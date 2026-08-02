@@ -371,6 +371,28 @@
         @media (prefers-color-scheme: light) {
             .fav-btn.active { color: #e6a800; }
         }
+
+        .type-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .type-toggle-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--secondary-bg);
+            color: var(--text);
+            transition: background 0.15s, color 0.15s;
+        }
+        .type-toggle-btn:active { opacity: 0.85; }
+        .type-toggle-btn.selected {
+            background: var(--button);
+            color: var(--button-text);
+        }
     </style>
 </head>
 <body>
@@ -467,13 +489,9 @@
         </div>
         <div class="form-group">
             <label class="form-label">Тип товара</label>
-            <div class="method-list">
-                <div class="method-item" id="type-partner" data-type="partner" onclick="selectListingType(this)">
-                    <div class="title">Товар является партнером X-Cod</div>
-                </div>
-                <div class="method-item" id="type-own" data-type="own" onclick="selectListingType(this)">
-                    <div class="title">Свой товар</div>
-                </div>
+            <div class="type-toggle">
+                <button type="button" class="type-toggle-btn" id="type-partner" data-type="partner" onclick="selectListingType(this)">Партнер X-Cod</button>
+                <button type="button" class="type-toggle-btn" id="type-own" data-type="own" onclick="selectListingType(this)">Свой товар</button>
             </div>
         </div>
         <div id="fields-partner" style="display:none;">
@@ -1028,7 +1046,7 @@ async function createListing() {
         document.getElementById('listing-bot').value = '';
         document.getElementById('listing-price').value = '';
         selectedListingType = null;
-        document.querySelectorAll('#type-partner, #type-own').forEach(function(el){ el.classList.remove('selected'); });
+        document.querySelectorAll('.type-toggle-btn').forEach(function(el){ el.classList.remove('selected'); });
         document.getElementById('fields-partner').style.display = 'none';
         document.getElementById('fields-own').style.display = 'none';
         showPage('my-listings');
@@ -1038,7 +1056,7 @@ async function createListing() {
 
 var selectedListingType = null;
 function selectListingType(el) {
-    document.querySelectorAll('#type-partner, #type-own').forEach(function(i){ i.classList.remove('selected'); });
+    document.querySelectorAll('.type-toggle-btn').forEach(function(i){ i.classList.remove('selected'); });
     el.classList.add('selected');
     selectedListingType = el.dataset.type;
     document.getElementById('fields-partner').style.display = selectedListingType === 'partner' ? 'block' : 'none';
