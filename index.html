@@ -2,62 +2,863 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Моё Mini App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>X-Cod Exchange</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        :root {
+            --bg: var(--tg-theme-bg-color, #0f0f0f);
+            --text: var(--tg-theme-text-color, #ffffff);
+            --hint: var(--tg-theme-hint-color, #8a8a8a);
+            --button: var(--tg-theme-button-color, #2ea6ff);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #1c1c1c);
+            --link: var(--tg-theme-link-color, #2ea6ff);
+            --destructive: #ff3b30;
+            --success: #34c759;
+            --warning: #ff9500;
+        }
+
+        * {
             margin: 0;
-            padding: 20px;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-        }
-        button {
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            width: 100%;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+            padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 20px 0 10px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            color: var(--hint);
+            font-size: 14px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--secondary-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 13px;
+            color: var(--hint);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .card-value small {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--hint);
+        }
+
+        /* Buttons */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.15s;
+            background: var(--button);
+            color: var(--button-text);
+        }
+
+        .btn:active {
+            opacity: 0.75;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-bg);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--destructive);
+        }
+
+        .btn-success {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--success);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-row .btn {
+            margin-bottom: 0;
+        }
+
+        .btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Menu grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .menu-item {
+            background: var(--secondary-bg);
+            border-radius: 16px;
+            padding: 20px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.15s;
+            border: none;
+            color: var(--text);
+        }
+
+        .menu-item:active {
+            transform: scale(0.96);
+            opacity: 0.8;
+        }
+
+        .menu-item .icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .menu-item .label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Lists */
+        .list-item {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item .left {
+            flex: 1;
+        }
+
+        .list-item .title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+
+        .list-item .subtitle {
+            font-size: 13px;
+            color: var(--hint);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background: rgba(255, 149, 0, 0.15);
+            color: var(--warning);
+        }
+
+        .badge-processing {
+            background: rgba(46, 166, 255, 0.15);
+            color: var(--button);
+        }
+
+        .badge-completed {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--success);
+        }
+
+        .badge-cancelled {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--destructive);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: var(--hint);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(128, 128, 128, 0.3);
+            border-radius: 12px;
+            background: var(--secondary-bg);
+            color: var(--text);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--button);
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: var(--link);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 0;
+            margin-bottom: 12px;
+        }
+
+        /* Empty state */
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--hint);
+        }
+
+        .empty .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--hint);
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(128, 128, 128, 0.2);
+            border-top-color: var(--button);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Info block */
+        .info-block {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--hint);
+        }
+
+        .info-block b {
+            color: var(--text);
+        }
+
+        /* User info */
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--button);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--button-text);
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 13px;
+            color: var(--hint);
+        }
+
+        /* Section title */
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        /* Method select */
+        .method-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .method-item {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.15s;
+        }
+
+        .method-item.selected {
+            border-color: var(--button);
+        }
+
+        .method-item .icon {
+            font-size: 24px;
+        }
+
+        .method-item .text {
+            flex: 1;
+        }
+
+        .method-item .title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .method-item .desc {
+            font-size: 12px;
+            color: var(--hint);
+            margin-top: 2px;
         }
     </style>
 </head>
 <body>
-    <h2>Привет из Mini App!</h2>
-    <p id="user"></p>
+    <div class="container">
 
-    <input type="text" id="message" placeholder="Напиши что-нибудь...">
-    <button onclick="sendData()">Отправить в бота</button>
-    <button onclick="Telegram.WebApp.close()">Закрыть</button>
+        <!-- LOADING -->
+        <div id="page-loading" class="page active">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div>Загрузка...</div>
+            </div>
+        </div>
+
+        <!-- MAIN MENU -->
+        <div id="page-main" class="page">
+            <div class="header">
+                <h1>X-Cod Exchange</h1>
+                <p>Покупка и продажа Telegram-ботов</p>
+            </div>
+
+            <div class="user-row">
+                <div class="avatar" id="user-avatar">?</div>
+                <div>
+                    <div class="user-name" id="user-name">—</div>
+                    <div class="user-role" id="user-role">—</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Баланс</div>
+                <div class="card-value" id="main-balance">0 <small>$</small></div>
+            </div>
+
+            <div class="menu-grid">
+                <button class="menu-item" onclick="showPage('balance')">
+                    <div class="icon">💵</div>
+                    <div class="label">Баланс</div>
+                </button>
+                <button class="menu-item" onclick="showPage('bots')">
+                    <div class="icon">🤖</div>
+                    <div class="label">Мои боты</div>
+                </button>
+                <button class="menu-item" onclick="showPage('help')">
+                    <div class="icon">📄</div>
+                    <div class="label">Помощь</div>
+                </button>
+                <button class="menu-item" onclick="showPage('support')">
+                    <div class="icon">💬</div>
+                    <div class="label">Поддержка</div>
+                </button>
+            </div>
+
+            <div id="admin-btn-wrap" style="display:none; margin-top:12px;">
+                <button class="btn btn-secondary" onclick="showPage('admin')">
+                    🛡 Админ-панель
+                </button>
+            </div>
+        </div>
+
+        <!-- BALANCE PAGE -->
+        <div id="page-balance" class="page">
+            <button class="back-btn" onclick="showPage('main')">← Назад</button>
+            <div class="section-title">💵 Баланс</div>
+
+            <div class="card">
+                <div class="card-title">Текущий баланс</div>
+                <div class="card-value" id="balance-value">0 <small>$</small></div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn" onclick="showPage('deposit')">💰 Пополнение</button>
+                <button class="btn btn-secondary" onclick="showPage('withdraw')">💳 Вывод</button>
+            </div>
+
+            <button class="btn btn-secondary" style="margin-top:4px;" onclick="showPage('requests')">
+                📋 Мои заявки
+            </button>
+        </div>
+
+        <!-- DEPOSIT PAGE -->
+        <div id="page-deposit" class="page">
+            <button class="back-btn" onclick="showPage('balance')">← Назад</button>
+            <div class="section-title">💰 Пополнение</div>
+
+            <div class="info-block">
+                Выберите способ пополнения. Минимальная сумма — <b>1$</b>
+            </div>
+
+            <div class="method-list">
+                <div class="method-item selected" data-method="card" onclick="selectMethod(this, 'deposit')">
+                    <div class="icon">🏦</div>
+                    <div class="text">
+                        <div class="title">Перевод по СБП</div>
+                        <div class="desc">Быстрый перевод на карту</div>
+                    </div>
+                </div>
+                <div class="method-item" data-method="crypto" onclick="selectMethod(this, 'deposit')">
+                    <div class="icon">₿</div>
+                    <div class="text">
+                        <div class="title">Криптовалюта (USDT)</div>
+                        <div class="desc">TRC20</div>
+                    </div>
+                </div>
+                <div class="method-item" data-method="stars" onclick="selectMethod(this, 'deposit')">
+                    <div class="icon">⭐</div>
+                    <div class="text">
+                        <div class="title">Telegram Stars</div>
+                        <div class="desc">1$ = 100 Stars</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Сумма ($)</label>
+                <input class="form-input" type="number" id="deposit-amount" placeholder="Например: 10" min="1" step="1">
+            </div>
+
+            <button class="btn" onclick="startDeposit()">Продолжить</button>
+        </div>
+
+        <!-- WITHDRAW PAGE -->
+        <div id="page-withdraw" class="page">
+            <button class="back-btn" onclick="showPage('balance')">← Назад</button>
+            <div class="section-title">💳 Вывод средств</div>
+
+            <div class="card">
+                <div class="card-title">Доступно</div>
+                <div class="card-value" id="withdraw-balance">0 <small>$</small></div>
+            </div>
+
+            <div class="info-block">
+                Минимальная сумма вывода — <b id="min-withdraw">5$</b>
+            </div>
+
+            <div class="method-list">
+                <div class="method-item selected" data-method="card" onclick="selectMethod(this, 'withdraw')">
+                    <div class="icon">💳</div>
+                    <div class="text">
+                        <div class="title">На карту</div>
+                        <div class="desc">По номеру карты</div>
+                    </div>
+                </div>
+                <div class="method-item" data-method="crypto" onclick="selectMethod(this, 'withdraw')">
+                    <div class="icon">₿</div>
+                    <div class="text">
+                        <div class="title">Криптовалюта</div>
+                        <div class="desc">USDT TRC20</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Сумма ($)</label>
+                <input class="form-input" type="number" id="withdraw-amount" placeholder="Например: 10" min="1" step="1">
+            </div>
+
+            <div class="form-group" id="withdraw-recipient-group">
+                <label class="form-label" id="withdraw-recipient-label">Номер карты и инициалы</label>
+                <input class="form-input" type="text" id="withdraw-recipient" placeholder="1234 5678 9012 3456, Иванов И.И.">
+            </div>
+
+            <button class="btn" onclick="startWithdraw()">Создать заявку</button>
+        </div>
+
+        <!-- REQUESTS PAGE -->
+        <div id="page-requests" class="page">
+            <button class="back-btn" onclick="showPage('balance')">← Назад</button>
+            <div class="section-title">📋 Мои заявки</div>
+            <div id="requests-list">
+                <div class="empty">
+                    <div class="icon">📭</div>
+                    <div>Загрузка заявок...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTS PAGE -->
+        <div id="page-bots" class="page">
+            <button class="back-btn" onclick="showPage('main')">← Назад</button>
+            <div class="section-title">🤖 Мои боты</div>
+            <div id="bots-list">
+                <div class="empty">
+                    <div class="icon">📭</div>
+                    <div>У вас пока нет ботов</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HELP PAGE -->
+        <div id="page-help" class="page">
+            <button class="back-btn" onclick="showPage('main')">← Назад</button>
+            <div class="section-title">📄 Помощь</div>
+
+            <div class="info-block">
+                <b>Навигатор</b><br><br>
+                💵 <b>Баланс</b> — пополнение, вывод, заявки<br>
+                🤖 <b>Мои боты</b> — ваши боты на продаже<br>
+                💬 <b>Поддержка</b> — связь с нами<br>
+                🛡 <b>Админ-панель</b> — для сотрудников
+            </div>
+
+            <div class="info-block">
+                <b>X-Cod Exchange</b> — честная платформа для покупки и продажи Telegram-ботов.<br><br>
+                • У каждого продавца и покупателя есть рейтинг и отзывы<br>
+                • Мы берём ответственность за каждую сделку
+            </div>
+        </div>
+
+        <!-- SUPPORT PAGE -->
+        <div id="page-support" class="page">
+            <button class="back-btn" onclick="showPage('main')">← Назад</button>
+            <div class="section-title">💬 Поддержка</div>
+
+            <div class="info-block">
+                Если у вас возникли вопросы — напишите нам:
+            </div>
+
+            <div class="btn-stack">
+                <button class="btn btn-secondary" onclick="openLink('https://t.me/support_bot')">
+                    📢 @support_bot
+                </button>
+            </div>
+
+            <div class="info-block" style="margin-top:16px;">
+                ⏱ Время ответа: обычно в течение 24 часов
+            </div>
+        </div>
+
+        <!-- ADMIN PAGE -->
+        <div id="page-admin" class="page">
+            <button class="back-btn" onclick="showPage('main')">← Назад</button>
+            <div class="section-title">🛡 Админ-панель</div>
+
+            <div class="card">
+                <div class="card-title">Ваша роль</div>
+                <div class="card-value" style="font-size:20px;" id="admin-role">—</div>
+            </div>
+
+            <div class="btn-stack">
+                <button class="btn btn-secondary" onclick="tg.showAlert('Управление сотрудниками пока доступно только в боте')">
+                    👥 Управление сотрудниками
+                </button>
+                <button class="btn btn-secondary" onclick="tg.showAlert('Заявки на рассмотрение пока доступны только в боте')">
+                    📋 Заявки на рассмотрение
+                </button>
+            </div>
+
+            <div class="info-block" style="margin-top:16px;">
+                Полное управление заявками и сотрудниками пока доступно через бота командой /panel
+            </div>
+        </div>
+
+    </div>
 
     <script>
+        // ==================== CONFIG ====================
+        // ⚠️ ЗАМЕНИ на адрес твоего проекта на Amvera
+        const API_URL = "https://exchange-xcodbots.waw0.amvera.tech/";
+
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand(); // открыть на весь экран
+        tg.expand();
+        tg.setHeaderColor('secondary_bg_color');
+        tg.setBackgroundColor('bg_color');
 
-        // Показать имя пользователя
-        document.getElementById('user').innerText =
-            'Привет, ' + (tg.initDataUnsafe.user?.first_name || 'гость') + '!';
+        let userData = null;
+        let selectedDepositMethod = 'card';
+        let selectedWithdrawMethod = 'card';
 
-        function sendData() {
-            const text = document.getElementById('message').value;
-            if (text) {
-                tg.sendData(text); // отправляет данные боту
-                tg.close();
+        // ==================== API ====================
+
+        async function apiGet(path) {
+            const res = await fetch(`${API_URL}${path}`, {
+                headers: {
+                    'X-Telegram-Init-Data': tg.initData
+                }
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        // ==================== INIT ====================
+
+        async function init() {
+            try {
+                if (!tg.initData) {
+                    document.getElementById('page-loading').innerHTML =
+                        '<div class="empty"><div class="icon">⚠️</div><div>Откройте приложение через Telegram</div></div>';
+                    return;
+                }
+
+                userData = await apiGet('/api/user');
+                renderMain();
+                showPage('main');
+            } catch (e) {
+                console.error(e);
+                document.getElementById('page-loading').innerHTML =
+                    `<div class="empty"><div class="icon">❌</div><div>Ошибка загрузки<br><small>${e.message}</small></div>
+                     <button class="btn" style="margin-top:16px;" onclick="init()">Повторить</button></div>`;
             }
         }
+
+        function renderMain() {
+            const name = userData.first_name || userData.username || 'Пользователь';
+            const initial = name.charAt(0).toUpperCase();
+
+            document.getElementById('user-avatar').textContent = initial;
+            document.getElementById('user-name').textContent = name;
+            document.getElementById('user-role').textContent = userData.role_name || 'Пользователь';
+            document.getElementById('main-balance').innerHTML = `${userData.balance} <small>$</small>`;
+            document.getElementById('balance-value').innerHTML = `${userData.balance} <small>$</small>`;
+            document.getElementById('withdraw-balance').innerHTML = `${userData.balance} <small>$</small>`;
+            document.getElementById('admin-role').textContent = userData.role_name || '—';
+
+            // Показать админ-кнопку если роль >= 2 (Корпоративный)
+            if (userData.role >= 2) {
+                document.getElementById('admin-btn-wrap').style.display = 'block';
+            }
+        }
+
+        // ==================== NAVIGATION ====================
+
+        function showPage(name) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const page = document.getElementById('page-' + name);
+            if (page) page.classList.add('active');
+
+            // Обновляем данные при переходе
+            if (name === 'balance' || name === 'withdraw') {
+                refreshBalance();
+            }
+            if (name === 'requests') {
+                loadRequests();
+            }
+            if (name === 'bots') {
+                loadBots();
+            }
+
+            // MainButton Telegram
+            tg.MainButton.hide();
+            window.scrollTo(0, 0);
+        }
+
+        async function refreshBalance() {
+            try {
+                const data = await apiGet('/api/balance');
+                userData.balance = data.balance;
+                document.getElementById('main-balance').innerHTML = `${data.balance} <small>$</small>`;
+                document.getElementById('balance-value').innerHTML = `${data.balance} <small>$</small>`;
+                document.getElementById('withdraw-balance').innerHTML = `${data.balance} <small>$</small>`;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // ==================== METHODS ====================
+
+        function selectMethod(el, type) {
+            const parent = el.parentElement;
+            parent.querySelectorAll('.method-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+
+            if (type === 'deposit') {
+                selectedDepositMethod = el.dataset.method;
+            } else {
+                selectedWithdrawMethod = el.dataset.method;
+                const label = document.getElementById('withdraw-recipient-label');
+                const input = document.getElementById('withdraw-recipient');
+                if (selectedWithdrawMethod === 'card') {
+                    label.textContent = 'Номер карты и инициалы';
+                    input.placeholder = '1234 5678 9012 3456, Иванов И.И.';
+                } else {
+                    label.textContent = 'Адрес USDT (TRC20)';
+                    input.placeholder = 'TSM4p8JjU2AqC7Xqy8Zf9gH3kL5nP2rV6w';
+                }
+            }
+        }
+
+        // ==================== ACTIONS ====================
+
+        function startDeposit() {
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            if (!amount || amount < 1) {
+                tg.showAlert('Минимальная сумма пополнения — 1$');
+                return;
+            }
+
+            // Пока заявки на пополнение создаются через бота
+            // Здесь можно добавить API-эндпоинт позже
+            tg.showAlert(
+                `Для пополнения на ${amount}$ через ${selectedDepositMethod === 'card' ? 'СБП' : selectedDepositMethod === 'crypto' ? 'USDT' : 'Stars'} ` +
+                `перейдите в бота и используйте раздел «Баланс → Пополнение».\n\n` +
+                `Полная интеграция заявок через Mini App будет добавлена.`
+            );
+        }
+
+        function startWithdraw() {
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const recipient = document.getElementById('withdraw-recipient').value.trim();
+
+            if (!amount || amount < 5) {
+                tg.showAlert('Минимальная сумма вывода — 5$');
+                return;
+            }
+            if (amount > userData.balance) {
+                tg.showAlert(`Недостаточно средств. Ваш баланс: ${userData.balance}$`);
+                return;
+            }
+            if (!recipient) {
+                tg.showAlert('Укажите реквизиты для вывода');
+                return;
+            }
+
+            tg.showAlert(
+                `Для вывода ${amount}$ на ${recipient} перейдите в бота и используйте раздел «Баланс → Вывод».\n\n` +
+                `Полная интеграция заявок через Mini App будет добавлена.`
+            );
+        }
+
+        function loadRequests() {
+            // Пока API для заявок нет — показываем заглушку
+            document.getElementById('requests-list').innerHTML = `
+                <div class="empty">
+                    <div class="icon">📋</div>
+                    <div>Заявки доступны в боте<br><small>Раздел «Баланс → Мои заявки»</small></div>
+                </div>
+            `;
+        }
+
+        function loadBots() {
+            document.getElementById('bots-list').innerHTML = `
+                <div class="empty">
+                    <div class="icon">🤖</div>
+                    <div>У вас пока нет ботов<br><small>Список ботов доступен в боте</small></div>
+                </div>
+            `;
+        }
+
+        function openLink(url) {
+            tg.openTelegramLink(url);
+        }
+
+        // ==================== START ====================
+        init();
     </script>
 </body>
 </html>
