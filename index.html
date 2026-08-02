@@ -97,11 +97,12 @@
         .drawer-item.active { color: var(--button); background: rgba(46,166,255,0.08); }
         .drawer-item .di { font-size: 20px; width: 28px; text-align: center; }
 
-        .drawer-spacer { height: 16px; }
+        .drawer-spacer { height: 20px; flex-shrink: 0; }
 
         .drawer-bottom {
             border-top: 1px solid rgba(128,128,128,0.15);
-            padding: 8px 0 calc(12px + env(safe-area-inset-bottom, 0));
+            margin-top: 8px;
+            padding: 12px 0 calc(16px + env(safe-area-inset-bottom, 0));
         }
 
         /* ===== CONTENT ===== */
@@ -663,16 +664,38 @@
 
     <!-- ADMIN -->
     <div id="page-admin" class="page">
-        <div class="section-title">🛡 Панель</div>
+        <div class="section-title">Панель</div>
         <div class="card">
             <div class="card-title">Ваша роль</div>
             <div style="font-size:18px;font-weight:600;" id="admin-role">—</div>
         </div>
         <div class="btn-stack" style="margin-bottom:16px;">
-            <button class="btn" onclick="loadAdminRequests()">📋 Заявки на рассмотрение</button>
-            <button class="btn btn-secondary" id="admin-staff-btn" style="display:none;" onclick="loadAdminStaff()">👥 Сотрудники</button>
+            <button class="btn" onclick="loadAdminRequests()">Заявки на рассмотрение</button>
+            <button class="btn btn-secondary" id="admin-staff-btn" style="display:none;" onclick="loadAdminStaff()">Сотрудники</button>
+            <button class="btn btn-secondary" id="admin-add-staff-btn" style="display:none;" onclick="showPage('admin-add-staff')">Добавить сотрудника</button>
         </div>
         <div id="admin-content"></div>
+    </div>
+
+    <!-- ADD STAFF -->
+    <div id="page-admin-add-staff" class="page">
+        <button class="back-link" onclick="showPage('admin')">← Назад</button>
+        <div class="section-title">Добавить сотрудника</div>
+        <div class="form-group">
+            <label class="form-label">ID пользователя Telegram</label>
+            <input class="form-input" type="number" id="add-staff-id" placeholder="Например: 123456789">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Роль</label>
+            <div class="method-list" id="add-staff-roles">
+                <div class="method-item selected" data-role="1" onclick="selectStaffRole(this)"><div class="title">Партнер</div></div>
+                <div class="method-item" data-role="2" onclick="selectStaffRole(this)"><div class="title">Корпоративный</div></div>
+                <div class="method-item" data-role="3" onclick="selectStaffRole(this)"><div class="title">Стажер</div></div>
+                <div class="method-item" data-role="4" onclick="selectStaffRole(this)"><div class="title">Модератор</div></div>
+                <div class="method-item" data-role="5" onclick="selectStaffRole(this)"><div class="title">Админ</div></div>
+            </div>
+        </div>
+        <button class="btn" id="add-staff-btn" onclick="submitAddStaff()">Назначить</button>
     </div>
 
 </div>
@@ -780,7 +803,30 @@ function renderMain() {
     }
     if (userData.role >= 5) {
         document.getElementById('admin-staff-btn').style.display = 'flex';
+        document.getElementById('admin-add-staff-btn').style.display = 'flex';
     }
+}
+
+var selectedStaffRole = 1;
+function selectStaffRole(el) {
+    el.parentElement.querySelectorAll('.method-item').forEach(function(i){ i.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedStaffRole = parseInt(el.dataset.role, 10);
+}
+
+async function submitAddStaff() {
+    var targetId = parseInt(document.getElementById('add-staff-id').value, 10);
+    var btn = document.getElementById('add-staff-btn');
+    if (!targetId) { tg.showAlert('Укажите ID пользователя'); return; }
+    btn.disabled = true; btn.textContent = 'Назначение...';
+    try {
+        await apiPost('/api/admin/staff', { user_id: targetId, role: selectedStaffRole });
+        tg.showAlert('Сотрудник добавлен');
+        document.getElementById('add-staff-id').value = '';
+        showPage('admin');
+        loadAdminStaff();
+    } catch (e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Назначить'; }
 }
 
 function setBalance(bal) {
