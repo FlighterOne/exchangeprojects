@@ -352,6 +352,16 @@
         .user-chip img {
             width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
         }
+
+        .check-row {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: 14px; color: var(--text); margin-bottom: 12px; cursor: pointer;
+        }
+        .check-row input { margin-top: 3px; width: 18px; height: 18px; flex-shrink: 0; }
+        .fav-btn {
+            border: none; background: transparent; font-size: 20px; cursor: pointer;
+            padding: 4px 8px; line-height: 1;
+        }
     </style>
 </head>
 <body>
@@ -387,6 +397,9 @@
         </button>
         <button class="drawer-item" data-page="balance" onclick="navTo('balance')">
             <span class="di">💵</span> Баланс
+        </button>
+        <button class="drawer-item" data-page="favorites" onclick="navTo('favorites')">
+            <span class="di">⭐</span> Избранные
         </button>
         <button class="drawer-item" data-page="my-listings" onclick="navTo('my-listings')">
             <span class="di">📋</span> Мои объявления
@@ -433,7 +446,7 @@
 
     <!-- CREATE LISTING -->
     <div id="page-listing-create" class="page">
-        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('home')">← Назад</button>
+        <button class="back-link" onclick="showPage('home')">← Назад</button>
         <div class="section-title">Новое объявление</div>
         <div class="form-group">
             <label class="form-label">Название</label>
@@ -444,14 +457,52 @@
             <textarea class="form-input" id="listing-desc" rows="4" placeholder="Описание" style="resize:vertical;min-height:100px;"></textarea>
         </div>
         <div class="form-group">
-            <label class="form-label">Цена ($)</label>
-            <input class="form-input" type="number" id="listing-price" placeholder="100" min="1">
+            <label class="form-label">Тип товара</label>
+            <div class="method-list">
+                <div class="method-item" id="type-partner" data-type="partner" onclick="selectListingType(this)">
+                    <div class="title">Товар является партнером X-Cod</div>
+                </div>
+                <div class="method-item" id="type-own" data-type="own" onclick="selectListingType(this)">
+                    <div class="title">Свой товар</div>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label class="form-label">Username бота (необязательно)</label>
-            <input class="form-input" type="text" id="listing-bot" placeholder="@my_bot">
+        <div id="fields-partner" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">Номер договора X-Cod</label>
+                <input class="form-input" type="text" id="listing-contract" placeholder="XC-0000">
+            </div>
+            <label class="check-row">
+                <input type="checkbox" id="listing-analytics">
+                <span>Согласие на передачу данных и аналитики</span>
+            </label>
+            <div class="info-block" style="margin-top:12px;">Цена определяется компанией X-Cod по аналитике после модерации.</div>
         </div>
-        <button class="btn" id="listing-create-btn" onclick="createListing()">Опубликовать</button>
+        <div id="fields-own" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">Вид товара</label>
+                <input class="form-input" type="text" id="listing-product-type" placeholder="TG бот / Mini App + сайт / другое">
+            </div>
+            <div class="form-group" id="tgstat-group">
+                <label class="form-label">Ссылка на TGStat</label>
+                <input class="form-input" type="text" id="listing-tgstat" placeholder="https://tgstat.ru/...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input class="form-input" type="text" id="listing-bot" placeholder="@my_bot">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цена ($)</label>
+                <input class="form-input" type="number" id="listing-price" placeholder="100" min="1">
+            </div>
+        </div>
+        <button class="btn" id="listing-create-btn" onclick="createListing()">Отправить на модерацию</button>
+    </div>
+
+    <!-- FAVORITES -->
+    <div id="page-favorites" class="page">
+        <div class="section-title">Избранные</div>
+        <div id="favorites-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
     <!-- EDIT LISTING -->
@@ -670,7 +721,8 @@
             <div style="font-size:18px;font-weight:600;" id="admin-role">—</div>
         </div>
         <div class="btn-stack" style="margin-bottom:16px;">
-            <button class="btn" id="admin-requests-btn" onclick="loadAdminRequests()">Заявки</button>
+            <button class="btn" onclick="loadAdminListings()">Модерация объявлений</button>
+            <button class="btn btn-secondary" id="admin-requests-btn" onclick="loadAdminRequests()">Модерация транзакций</button>
             <button class="btn btn-secondary" id="admin-staff-btn" style="display:none;" onclick="loadAdminStaff()">Управление сотрудниками</button>
         </div>
         <div id="admin-content"></div>
@@ -843,6 +895,7 @@ function showPage(name) {
     if (page) page.classList.add('active');
     if (name === 'home') loadListings();
     if (name === 'my-listings') loadMyListings();
+    if (name === 'favorites') loadFavorites();
     if (name === 'orders') loadOrders();
     if (name === 'balance' || name === 'withdraw') refreshBalance();
     if (name === 'requests') loadRequests();
@@ -864,11 +917,12 @@ async function loadListings() {
             var seller = l.seller_name || l.seller_username || ('ID ' + l.seller_id);
             var date = (l.created_at || '').slice(0, 10);
             var desc = (l.description || '').replace(/</g, '&lt;');
+            var fav = l.is_favorite ? '★' : '☆';
             return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
                 '<div class="price">' + Number(l.price).toLocaleString('ru-RU') + ' $</div>' +
                 '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
                 '<div class="ldesc">' + desc + '</div>' +
-                '<div class="meta"><span>👤 ' + seller + '</span><span>' + date + '</span></div>' +
+                '<div class="meta"><span>👤 ' + seller + '</span><button class="fav-btn" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', ' + (l.is_favorite ? 'true' : 'false') + ')">' + fav + '</button></div>' +
                 '</div>';
         }).join('');
     } catch (e) {
@@ -893,12 +947,13 @@ async function openListing(id) {
             '<div class="info-block">Продавец: <b>' + seller + '</b>' +
             (l.bot_username ? '<br>Бот: <b>@' + l.bot_username + '</b>' : '') +
             '<br>Опубликовано: ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
-        if (canEdit) {
-            html += '<div class="btn-stack" style="margin-top:12px;">' +
-                '<button class="btn btn-secondary" onclick="openEditListing(' + l.id + ')">✏️ Редактировать</button></div>';
-        }
+        var isFav = !!l.is_favorite;
         html += '<div class="btn-stack" style="margin-top:12px;">' +
-            '<button class="btn" onclick="tg.showAlert(\'Свяжитесь с продавцом через поддержку или бота\')">💬 Связаться</button></div>';
+            '<button class="btn btn-secondary" onclick="toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' + (isFav ? '★ В избранном' : '☆ В избранное') + '</button>';
+        if (canEdit) {
+            html += '<button class="btn btn-secondary" onclick="openEditListing(' + l.id + ')">Редактировать</button>';
+        }
+        html += '<button class="btn" onclick="tg.showAlert(\'Свяжитесь с продавцом через поддержку или бота\')">Связаться</button></div>';
         box.innerHTML = html;
         window._currentListing = l;
     } catch (e) {
@@ -920,22 +975,55 @@ function openEditListing(id) {
 async function createListing() {
     var title = document.getElementById('listing-title').value.trim();
     var description = document.getElementById('listing-desc').value.trim();
-    var price = parseFloat(document.getElementById('listing-price').value);
-    var bot_username = document.getElementById('listing-bot').value.trim();
     var btn = document.getElementById('listing-create-btn');
     if (!title) { tg.showAlert('Укажите название'); return; }
-    if (!price || price < 1) { tg.showAlert('Укажите цену'); return; }
-    btn.disabled = true; btn.textContent = 'Публикация...';
+    if (!description) { tg.showAlert('Укажите описание'); return; }
+    if (!selectedListingType) { tg.showAlert('Выберите тип товара'); return; }
+
+    var body = {
+        title: title,
+        description: description,
+        listing_type: selectedListingType
+    };
+
+    if (selectedListingType === 'partner') {
+        body.contract_number = document.getElementById('listing-contract').value.trim();
+        body.analytics_consent = document.getElementById('listing-analytics').checked;
+    } else {
+        body.product_type = document.getElementById('listing-product-type').value.trim();
+        body.tgstat_url = document.getElementById('listing-tgstat').value.trim();
+        body.bot_username = document.getElementById('listing-bot').value.trim();
+        body.price = parseFloat(document.getElementById('listing-price').value) || 0;
+    }
+
+    btn.disabled = true; btn.textContent = 'Отправка...';
     try {
-        await apiPost('/api/listings', { title: title, description: description, price: price, bot_username: bot_username });
-        tg.showAlert('✅ Объявление опубликовано');
+        await apiPost('/api/listings', body);
+        tg.showAlert('Объявление отправлено на модерацию');
         document.getElementById('listing-title').value = '';
         document.getElementById('listing-desc').value = '';
-        document.getElementById('listing-price').value = '';
+        document.getElementById('listing-contract').value = '';
+        document.getElementById('listing-analytics').checked = false;
+        document.getElementById('listing-product-type').value = '';
+        document.getElementById('listing-tgstat').value = '';
         document.getElementById('listing-bot').value = '';
-        showPage('home');
+        document.getElementById('listing-price').value = '';
+        selectedListingType = null;
+        document.querySelectorAll('#type-partner, #type-own').forEach(function(el){ el.classList.remove('selected'); });
+        document.getElementById('fields-partner').style.display = 'none';
+        document.getElementById('fields-own').style.display = 'none';
+        showPage('my-listings');
     } catch (e) { tg.showAlert(e.message); }
-    finally { btn.disabled = false; btn.textContent = 'Опубликовать'; }
+    finally { btn.disabled = false; btn.textContent = 'Отправить на модерацию'; }
+}
+
+var selectedListingType = null;
+function selectListingType(el) {
+    document.querySelectorAll('#type-partner, #type-own').forEach(function(i){ i.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedListingType = el.dataset.type;
+    document.getElementById('fields-partner').style.display = selectedListingType === 'partner' ? 'block' : 'none';
+    document.getElementById('fields-own').style.display = selectedListingType === 'own' ? 'block' : 'none';
 }
 
 async function saveListing() {
@@ -1112,25 +1200,130 @@ async function loadMyListings() {
     var box = document.getElementById('my-listings-list');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     try {
-        var data = await apiGet('/api/listings');
-        var items = (data.listings || []).filter(function(l) { return l.seller_id === userData.user_id; });
+        var data = await apiGet('/api/my-listings');
+        var items = data.listings || [];
         if (!items.length) {
             box.innerHTML = '<div class="empty"><div class="icon">📋</div>У вас пока нет объявлений</div>';
             return;
         }
+        var statusMap = {
+            pending: ['На модерации', 'badge-pending'],
+            active: ['Опубликовано', 'badge-completed'],
+            rejected: ['Отклонено', 'badge-cancelled'],
+            deleted: ['Удалено', 'badge-cancelled']
+        };
         box.innerHTML = items.map(function(l) {
+            var st = statusMap[l.status] || [l.status, 'badge-pending'];
             var date = (l.created_at || '').slice(0, 10);
+            var priceText = (l.listing_type === 'partner' && !l.price) ? 'Цена по аналитике' : (Number(l.price).toLocaleString('ru-RU') + ' $');
             return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
-                '<div class="price">' + Number(l.price).toLocaleString('ru-RU') + ' $</div>' +
+                '<div class="top" style="display:flex;justify-content:space-between;margin-bottom:6px;"><div class="price" style="margin:0;">' + priceText + '</div><span class="badge ' + st[1] + '">' + st[0] + '</span></div>' +
                 '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
                 '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
-                '<div class="meta"><span>✏️ Нажмите для редактирования</span><span>' + date + '</span></div>' +
+                '<div class="meta"><span>' + (l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар') + '</span><span>' + date + '</span></div>' +
                 '</div>';
         }).join('');
     } catch (e) {
         box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
     }
 }
+
+async function loadFavorites() {
+    var box = document.getElementById('favorites-list');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/favorites');
+        var items = data.listings || [];
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">⭐</div>Избранных пока нет</div>';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            var seller = l.seller_name || l.seller_username || ('ID ' + l.seller_id);
+            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                '<div class="price">' + Number(l.price).toLocaleString('ru-RU') + ' $</div>' +
+                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="meta"><span>👤 ' + seller + '</span><button class="fav-btn" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', true)">★</button></div>' +
+                '</div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+async function toggleFavorite(id, isFav) {
+    try {
+        if (isFav) {
+            await fetch(API_URL + '/api/favorites/' + id, { method: 'DELETE', headers: { 'X-Telegram-Init-Data': tg.initData } });
+        } else {
+            await apiPost('/api/favorites/' + id, {});
+        }
+        if (document.getElementById('page-favorites').classList.contains('active')) loadFavorites();
+        else if (document.getElementById('page-home').classList.contains('active')) loadListings();
+        else if (document.getElementById('page-listing-detail').classList.contains('active')) openListing(id);
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function loadAdminListings() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/listings');
+        var items = data.listings || [];
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет объявлений на модерации</div>';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            var typeLabel = l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар';
+            var extra = '';
+            if (l.listing_type === 'partner') {
+                extra = '<br>Договор: ' + (l.contract_number || '—') + '<br>Аналитика: ' + (l.analytics_consent ? 'да' : 'нет');
+            } else {
+                extra = '<br>Вид: ' + (l.product_type || '—') +
+                    (l.bot_username ? '<br>@' + l.bot_username : '') +
+                    (l.tgstat_url ? '<br>TGStat: ' + l.tgstat_url : '') +
+                    '<br>Цена: ' + l.price + '$';
+            }
+            var approveBtn = l.listing_type === 'partner'
+                ? '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', true)">Одобрить (указать цену)</button>'
+                : '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', false)">Одобрить</button>';
+            return '<div class="list-item"><div class="top"><div class="title">' + (l.title || '').replace(/</g, '&lt;') +
+                ' #' + l.id + '</div></div><div class="subtitle">' + typeLabel + ' · User: ' + l.seller_id +
+                '<br>' + (l.description || '').replace(/</g, '&lt;').slice(0, 120) + extra +
+                '</div><div class="actions">' + approveBtn +
+                '<button class="btn btn-danger" onclick="adminRejectListing(' + l.id + ')">Отклонить</button></div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+async function adminApproveListing(id, needPrice) {
+    var price = null;
+    if (needPrice) {
+        var p = prompt('Укажите цену для партнерского товара ($)');
+        if (p === null) return;
+        price = parseFloat(p);
+        if (!price || price < 1) { tg.showAlert('Некорректная цена'); return; }
+    }
+    try {
+        var body = price ? { price: price } : {};
+        await apiPost('/api/admin/listings/' + id + '/approve', body);
+        tg.showAlert('Объявление #' + id + ' одобрено');
+        loadAdminListings();
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function adminRejectListing(id) {
+    try {
+        await apiPost('/api/admin/listings/' + id + '/reject', {});
+        tg.showAlert('Объявление #' + id + ' отклонено');
+        loadAdminListings();
+    } catch (e) { tg.showAlert(e.message); }
+}
+
 
 async function loadOrders() {
     var box = document.getElementById('orders-list');
