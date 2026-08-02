@@ -17,75 +17,153 @@
             --destructive: #ff3b30;
             --success: #34c759;
             --warning: #ff9500;
+            --header-h: 52px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 24px;
+            background: var(--bg); color: var(--text); min-height: 100vh;
+            overflow-x: hidden;
         }
-        .container { max-width: 480px; margin: 0 auto; padding: 16px; }
-        .header { text-align: center; padding: 20px 0 10px; }
-        .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-        .header p { color: var(--hint); font-size: 14px; }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: var(--header-h);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 12px;
+            background: var(--bg);
+            border-bottom: 1px solid rgba(128,128,128,0.15);
+        }
+        .topbar-left { display: flex; align-items: center; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .icon-btn {
+            width: 40px; height: 40px; border: none; background: transparent;
+            color: var(--text); font-size: 22px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 10px;
+        }
+        .icon-btn:active { background: var(--secondary-bg); }
+
+        .lang-btn {
+            height: 32px; padding: 0 10px; border-radius: 8px;
+            border: 1px solid rgba(128,128,128,0.3); background: var(--secondary-bg);
+            color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        .balance-chip {
+            height: 32px; padding: 0 12px; border-radius: 16px;
+            background: var(--secondary-bg); color: var(--text);
+            font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px;
+            cursor: pointer;
+        }
+        .user-chip {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--button); color: var(--button-text);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 700; cursor: pointer;
+        }
+
+        /* ===== DRAWER ===== */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        }
+        .overlay.open { opacity: 1; pointer-events: auto; }
+
+        .drawer {
+            position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 80vw;
+            background: var(--secondary-bg); z-index: 210;
+            transform: translateX(-100%); transition: transform 0.28s ease;
+            display: flex; flex-direction: column;
+            padding-top: env(safe-area-inset-top, 0);
+        }
+        .drawer.open { transform: translateX(0); }
+
+        .drawer-header {
+            padding: 20px 16px 16px;
+            border-bottom: 1px solid rgba(128,128,128,0.15);
+        }
+        .drawer-header .title { font-size: 18px; font-weight: 700; }
+        .drawer-header .sub { font-size: 12px; color: var(--hint); margin-top: 2px; }
+
+        .drawer-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .drawer-item {
+            display: flex; align-items: center; gap: 12px;
+            width: 100%; padding: 14px 20px; border: none; background: transparent;
+            color: var(--text); font-size: 15px; font-weight: 500; cursor: pointer; text-align: left;
+        }
+        .drawer-item:active { background: rgba(128,128,128,0.12); }
+        .drawer-item.active { color: var(--button); background: rgba(46,166,255,0.08); }
+        .drawer-item .di { font-size: 20px; width: 28px; text-align: center; }
+
+        .drawer-spacer { height: 16px; }
+
+        .drawer-bottom {
+            border-top: 1px solid rgba(128,128,128,0.15);
+            padding: 8px 0 calc(12px + env(safe-area-inset-bottom, 0));
+        }
+
+        /* ===== CONTENT ===== */
+        .content {
+            padding: calc(var(--header-h) + 12px) 16px 24px;
+            max-width: 480px; margin: 0 auto;
+        }
+
+        .page { display: none; animation: fadeIn 0.2s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+
         .card { background: var(--secondary-bg); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
-        .card-title { font-size: 13px; color: var(--hint); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-title { font-size: 12px; color: var(--hint); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
         .card-value { font-size: 28px; font-weight: 700; }
-        .card-value small { font-size: 16px; font-weight: 500; color: var(--hint); }
+        .card-value small { font-size: 15px; font-weight: 500; color: var(--hint); }
+
         .btn {
             display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
-            padding: 14px 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: opacity 0.15s; background: var(--button); color: var(--button-text);
+            padding: 14px 16px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600;
+            cursor: pointer; background: var(--button); color: var(--button-text);
         }
-        .btn:active { opacity: 0.75; }
+        .btn:active { opacity: 0.8; }
         .btn:disabled { opacity: 0.5; pointer-events: none; }
         .btn-secondary { background: var(--secondary-bg); color: var(--text); }
-        .btn-danger { background: rgba(255, 59, 48, 0.15); color: var(--destructive); }
-        .btn-success { background: rgba(52, 199, 89, 0.15); color: var(--success); }
+        .btn-danger { background: rgba(255,59,48,0.15); color: var(--destructive); }
+        .btn-success { background: rgba(52,199,89,0.15); color: var(--success); }
         .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .btn-row .btn { margin-bottom: 0; }
         .btn-stack { display: flex; flex-direction: column; gap: 10px; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
         .menu-item {
-            background: var(--secondary-bg); border-radius: 16px; padding: 20px 12px; text-align: center;
-            cursor: pointer; transition: transform 0.1s, opacity 0.15s; border: none; color: var(--text);
+            background: var(--secondary-bg); border-radius: 16px; padding: 18px 12px;
+            text-align: center; border: none; color: var(--text); cursor: pointer;
         }
-        .menu-item:active { transform: scale(0.96); opacity: 0.8; }
-        .menu-item .icon { font-size: 28px; margin-bottom: 8px; }
-        .menu-item .label { font-size: 14px; font-weight: 600; }
+        .menu-item:active { opacity: 0.8; }
+        .menu-item .icon { font-size: 26px; margin-bottom: 6px; }
+        .menu-item .label { font-size: 13px; font-weight: 600; }
+
         .list-item { background: var(--secondary-bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; }
-        .list-item .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .list-item .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .list-item .title { font-weight: 600; font-size: 15px; }
         .list-item .subtitle { font-size: 13px; color: var(--hint); line-height: 1.4; }
         .list-item .actions { display: flex; gap: 8px; margin-top: 10px; }
         .list-item .actions .btn { padding: 10px 12px; font-size: 13px; }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-        .badge-pending { background: rgba(255, 149, 0, 0.15); color: var(--warning); }
-        .badge-processing { background: rgba(46, 166, 255, 0.15); color: var(--button); }
-        .badge-completed { background: rgba(52, 199, 89, 0.15); color: var(--success); }
-        .badge-cancelled { background: rgba(255, 59, 48, 0.15); color: var(--destructive); }
+
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-pending { background: rgba(255,149,0,0.15); color: var(--warning); }
+        .badge-processing { background: rgba(46,166,255,0.15); color: var(--button); }
+        .badge-completed { background: rgba(52,199,89,0.15); color: var(--success); }
+        .badge-cancelled { background: rgba(255,59,48,0.15); color: var(--destructive); }
+
         .form-group { margin-bottom: 14px; }
         .form-label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 6px; }
         .form-input {
-            width: 100%; padding: 14px 16px; border: 1px solid rgba(128, 128, 128, 0.3);
+            width: 100%; padding: 14px 16px; border: 1px solid rgba(128,128,128,0.3);
             border-radius: 12px; background: var(--secondary-bg); color: var(--text); font-size: 16px; outline: none;
         }
         .form-input:focus { border-color: var(--button); }
-        .page { display: none; animation: fadeIn 0.2s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .back-btn {
-            display: inline-flex; align-items: center; gap: 4px; background: none; border: none;
-            color: var(--link); font-size: 15px; font-weight: 500; cursor: pointer; padding: 8px 0; margin-bottom: 12px;
-        }
-        .empty { text-align: center; padding: 40px 20px; color: var(--hint); }
-        .empty .icon { font-size: 48px; margin-bottom: 12px; }
-        .loading { text-align: center; padding: 60px 20px; color: var(--hint); }
-        .spinner {
-            width: 36px; height: 36px; border: 3px solid rgba(128, 128, 128, 0.2);
-            border-top-color: var(--button); border-radius: 50%;
-            animation: spin 0.7s linear infinite; margin: 0 auto 16px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
         .info-block {
             background: var(--secondary-bg); border-radius: 12px; padding: 14px 16px;
             margin-bottom: 12px; font-size: 14px; line-height: 1.5; color: var(--hint);
@@ -95,480 +173,825 @@
             background: rgba(128,128,128,0.2); padding: 2px 6px; border-radius: 4px;
             font-size: 13px; color: var(--text); word-break: break-all;
         }
-        .user-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-        .avatar {
-            width: 48px; height: 48px; border-radius: 50%; background: var(--button);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; font-weight: 700; color: var(--button-text); flex-shrink: 0;
+
+        .empty { text-align: center; padding: 40px 20px; color: var(--hint); }
+        .empty .icon { font-size: 44px; margin-bottom: 10px; }
+        .loading { text-align: center; padding: 50px 20px; color: var(--hint); }
+        .spinner {
+            width: 32px; height: 32px; border: 3px solid rgba(128,128,128,0.2);
+            border-top-color: var(--button); border-radius: 50%;
+            animation: spin 0.7s linear infinite; margin: 0 auto 12px;
         }
-        .user-name { font-size: 17px; font-weight: 600; }
-        .user-role { font-size: 13px; color: var(--hint); }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .method-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         .method-item {
-            background: var(--secondary-bg); border-radius: 12px; padding: 16px;
+            background: var(--secondary-bg); border-radius: 12px; padding: 14px;
             display: flex; align-items: center; gap: 12px; cursor: pointer;
-            border: 2px solid transparent; transition: border-color 0.15s;
+            border: 2px solid transparent;
         }
         .method-item.selected { border-color: var(--button); }
-        .method-item .icon { font-size: 24px; }
-        .method-item .text { flex: 1; }
+        .method-item .icon { font-size: 22px; }
         .method-item .title { font-weight: 600; font-size: 15px; }
         .method-item .desc { font-size: 12px; color: var(--hint); margin-top: 2px; }
+
         .payment-card { background: var(--secondary-bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .payment-card .row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
-        .payment-card .row:last-child { margin-bottom: 0; }
         .payment-card .label { color: var(--hint); }
         .payment-card .value { font-weight: 600; text-align: right; word-break: break-all; }
+
+        .news-card {
+            background: var(--secondary-bg); border-radius: 14px; padding: 16px; margin-bottom: 10px;
+        }
+        .news-card .date { font-size: 12px; color: var(--hint); margin-bottom: 6px; }
+        .news-card .title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .news-card .text { font-size: 13px; color: var(--hint); line-height: 1.4; }
+
+        .exchange-placeholder {
+            text-align: center; padding: 48px 20px; color: var(--hint);
+        }
+        .exchange-placeholder .big { font-size: 48px; margin-bottom: 12px; }
+
+        .listing-card {
+            background: var(--secondary-bg); border-radius: 16px; padding: 16px;
+            margin-bottom: 12px; cursor: pointer; transition: opacity 0.15s;
+        }
+        .listing-card:active { opacity: 0.85; }
+        .listing-card .price {
+            font-size: 20px; font-weight: 700; color: var(--success); margin-bottom: 6px;
+        }
+        .listing-card .ltitle {
+            font-size: 16px; font-weight: 600; margin-bottom: 6px; line-height: 1.3;
+        }
+        .listing-card .ldesc {
+            font-size: 13px; color: var(--hint); line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+            white-space: pre-line;
+        }
+        .listing-card .meta {
+            margin-top: 10px; font-size: 12px; color: var(--hint);
+            display: flex; justify-content: space-between; align-items: center;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="page-loading" class="page active">
-            <div class="loading"><div class="spinner"></div><div>Загрузка...</div></div>
-        </div>
 
-        <div id="page-main" class="page">
-            <div class="header">
-                <h1>X-Cod Exchange</h1>
-                <p>Покупка и продажа Telegram-ботов</p>
-            </div>
-            <div class="user-row">
-                <div class="avatar" id="user-avatar">?</div>
-                <div>
-                    <div class="user-name" id="user-name">—</div>
-                    <div class="user-role" id="user-role">—</div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-title">Баланс</div>
-                <div class="card-value" id="main-balance">0 <small>$</small></div>
-            </div>
-            <div class="menu-grid">
-                <button class="menu-item" onclick="showPage('balance')"><div class="icon">💵</div><div class="label">Баланс</div></button>
-                <button class="menu-item" onclick="showPage('bots')"><div class="icon">🤖</div><div class="label">Мои боты</div></button>
-                <button class="menu-item" onclick="showPage('help')"><div class="icon">📄</div><div class="label">Помощь</div></button>
-                <button class="menu-item" onclick="showPage('support')"><div class="icon">💬</div><div class="label">Поддержка</div></button>
-            </div>
-            <div id="admin-btn-wrap" style="display:none; margin-top:12px;">
-                <button class="btn btn-secondary" onclick="showPage('admin')">🛡 Админ-панель</button>
-            </div>
-        </div>
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
+    </div>
+    <div class="topbar-right">
+        <button class="lang-btn" onclick="tg.showAlert('Пока доступен только русский язык')">RU</button>
+        <div class="balance-chip" onclick="showPage('balance')" id="top-balance">0 $</div>
+        <div class="user-chip" id="top-avatar" onclick="showPage('profile')">?</div>
+    </div>
+</div>
 
-        <div id="page-balance" class="page">
-            <button class="back-btn" onclick="showPage('main')">← Назад</button>
-            <div class="section-title">💵 Баланс</div>
-            <div class="card">
-                <div class="card-title">Текущий баланс</div>
-                <div class="card-value" id="balance-value">0 <small>$</small></div>
-            </div>
-            <div class="btn-row">
-                <button class="btn" onclick="showPage('deposit')">💰 Пополнение</button>
-                <button class="btn btn-secondary" onclick="showPage('withdraw')">💳 Вывод</button>
-            </div>
-            <button class="btn btn-secondary" style="margin-top:4px;" onclick="showPage('requests')">📋 Мои заявки</button>
-        </div>
+<!-- DRAWER -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+    <div class="drawer-header">
+        <div class="title">X-Cod Exchange</div>
+        <div class="sub">Меню</div>
+    </div>
+    <div class="drawer-nav">
+        <button class="drawer-item active" data-page="home" onclick="navTo('home')">
+            <span class="di">🏠</span> Главная
+        </button>
+        <button class="drawer-item" data-page="news" onclick="navTo('news')">
+            <span class="di">📰</span> Новости
+        </button>
+        <button class="drawer-item" data-page="exchange" onclick="navTo('exchange')">
+            <span class="di">📊</span> Биржа
+        </button>
+        <button class="drawer-item" data-page="transactions" onclick="navTo('transactions')">
+            <span class="di">📜</span> Мои транзакции
+        </button>
+        <button class="drawer-item" data-page="bots" onclick="navTo('bots')">
+            <span class="di">🤖</span> Мои боты
+        </button>
+        <button class="drawer-item" data-page="balance" onclick="navTo('balance')">
+            <span class="di">💵</span> Баланс
+        </button>
+    </div>
+    <div class="drawer-bottom">
+        <button class="drawer-item" data-page="settings" onclick="navTo('settings')">
+            <span class="di">⚙️</span> Настройки
+        </button>
+        <button class="drawer-item" data-page="support" onclick="navTo('support')">
+            <span class="di">💬</span> Поддержка
+        </button>
+        <button class="drawer-item" data-page="admin" id="drawer-admin" style="display:none;" onclick="navTo('admin')">
+            <span class="di">🛡</span> Панель
+        </button>
+    </div>
+</div>
 
-        <div id="page-deposit" class="page">
-            <button class="back-btn" onclick="showPage('balance')">← Назад</button>
-            <div class="section-title">💰 Пополнение</div>
-            <div class="info-block">Выберите способ. Минимальная сумма — <b>1$</b></div>
-            <div class="method-list">
-                <div class="method-item selected" data-method="card" onclick="selectMethod(this, 'deposit')">
-                    <div class="icon">🏦</div>
-                    <div class="text"><div class="title">Перевод по СБП</div><div class="desc">Быстрый перевод на карту</div></div>
-                </div>
-                <div class="method-item" data-method="crypto" onclick="selectMethod(this, 'deposit')">
-                    <div class="icon">₿</div>
-                    <div class="text"><div class="title">Криптовалюта (USDT)</div><div class="desc">TRC20</div></div>
-                </div>
-                <div class="method-item" data-method="stars" onclick="selectMethod(this, 'deposit')">
-                    <div class="icon">⭐</div>
-                    <div class="text"><div class="title">Telegram Stars</div><div class="desc">1$ = 100 Stars (оплата в боте)</div></div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Сумма ($)</label>
-                <input class="form-input" type="number" id="deposit-amount" placeholder="Например: 10" min="1" step="1">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Комментарий / номер транзакции</label>
-                <input class="form-input" type="text" id="deposit-comment" placeholder="Необязательно">
-            </div>
-            <button class="btn" id="deposit-btn" onclick="startDeposit()">Создать заявку</button>
-        </div>
+<!-- CONTENT -->
+<div class="content">
 
-        <div id="page-deposit-result" class="page">
-            <button class="back-btn" onclick="showPage('balance')">← К балансу</button>
-            <div class="section-title">💳 Реквизиты для оплаты</div>
-            <div id="deposit-result-content"></div>
-        </div>
+    <!-- LOADING -->
+    <div id="page-loading" class="page active">
+        <div class="loading"><div class="spinner"></div>Загрузка...</div>
+    </div>
 
-        <div id="page-withdraw" class="page">
-            <button class="back-btn" onclick="showPage('balance')">← Назад</button>
-            <div class="section-title">💳 Вывод средств</div>
-            <div class="card">
-                <div class="card-title">Доступно</div>
-                <div class="card-value" id="withdraw-balance">0 <small>$</small></div>
-            </div>
-            <div class="info-block">Минимальная сумма вывода — <b>5$</b></div>
-            <div class="method-list">
-                <div class="method-item selected" data-method="card" onclick="selectMethod(this, 'withdraw')">
-                    <div class="icon">💳</div>
-                    <div class="text"><div class="title">На карту</div><div class="desc">По номеру карты</div></div>
-                </div>
-                <div class="method-item" data-method="crypto" onclick="selectMethod(this, 'withdraw')">
-                    <div class="icon">₿</div>
-                    <div class="text"><div class="title">Криптовалюта</div><div class="desc">USDT TRC20</div></div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Сумма ($)</label>
-                <input class="form-input" type="number" id="withdraw-amount" placeholder="Например: 10" min="1" step="1">
-            </div>
-            <div class="form-group">
-                <label class="form-label" id="withdraw-recipient-label">Номер карты и инициалы</label>
-                <input class="form-input" type="text" id="withdraw-recipient" placeholder="1234 5678 9012 3456, Иванов И.И.">
-            </div>
-            <button class="btn" id="withdraw-btn" onclick="startWithdraw()">Создать заявку</button>
+    <!-- HOME -->
+    <div id="page-home" class="page">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <div class="section-title" style="margin-bottom:0;">Объявления</div>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showPage('listing-create')">+ Создать</button>
         </div>
+        <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
 
-        <div id="page-requests" class="page">
-            <button class="back-btn" onclick="showPage('balance')">← Назад</button>
-            <div class="section-title">📋 Мои заявки</div>
-            <div id="requests-list"><div class="loading"><div class="spinner"></div></div></div>
+    <!-- LISTING DETAIL -->
+    <div id="page-listing-detail" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('home')">← Назад</button>
+        <div id="listing-detail-content"></div>
+    </div>
+
+    <!-- CREATE LISTING -->
+    <div id="page-listing-create" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('home')">← Назад</button>
+        <div class="section-title">Новое объявление</div>
+        <div class="form-group">
+            <label class="form-label">Название</label>
+            <input class="form-input" type="text" id="listing-title" placeholder="Название бота / проекта">
         </div>
-
-        <div id="page-bots" class="page">
-            <button class="back-btn" onclick="showPage('main')">← Назад</button>
-            <div class="section-title">🤖 Мои боты</div>
-            <div id="bots-list"><div class="loading"><div class="spinner"></div></div></div>
+        <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea class="form-input" id="listing-desc" rows="4" placeholder="Описание" style="resize:vertical;min-height:100px;"></textarea>
         </div>
-
-        <div id="page-help" class="page">
-            <button class="back-btn" onclick="showPage('main')">← Назад</button>
-            <div class="section-title">📄 Помощь</div>
-            <div class="info-block">
-                <b>Навигатор</b><br><br>
-                💵 <b>Баланс</b> — пополнение, вывод, заявки<br>
-                🤖 <b>Мои боты</b> — ваши боты на продаже<br>
-                💬 <b>Поддержка</b> — связь с нами<br>
-                🛡 <b>Админ-панель</b> — для сотрудников
-            </div>
-            <div class="info-block">
-                <b>X-Cod Exchange</b> — честная платформа для покупки и продажи Telegram-ботов.<br><br>
-                • У каждого продавца и покупателя есть рейтинг и отзывы<br>
-                • Мы берём ответственность за каждую сделку
-            </div>
+        <div class="form-group">
+            <label class="form-label">Цена ($)</label>
+            <input class="form-input" type="number" id="listing-price" placeholder="100" min="1">
         </div>
-
-        <div id="page-support" class="page">
-            <button class="back-btn" onclick="showPage('main')">← Назад</button>
-            <div class="section-title">💬 Поддержка</div>
-            <div class="info-block">Если у вас возникли вопросы — напишите нам:</div>
-            <div class="btn-stack">
-                <button class="btn btn-secondary" onclick="openLink('https://t.me/support_bot')">📢 @support_bot</button>
-            </div>
-            <div class="info-block" style="margin-top:16px;">⏱ Время ответа: обычно в течение 24 часов</div>
+        <div class="form-group">
+            <label class="form-label">Username бота (необязательно)</label>
+            <input class="form-input" type="text" id="listing-bot" placeholder="@my_bot">
         </div>
+        <button class="btn" id="listing-create-btn" onclick="createListing()">Опубликовать</button>
+    </div>
 
-        <div id="page-admin" class="page">
-            <button class="back-btn" onclick="showPage('main')">← Назад</button>
-            <div class="section-title">🛡 Админ-панель</div>
-            <div class="card">
-                <div class="card-title">Ваша роль</div>
-                <div class="card-value" style="font-size:20px;" id="admin-role">—</div>
-            </div>
-            <div class="info-block">
-                Управление сотрудниками и рассмотрение заявок доступно в боте командой <b>/panel</b>
-            </div>
+    <!-- EDIT LISTING -->
+    <div id="page-listing-edit" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('home')">← Назад</button>
+        <div class="section-title">Редактировать</div>
+        <input type="hidden" id="edit-listing-id">
+        <div class="form-group">
+            <label class="form-label">Название</label>
+            <input class="form-input" type="text" id="edit-listing-title">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea class="form-input" id="edit-listing-desc" rows="4" style="resize:vertical;min-height:100px;"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Цена ($)</label>
+            <input class="form-input" type="number" id="edit-listing-price" min="1">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Username бота</label>
+            <input class="form-input" type="text" id="edit-listing-bot">
+        </div>
+        <div class="btn-stack">
+            <button class="btn" id="listing-save-btn" onclick="saveListing()">Сохранить</button>
+            <button class="btn btn-danger" onclick="deleteListing()">Удалить объявление</button>
         </div>
     </div>
 
-    <script>
-        const API_URL = "https://exchange-xcodbots.waw0.amvera.tech";
+    <!-- NEWS -->
+    <div id="page-news" class="page">
+        <div class="section-title">Новости</div>
+        <div class="news-card">
+            <div class="date">Сегодня</div>
+            <div class="title">Добро пожаловать в X-Cod Exchange</div>
+            <div class="text">Платформа для безопасной покупки и продажи Telegram-ботов запущена. Следите за обновлениями!</div>
+        </div>
+        <div class="news-card">
+            <div class="date">Недавно</div>
+            <div class="title">Mini App доступен</div>
+            <div class="text">Теперь вы можете управлять балансом и заявками прямо из мини-приложения.</div>
+        </div>
+    </div>
 
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        try {
-            tg.setHeaderColor('secondary_bg_color');
-            tg.setBackgroundColor('bg_color');
-        } catch (e) {}
+    <!-- EXCHANGE -->
+    <div id="page-exchange" class="page">
+        <div class="section-title">Биржа</div>
+        <div class="exchange-placeholder">
+            <div class="big">📊</div>
+            <div>Раздел биржи в разработке</div>
+            <div style="font-size:13px;margin-top:8px;">Скоро здесь появится каталог ботов</div>
+        </div>
+    </div>
 
-        let userData = null;
-        let selectedDepositMethod = 'card';
-        let selectedWithdrawMethod = 'card';
+    <!-- TRANSACTIONS -->
+    <div id="page-transactions" class="page">
+        <div class="section-title">Мои транзакции</div>
+        <div id="tx-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
 
-        async function apiGet(path) {
-            const res = await fetch(API_URL + path, {
-                headers: { 'X-Telegram-Init-Data': tg.initData }
-            });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-            return data;
+    <!-- BOTS -->
+    <div id="page-bots" class="page">
+        <div class="section-title">Мои боты</div>
+        <div id="bots-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- BALANCE -->
+    <div id="page-balance" class="page">
+        <div class="section-title">Баланс</div>
+        <div class="card">
+            <div class="card-title">Текущий баланс</div>
+            <div class="card-value" id="balance-value">0 <small>$</small></div>
+        </div>
+        <div class="btn-row">
+            <button class="btn" onclick="showPage('deposit')">💰 Пополнение</button>
+            <button class="btn btn-secondary" onclick="showPage('withdraw')">💳 Вывод</button>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:4px;" onclick="showPage('requests')">📋 Мои заявки</button>
+    </div>
+
+    <!-- DEPOSIT -->
+    <div id="page-deposit" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← Назад</button>
+        <div class="section-title">Пополнение</div>
+        <div class="info-block">Минимальная сумма — <b>1$</b></div>
+        <div class="method-list">
+            <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
+                <div class="icon">🏦</div>
+                <div><div class="title">СБП</div><div class="desc">Перевод на карту</div></div>
+            </div>
+            <div class="method-item" data-method="crypto" onclick="selectMethod(this,'deposit')">
+                <div class="icon">₿</div>
+                <div><div class="title">USDT</div><div class="desc">TRC20</div></div>
+            </div>
+            <div class="method-item" data-method="stars" onclick="selectMethod(this,'deposit')">
+                <div class="icon">⭐</div>
+                <div><div class="title">Telegram Stars</div><div class="desc">Оплата в боте</div></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Сумма ($)</label>
+            <input class="form-input" type="number" id="deposit-amount" placeholder="10" min="1">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Комментарий</label>
+            <input class="form-input" type="text" id="deposit-comment" placeholder="Необязательно">
+        </div>
+        <button class="btn" id="deposit-btn" onclick="startDeposit()">Создать заявку</button>
+    </div>
+
+    <!-- DEPOSIT RESULT -->
+    <div id="page-deposit-result" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← К балансу</button>
+        <div class="section-title">Реквизиты</div>
+        <div id="deposit-result-content"></div>
+    </div>
+
+    <!-- WITHDRAW -->
+    <div id="page-withdraw" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← Назад</button>
+        <div class="section-title">Вывод</div>
+        <div class="card">
+            <div class="card-title">Доступно</div>
+            <div class="card-value" id="withdraw-balance">0 <small>$</small></div>
+        </div>
+        <div class="info-block">Минимум — <b>5$</b></div>
+        <div class="method-list">
+            <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
+                <div class="icon">💳</div>
+                <div><div class="title">На карту</div><div class="desc">По номеру карты</div></div>
+            </div>
+            <div class="method-item" data-method="crypto" onclick="selectMethod(this,'withdraw')">
+                <div class="icon">₿</div>
+                <div><div class="title">Крипта</div><div class="desc">USDT TRC20</div></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Сумма ($)</label>
+            <input class="form-input" type="number" id="withdraw-amount" placeholder="10" min="1">
+        </div>
+        <div class="form-group">
+            <label class="form-label" id="withdraw-recipient-label">Номер карты и инициалы</label>
+            <input class="form-input" type="text" id="withdraw-recipient" placeholder="1234 5678 9012 3456, Иванов И.И.">
+        </div>
+        <button class="btn" id="withdraw-btn" onclick="startWithdraw()">Создать заявку</button>
+    </div>
+
+    <!-- REQUESTS -->
+    <div id="page-requests" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← Назад</button>
+        <div class="section-title">Мои заявки</div>
+        <div id="requests-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="page-settings" class="page">
+        <div class="section-title">Настройки</div>
+        <div class="list-item">
+            <div class="top"><div class="title">Язык</div><span class="badge badge-processing">RU</span></div>
+            <div class="subtitle">Пока доступен только русский</div>
+        </div>
+        <div class="list-item">
+            <div class="top"><div class="title">Тема</div></div>
+            <div class="subtitle">Следует теме Telegram</div>
+        </div>
+    </div>
+
+    <!-- SUPPORT -->
+    <div id="page-support" class="page">
+        <div class="section-title">Поддержка</div>
+        <div class="info-block">Если есть вопросы — напишите нам:</div>
+        <div class="btn-stack">
+            <button class="btn btn-secondary" onclick="openLink('https://t.me/support_bot')">📢 @support_bot</button>
+        </div>
+        <div class="info-block" style="margin-top:16px;">⏱ Ответ обычно в течение 24 часов</div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="page-profile" class="page">
+        <div class="section-title">Профиль</div>
+        <div class="card">
+            <div class="card-title">Имя</div>
+            <div style="font-size:18px;font-weight:600;" id="profile-name">—</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Роль</div>
+            <div style="font-size:16px;font-weight:600;" id="profile-role">—</div>
+        </div>
+        <div class="card">
+            <div class="card-title">ID</div>
+            <div style="font-size:16px;font-weight:600;" id="profile-id">—</div>
+        </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="page-admin" class="page">
+        <div class="section-title">🛡 Панель</div>
+        <div class="card">
+            <div class="card-title">Ваша роль</div>
+            <div style="font-size:18px;font-weight:600;" id="admin-role">—</div>
+        </div>
+        <div class="btn-stack" style="margin-bottom:16px;">
+            <button class="btn" onclick="loadAdminRequests()">📋 Заявки на рассмотрение</button>
+            <button class="btn btn-secondary" id="admin-staff-btn" style="display:none;" onclick="loadAdminStaff()">👥 Сотрудники</button>
+        </div>
+        <div id="admin-content"></div>
+    </div>
+
+</div>
+
+<script>
+const API_URL = "https://exchange-xcodbots.waw0.amvera.tech";
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+try { tg.setHeaderColor('secondary_bg_color'); tg.setBackgroundColor('bg_color'); } catch(e){}
+
+let userData = null;
+let selectedDepositMethod = 'card';
+let selectedWithdrawMethod = 'card';
+
+function openDrawer() {
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+}
+function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+}
+function navTo(page) {
+    closeDrawer();
+    showPage(page);
+    document.querySelectorAll('.drawer-item').forEach(function(el) {
+        el.classList.toggle('active', el.dataset.page === page);
+    });
+}
+
+async function apiGet(path) {
+    var res = await fetch(API_URL + path, { headers: { 'X-Telegram-Init-Data': tg.initData } });
+    var data = await res.json().catch(function(){ return {}; });
+    if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+    return data;
+}
+async function apiPost(path, body) {
+    var res = await fetch(API_URL + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
+        body: JSON.stringify(body)
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+    return data;
+}
+
+async function init() {
+    try {
+        if (!tg.initData) {
+            document.getElementById('page-loading').innerHTML =
+                '<div class="empty"><div class="icon">⚠️</div>Откройте через Telegram</div>';
+            return;
         }
+        userData = await apiGet('/api/user');
+        renderMain();
+        showPage('home');
+    } catch (e) {
+        document.getElementById('page-loading').innerHTML =
+            '<div class="empty"><div class="icon">❌</div>' + e.message +
+            '<br><button class="btn" style="margin-top:16px;" onclick="location.reload()">Повторить</button></div>';
+    }
+}
 
-        async function apiPost(path, body) {
-            const res = await fetch(API_URL + path, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Telegram-Init-Data': tg.initData
-                },
-                body: JSON.stringify(body)
-            });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-            return data;
+function renderMain() {
+    var name = userData.first_name || userData.username || 'User';
+    document.getElementById('top-avatar').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('profile-name').textContent = name;
+    document.getElementById('profile-role').textContent = userData.role_name || '—';
+    document.getElementById('profile-id').textContent = userData.user_id;
+    document.getElementById('admin-role').textContent = userData.role_name || '—';
+    setBalance(userData.balance);
+    if (userData.role >= 2) {
+        document.getElementById('drawer-admin').style.display = 'flex';
+    }
+    if (userData.role >= 5) {
+        document.getElementById('admin-staff-btn').style.display = 'flex';
+    }
+}
+
+function setBalance(bal) {
+    userData.balance = bal;
+    var html = bal + ' <small>$</small>';
+    document.getElementById('balance-value').innerHTML = html;
+    document.getElementById('withdraw-balance').innerHTML = html;
+    document.getElementById('top-balance').textContent = bal + ' $';
+}
+
+function showPage(name) {
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    var page = document.getElementById('page-' + name);
+    if (page) page.classList.add('active');
+    if (name === 'home') loadListings();
+    if (name === 'balance' || name === 'withdraw') refreshBalance();
+    if (name === 'requests') loadRequests();
+    if (name === 'bots') loadBots();
+    if (name === 'transactions') loadTransactions();
+    if (name === 'admin') { document.getElementById('admin-content').innerHTML = ''; }
+    window.scrollTo(0, 0);
+}
+
+async function loadListings() {
+    var box = document.getElementById('listings-feed');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/listings');
+        var items = data.listings || [];
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">📭</div>Пока нет объявлений</div>';
+            return;
         }
+        box.innerHTML = items.map(function(l) {
+            var seller = l.seller_name || l.seller_username || ('ID ' + l.seller_id);
+            var date = (l.created_at || '').slice(0, 10);
+            var desc = (l.description || '').replace(/</g, '&lt;');
+            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                '<div class="price">' + Number(l.price).toLocaleString('ru-RU') + ' $</div>' +
+                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="ldesc">' + desc + '</div>' +
+                '<div class="meta"><span>👤 ' + seller + '</span><span>' + date + '</span></div>' +
+                '</div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
 
-        async function init() {
-            try {
-                if (!tg.initData) {
-                    document.getElementById('page-loading').innerHTML =
-                        '<div class="empty"><div class="icon">⚠️</div><div>Откройте приложение через Telegram</div></div>';
-                    return;
-                }
-                userData = await apiGet('/api/user');
-                renderMain();
-                showPage('main');
-            } catch (e) {
-                console.error(e);
-                document.getElementById('page-loading').innerHTML =
-                    '<div class="empty"><div class="icon">❌</div><div>Ошибка загрузки<br><small>' + e.message +
-                    '</small></div><button class="btn" style="margin-top:16px;" onclick="location.reload()">Повторить</button></div>';
+async function openListing(id) {
+    var box = document.getElementById('listing-detail-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    showPage('listing-detail');
+    try {
+        var l = await apiGet('/api/listings/' + id);
+        var seller = l.seller_name || l.seller_username || ('ID ' + l.seller_id);
+        var canEdit = (l.seller_id === userData.user_id) || (userData.role >= 5);
+        var html = '<div class="card">' +
+            '<div class="card-title">Цена</div>' +
+            '<div class="card-value" style="color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>' +
+            '</div>' +
+            '<div class="section-title" style="font-size:17px;">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+            '<div class="info-block" style="white-space:pre-line;">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
+            '<div class="info-block">Продавец: <b>' + seller + '</b>' +
+            (l.bot_username ? '<br>Бот: <b>@' + l.bot_username + '</b>' : '') +
+            '<br>Опубликовано: ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
+        if (canEdit) {
+            html += '<div class="btn-stack" style="margin-top:12px;">' +
+                '<button class="btn btn-secondary" onclick="openEditListing(' + l.id + ')">✏️ Редактировать</button></div>';
+        }
+        html += '<div class="btn-stack" style="margin-top:12px;">' +
+            '<button class="btn" onclick="tg.showAlert(\'Свяжитесь с продавцом через поддержку или бота\')">💬 Связаться</button></div>';
+        box.innerHTML = html;
+        window._currentListing = l;
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function openEditListing(id) {
+    var l = window._currentListing;
+    if (!l || l.id !== id) return;
+    document.getElementById('edit-listing-id').value = l.id;
+    document.getElementById('edit-listing-title').value = l.title || '';
+    document.getElementById('edit-listing-desc').value = l.description || '';
+    document.getElementById('edit-listing-price').value = l.price || '';
+    document.getElementById('edit-listing-bot').value = l.bot_username || '';
+    showPage('listing-edit');
+}
+
+async function createListing() {
+    var title = document.getElementById('listing-title').value.trim();
+    var description = document.getElementById('listing-desc').value.trim();
+    var price = parseFloat(document.getElementById('listing-price').value);
+    var bot_username = document.getElementById('listing-bot').value.trim();
+    var btn = document.getElementById('listing-create-btn');
+    if (!title) { tg.showAlert('Укажите название'); return; }
+    if (!price || price < 1) { tg.showAlert('Укажите цену'); return; }
+    btn.disabled = true; btn.textContent = 'Публикация...';
+    try {
+        await apiPost('/api/listings', { title: title, description: description, price: price, bot_username: bot_username });
+        tg.showAlert('✅ Объявление опубликовано');
+        document.getElementById('listing-title').value = '';
+        document.getElementById('listing-desc').value = '';
+        document.getElementById('listing-price').value = '';
+        document.getElementById('listing-bot').value = '';
+        showPage('home');
+    } catch (e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Опубликовать'; }
+}
+
+async function saveListing() {
+    var id = document.getElementById('edit-listing-id').value;
+    var btn = document.getElementById('listing-save-btn');
+    btn.disabled = true; btn.textContent = 'Сохранение...';
+    try {
+        var res = await fetch(API_URL + '/api/listings/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
+            body: JSON.stringify({
+                title: document.getElementById('edit-listing-title').value.trim(),
+                description: document.getElementById('edit-listing-desc').value.trim(),
+                price: parseFloat(document.getElementById('edit-listing-price').value),
+                bot_username: document.getElementById('edit-listing-bot').value.trim()
+            })
+        });
+        var data = await res.json().catch(function(){ return {}; });
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        tg.showAlert('✅ Сохранено');
+        showPage('home');
+    } catch (e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Сохранить'; }
+}
+
+async function deleteListing() {
+    var id = document.getElementById('edit-listing-id').value;
+    try {
+        var res = await fetch(API_URL + '/api/listings/' + id, {
+            method: 'DELETE',
+            headers: { 'X-Telegram-Init-Data': tg.initData }
+        });
+        var data = await res.json().catch(function(){ return {}; });
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        tg.showAlert('Объявление удалено');
+        showPage('home');
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function refreshBalance() {
+    try { var d = await apiGet('/api/balance'); setBalance(d.balance); } catch(e){}
+}
+
+function selectMethod(el, type) {
+    el.parentElement.querySelectorAll('.method-item').forEach(function(i){ i.classList.remove('selected'); });
+    el.classList.add('selected');
+    if (type === 'deposit') selectedDepositMethod = el.dataset.method;
+    else {
+        selectedWithdrawMethod = el.dataset.method;
+        var label = document.getElementById('withdraw-recipient-label');
+        var input = document.getElementById('withdraw-recipient');
+        if (selectedWithdrawMethod === 'card') {
+            label.textContent = 'Номер карты и инициалы';
+            input.placeholder = '1234 5678 9012 3456, Иванов И.И.';
+        } else {
+            label.textContent = 'Адрес USDT (TRC20)';
+            input.placeholder = 'TSM4p8JjU2AqC7Xqy8Zf9gH3kL5nP2rV6w';
+        }
+    }
+}
+
+async function startDeposit() {
+    var amount = parseFloat(document.getElementById('deposit-amount').value);
+    var comment = document.getElementById('deposit-comment').value.trim();
+    var btn = document.getElementById('deposit-btn');
+    if (!amount || amount < 1) { tg.showAlert('Минимум 1$'); return; }
+    btn.disabled = true; btn.textContent = 'Создание...';
+    try {
+        var result = await apiPost('/api/deposit', { amount: amount, method: selectedDepositMethod, comment: comment });
+        if (selectedDepositMethod === 'stars') {
+            tg.showAlert('Заявка #' + result.request_id + ' создана. Оплатите Stars через бота.');
+            showPage('requests'); return;
+        }
+        var html = '<div class="payment-card">' +
+            '<div class="row"><span class="label">Заявка</span><span class="value">#' + result.request_id + '</span></div>' +
+            '<div class="row"><span class="label">Сумма</span><span class="value">' + result.amount + '$</span></div>';
+        if (result.method === 'card') {
+            html += '<div class="row"><span class="label">К оплате</span><span class="value">' + result.rub_amount + ' ₽</span></div>' +
+                '<div class="row"><span class="label">Телефон</span><span class="value"><code>' + result.payment_info.phone + '</code></span></div>' +
+                '<div class="row"><span class="label">Банк</span><span class="value">' + result.payment_info.bank + '</span></div>' +
+                '<div class="row"><span class="label">Получатель</span><span class="value">' + result.payment_info.recipient_name + '</span></div>';
+        } else {
+            html += '<div class="row"><span class="label">Сеть</span><span class="value">' + result.payment_info.network + '</span></div>' +
+                '<div class="row"><span class="label">Адрес</span><span class="value"><code>' + result.payment_info.wallet + '</code></span></div>';
+        }
+        html += '</div><div class="info-block">После оплаты нажмите «Я оплатил»</div>' +
+            '<div class="btn-stack">' +
+            '<button class="btn btn-success" onclick="confirmRequest(' + result.request_id + ')">✅ Я оплатил</button>' +
+            '<button class="btn btn-danger" onclick="cancelRequest(' + result.request_id + ')">❌ Отменить</button>' +
+            '<button class="btn btn-secondary" onclick="showPage(\'requests\')">📋 Мои заявки</button></div>';
+        document.getElementById('deposit-result-content').innerHTML = html;
+        showPage('deposit-result');
+    } catch(e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Создать заявку'; }
+}
+
+async function startWithdraw() {
+    var amount = parseFloat(document.getElementById('withdraw-amount').value);
+    var raw = document.getElementById('withdraw-recipient').value.trim();
+    var btn = document.getElementById('withdraw-btn');
+    if (!amount || amount < 5) { tg.showAlert('Минимум 5$'); return; }
+    if (amount > userData.balance) { tg.showAlert('Недостаточно средств'); return; }
+    if (!raw) { tg.showAlert('Укажите реквизиты'); return; }
+    var recipient = raw, recipient_name = '';
+    if (selectedWithdrawMethod === 'card' && raw.indexOf(',') !== -1) {
+        var p = raw.split(','); recipient = p[0].trim(); recipient_name = (p[1]||'').trim();
+    }
+    btn.disabled = true; btn.textContent = 'Создание...';
+    try {
+        var result = await apiPost('/api/withdraw', {
+            amount: amount, method: selectedWithdrawMethod,
+            recipient: recipient, recipient_name: recipient_name
+        });
+        setBalance(result.new_balance);
+        tg.showAlert('✅ Заявка #' + result.request_id + ' создана');
+        document.getElementById('withdraw-amount').value = '';
+        document.getElementById('withdraw-recipient').value = '';
+        showPage('requests');
+    } catch(e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Создать заявку'; }
+}
+
+async function loadRequests() {
+    var box = document.getElementById('requests-list');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/requests');
+        var reqs = data.requests || [];
+        if (!reqs.length) { box.innerHTML = '<div class="empty"><div class="icon">📭</div>Нет заявок</div>'; return; }
+        var statusMap = {
+            pending: ['Ожидает', 'badge-pending'], processing: ['В обработке', 'badge-processing'],
+            completed: ['Выполнено', 'badge-completed'], cancelled: ['Отменена', 'badge-cancelled']
+        };
+        var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
+        box.innerHTML = reqs.map(function(r) {
+            var st = statusMap[r.status] || [r.status, 'badge-pending'];
+            var typeEmoji = r.type === 'deposit' ? '💰' : '💳';
+            var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+            var actions = '';
+            if (r.status === 'pending' && r.type === 'deposit') {
+                actions = '<div class="actions">' +
+                    '<button class="btn btn-success" onclick="confirmRequest(' + r.id + ')">✅ Я оплатил</button>' +
+                    '<button class="btn btn-danger" onclick="cancelRequest(' + r.id + ')">❌ Отменить</button></div>';
             }
-        }
+            var extra = '';
+            if (r.recipient) extra += '<br>Получатель: ' + r.recipient;
+            if (r.comment) extra += '<br>' + r.comment;
+            return '<div class="list-item"><div class="top"><div class="title">' + typeEmoji + ' ' + typeName +
+                ' #' + r.id + '</div><span class="badge ' + st[1] + '">' + st[0] +
+                '</span></div><div class="subtitle">' + r.amount + '$ · ' + (methodMap[r.method]||r.method) +
+                extra + '</div>' + actions + '</div>';
+        }).join('');
+    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+}
 
-        function renderMain() {
-            const name = userData.first_name || userData.username || 'Пользователь';
-            document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
-            document.getElementById('user-name').textContent = name;
-            document.getElementById('user-role').textContent = userData.role_name || 'Пользователь';
-            setBalance(userData.balance);
-            document.getElementById('admin-role').textContent = userData.role_name || '—';
-            if (userData.role >= 2) {
-                document.getElementById('admin-btn-wrap').style.display = 'block';
-            }
-        }
+async function confirmRequest(id) {
+    try {
+        await apiPost('/api/request/confirm', { request_id: id });
+        tg.showAlert('✅ Заявка #' + id + ' на проверке');
+        loadRequests();
+        if (document.getElementById('page-deposit-result').classList.contains('active')) showPage('requests');
+    } catch(e) { tg.showAlert(e.message); }
+}
+async function cancelRequest(id) {
+    try {
+        await apiPost('/api/request/cancel', { request_id: id });
+        tg.showAlert('❌ Заявка #' + id + ' отменена');
+        loadRequests();
+        if (document.getElementById('page-deposit-result').classList.contains('active')) showPage('balance');
+    } catch(e) { tg.showAlert(e.message); }
+}
 
-        function setBalance(bal) {
-            userData.balance = bal;
-            const html = bal + ' <small>$</small>';
-            document.getElementById('main-balance').innerHTML = html;
-            document.getElementById('balance-value').innerHTML = html;
-            document.getElementById('withdraw-balance').innerHTML = html;
-        }
+async function loadBots() {
+    var box = document.getElementById('bots-list');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/bots');
+        var bots = data.bots || [];
+        if (!bots.length) { box.innerHTML = '<div class="empty"><div class="icon">🤖</div>Нет ботов</div>'; return; }
+        box.innerHTML = bots.map(function(b) {
+            return '<div class="list-item"><div class="top"><div class="title">' + b.bot_name +
+                '</div><span class="badge ' + (b.status==='active'?'badge-completed':'badge-cancelled') + '">' +
+                (b.status==='active'?'Активен':'Неактивен') + '</span></div>' +
+                '<div class="subtitle">Цена: ' + b.price + (b.bot_username ? ' · @'+b.bot_username : '') + '</div></div>';
+        }).join('');
+    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+}
 
-        function showPage(name) {
-            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-            var page = document.getElementById('page-' + name);
-            if (page) page.classList.add('active');
-            if (name === 'balance' || name === 'withdraw') refreshBalance();
-            if (name === 'requests') loadRequests();
-            if (name === 'bots') loadBots();
-            window.scrollTo(0, 0);
-        }
+async function loadTransactions() {
+    var box = document.getElementById('tx-list');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/transactions');
+        var txs = data.transactions || [];
+        if (!txs.length) { box.innerHTML = '<div class="empty"><div class="icon">📜</div>Нет транзакций</div>'; return; }
+        box.innerHTML = txs.map(function(t) {
+            var sign = (t.type === 'income' || t.type === 'refund') ? '+' : '−';
+            var color = sign === '+' ? 'var(--success)' : 'var(--destructive)';
+            return '<div class="list-item"><div class="top"><div class="title">' + (t.description||t.type) +
+                '</div><span style="font-weight:700;color:' + color + '">' + sign + t.amount + '$</span></div>' +
+                '<div class="subtitle">' + (t.created_at||'').slice(0,16).replace('T',' ') + '</div></div>';
+        }).join('');
+    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+}
 
-        async function refreshBalance() {
-            try {
-                var data = await apiGet('/api/balance');
-                setBalance(data.balance);
-            } catch (e) { console.error(e); }
-        }
+async function loadAdminRequests() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/requests');
+        var reqs = data.requests || [];
+        if (!reqs.length) { box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на рассмотрении</div>'; return; }
+        var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
+        box.innerHTML = '<div style="font-size:14px;color:var(--hint);margin-bottom:10px;">Всего: ' + reqs.length + '</div>' +
+            reqs.map(function(r) {
+                var typeEmoji = r.type === 'deposit' ? '💰' : '💳';
+                var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+                var extra = '';
+                if (r.recipient) extra += '<br>Реквизиты: ' + r.recipient;
+                if (r.recipient_name) extra += '<br>Имя: ' + r.recipient_name;
+                if (r.comment) extra += '<br>' + r.comment;
+                return '<div class="list-item"><div class="top"><div class="title">' + typeEmoji + ' ' + typeName +
+                    ' #' + r.id + '</div></div><div class="subtitle">User: ' + r.user_id + ' · ' + r.amount +
+                    '$ · ' + (methodMap[r.method]||r.method) + extra + '</div>' +
+                    '<div class="actions">' +
+                    '<button class="btn btn-success" onclick="adminApprove(' + r.id + ')">✅ Одобрить</button>' +
+                    '<button class="btn btn-danger" onclick="adminReject(' + r.id + ')">❌ Отклонить</button>' +
+                    '</div></div>';
+            }).join('');
+    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+}
 
-        function selectMethod(el, type) {
-            el.parentElement.querySelectorAll('.method-item').forEach(function(i) { i.classList.remove('selected'); });
-            el.classList.add('selected');
-            if (type === 'deposit') {
-                selectedDepositMethod = el.dataset.method;
-            } else {
-                selectedWithdrawMethod = el.dataset.method;
-                var label = document.getElementById('withdraw-recipient-label');
-                var input = document.getElementById('withdraw-recipient');
-                if (selectedWithdrawMethod === 'card') {
-                    label.textContent = 'Номер карты и инициалы';
-                    input.placeholder = '1234 5678 9012 3456, Иванов И.И.';
-                } else {
-                    label.textContent = 'Адрес USDT (TRC20)';
-                    input.placeholder = 'TSM4p8JjU2AqC7Xqy8Zf9gH3kL5nP2rV6w';
-                }
-            }
-        }
+async function adminApprove(id) {
+    try {
+        await apiPost('/api/admin/approve', { request_id: id });
+        tg.showAlert('✅ Заявка #' + id + ' одобрена');
+        loadAdminRequests();
+    } catch(e) { tg.showAlert(e.message); }
+}
+async function adminReject(id) {
+    try {
+        await apiPost('/api/admin/reject', { request_id: id });
+        tg.showAlert('❌ Заявка #' + id + ' отклонена');
+        loadAdminRequests();
+    } catch(e) { tg.showAlert(e.message); }
+}
 
-        async function startDeposit() {
-            var amount = parseFloat(document.getElementById('deposit-amount').value);
-            var comment = document.getElementById('deposit-comment').value.trim();
-            var btn = document.getElementById('deposit-btn');
-            if (!amount || amount < 1) { tg.showAlert('Минимальная сумма пополнения — 1$'); return; }
-            btn.disabled = true;
-            btn.textContent = 'Создание...';
-            try {
-                var result = await apiPost('/api/deposit', {
-                    amount: amount,
-                    method: selectedDepositMethod,
-                    comment: comment
-                });
-                if (selectedDepositMethod === 'stars') {
-                    tg.showAlert('Заявка #' + result.request_id + ' создана.\n\nДля оплаты Stars откройте бота → Баланс → Пополнение → Telegram Stars.');
-                    showPage('requests');
-                    return;
-                }
-                var html = '<div class="payment-card">' +
-                    '<div class="row"><span class="label">Заявка</span><span class="value">#' + result.request_id + '</span></div>' +
-                    '<div class="row"><span class="label">Сумма</span><span class="value">' + result.amount + '$</span></div>';
-                if (result.method === 'card') {
-                    html += '<div class="row"><span class="label">К оплате</span><span class="value">' + result.rub_amount + ' ₽</span></div>' +
-                        '<div class="row"><span class="label">Телефон</span><span class="value"><code>' + result.payment_info.phone + '</code></span></div>' +
-                        '<div class="row"><span class="label">Банк</span><span class="value">' + result.payment_info.bank + '</span></div>' +
-                        '<div class="row"><span class="label">Получатель</span><span class="value">' + result.payment_info.recipient_name + '</span></div>';
-                } else {
-                    html += '<div class="row"><span class="label">Сеть</span><span class="value">' + result.payment_info.network + '</span></div>' +
-                        '<div class="row"><span class="label">Адрес</span><span class="value"><code>' + result.payment_info.wallet + '</code></span></div>';
-                }
-                html += '</div><div class="info-block">После оплаты нажмите «Я оплатил». Администратор проверит платёж.</div>' +
-                    '<div class="btn-stack">' +
-                    '<button class="btn btn-success" onclick="confirmRequest(' + result.request_id + ')">✅ Я оплатил</button>' +
-                    '<button class="btn btn-danger" onclick="cancelRequest(' + result.request_id + ')">❌ Отменить</button>' +
-                    '<button class="btn btn-secondary" onclick="showPage(\'requests\')">📋 Мои заявки</button>' +
-                    '</div>';
-                document.getElementById('deposit-result-content').innerHTML = html;
-                showPage('deposit-result');
-            } catch (e) {
-                tg.showAlert(e.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Создать заявку';
-            }
-        }
+async function loadAdminStaff() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/staff');
+        var staff = data.staff || [];
+        if (!staff.length) { box.innerHTML = '<div class="empty">Нет сотрудников</div>'; return; }
+        box.innerHTML = staff.map(function(s) {
+            return '<div class="list-item"><div class="top"><div class="title">' +
+                (s.first_name || s.username || s.user_id) +
+                '</div><span class="badge badge-processing">' + s.role_name + '</span></div>' +
+                '<div class="subtitle">ID: ' + s.user_id + ' · Баланс: ' + s.balance + '$</div></div>';
+        }).join('');
+    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+}
 
-        async function startWithdraw() {
-            var amount = parseFloat(document.getElementById('withdraw-amount').value);
-            var recipientRaw = document.getElementById('withdraw-recipient').value.trim();
-            var btn = document.getElementById('withdraw-btn');
-            if (!amount || amount < 5) { tg.showAlert('Минимальная сумма вывода — 5$'); return; }
-            if (amount > userData.balance) { tg.showAlert('Недостаточно средств. Баланс: ' + userData.balance + '$'); return; }
-            if (!recipientRaw) { tg.showAlert('Укажите реквизиты для вывода'); return; }
-            var recipient = recipientRaw;
-            var recipient_name = '';
-            if (selectedWithdrawMethod === 'card' && recipientRaw.indexOf(',') !== -1) {
-                var parts = recipientRaw.split(',');
-                recipient = parts[0].trim();
-                recipient_name = (parts[1] || '').trim();
-            }
-            btn.disabled = true;
-            btn.textContent = 'Создание...';
-            try {
-                var result = await apiPost('/api/withdraw', {
-                    amount: amount,
-                    method: selectedWithdrawMethod,
-                    recipient: recipient,
-                    recipient_name: recipient_name
-                });
-                setBalance(result.new_balance);
-                tg.showAlert('✅ Заявка #' + result.request_id + ' создана!\nСумма ' + result.amount + '$ списана с баланса.\nСтатус: в обработке.');
-                document.getElementById('withdraw-amount').value = '';
-                document.getElementById('withdraw-recipient').value = '';
-                showPage('requests');
-            } catch (e) {
-                tg.showAlert(e.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Создать заявку';
-            }
-        }
+function openLink(url) { tg.openTelegramLink(url); }
 
-        async function loadRequests() {
-            var box = document.getElementById('requests-list');
-            box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-            try {
-                var data = await apiGet('/api/requests');
-                var reqs = data.requests || [];
-                if (!reqs.length) {
-                    box.innerHTML = '<div class="empty"><div class="icon">📭</div><div>У вас нет заявок</div></div>';
-                    return;
-                }
-                var statusMap = {
-                    pending: ['Ожидает оплаты', 'badge-pending'],
-                    processing: ['В обработке', 'badge-processing'],
-                    completed: ['Выполнено', 'badge-completed'],
-                    cancelled: ['Отменена', 'badge-cancelled']
-                };
-                var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
-                box.innerHTML = reqs.map(function(r) {
-                    var st = statusMap[r.status] || [r.status, 'badge-pending'];
-                    var typeEmoji = r.type === 'deposit' ? '💰' : '💳';
-                    var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
-                    var method = methodMap[r.method] || r.method || '—';
-                    var actions = '';
-                    if (r.status === 'pending' && r.type === 'deposit') {
-                        actions = '<div class="actions">' +
-                            '<button class="btn btn-success" onclick="confirmRequest(' + r.id + ')">✅ Я оплатил</button>' +
-                            '<button class="btn btn-danger" onclick="cancelRequest(' + r.id + ')">❌ Отменить</button>' +
-                            '</div>';
-                    }
-                    var extra = '';
-                    if (r.recipient) extra += '<br>Получатель: ' + r.recipient;
-                    if (r.recipient_name) extra += '<br>Имя: ' + r.recipient_name;
-                    if (r.comment) extra += '<br>Комментарий: ' + r.comment;
-                    return '<div class="list-item"><div class="top"><div class="title">' + typeEmoji + ' ' + typeName +
-                        ' #' + r.id + '</div><span class="badge ' + st[1] + '">' + st[0] +
-                        '</span></div><div class="subtitle">Сумма: <b>' + r.amount + '$</b> · ' + method + extra +
-                        '</div>' + actions + '</div>';
-                }).join('');
-            } catch (e) {
-                box.innerHTML = '<div class="empty"><div class="icon">❌</div><div>' + e.message + '</div></div>';
-            }
-        }
-
-        async function confirmRequest(id) {
-            try {
-                await apiPost('/api/request/confirm', { request_id: id });
-                tg.showAlert('✅ Заявка #' + id + ' отправлена на проверку');
-                loadRequests();
-                if (document.getElementById('page-deposit-result').classList.contains('active')) {
-                    showPage('requests');
-                }
-            } catch (e) { tg.showAlert(e.message); }
-        }
-
-        async function cancelRequest(id) {
-            try {
-                await apiPost('/api/request/cancel', { request_id: id });
-                tg.showAlert('❌ Заявка #' + id + ' отменена');
-                loadRequests();
-                if (document.getElementById('page-deposit-result').classList.contains('active')) {
-                    showPage('balance');
-                }
-            } catch (e) { tg.showAlert(e.message); }
-        }
-
-        async function loadBots() {
-            var box = document.getElementById('bots-list');
-            box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-            try {
-                var data = await apiGet('/api/bots');
-                var bots = data.bots || [];
-                if (!bots.length) {
-                    box.innerHTML = '<div class="empty"><div class="icon">🤖</div><div>У вас пока нет ботов</div></div>';
-                    return;
-                }
-                box.innerHTML = bots.map(function(b) {
-                    return '<div class="list-item"><div class="top"><div class="title">' + b.bot_name +
-                        '</div><span class="badge ' + (b.status === 'active' ? 'badge-completed' : 'badge-cancelled') +
-                        '">' + (b.status === 'active' ? 'Активен' : 'Неактивен') +
-                        '</span></div><div class="subtitle">Цена: <b>' + b.price + '</b> · ' +
-                        (b.bot_username ? '@' + b.bot_username : 'без username') + '</div></div>';
-                }).join('');
-            } catch (e) {
-                box.innerHTML = '<div class="empty"><div class="icon">❌</div><div>' + e.message + '</div></div>';
-            }
-        }
-
-        function openLink(url) { tg.openTelegramLink(url); }
-
-        init();
-    </script>
+init();
+</script>
 </body>
 </html>
