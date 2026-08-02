@@ -232,6 +232,67 @@
             margin-top: 10px; font-size: 12px; color: var(--hint);
             display: flex; justify-content: space-between; align-items: center;
         }
+
+        /* Wallet-style balance */
+        .wallet-balance {
+            text-align: center;
+            padding: 36px 16px 28px;
+        }
+        .wallet-amount {
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+        .wallet-amount small {
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--hint);
+            margin-left: 4px;
+        }
+        .wallet-actions {
+            display: flex;
+            justify-content: center;
+            gap: 36px;
+            margin-bottom: 8px;
+        }
+        .wallet-action {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 0;
+        }
+        .wallet-action:active { opacity: 0.7; }
+        .wallet-action-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 500;
+            line-height: 1;
+        }
+        .wallet-action-icon.plus {
+            background: var(--button);
+            color: var(--button-text);
+        }
+        .wallet-action-icon.minus {
+            background: var(--secondary-bg);
+            color: var(--text);
+            border: 1.5px solid rgba(128,128,128,0.25);
+        }
+        .wallet-action-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--hint);
+        }
     </style>
 </head>
 <body>
@@ -265,14 +326,14 @@
         <button class="drawer-item" data-page="exchange" onclick="navTo('exchange')">
             <span class="di">📊</span> Биржа
         </button>
-        <button class="drawer-item" data-page="transactions" onclick="navTo('transactions')">
-            <span class="di">📜</span> Мои транзакции
-        </button>
-        <button class="drawer-item" data-page="bots" onclick="navTo('bots')">
-            <span class="di">🤖</span> Мои боты
-        </button>
         <button class="drawer-item" data-page="balance" onclick="navTo('balance')">
             <span class="di">💵</span> Баланс
+        </button>
+        <button class="drawer-item" data-page="my-listings" onclick="navTo('my-listings')">
+            <span class="di">📋</span> Мои объявления
+        </button>
+        <button class="drawer-item" data-page="orders" onclick="navTo('orders')">
+            <span class="di">📦</span> История заказов
         </button>
     </div>
     <div class="drawer-bottom">
@@ -386,30 +447,37 @@
         </div>
     </div>
 
-    <!-- TRANSACTIONS -->
-    <div id="page-transactions" class="page">
-        <div class="section-title">Мои транзакции</div>
-        <div id="tx-list"><div class="loading"><div class="spinner"></div></div></div>
+    <!-- MY LISTINGS -->
+    <div id="page-my-listings" class="page">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <div class="section-title" style="margin-bottom:0;">Мои объявления</div>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showPage('listing-create')">+ Создать</button>
+        </div>
+        <div id="my-listings-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
-    <!-- BOTS -->
-    <div id="page-bots" class="page">
-        <div class="section-title">Мои боты</div>
-        <div id="bots-list"><div class="loading"><div class="spinner"></div></div></div>
+    <!-- ORDERS -->
+    <div id="page-orders" class="page">
+        <div class="section-title">История заказов</div>
+        <div id="orders-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
     <!-- BALANCE -->
     <div id="page-balance" class="page">
-        <div class="section-title">Баланс</div>
-        <div class="card">
-            <div class="card-title">Текущий баланс</div>
-            <div class="card-value" id="balance-value">0 <small>$</small></div>
+        <div class="wallet-balance">
+            <div class="wallet-amount" id="balance-value">0.00 <small>$</small></div>
         </div>
-        <div class="btn-row">
-            <button class="btn" onclick="showPage('deposit')">💰 Пополнение</button>
-            <button class="btn btn-secondary" onclick="showPage('withdraw')">💳 Вывод</button>
+        <div class="wallet-actions">
+            <button class="wallet-action" onclick="showPage('deposit')">
+                <div class="wallet-action-icon plus">+</div>
+                <div class="wallet-action-label">Пополнить</div>
+            </button>
+            <button class="wallet-action" onclick="showPage('withdraw')">
+                <div class="wallet-action-icon minus">−</div>
+                <div class="wallet-action-label">Вывести</div>
+            </button>
         </div>
-        <button class="btn btn-secondary" style="margin-top:4px;" onclick="showPage('requests')">📋 Мои заявки</button>
+        <button class="btn btn-secondary" style="margin-top:28px;" onclick="showPage('requests')">📜 Мои транзакции</button>
     </div>
 
     <!-- DEPOSIT -->
@@ -482,7 +550,7 @@
     <!-- REQUESTS -->
     <div id="page-requests" class="page">
         <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← Назад</button>
-        <div class="section-title">Мои заявки</div>
+        <div class="section-title">Мои транзакции</div>
         <div id="requests-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
@@ -621,10 +689,11 @@ function renderMain() {
 
 function setBalance(bal) {
     userData.balance = bal;
-    var html = bal + ' <small>$</small>';
+    var formatted = Number(bal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var html = formatted + ' <small>$</small>';
     document.getElementById('balance-value').innerHTML = html;
     document.getElementById('withdraw-balance').innerHTML = html;
-    document.getElementById('top-balance').textContent = bal + ' $';
+    document.getElementById('top-balance').textContent = formatted + ' $';
 }
 
 function showPage(name) {
@@ -632,10 +701,10 @@ function showPage(name) {
     var page = document.getElementById('page-' + name);
     if (page) page.classList.add('active');
     if (name === 'home') loadListings();
+    if (name === 'my-listings') loadMyListings();
+    if (name === 'orders') loadOrders();
     if (name === 'balance' || name === 'withdraw') refreshBalance();
     if (name === 'requests') loadRequests();
-    if (name === 'bots') loadBots();
-    if (name === 'transactions') loadTransactions();
     if (name === 'admin') { document.getElementById('admin-content').innerHTML = ''; }
     window.scrollTo(0, 0);
 }
@@ -815,7 +884,7 @@ async function startDeposit() {
             '<div class="btn-stack">' +
             '<button class="btn btn-success" onclick="confirmRequest(' + result.request_id + ')">✅ Я оплатил</button>' +
             '<button class="btn btn-danger" onclick="cancelRequest(' + result.request_id + ')">❌ Отменить</button>' +
-            '<button class="btn btn-secondary" onclick="showPage(\'requests\')">📋 Мои заявки</button></div>';
+            '<button class="btn btn-secondary" onclick="showPage(\'requests\')">📜 Мои транзакции</button></div>';
         document.getElementById('deposit-result-content').innerHTML = html;
         showPage('deposit-result');
     } catch(e) { tg.showAlert(e.message); }
@@ -898,37 +967,59 @@ async function cancelRequest(id) {
     } catch(e) { tg.showAlert(e.message); }
 }
 
-async function loadBots() {
-    var box = document.getElementById('bots-list');
+async function loadMyListings() {
+    var box = document.getElementById('my-listings-list');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     try {
-        var data = await apiGet('/api/bots');
-        var bots = data.bots || [];
-        if (!bots.length) { box.innerHTML = '<div class="empty"><div class="icon">🤖</div>Нет ботов</div>'; return; }
-        box.innerHTML = bots.map(function(b) {
-            return '<div class="list-item"><div class="top"><div class="title">' + b.bot_name +
-                '</div><span class="badge ' + (b.status==='active'?'badge-completed':'badge-cancelled') + '">' +
-                (b.status==='active'?'Активен':'Неактивен') + '</span></div>' +
-                '<div class="subtitle">Цена: ' + b.price + (b.bot_username ? ' · @'+b.bot_username : '') + '</div></div>';
+        var data = await apiGet('/api/listings');
+        var items = (data.listings || []).filter(function(l) { return l.seller_id === userData.user_id; });
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">📋</div>У вас пока нет объявлений</div>';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            var date = (l.created_at || '').slice(0, 10);
+            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                '<div class="price">' + Number(l.price).toLocaleString('ru-RU') + ' $</div>' +
+                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="meta"><span>✏️ Нажмите для редактирования</span><span>' + date + '</span></div>' +
+                '</div>';
         }).join('');
-    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
 }
 
-async function loadTransactions() {
-    var box = document.getElementById('tx-list');
+async function loadOrders() {
+    var box = document.getElementById('orders-list');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     try {
-        var data = await apiGet('/api/transactions');
-        var txs = data.transactions || [];
-        if (!txs.length) { box.innerHTML = '<div class="empty"><div class="icon">📜</div>Нет транзакций</div>'; return; }
-        box.innerHTML = txs.map(function(t) {
-            var sign = (t.type === 'income' || t.type === 'refund') ? '+' : '−';
-            var color = sign === '+' ? 'var(--success)' : 'var(--destructive)';
-            return '<div class="list-item"><div class="top"><div class="title">' + (t.description||t.type) +
-                '</div><span style="font-weight:700;color:' + color + '">' + sign + t.amount + '$</span></div>' +
-                '<div class="subtitle">' + (t.created_at||'').slice(0,16).replace('T',' ') + '</div></div>';
+        var data = await apiGet('/api/requests');
+        var reqs = data.requests || [];
+        if (!reqs.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">📦</div>История заказов пуста</div>';
+            return;
+        }
+        var statusMap = {
+            pending: ['Ожидает', 'badge-pending'],
+            processing: ['В обработке', 'badge-processing'],
+            completed: ['Выполнено', 'badge-completed'],
+            cancelled: ['Отменена', 'badge-cancelled']
+        };
+        var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
+        box.innerHTML = reqs.map(function(r) {
+            var st = statusMap[r.status] || [r.status, 'badge-pending'];
+            var typeEmoji = r.type === 'deposit' ? '💰' : '💳';
+            var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+            return '<div class="list-item"><div class="top"><div class="title">' + typeEmoji + ' ' + typeName +
+                ' #' + r.id + '</div><span class="badge ' + st[1] + '">' + st[0] +
+                '</span></div><div class="subtitle">' + r.amount + '$ · ' + (methodMap[r.method] || r.method || '') +
+                '<br>' + (r.created_at || '').slice(0, 16).replace('T', ' ') + '</div></div>';
         }).join('');
-    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
 }
 
 async function loadAdminRequests() {
