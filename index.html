@@ -89,13 +89,13 @@
 
         .drawer-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
         .drawer-item {
-            display: flex; align-items: center; gap: 12px;
-            width: 100%; padding: 14px 20px; border: none; background: transparent;
-            color: var(--text); font-size: 15px; font-weight: 500; cursor: pointer; text-align: left;
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; padding: 11px 18px; border: none; background: transparent;
+            color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left;
         }
         .drawer-item:active { background: rgba(128,128,128,0.12); }
         .drawer-item.active { color: var(--button); background: rgba(46,166,255,0.08); }
-        .drawer-item .di { font-size: 20px; width: 28px; text-align: center; }
+        .drawer-item .di { font-size: 17px; width: 24px; text-align: center; }
 
         .drawer-spacer { height: 20px; flex-shrink: 0; }
 
@@ -670,9 +670,8 @@
             <div style="font-size:18px;font-weight:600;" id="admin-role">—</div>
         </div>
         <div class="btn-stack" style="margin-bottom:16px;">
-            <button class="btn" onclick="loadAdminRequests()">Заявки на рассмотрение</button>
-            <button class="btn btn-secondary" id="admin-staff-btn" style="display:none;" onclick="loadAdminStaff()">Сотрудники</button>
-            <button class="btn btn-secondary" id="admin-add-staff-btn" style="display:none;" onclick="showPage('admin-add-staff')">Добавить сотрудника</button>
+            <button class="btn" id="admin-requests-btn" onclick="loadAdminRequests()">Заявки</button>
+            <button class="btn btn-secondary" id="admin-staff-btn" style="display:none;" onclick="loadAdminStaff()">Управление сотрудниками</button>
         </div>
         <div id="admin-content"></div>
     </div>
@@ -803,7 +802,6 @@ function renderMain() {
     }
     if (userData.role >= 5) {
         document.getElementById('admin-staff-btn').style.display = 'flex';
-        document.getElementById('admin-add-staff-btn').style.display = 'flex';
     }
 }
 
@@ -1213,13 +1211,22 @@ async function loadAdminStaff() {
     try {
         var data = await apiGet('/api/admin/staff');
         var staff = data.staff || [];
-        if (!staff.length) { box.innerHTML = '<div class="empty">Нет сотрудников</div>'; return; }
-        box.innerHTML = staff.map(function(s) {
+        var html = '';
+        if (userData.role >= 5) {
+            html += '<button class="btn" style="margin-bottom:12px;" onclick="showPage(\'admin-add-staff\')">Добавить сотрудника</button>';
+        }
+        if (!staff.length) {
+            html += '<div class="empty">Нет сотрудников</div>';
+            box.innerHTML = html;
+            return;
+        }
+        html += staff.map(function(s) {
             return '<div class="list-item"><div class="top"><div class="title">' +
                 (s.first_name || s.username || s.user_id) +
                 '</div><span class="badge badge-processing">' + s.role_name + '</span></div>' +
                 '<div class="subtitle">ID: ' + s.user_id + ' · Баланс: ' + s.balance + '$</div></div>';
         }).join('');
+        box.innerHTML = html;
     } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
 }
 
