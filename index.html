@@ -293,6 +293,64 @@
             font-weight: 500;
             color: var(--hint);
         }
+
+        .min-hint {
+            color: var(--destructive);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        .field-hint {
+            font-size: 12px;
+            color: var(--hint);
+            margin-top: 6px;
+        }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: none; border: none; color: var(--link);
+            font-size: 15px; font-weight: 500; cursor: pointer;
+            padding: 0; margin-bottom: 14px;
+        }
+        .method-list { gap: 8px; }
+        .method-item {
+            padding: 14px 16px;
+            justify-content: flex-start;
+        }
+        .method-item .title { font-weight: 600; font-size: 15px; }
+        .form-group { margin-bottom: 20px; }
+
+        .profile-header {
+            text-align: center;
+            padding: 24px 0 20px;
+        }
+        .profile-avatar-wrap {
+            width: 88px; height: 88px; border-radius: 50%;
+            margin: 0 auto 14px; overflow: hidden;
+            background: var(--button);
+            position: relative;
+        }
+        .profile-avatar-img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .profile-avatar-fallback {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px; font-weight: 700; color: var(--button-text);
+        }
+        .profile-fullname {
+            font-size: 22px; font-weight: 700; margin-bottom: 4px;
+        }
+        .profile-username {
+            font-size: 14px; color: var(--hint);
+        }
+
+        .user-chip {
+            overflow: hidden;
+            padding: 0;
+        }
+        .user-chip img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -305,7 +363,7 @@
     <div class="topbar-right">
         <button class="lang-btn" onclick="tg.showAlert('Пока доступен только русский язык')">RU</button>
         <div class="balance-chip" onclick="showPage('balance')" id="top-balance">0 $</div>
-        <div class="user-chip" id="top-avatar" onclick="showPage('profile')">?</div>
+        <div class="user-chip" id="top-avatar" onclick="showPage('profile')"><span id="top-avatar-letter">?</span></div>
     </div>
 </div>
 
@@ -482,69 +540,77 @@
 
     <!-- DEPOSIT -->
     <div id="page-deposit" class="page">
-        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← Назад</button>
+        <button class="back-link" onclick="showPage('balance')">← Назад</button>
         <div class="section-title">Пополнение</div>
-        <div class="info-block">Минимальная сумма — <b>1$</b></div>
-        <div class="method-list">
-            <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
-                <div class="icon">🏦</div>
-                <div><div class="title">СБП</div><div class="desc">Перевод на карту</div></div>
-            </div>
-            <div class="method-item" data-method="crypto" onclick="selectMethod(this,'deposit')">
-                <div class="icon">₿</div>
-                <div><div class="title">USDT</div><div class="desc">TRC20</div></div>
-            </div>
-            <div class="method-item" data-method="stars" onclick="selectMethod(this,'deposit')">
-                <div class="icon">⭐</div>
-                <div><div class="title">Telegram Stars</div><div class="desc">Оплата в боте</div></div>
-            </div>
-        </div>
+
+        <div class="min-hint">Минимум 1$</div>
+
         <div class="form-group">
-            <label class="form-label">Сумма ($)</label>
-            <input class="form-input" type="number" id="deposit-amount" placeholder="10" min="1">
+            <label class="form-label">Сумма</label>
+            <input class="form-input" type="number" id="deposit-amount" placeholder="0.00" min="1" step="0.01">
         </div>
+
+        <div class="form-group">
+            <label class="form-label">Способ оплаты</label>
+            <div class="method-list">
+                <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
+                    <div class="title">СБП</div>
+                </div>
+                <div class="method-item" data-method="crypto" onclick="selectMethod(this,'deposit')">
+                    <div class="title">USDT TRC20</div>
+                </div>
+                <div class="method-item" data-method="stars" onclick="selectMethod(this,'deposit')">
+                    <div class="title">Telegram Stars</div>
+                </div>
+            </div>
+        </div>
+
         <div class="form-group">
             <label class="form-label">Комментарий</label>
             <input class="form-input" type="text" id="deposit-comment" placeholder="Необязательно">
         </div>
-        <button class="btn" id="deposit-btn" onclick="startDeposit()">Создать заявку</button>
+
+        <button class="btn" id="deposit-btn" onclick="startDeposit()">Продолжить</button>
     </div>
 
     <!-- DEPOSIT RESULT -->
     <div id="page-deposit-result" class="page">
-        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← К балансу</button>
+        <button class="back-link" onclick="showPage('balance')">← К балансу</button>
         <div class="section-title">Реквизиты</div>
         <div id="deposit-result-content"></div>
     </div>
 
     <!-- WITHDRAW -->
     <div id="page-withdraw" class="page">
-        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← Назад</button>
+        <button class="back-link" onclick="showPage('balance')">← Назад</button>
         <div class="section-title">Вывод</div>
-        <div class="card">
-            <div class="card-title">Доступно</div>
-            <div class="card-value" id="withdraw-balance">0 <small>$</small></div>
-        </div>
-        <div class="info-block">Минимум — <b>5$</b></div>
-        <div class="method-list">
-            <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
-                <div class="icon">💳</div>
-                <div><div class="title">На карту</div><div class="desc">По номеру карты</div></div>
-            </div>
-            <div class="method-item" data-method="crypto" onclick="selectMethod(this,'withdraw')">
-                <div class="icon">₿</div>
-                <div><div class="title">Крипта</div><div class="desc">USDT TRC20</div></div>
-            </div>
-        </div>
+
+        <div class="min-hint">Минимум 5$</div>
+
         <div class="form-group">
-            <label class="form-label">Сумма ($)</label>
-            <input class="form-input" type="number" id="withdraw-amount" placeholder="10" min="1">
+            <label class="form-label">Сумма</label>
+            <input class="form-input" type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01">
+            <div class="field-hint">Доступно: <span id="withdraw-available">0.00</span> $</div>
         </div>
+
         <div class="form-group">
-            <label class="form-label" id="withdraw-recipient-label">Номер карты и инициалы</label>
-            <input class="form-input" type="text" id="withdraw-recipient" placeholder="1234 5678 9012 3456, Иванов И.И.">
+            <label class="form-label">Способ вывода</label>
+            <div class="method-list">
+                <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
+                    <div class="title">СБП / карта</div>
+                </div>
+                <div class="method-item" data-method="crypto" onclick="selectMethod(this,'withdraw')">
+                    <div class="title">USDT TRC20</div>
+                </div>
+            </div>
         </div>
-        <button class="btn" id="withdraw-btn" onclick="startWithdraw()">Создать заявку</button>
+
+        <div class="form-group">
+            <label class="form-label" id="withdraw-recipient-label">Реквизиты</label>
+            <input class="form-input" type="text" id="withdraw-recipient" placeholder="Номер карты, Иванов И.И.">
+        </div>
+
+        <button class="btn" id="withdraw-btn" onclick="startWithdraw()">Вывести</button>
     </div>
 
     <!-- REQUESTS -->
@@ -579,18 +645,19 @@
 
     <!-- PROFILE -->
     <div id="page-profile" class="page">
-        <div class="section-title">Профиль</div>
-        <div class="card">
-            <div class="card-title">Имя</div>
-            <div style="font-size:18px;font-weight:600;" id="profile-name">—</div>
+        <div class="profile-header">
+            <div class="profile-avatar-wrap" id="profile-avatar-wrap">
+                <img id="profile-avatar-img" class="profile-avatar-img" alt="" style="display:none;">
+                <div class="profile-avatar-fallback" id="profile-avatar-fallback">?</div>
+            </div>
+            <div class="profile-fullname" id="profile-name">—</div>
+            <div class="profile-username" id="profile-username"></div>
         </div>
-        <div class="card">
-            <div class="card-title">Роль</div>
-            <div style="font-size:16px;font-weight:600;" id="profile-role">—</div>
+        <div class="list-item">
+            <div class="top"><div class="title">Роль</div><span class="badge badge-processing" id="profile-role">—</span></div>
         </div>
-        <div class="card">
-            <div class="card-title">ID</div>
-            <div style="font-size:16px;font-weight:600;" id="profile-id">—</div>
+        <div class="list-item">
+            <div class="top"><div class="title">ID</div><span style="font-weight:600;color:var(--hint);" id="profile-id">—</span></div>
         </div>
     </div>
 
@@ -672,12 +739,41 @@ async function init() {
 }
 
 function renderMain() {
-    var name = userData.first_name || userData.username || 'User';
-    document.getElementById('top-avatar').textContent = name.charAt(0).toUpperCase();
-    document.getElementById('profile-name').textContent = name;
+    var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
+    var first = tgUser.first_name || userData.first_name || '';
+    var last = tgUser.last_name || userData.last_name || '';
+    var fullName = (first + ' ' + last).trim() || userData.username || 'User';
+    var username = tgUser.username || userData.username || '';
+    var initial = fullName.charAt(0).toUpperCase();
+    var photo = tgUser.photo_url || null;
+
+    // Top bar avatar
+    var topEl = document.getElementById('top-avatar');
+    if (photo) {
+        topEl.innerHTML = '<img src="' + photo + '" alt="">';
+    } else {
+        topEl.innerHTML = '<span id="top-avatar-letter">' + initial + '</span>';
+    }
+
+    // Profile page
+    document.getElementById('profile-name').textContent = fullName;
+    document.getElementById('profile-username').textContent = username ? '@' + username : '';
     document.getElementById('profile-role').textContent = userData.role_name || '—';
     document.getElementById('profile-id').textContent = userData.user_id;
     document.getElementById('admin-role').textContent = userData.role_name || '—';
+
+    var img = document.getElementById('profile-avatar-img');
+    var fallback = document.getElementById('profile-avatar-fallback');
+    if (photo) {
+        img.src = photo;
+        img.style.display = 'block';
+        fallback.style.display = 'none';
+    } else {
+        img.style.display = 'none';
+        fallback.style.display = 'flex';
+        fallback.textContent = initial;
+    }
+
     setBalance(userData.balance);
     if (userData.role >= 2) {
         document.getElementById('drawer-admin').style.display = 'flex';
@@ -692,8 +788,9 @@ function setBalance(bal) {
     var formatted = Number(bal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     var html = formatted + ' <small>$</small>';
     document.getElementById('balance-value').innerHTML = html;
-    document.getElementById('withdraw-balance').innerHTML = html;
     document.getElementById('top-balance').textContent = formatted + ' $';
+    var avail = document.getElementById('withdraw-available');
+    if (avail) avail.textContent = formatted;
 }
 
 function showPage(name) {
@@ -847,11 +944,11 @@ function selectMethod(el, type) {
         var label = document.getElementById('withdraw-recipient-label');
         var input = document.getElementById('withdraw-recipient');
         if (selectedWithdrawMethod === 'card') {
-            label.textContent = 'Номер карты и инициалы';
-            input.placeholder = '1234 5678 9012 3456, Иванов И.И.';
+            label.textContent = 'Реквизиты';
+            input.placeholder = 'Номер карты, Иванов И.И.';
         } else {
-            label.textContent = 'Адрес USDT (TRC20)';
-            input.placeholder = 'TSM4p8JjU2AqC7Xqy8Zf9gH3kL5nP2rV6w';
+            label.textContent = 'Адрес кошелька';
+            input.placeholder = 'Адрес USDT TRC20';
         }
     }
 }
