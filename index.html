@@ -842,17 +842,53 @@
     <!-- ADMIN -->
     <div id="page-admin" class="page">
         <div class="section-title">Панель</div>
-        <div class="card">
+        <div class="card" style="margin-bottom:14px;">
             <div class="card-title">Ваша роль</div>
             <div style="font-size:18px;font-weight:600;" id="admin-role">—</div>
         </div>
-        <div class="btn-stack" style="margin-bottom:16px;">
-            <button class="btn" onclick="loadAdminListings()">Модерация объявлений</button>
-            <button class="btn btn-secondary" id="admin-requests-btn" onclick="loadAdminRequests()">Модерация транзакций</button>
-            <button class="btn btn-secondary" onclick="loadAdminJobs()">Обработка заявок на работу</button>
-            <button class="btn btn-secondary" id="admin-staff-btn" style="display:none;" onclick="loadAdminStaff()">Управление сотрудниками</button>
+        <div class="support-grid" id="admin-tiles">
+            <button class="support-tile" onclick="openAdminSection('listings')">
+                <div class="support-tile-icon">📄</div>
+                <div class="support-tile-title">Модерация объявлений</div>
+            </button>
+            <button class="support-tile" onclick="openAdminSection('transactions')">
+                <div class="support-tile-icon">💳</div>
+                <div class="support-tile-title">Модерация транзакций</div>
+            </button>
+            <button class="support-tile" onclick="openAdminSection('jobs')">
+                <div class="support-tile-icon">💼</div>
+                <div class="support-tile-title">Модерация заявок на работу</div>
+            </button>
+            <button class="support-tile" onclick="openAdminSection('complaints')">
+                <div class="support-tile-icon">⚠️</div>
+                <div class="support-tile-title">Модерация жалоб</div>
+            </button>
+            <button class="support-tile" id="admin-staff-tile" style="display:none;" onclick="openAdminSection('staff')">
+                <div class="support-tile-icon">👥</div>
+                <div class="support-tile-title">Управление сотрудниками</div>
+            </button>
         </div>
+    </div>
+
+    <!-- ADMIN SECTION LIST -->
+    <div id="page-admin-section" class="page">
+        <button class="back-link" onclick="showPage('admin')">← Панель</button>
+        <div class="section-title" id="admin-section-title">—</div>
         <div id="admin-content"></div>
+    </div>
+
+    <!-- ADMIN ITEM DETAIL -->
+    <div id="page-admin-detail" class="page">
+        <button class="back-link" id="admin-detail-back" onclick="showPage('admin-section')">← Назад</button>
+        <div class="section-title" id="admin-detail-title">Детали</div>
+        <div id="admin-detail-content"></div>
+    </div>
+
+    <!-- ADMIN STAFF DETAIL -->
+    <div id="page-admin-staff-detail" class="page">
+        <button class="back-link" onclick="openAdminSection('staff')">← Сотрудники</button>
+        <div class="section-title">Сотрудник</div>
+        <div id="staff-detail-content"></div>
     </div>
 
     <!-- ADD STAFF -->
@@ -879,7 +915,7 @@
 </div>
 
 <script>
-const API_URL = "https://exchange-stavka.waw0.amvera.tech/";
+const API_URL = "https://exchange-xcodbots.waw0.amvera.tech";
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
@@ -980,7 +1016,7 @@ function renderMain() {
         document.getElementById('drawer-admin').style.display = 'flex';
     }
     if (userData.role >= 5) {
-        document.getElementById('admin-staff-btn').style.display = 'flex';
+        document.getElementById('admin-staff-tile').style.display = 'flex';
     }
 }
 
@@ -1413,39 +1449,86 @@ async function toggleFavorite(id, isFav) {
     } catch (e) { tg.showAlert(e.message); }
 }
 
+
+var _adminSection = '';
+var _adminCache = { listings: [], transactions: [], jobs: [], staff: [] };
+
+function openAdminSection(section) {
+    _adminSection = section;
+    var titles = {
+        listings: 'Модерация объявлений',
+        transactions: 'Модерация транзакций',
+        jobs: 'Модерация заявок на работу',
+        complaints: 'Модерация жалоб',
+        staff: 'Управление сотрудниками'
+    };
+    document.getElementById('admin-section-title').textContent = titles[section] || section;
+    showPage('admin-section');
+    if (section === 'listings') loadAdminListings();
+    else if (section === 'transactions') loadAdminRequests();
+    else if (section === 'jobs') loadAdminJobs();
+    else if (section === 'complaints') {
+        document.getElementById('admin-content').innerHTML =
+            '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
+    }
+    else if (section === 'staff') loadAdminStaff();
+}
+
 async function loadAdminListings() {
     var box = document.getElementById('admin-content');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     try {
         var data = await apiGet('/api/admin/listings');
         var items = data.listings || [];
+        _adminCache.listings = items;
         if (!items.length) {
             box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет объявлений на модерации</div>';
             return;
         }
         box.innerHTML = items.map(function(l) {
             var typeLabel = l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар';
-            var extra = '';
-            if (l.listing_type === 'partner') {
-                extra = '<br>Договор: ' + (l.contract_number || '—') + '<br>Аналитика: ' + (l.analytics_consent ? 'да' : 'нет');
-            } else {
-                extra = '<br>Вид: ' + (l.product_type || '—') +
-                    (l.bot_username ? '<br>@' + l.bot_username : '') +
-                    (l.tgstat_url ? '<br>TGStat: ' + l.tgstat_url : '') +
-                    '<br>Цена: ' + l.price + '$';
-            }
-            var approveBtn = l.listing_type === 'partner'
-                ? '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', true)">Одобрить (указать цену)</button>'
-                : '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', false)">Одобрить</button>';
-            return '<div class="list-item"><div class="top"><div class="title">' + (l.title || '').replace(/</g, '&lt;') +
-                ' #' + l.id + '</div></div><div class="subtitle">' + typeLabel + ' · User: ' + l.seller_id +
-                '<br>' + (l.description || '').replace(/</g, '&lt;').slice(0, 120) + extra +
-                '</div><div class="actions">' + approveBtn +
-                '<button class="btn btn-danger" onclick="adminRejectListing(' + l.id + ')">Отклонить</button></div></div>';
+            return '<div class="list-item" style="cursor:pointer;" onclick="openAdminListingDetail(' + l.id + ')">' +
+                '<div class="top"><div class="title">' + (l.title || '').replace(/</g, '&lt;') +
+                ' #' + l.id + '</div></div>' +
+                '<div class="subtitle">' + typeLabel + ' · User: ' + l.seller_id +
+                '<br>' + (l.description || '').replace(/</g, '&lt;').slice(0, 80) + '…</div></div>';
         }).join('');
     } catch (e) {
         box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
     }
+}
+
+function openAdminListingDetail(id) {
+    var l = (_adminCache.listings || []).find(function(x){ return x.id === id; });
+    if (!l) { tg.showAlert('Объявление не найдено'); return; }
+    document.getElementById('admin-detail-title').textContent = 'Объявление #' + id;
+    var typeLabel = l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар';
+    var html = '<div class="info-block">' +
+        '<b>Название:</b> ' + (l.title || '').replace(/</g, '&lt;') + '<br><br>' +
+        '<b>Описание:</b><br>' + (l.description || '').replace(/</g, '&lt;') + '<br><br>' +
+        '<b>Тип:</b> ' + typeLabel + '<br>' +
+        '<b>Продавец ID:</b> ' + l.seller_id + '<br>' +
+        (l.seller_username ? '<b>Username:</b> @' + l.seller_username + '<br>' : '') +
+        (l.seller_name ? '<b>Имя:</b> ' + l.seller_name + '<br>' : '');
+    if (l.listing_type === 'partner') {
+        html += '<b>Договор:</b> ' + (l.contract_number || '—') + '<br>' +
+            '<b>Согласие на аналитику:</b> ' + (l.analytics_consent ? 'да' : 'нет') + '<br>';
+    } else {
+        html += '<b>Вид товара:</b> ' + (l.product_type || '—') + '<br>' +
+            (l.bot_username ? '<b>Бот:</b> @' + l.bot_username + '<br>' : '') +
+            (l.tgstat_url ? '<b>TGStat:</b> ' + l.tgstat_url + '<br>' : '') +
+            '<b>Цена:</b> ' + l.price + '$<br>';
+    }
+    html += '<b>Создано:</b> ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
+    html += '<div class="btn-stack">';
+    if (l.listing_type === 'partner') {
+        html += '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', true)">Одобрить (указать цену)</button>';
+    } else {
+        html += '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', false)">Одобрить</button>';
+    }
+    html += '<button class="btn btn-danger" onclick="adminRejectListing(' + l.id + ')">Отклонить</button></div>';
+    document.getElementById('admin-detail-content').innerHTML = html;
+    showPage('admin-detail');
 }
 
 async function adminApproveListing(id, needPrice) {
@@ -1460,7 +1543,7 @@ async function adminApproveListing(id, needPrice) {
         var body = price ? { price: price } : {};
         await apiPost('/api/admin/listings/' + id + '/approve', body);
         tg.showAlert('Объявление #' + id + ' одобрено');
-        loadAdminListiАngs();
+        openAdminSection('listings');
     } catch (e) { tg.showAlert(e.message); }
 }
 
@@ -1468,40 +1551,8 @@ async function adminRejectListing(id) {
     try {
         await apiPost('/api/admin/listings/' + id + '/reject', {});
         tg.showAlert('Объявление #' + id + ' отклонено');
-        loadAdminListings();
+        openAdminSection('listings');
     } catch (e) { tg.showAlert(e.message); }
-}
-
-
-async function loadOrders() {
-    var box = document.getElementById('orders-list');
-    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    try {
-        var data = await apiGet('/api/requests');
-        var reqs = data.requests || [];
-        if (!reqs.length) {
-            box.innerHTML = '<div class="empty"><div class="icon">📦</div>История заказов пуста</div>';
-            return;
-        }
-        var statusMap = {
-            pending: ['Ожидает', 'badge-pending'],
-            processing: ['В обработке', 'badge-processing'],
-            completed: ['Выполнено', 'badge-completed'],
-            cancelled: ['Отменена', 'badge-cancelled']
-        };
-        var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
-        box.innerHTML = reqs.map(function(r) {
-            var st = statusMap[r.status] || [r.status, 'badge-pending'];
-            var typeEmoji = r.type === 'deposit' ? '💰' : '💳';
-            var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
-            return '<div class="list-item"><div class="top"><div class="title">' + typeEmoji + ' ' + typeName +
-                ' #' + r.id + '</div><span class="badge ' + st[1] + '">' + st[0] +
-                '</span></div><div class="subtitle">' + r.amount + '$ · ' + (methodMap[r.method] || r.method || '') +
-                '<br>' + (r.created_at || '').slice(0, 16).replace('T', ' ') + '</div></div>';
-        }).join('');
-    } catch (e) {
-        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
-    }
 }
 
 async function loadAdminRequests() {
@@ -1510,40 +1561,112 @@ async function loadAdminRequests() {
     try {
         var data = await apiGet('/api/admin/requests');
         var reqs = data.requests || [];
-        if (!reqs.length) { box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на рассмотрении</div>'; return; }
+        _adminCache.transactions = reqs;
+        if (!reqs.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на рассмотрении</div>';
+            return;
+        }
         var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
-        box.innerHTML = '<div style="font-size:14px;color:var(--hint);margin-bottom:10px;">Всего: ' + reqs.length + '</div>' +
-            reqs.map(function(r) {
-                var typeEmoji = r.type === 'deposit' ? '💰' : '💳';
-                var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
-                var extra = '';
-                if (r.recipient) extra += '<br>Реквизиты: ' + r.recipient;
-                if (r.recipient_name) extra += '<br>Имя: ' + r.recipient_name;
-                if (r.comment) extra += '<br>' + r.comment;
-                return '<div class="list-item"><div class="top"><div class="title">' + typeEmoji + ' ' + typeName +
-                    ' #' + r.id + '</div></div><div class="subtitle">User: ' + r.user_id + ' · ' + r.amount +
-                    '$ · ' + (methodMap[r.method]||r.method) + extra + '</div>' +
-                    '<div class="actions">' +
-                    '<button class="btn btn-success" onclick="adminApprove(' + r.id + ')">✅ Одобрить</button>' +
-                    '<button class="btn btn-danger" onclick="adminReject(' + r.id + ')">❌ Отклонить</button>' +
-                    '</div></div>';
-            }).join('');
-    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+        box.innerHTML = reqs.map(function(r) {
+            var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+            return '<div class="list-item" style="cursor:pointer;" onclick="openAdminTxDetail(' + r.id + ')">' +
+                '<div class="top"><div class="title">' + typeName + ' #' + r.id + '</div></div>' +
+                '<div class="subtitle">User: ' + r.user_id + ' · ' + r.amount + '$ · ' +
+                (methodMap[r.method] || r.method || '') + '</div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function openAdminTxDetail(id) {
+    var r = (_adminCache.transactions || []).find(function(x){ return x.id === id; });
+    if (!r) { tg.showAlert('Заявка не найдена'); return; }
+    var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
+    var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+    document.getElementById('admin-detail-title').textContent = typeName + ' #' + id;
+    var html = '<div class="info-block">' +
+        '<b>Тип:</b> ' + typeName + '<br>' +
+        '<b>User ID:</b> ' + r.user_id + '<br>' +
+        '<b>Сумма:</b> ' + r.amount + '$<br>' +
+        '<b>Метод:</b> ' + (methodMap[r.method] || r.method || '—') + '<br>' +
+        (r.recipient ? '<b>Реквизиты:</b> ' + r.recipient + '<br>' : '') +
+        (r.recipient_name ? '<b>Имя:</b> ' + r.recipient_name + '<br>' : '') +
+        (r.comment ? '<b>Комментарий:</b> ' + r.comment + '<br>' : '') +
+        '<b>Статус:</b> ' + r.status + '<br>' +
+        '<b>Создано:</b> ' + (r.created_at || '').slice(0, 16).replace('T', ' ') +
+        '</div>' +
+        '<div class="btn-stack">' +
+        '<button class="btn btn-success" onclick="adminApprove(' + r.id + ')">Одобрить</button>' +
+        '<button class="btn btn-danger" onclick="adminReject(' + r.id + ')">Отклонить</button></div>';
+    document.getElementById('admin-detail-content').innerHTML = html;
+    showPage('admin-detail');
 }
 
 async function adminApprove(id) {
     try {
         await apiPost('/api/admin/approve', { request_id: id });
-        tg.showAlert('✅ Заявка #' + id + ' одобрена');
-        loadAdminRequests();
-    } catch(e) { tg.showAlert(e.message); }
+        tg.showAlert('Заявка #' + id + ' одобрена');
+        openAdminSection('transactions');
+    } catch (e) { tg.showAlert(e.message); }
 }
 async function adminReject(id) {
     try {
         await apiPost('/api/admin/reject', { request_id: id });
-        tg.showAlert('❌ Заявка #' + id + ' отклонена');
-        loadAdminRequests();
-    } catch(e) { tg.showAlert(e.message); }
+        tg.showAlert('Заявка #' + id + ' отклонена');
+        openAdminSection('transactions');
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function loadAdminJobs() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/job-applications');
+        var apps = data.applications || [];
+        _adminCache.jobs = apps;
+        if (!apps.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на работу</div>';
+            return;
+        }
+        box.innerHTML = apps.map(function(a) {
+            return '<div class="list-item" style="cursor:pointer;" onclick="openAdminJobDetail(' + a.id + ')">' +
+                '<div class="top"><div class="title">' + (a.full_name || '').replace(/</g, '&lt;') +
+                ' #' + a.id + '</div></div>' +
+                '<div class="subtitle">Возраст: ' + a.age + ' · ' + (a.employment_label || a.employment) + '</div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function openAdminJobDetail(id) {
+    var a = (_adminCache.jobs || []).find(function(x){ return x.id === id; });
+    if (!a) { tg.showAlert('Заявка не найдена'); return; }
+    document.getElementById('admin-detail-title').textContent = 'Заявка на работу #' + id;
+    var html = '<div class="info-block">' +
+        '<b>ФИО:</b> ' + (a.full_name || '').replace(/</g, '&lt;') + '<br>' +
+        '<b>Возраст:</b> ' + a.age + '<br>' +
+        '<b>Занятость:</b> ' + (a.employment_label || a.employment) + '<br>' +
+        '<b>Username:</b> @' + (a.username || '—') + '<br>' +
+        '<b>Телефон:</b> ' + (a.phone || '—') + '<br>' +
+        '<b>Почта:</b> ' + (a.email || '—') + '<br>' +
+        '<b>TG ID:</b> ' + a.user_id + '<br>' +
+        '<b>Создано:</b> ' + (a.created_at || '').slice(0, 16).replace('T', ' ') +
+        '</div>' +
+        '<div class="btn-stack">' +
+        '<button class="btn btn-success" onclick="setJobStatus(' + a.id + ', \'accepted\')">Принять</button>' +
+        '<button class="btn btn-danger" onclick="setJobStatus(' + a.id + ', \'rejected\')">Отклонить</button></div>';
+    document.getElementById('admin-detail-content').innerHTML = html;
+    showPage('admin-detail');
+}
+
+async function setJobStatus(id, status) {
+    try {
+        await apiPost('/api/admin/job-applications/' + id + '/status', { status: status });
+        tg.showAlert(status === 'accepted' ? 'Заявка принята' : 'Заявка отклонена');
+        openAdminSection('jobs');
+    } catch (e) { tg.showAlert(e.message); }
 }
 
 async function loadAdminStaff() {
@@ -1552,6 +1675,7 @@ async function loadAdminStaff() {
     try {
         var data = await apiGet('/api/admin/staff');
         var staff = data.staff || [];
+        _adminCache.staff = staff;
         var html = '';
         if (userData.role >= 5) {
             html += '<button class="btn" style="margin-bottom:12px;" onclick="showPage(\'admin-add-staff\')">Добавить сотрудника</button>';
@@ -1562,96 +1686,78 @@ async function loadAdminStaff() {
             return;
         }
         html += staff.map(function(s) {
-            return '<div class="list-item"><div class="top"><div class="title">' +
-                (s.first_name || s.username || s.user_id) +
-                '</div><span class="badge badge-processing">' + s.role_name + '</span></div>' +
+            var name = s.username ? ('@' + s.username) : (s.first_name || s.user_id);
+            return '<div class="list-item" style="cursor:pointer;" onclick="openStaffDetail(' + s.user_id + ')">' +
+                '<div class="top"><div class="title">' + name + '</div>' +
+                '<span class="badge badge-processing">' + s.role_name + '</span></div>' +
                 '<div class="subtitle">ID: ' + s.user_id + ' · Баланс: ' + s.balance + '$</div></div>';
         }).join('');
         box.innerHTML = html;
-    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
-}
-
-
-var selectedEmployment = null;
-function selectEmployment(el) {
-    document.querySelectorAll('#job-employment-list .method-item').forEach(function(i){ i.classList.remove('selected'); });
-    el.classList.add('selected');
-    selectedEmployment = el.dataset.emp;
-}
-
-async function submitJobApplication() {
-    var fio = document.getElementById('job-fio').value.trim();
-    var age = parseInt(document.getElementById('job-age').value, 10);
-    var username = document.getElementById('job-username').value.trim();
-    var phone = document.getElementById('job-phone').value.trim();
-    var email = document.getElementById('job-email').value.trim();
-    var btn = document.getElementById('job-submit-btn');
-
-    if (!fio) { tg.showAlert('Укажите ФИО'); return; }
-    if (!age || age < 16) { tg.showAlert('Минимальный возраст — 16 лет'); return; }
-    if (!selectedEmployment) { tg.showAlert('Выберите занятость'); return; }
-    if (!phone) { tg.showAlert('Укажите номер телефона'); return; }
-    if (!email || email.indexOf('@') < 0) { tg.showAlert('Укажите корректную почту'); return; }
-
-    btn.disabled = true; btn.textContent = 'Отправка...';
-    try {
-        await apiPost('/api/job-applications', {
-            full_name: fio,
-            age: age,
-            employment: selectedEmployment,
-            username: username,
-            phone: phone,
-            email: email
-        });
-        tg.showAlert('Анкета отправлена. Мы свяжемся с вами.');
-        document.getElementById('job-fio').value = '';
-        document.getElementById('job-age').value = '';
-        document.getElementById('job-phone').value = '';
-        document.getElementById('job-email').value = '';
-        selectedEmployment = null;
-        document.querySelectorAll('#job-employment-list .method-item').forEach(function(i){ i.classList.remove('selected'); });
-        showPage('collaborate');
-    } catch (e) { tg.showAlert(e.message); }
-    finally { btn.disabled = false; btn.textContent = 'Отправить анкету'; }
-}
-
-async function loadAdminJobs() {
-    var box = document.getElementById('admin-content');
-    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    try {
-        var data = await apiGet('/api/admin/job-applications');
-        var apps = data.applications || [];
-        if (!apps.length) {
-            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на работу</div>';
-            return;
-        }
-        box.innerHTML = apps.map(function(a) {
-            return '<div class="list-item">' +
-                '<div class="top"><div class="title">' + (a.full_name || '').replace(/</g, '&lt;') +
-                ' #' + a.id + '</div><span class="badge badge-pending">На рассмотрении</span></div>' +
-                '<div class="subtitle">' +
-                'Возраст: ' + a.age + '<br>' +
-                'Занятость: ' + (a.employment_label || a.employment) + '<br>' +
-                'Username: @' + (a.username || '—') + '<br>' +
-                'Телефон: ' + (a.phone || '—') + '<br>' +
-                'Почта: ' + (a.email || '—') + '<br>' +
-                'TG ID: ' + a.user_id +
-                '</div>' +
-                '<div class="actions">' +
-                '<button class="btn btn-success" onclick="setJobStatus(' + a.id + ', \'accepted\')">Принять</button>' +
-                '<button class="btn btn-danger" onclick="setJobStatus(' + a.id + ', \'rejected\')">Отклонить</button>' +
-                '</div></div>';
-        }).join('');
     } catch (e) {
         box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
     }
 }
 
-async function setJobStatus(id, status) {
+function openStaffDetail(uid) {
+    if (userData.role < 5) {
+        tg.showAlert('Доступ только для админа и выше');
+        return;
+    }
+    var s = (_adminCache.staff || []).find(function(x){ return x.user_id === uid; });
+    if (!s) { tg.showAlert('Сотрудник не найден'); return; }
+    window._currentStaff = s;
+    var name = s.username ? ('@' + s.username) : (s.first_name || s.user_id);
+    var roles = [
+        { id: 0, name: 'Пользователь' },
+        { id: 1, name: 'Партнер' },
+        { id: 2, name: 'Корпоративный' },
+        { id: 3, name: 'Стажер' },
+        { id: 4, name: 'Модератор' },
+        { id: 5, name: 'Админ' },
+        { id: 6, name: 'Создатель' }
+    ];
+    var roleBtns = roles.filter(function(r){
+        return r.id !== s.role && r.id <= userData.role && (r.id < 6 || userData.role >= 6);
+    }).map(function(r) {
+        return '<button class="btn btn-secondary" style="margin-bottom:6px;" onclick="adminSetStaffRole(' + s.user_id + ', ' + r.id + ')">' + r.name + '</button>';
+    }).join('');
+
+    var html = '<div class="info-block">' +
+        '<b>Имя:</b> ' + (s.first_name || '—') + '<br>' +
+        '<b>Username:</b> ' + (s.username ? '@' + s.username : '—') + '<br>' +
+        '<b>ID:</b> ' + s.user_id + '<br>' +
+        '<b>Роль:</b> ' + s.role_name + '<br>' +
+        '<b>Баланс:</b> ' + s.balance + '$' +
+        '</div>' +
+        '<div class="section-title" style="font-size:16px;">Изменить роль</div>' +
+        (roleBtns || '<div class="info-block">Нет доступных ролей для назначения</div>') +
+        '<div class="section-title" style="font-size:16px;margin-top:16px;">Изменить баланс</div>' +
+        '<div class="form-group"><label class="form-label">Новый баланс ($)</label>' +
+        '<input class="form-input" type="number" id="staff-balance-input" value="' + s.balance + '"></div>' +
+        '<button class="btn" onclick="adminSetStaffBalance(' + s.user_id + ')">Сохранить баланс</button>';
+    document.getElementById('staff-detail-content').innerHTML = html;
+    showPage('admin-staff-detail');
+}
+
+async function adminSetStaffRole(uid, role) {
     try {
-        await apiPost('/api/admin/job-applications/' + id + '/status', { status: status });
-        tg.showAlert(status === 'accepted' ? 'Заявка принята' : 'Заявка отклонена');
-        loadAdminJobs();
+        await apiPost('/api/admin/staff', { user_id: uid, role: role });
+        tg.showAlert('Роль обновлена');
+        var data = await apiGet('/api/admin/staff');
+        _adminCache.staff = data.staff || [];
+        openStaffDetail(uid);
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function adminSetStaffBalance(uid) {
+    var val = parseFloat(document.getElementById('staff-balance-input').value);
+    if (isNaN(val) || val < 0) { tg.showAlert('Некорректная сумма'); return; }
+    try {
+        await apiPost('/api/admin/user/balance', { user_id: uid, balance: val, mode: 'set' });
+        tg.showAlert('Баланс обновлён');
+        var data = await apiGet('/api/admin/staff');
+        _adminCache.staff = data.staff || [];
+        openStaffDetail(uid);
     } catch (e) { tg.showAlert(e.message); }
 }
 
