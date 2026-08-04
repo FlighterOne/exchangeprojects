@@ -393,6 +393,32 @@
             background: var(--button);
             color: var(--button-text);
         }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .support-tile {
+            aspect-ratio: 1;
+            background: var(--secondary-bg);
+            border: none;
+            border-radius: 16px;
+            padding: 16px 12px;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 6px;
+        }
+        .support-tile:active { opacity: 0.8; }
+        .support-tile-icon { font-size: 28px; line-height: 1; }
+        .support-tile-title { font-size: 13px; font-weight: 600; line-height: 1.25; }
+        .support-tile-sub { font-size: 11px; color: var(--hint); line-height: 1.2; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -715,11 +741,84 @@
     <!-- SUPPORT -->
     <div id="page-support" class="page">
         <div class="section-title">Поддержка</div>
-        <div class="info-block">Если есть вопросы — напишите нам:</div>
-        <div class="btn-stack">
-            <button class="btn btn-secondary" onclick="openLink('https://t.me/support_bot')">📢 @support_bot</button>
+        <div class="support-grid">
+            <button class="support-tile" onclick="openLink('https://t.me/xcodmanager')">
+                <div class="support-tile-icon">✈️</div>
+                <div class="support-tile-title">Написать в Telegram</div>
+                <div class="support-tile-sub">@xcodmanager</div>
+            </button>
+            <button class="support-tile" onclick="openEmail('xcodsupport@gmail.com')">
+                <div class="support-tile-icon">✉️</div>
+                <div class="support-tile-title">Написать на почту</div>
+                <div class="support-tile-sub">xcodsupport@gmail.com</div>
+            </button>
+            <button class="support-tile" onclick="showPage('collaborate')">
+                <div class="support-tile-icon">🤝</div>
+                <div class="support-tile-title">Сотрудничать</div>
+                <div class="support-tile-sub">Вакансии</div>
+            </button>
+            <button class="support-tile" onclick="openExternal('https://xcodinfo.ru/faq')">
+                <div class="support-tile-icon">❓</div>
+                <div class="support-tile-title">FAQ</div>
+                <div class="support-tile-sub">Частые вопросы</div>
+            </button>
         </div>
-        <div class="info-block" style="margin-top:16px;">⏱ Ответ обычно в течение 24 часов</div>
+    </div>
+
+    <!-- COLLABORATE -->
+    <div id="page-collaborate" class="page">
+        <button class="back-link" onclick="showPage('support')">← Назад</button>
+        <div class="section-title">Сотрудничать</div>
+        <div class="info-block">
+            <b>Модератор</b><br><br>
+            • Зарплата: <b>25$ / 12 ч</b><br>
+            • Обязательно: <b>3 смены в неделю</b><br><br>
+            <b>Стажировка</b><br><br>
+            • Срок: <b>1 месяц</b><br>
+            • Стажировочная смена: <b>6 ч</b><br>
+            • Оплата за стажировочную смену: <b>10$</b>
+        </div>
+        <div class="btn-stack">
+            <button class="btn" onclick="showPage('job-form')">Составить анкету</button>
+            <button class="btn btn-secondary" onclick="openLink('https://t.me/xcodmanager')">Написать менеджеру</button>
+        </div>
+    </div>
+
+    <!-- JOB APPLICATION FORM -->
+    <div id="page-job-form" class="page">
+        <button class="back-link" onclick="showPage('collaborate')">← Назад</button>
+        <div class="section-title">Анкета</div>
+        <div class="form-group">
+            <label class="form-label">ФИО</label>
+            <input class="form-input" type="text" id="job-fio" placeholder="Иванов Иван Иванович">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Возраст (минимум 16)</label>
+            <input class="form-input" type="number" id="job-age" placeholder="18" min="16">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Занятость</label>
+            <div class="method-list" id="job-employment-list">
+                <div class="method-item" data-emp="school" onclick="selectEmployment(this)"><div class="title">Школьник</div></div>
+                <div class="method-item" data-emp="student" onclick="selectEmployment(this)"><div class="title">Студент</div></div>
+                <div class="method-item" data-emp="working" onclick="selectEmployment(this)"><div class="title">Работаю</div></div>
+                <div class="method-item" data-emp="retired" onclick="selectEmployment(this)"><div class="title">На пенсии</div></div>
+                <div class="method-item" data-emp="searching" onclick="selectEmployment(this)"><div class="title">Окончил обучение, в активных поисках работы</div></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Username</label>
+            <input class="form-input" type="text" id="job-username" placeholder="@username">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Номер телефона</label>
+            <input class="form-input" type="tel" id="job-phone" placeholder="+7...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Почта</label>
+            <input class="form-input" type="email" id="job-email" placeholder="mail@example.com">
+        </div>
+        <button class="btn" id="job-submit-btn" onclick="submitJobApplication()">Отправить анкету</button>
     </div>
 
     <!-- PROFILE -->
@@ -750,6 +849,7 @@
         <div class="btn-stack" style="margin-bottom:16px;">
             <button class="btn" onclick="loadAdminListings()">Модерация объявлений</button>
             <button class="btn btn-secondary" id="admin-requests-btn" onclick="loadAdminRequests()">Модерация транзакций</button>
+            <button class="btn btn-secondary" onclick="loadAdminJobs()">Обработка заявок на работу</button>
             <button class="btn btn-secondary" id="admin-staff-btn" style="display:none;" onclick="loadAdminStaff()">Управление сотрудниками</button>
         </div>
         <div id="admin-content"></div>
@@ -927,6 +1027,14 @@ function showPage(name) {
     if (name === 'balance' || name === 'withdraw') refreshBalance();
     if (name === 'requests') loadRequests();
     if (name === 'admin') { document.getElementById('admin-content').innerHTML = ''; }
+    if (name === 'job-form') {
+        try {
+            var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
+            var un = tgUser.username || (userData && userData.username) || '';
+            var el = document.getElementById('job-username');
+            if (el && !el.value && un) el.value = '@' + un;
+        } catch (e) {}
+    }
     window.scrollTo(0, 0);
 }
 
@@ -1463,7 +1571,100 @@ async function loadAdminStaff() {
     } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
 }
 
+
+var selectedEmployment = null;
+function selectEmployment(el) {
+    document.querySelectorAll('#job-employment-list .method-item').forEach(function(i){ i.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedEmployment = el.dataset.emp;
+}
+
+async function submitJobApplication() {
+    var fio = document.getElementById('job-fio').value.trim();
+    var age = parseInt(document.getElementById('job-age').value, 10);
+    var username = document.getElementById('job-username').value.trim();
+    var phone = document.getElementById('job-phone').value.trim();
+    var email = document.getElementById('job-email').value.trim();
+    var btn = document.getElementById('job-submit-btn');
+
+    if (!fio) { tg.showAlert('Укажите ФИО'); return; }
+    if (!age || age < 16) { tg.showAlert('Минимальный возраст — 16 лет'); return; }
+    if (!selectedEmployment) { tg.showAlert('Выберите занятость'); return; }
+    if (!phone) { tg.showAlert('Укажите номер телефона'); return; }
+    if (!email || email.indexOf('@') < 0) { tg.showAlert('Укажите корректную почту'); return; }
+
+    btn.disabled = true; btn.textContent = 'Отправка...';
+    try {
+        await apiPost('/api/job-applications', {
+            full_name: fio,
+            age: age,
+            employment: selectedEmployment,
+            username: username,
+            phone: phone,
+            email: email
+        });
+        tg.showAlert('Анкета отправлена. Мы свяжемся с вами.');
+        document.getElementById('job-fio').value = '';
+        document.getElementById('job-age').value = '';
+        document.getElementById('job-phone').value = '';
+        document.getElementById('job-email').value = '';
+        selectedEmployment = null;
+        document.querySelectorAll('#job-employment-list .method-item').forEach(function(i){ i.classList.remove('selected'); });
+        showPage('collaborate');
+    } catch (e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Отправить анкету'; }
+}
+
+async function loadAdminJobs() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/job-applications');
+        var apps = data.applications || [];
+        if (!apps.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на работу</div>';
+            return;
+        }
+        box.innerHTML = apps.map(function(a) {
+            return '<div class="list-item">' +
+                '<div class="top"><div class="title">' + (a.full_name || '').replace(/</g, '&lt;') +
+                ' #' + a.id + '</div><span class="badge badge-pending">На рассмотрении</span></div>' +
+                '<div class="subtitle">' +
+                'Возраст: ' + a.age + '<br>' +
+                'Занятость: ' + (a.employment_label || a.employment) + '<br>' +
+                'Username: @' + (a.username || '—') + '<br>' +
+                'Телефон: ' + (a.phone || '—') + '<br>' +
+                'Почта: ' + (a.email || '—') + '<br>' +
+                'TG ID: ' + a.user_id +
+                '</div>' +
+                '<div class="actions">' +
+                '<button class="btn btn-success" onclick="setJobStatus(' + a.id + ', \'accepted\')">Принять</button>' +
+                '<button class="btn btn-danger" onclick="setJobStatus(' + a.id + ', \'rejected\')">Отклонить</button>' +
+                '</div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+async function setJobStatus(id, status) {
+    try {
+        await apiPost('/api/admin/job-applications/' + id + '/status', { status: status });
+        tg.showAlert(status === 'accepted' ? 'Заявка принята' : 'Заявка отклонена');
+        loadAdminJobs();
+    } catch (e) { tg.showAlert(e.message); }
+}
+
 function openLink(url) { tg.openTelegramLink(url); }
+function openEmail(email) {
+    var mailto = 'mailto:' + email;
+    if (tg.openLink) tg.openLink(mailto);
+    else window.location.href = mailto;
+}
+function openExternal(url) {
+    if (tg.openLink) tg.openLink(url);
+    else window.open(url, '_blank');
+}
 
 init();
 </script>
