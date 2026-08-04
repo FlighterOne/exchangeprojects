@@ -419,6 +419,34 @@
         .support-tile-icon { font-size: 28px; line-height: 1; }
         .support-tile-title { font-size: 13px; font-weight: 600; line-height: 1.25; }
         .support-tile-sub { font-size: 11px; color: var(--hint); line-height: 1.2; word-break: break-all; }
+
+        .lang-tag {
+            font-size: 11px; font-weight: 500; color: var(--hint);
+            margin-left: 6px;
+        }
+        .lang-btn, .theme-btn { text-align: left; }
+        .theme-btn.active {
+            background: var(--button) !important;
+            color: var(--button-text) !important;
+        }
+        html[data-theme="light"] {
+            --bg: #ffffff;
+            --text: #000000;
+            --hint: #8e8e93;
+            --button: #2ea6ff;
+            --button-text: #ffffff;
+            --secondary-bg: #f2f2f7;
+            --link: #2ea6ff;
+        }
+        html[data-theme="dark"] {
+            --bg: #0f0f0f;
+            --text: #ffffff;
+            --hint: #8a8a8a;
+            --button: #2ea6ff;
+            --button-text: #ffffff;
+            --secondary-bg: #1c1c1c;
+            --link: #2ea6ff;
+        }
     </style>
 </head>
 <body>
@@ -728,13 +756,40 @@
     <!-- SETTINGS -->
     <div id="page-settings" class="page">
         <div class="section-title">Настройки</div>
-        <div class="list-item">
-            <div class="top"><div class="title">Язык</div><span class="badge badge-processing">RU</span></div>
-            <div class="subtitle">Пока доступен только русский</div>
+        <div class="support-grid">
+            <button class="support-tile" onclick="showPage('settings-lang')">
+                <div class="support-tile-icon">🌐</div>
+                <div class="support-tile-title">Язык</div>
+                <div class="support-tile-sub" id="settings-lang-label">Русский</div>
+            </button>
+            <button class="support-tile" onclick="showPage('settings-theme')">
+                <div class="support-tile-icon">🎨</div>
+                <div class="support-tile-title">Тема</div>
+                <div class="support-tile-sub" id="settings-theme-label">Как в Telegram</div>
+            </button>
         </div>
-        <div class="list-item">
-            <div class="top"><div class="title">Тема</div></div>
-            <div class="subtitle">Следует теме Telegram</div>
+    </div>
+
+    <div id="page-settings-lang" class="page">
+        <button class="back-link" onclick="showPage('settings')">← Назад</button>
+        <div class="section-title">Язык</div>
+        <div class="btn-stack" id="lang-list">
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('ru')">Русский <span class="lang-tag">оригинал</span></button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('en')">English <span class="lang-tag">original</span></button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('de')">Deutsch</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('fr')">Français</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('es')">Español</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('zh')">中文</button>
+        </div>
+    </div>
+
+    <div id="page-settings-theme" class="page">
+        <button class="back-link" onclick="showPage('settings')">← Назад</button>
+        <div class="section-title">Тема</div>
+        <div class="btn-stack">
+            <button class="btn btn-secondary theme-btn" id="theme-auto" onclick="setAppTheme('auto')">Как в Telegram</button>
+            <button class="btn btn-secondary theme-btn" id="theme-light" onclick="setAppTheme('light')">Светлая</button>
+            <button class="btn btn-secondary theme-btn" id="theme-dark" onclick="setAppTheme('dark')">Тёмная</button>
         </div>
     </div>
 
@@ -855,7 +910,7 @@
                 <div class="support-tile-icon">💳</div>
                 <div class="support-tile-title">Модерация транзакций</div>
             </button>
-            <button class="support-tile" onclick="openAdminSection('jobs')">
+            <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
                 <div class="support-tile-icon">💼</div>
                 <div class="support-tile-title">Модерация заявок на работу</div>
             </button>
@@ -915,7 +970,7 @@
 </div>
 
 <script>
-const API_URL = "https://exchange-stavka.waw0.amvera.tech/";
+const API_URL = "https://exchange-xcodbots.waw0.amvera.tech";
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
@@ -959,6 +1014,8 @@ async function apiPost(path, body) {
 }
 
 async function init() {
+    applyThemeFromStorage();
+
     try {
         if (!tg.initData) {
             document.getElementById('page-loading').innerHTML =
@@ -1017,6 +1074,8 @@ function renderMain() {
     }
     if (userData.role >= 5) {
         document.getElementById('admin-staff-tile').style.display = 'flex';
+        var jt = document.getElementById('admin-jobs-tile');
+        if (jt) jt.style.display = 'flex';
     }
 }
 
@@ -1466,7 +1525,10 @@ function openAdminSection(section) {
     showPage('admin-section');
     if (section === 'listings') loadAdminListings();
     else if (section === 'transactions') loadAdminRequests();
-    else if (section === 'jobs') loadAdminJobs();
+    else if (section === 'jobs') {
+        if (userData.role < 5) { tg.showAlert('Доступ только для админа и выше'); showPage('admin'); return; }
+        loadAdminJobs();
+    }
     else if (section === 'complaints') {
         document.getElementById('admin-content').innerHTML =
             '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
@@ -1759,6 +1821,45 @@ async function adminSetStaffBalance(uid) {
         _adminCache.staff = data.staff || [];
         openStaffDetail(uid);
     } catch (e) { tg.showAlert(e.message); }
+}
+
+
+function pickLanguage(code) {
+    tg.showAlert('Пока в разработке');
+}
+
+function applyThemeFromStorage() {
+    var theme = localStorage.getItem('xcod_theme') || 'auto';
+    setAppTheme(theme, true);
+}
+
+function setAppTheme(theme, silent) {
+    localStorage.setItem('xcod_theme', theme);
+    var root = document.documentElement;
+    if (theme === 'light') {
+        root.setAttribute('data-theme', 'light');
+        try { tg.setHeaderColor && tg.setHeaderColor('#ffffff'); } catch(e){}
+        try { tg.setBackgroundColor && tg.setBackgroundColor('#ffffff'); } catch(e){}
+    } else if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        try { tg.setHeaderColor && tg.setHeaderColor('#0f0f0f'); } catch(e){}
+        try { tg.setBackgroundColor && tg.setBackgroundColor('#0f0f0f'); } catch(e){}
+    } else {
+        root.removeAttribute('data-theme');
+        try {
+            if (tg.themeParams && tg.themeParams.bg_color) {
+                tg.setHeaderColor && tg.setHeaderColor(tg.themeParams.bg_color);
+                tg.setBackgroundColor && tg.setBackgroundColor(tg.themeParams.bg_color);
+            }
+        } catch(e){}
+    }
+    var labels = { auto: 'Как в Telegram', light: 'Светлая', dark: 'Тёмная' };
+    var el = document.getElementById('settings-theme-label');
+    if (el) el.textContent = labels[theme] || labels.auto;
+    document.querySelectorAll('.theme-btn').forEach(function(b){ b.classList.remove('active'); });
+    var btn = document.getElementById('theme-' + theme);
+    if (btn) btn.classList.add('active');
+    if (!silent) tg.HapticFeedback && tg.HapticFeedback.selectionChanged && tg.HapticFeedback.selectionChanged();
 }
 
 function openLink(url) { tg.openTelegramLink(url); }
