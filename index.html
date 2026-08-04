@@ -447,6 +447,23 @@
             --secondary-bg: #1c1c1c;
             --link: #2ea6ff;
         }
+
+        .flag-img {
+            width: 22px;
+            height: 16px;
+            object-fit: cover;
+            border-radius: 2px;
+            vertical-align: -2px;
+            margin-right: 6px;
+            display: inline-block;
+            box-shadow: 0 0 0 1px rgba(128,128,128,0.25);
+        }
+        .flag-img.sm {
+            width: 18px;
+            height: 13px;
+            margin-right: 0;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -457,7 +474,7 @@
         <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
     </div>
     <div class="topbar-right">
-        <button class="lang-btn" onclick="showPage('settings-lang')">🇷🇺</button>
+        <button class="lang-btn" onclick="showPage('settings-lang')"><img class="flag-img sm" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"></button>
         <div class="balance-chip" onclick="showPage('balance')" id="top-balance">0 $</div>
         <div class="user-chip" id="top-avatar" onclick="showPage('profile')"><span id="top-avatar-letter">?</span></div>
     </div>
@@ -760,7 +777,7 @@
             <button class="support-tile" onclick="showPage('settings-lang')">
                 <div class="support-tile-icon">🌐</div>
                 <div class="support-tile-title">Язык</div>
-                <div class="support-tile-sub" id="settings-lang-label">🇷🇺 Русский</div>
+                <div class="support-tile-sub" id="settings-lang-label"><img class="flag-img sm" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"> Русский</div>
             </button>
             <button class="support-tile" onclick="showPage('settings-theme')">
                 <div class="support-tile-icon">🎨</div>
@@ -774,12 +791,12 @@
         <button class="back-link" onclick="showPage('settings')">← Назад</button>
         <div class="section-title">Язык</div>
         <div class="btn-stack" id="lang-list">
-            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('ru')">🇷🇺 Русский <span class="lang-tag">original</span></button>
-            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('en')">🇬🇧 English <span class="lang-tag">original</span></button>
-            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('de')">🇩🇪 Deutsch</button>
-            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('fr')">🇫🇷 Français</button>
-            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('es')">🇪🇸 Español</button>
-            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('zh')">🇨🇳 中文</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('ru')"><img class="flag-img" src="https://flagcdn.com/w40/ru.png" alt="" width="22" height="16"> Русский <span class="lang-tag">original</span></button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('en')"><img class="flag-img" src="https://flagcdn.com/w40/gb.png" alt="" width="22" height="16"> English <span class="lang-tag">original</span></button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('de')"><img class="flag-img" src="https://flagcdn.com/w40/de.png" alt="" width="22" height="16"> Deutsch</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('fr')"><img class="flag-img" src="https://flagcdn.com/w40/fr.png" alt="" width="22" height="16"> Français</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('es')"><img class="flag-img" src="https://flagcdn.com/w40/es.png" alt="" width="22" height="16"> Español</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('zh')"><img class="flag-img" src="https://flagcdn.com/w40/cn.png" alt="" width="22" height="16"> 中文</button>
         </div>
     </div>
 
@@ -902,6 +919,14 @@
             <div style="font-size:18px;font-weight:600;" id="admin-role">—</div>
         </div>
         <div class="support-grid" id="admin-tiles">
+            <button class="support-tile" onclick="openAdminSection('workcenter')">
+                <div class="support-tile-icon">🗓️</div>
+                <div class="support-tile-title">Рабочий центр</div>
+            </button>
+            <button class="support-tile" onclick="openAdminSection('career')">
+                <div class="support-tile-icon">📈</div>
+                <div class="support-tile-title">Трекер должностного роста</div>
+            </button>
             <button class="support-tile" onclick="openAdminSection('listings')">
                 <div class="support-tile-icon">📄</div>
                 <div class="support-tile-title">Модерация объявлений</div>
@@ -1515,6 +1540,8 @@ var _adminCache = { listings: [], transactions: [], jobs: [], staff: [] };
 function openAdminSection(section) {
     _adminSection = section;
     var titles = {
+        workcenter: 'Рабочий центр',
+        career: 'Трекер должностного роста',
         listings: 'Модерация объявлений',
         transactions: 'Модерация транзакций',
         jobs: 'Модерация заявок на работу',
@@ -1523,7 +1550,9 @@ function openAdminSection(section) {
     };
     document.getElementById('admin-section-title').textContent = titles[section] || section;
     showPage('admin-section');
-    if (section === 'listings') loadAdminListings();
+    if (section === 'workcenter') loadWorkCenter();
+    else if (section === 'career') loadCareerTracker();
+    else if (section === 'listings') loadAdminListings();
     else if (section === 'transactions') loadAdminRequests();
     else if (section === 'jobs') {
         if (userData.role < 5) { tg.showAlert('Доступ только для админа и выше'); showPage('admin'); return; }
@@ -1535,6 +1564,62 @@ function openAdminSection(section) {
     }
     else if (section === 'staff') loadAdminStaff();
 }
+
+function loadWorkCenter() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML =
+        '<div class="support-grid">' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">📝</div><div class="support-tile-title">Записаться на смену</div></button>' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">✅</div><div class="support-tile-title">Отработанные смены</div></button>' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">📜</div><div class="support-tile-title">История моих смен</div></button>' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">🗂️</div><div class="support-tile-title">История действий</div></button>' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">🚫</div><div class="support-tile-title">Список блокировок</div></button>' +
+        '</div>';
+}
+
+function loadCareerTracker() {
+    var box = document.getElementById('admin-content');
+    var role = (userData && userData.role) || 0;
+    var roleName = (userData && userData.role_name) || '—';
+    var html = '<div class="info-block"><b>Ваша роль:</b> ' + roleName + '</div>';
+
+    // Стажер (3) -> Модератор (4)
+    var internDone = role >= 4;
+    html += '<div class="list-item">' +
+        '<div class="top"><div class="title">Стажёр → Модератор</div>' +
+        '<span class="badge ' + (internDone ? 'badge-completed' : 'badge-pending') + '">' +
+        (internDone ? 'Выполнено' : 'В процессе') + '</span></div>' +
+        '<div class="subtitle">Нужно: <b>30 дней</b> и <b>12 смен</b></div></div>';
+
+    // Модератор (4) -> Админ (5)
+    var modDone = role >= 5;
+    html += '<div class="list-item">' +
+        '<div class="top"><div class="title">Модератор → Админ</div>' +
+        '<span class="badge ' + (modDone ? 'badge-completed' : 'badge-pending') + '">' +
+        (modDone ? 'Выполнено' : 'В процессе') + '</span></div>' +
+        '<div class="subtitle">Нужно: <b>360 дней</b>, <b>150 смен</b>, рейтинг <b>выше 4.75</b></div></div>';
+
+    // Placeholder progress (until shifts system is live)
+    html += '<div class="info-block" style="margin-top:8px;">Учёт смен и рейтинга подключится вместе с рабочим центром. Пока показаны условия повышения.</div>';
+
+    // Promotion request button - show when role is intern or moderator (eligible track)
+    // Without real shift data, only show message about conditions; when "met" we'd enable
+    // For now: if role is 3 (intern) or 4 (mod) show disabled-style info; if somehow we mark ready, show button
+    if (role === 3 || role === 4) {
+        html += '<button class="btn" style="margin-top:12px;" onclick="requestPromotion()">Подать заявку на повышение</button>';
+        html += '<div class="field-hint" style="margin-top:8px;">Заявка доступна после выполнения условий. Сейчас функция в подготовке — заявка уйдёт на рассмотрение админам.</div>';
+    } else if (role >= 5) {
+        html += '<div class="info-block">Вы уже на уровне админа или выше.</div>';
+    } else {
+        html += '<div class="info-block">Трекер доступен сотрудникам от роли «Стажёр».</div>';
+    }
+    box.innerHTML = html;
+}
+
+function requestPromotion() {
+    tg.showAlert('Заявка на повышение: пока в разработке. Условия будут проверяться автоматически по сменам.');
+}
+
 
 async function loadAdminListings() {
     var box = document.getElementById('admin-content');
