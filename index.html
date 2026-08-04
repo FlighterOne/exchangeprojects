@@ -457,7 +457,7 @@
         <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
     </div>
     <div class="topbar-right">
-        <button class="lang-btn" onclick="tg.showAlert('Пока доступен только русский язык')">RU</button>
+        <button class="lang-btn" onclick="showPage('settings-lang')">🇷🇺</button>
         <div class="balance-chip" onclick="showPage('balance')" id="top-balance">0 $</div>
         <div class="user-chip" id="top-avatar" onclick="showPage('profile')"><span id="top-avatar-letter">?</span></div>
     </div>
@@ -760,7 +760,7 @@
             <button class="support-tile" onclick="showPage('settings-lang')">
                 <div class="support-tile-icon">🌐</div>
                 <div class="support-tile-title">Язык</div>
-                <div class="support-tile-sub" id="settings-lang-label">Русский</div>
+                <div class="support-tile-sub" id="settings-lang-label">🇷🇺 Русский</div>
             </button>
             <button class="support-tile" onclick="showPage('settings-theme')">
                 <div class="support-tile-icon">🎨</div>
@@ -970,7 +970,7 @@
 </div>
 
 <script>
-const API_URL = "https://exchange-xcodbots.waw0.amvera.tech";
+const API_URL = "https://exchange-stavka.waw0.amvera.tech/";
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
