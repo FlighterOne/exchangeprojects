@@ -879,7 +879,7 @@
 </div>
 
 <script>
-const API_URL = "https://exchange-xcodbots.waw0.amvera.tech";
+const API_URL = "https://exchange-stavka.waw0.amvera.tech/";
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
@@ -1460,7 +1460,7 @@ async function adminApproveListing(id, needPrice) {
         var body = price ? { price: price } : {};
         await apiPost('/api/admin/listings/' + id + '/approve', body);
         tg.showAlert('Объявление #' + id + ' одобрено');
-        loadAdminListings();
+        loadAdminListiАngs();
     } catch (e) { tg.showAlert(e.message); }
 }
 
