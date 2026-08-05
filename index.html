@@ -464,6 +464,32 @@
             margin-right: 0;
             vertical-align: middle;
         }
+
+        .rating-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 14px; }
+        .rating-chip {
+            background: var(--secondary-bg); border-radius: 12px; padding: 10px 14px;
+            min-width: 100px; flex: 1;
+        }
+        .rating-chip .rl { font-size: 12px; color: var(--hint); }
+        .rating-chip .rv { font-size: 20px; font-weight: 700; margin-top: 4px; }
+        .seller-link { color: var(--link); font-weight: 500; cursor: pointer; }
+        .seller-link:active { opacity: 0.7; }
+        .pie-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; margin: 12px 0; }
+        .pie-legend { width: 100%; }
+        .pie-legend-item {
+            display: flex; align-items: center; gap: 8px; font-size: 13px;
+            margin-bottom: 6px;
+        }
+        .pie-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+        .seg-toggle {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+        }
+        .seg-toggle button {
+            border: none; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 600;
+            background: var(--secondary-bg); color: var(--text); cursor: pointer;
+        }
+        .seg-toggle button.active { background: var(--button); color: var(--button-text); }
+        .period-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -947,6 +973,10 @@
                 <div class="support-tile-icon">👥</div>
                 <div class="support-tile-title">Управление сотрудниками</div>
             </button>
+            <button class="support-tile" onclick="openAdminSection('analytics')">
+                <div class="support-tile-icon">📊</div>
+                <div class="support-tile-title">Аналитика</div>
+            </button>
         </div>
     </div>
 
@@ -969,6 +999,11 @@
         <button class="back-link" onclick="openAdminSection('staff')">← Сотрудники</button>
         <div class="section-title">Сотрудник</div>
         <div id="staff-detail-content"></div>
+    </div>
+
+    <div id="page-user-profile" class="page">
+        <button class="back-link" id="user-profile-back" onclick="showPage('home')">← Назад</button>
+        <div id="user-profile-content"></div>
     </div>
 
     <!-- ADD STAFF -->
@@ -995,7 +1030,7 @@
 </div>
 
 <script>
-const API_URL = "https://exchange-stavka.waw0.amvera.tech/";
+const API_URL = "https://exchange-stavka.waw0.amvera.tech";
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
@@ -1160,11 +1195,76 @@ function showPage(name) {
 
 
 function formatSeller(l) {
-    if (l.seller_username) return '@' + l.seller_username;
-    var name = ((l.seller_name || '') + ' ' + (l.seller_last_name || '')).trim();
-    if (name) return name;
-    return 'ID ' + l.seller_id;
+    var label;
+    if (l.seller_username) label = '@' + l.seller_username;
+    else {
+        var name = ((l.seller_name || '') + ' ' + (l.seller_last_name || '')).trim();
+        label = name || ('ID ' + l.seller_id);
+    }
+    return label;
 }
+function sellerLinkHtml(l) {
+    var label = formatSeller(l).replace(/</g, '&lt;');
+    var id = l.seller_id || l.user_id;
+    return '<span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + id + ')">' + label + '</span>';
+}
+
+var _profileBack = 'home';
+async function openUserProfile(uid, backPage) {
+    if (backPage) _profileBack = backPage;
+    else if (document.getElementById('page-home').classList.contains('active')) _profileBack = 'home';
+    else if (document.getElementById('page-listing-detail').classList.contains('active')) _profileBack = 'listing-detail';
+    else if (document.getElementById('page-favorites').classList.contains('active')) _profileBack = 'favorites';
+    else if (document.getElementById('page-my-listings').classList.contains('active')) _profileBack = 'my-listings';
+    else if (document.getElementById('page-admin-section').classList.contains('active')) _profileBack = 'admin-section';
+    document.getElementById('user-profile-back').setAttribute('onclick', "showPage('" + _profileBack + "')");
+    var box = document.getElementById('user-profile-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    showPage('user-profile');
+    window._profileUid = uid;
+    window._profileStatus = 'active';
+    await renderUserProfile();
+}
+
+async function renderUserProfile() {
+    var uid = window._profileUid;
+    var status = window._profileStatus || 'active';
+    var box = document.getElementById('user-profile-content');
+    try {
+        var p = await apiGet('/api/users/' + uid + '/profile?status=' + status);
+        var uname = p.username ? ('@' + p.username) : ((p.first_name || '') + ' ' + (p.last_name || '')).trim() || ('ID ' + p.user_id);
+        var html = '<div class="profile-header" style="padding-top:8px;">' +
+            '<div class="profile-fullname">' + uname.replace(/</g,'&lt;') + '</div>' +
+            '<div class="profile-username">ID ' + p.user_id + (p.role_name ? ' · ' + p.role_name : '') + '</div></div>';
+        html += '<div class="rating-row">' +
+            '<div class="rating-chip"><div class="rl">Рейтинг продавца</div><div class="rv">★ ' + Number(p.rating_seller).toFixed(2) + '</div></div>' +
+            '<div class="rating-chip"><div class="rl">Рейтинг покупателя</div><div class="rv">★ ' + Number(p.rating_buyer).toFixed(2) + '</div></div>';
+        if (p.rating_staff != null) {
+            html += '<div class="rating-chip"><div class="rl">Рейтинг сотрудника</div><div class="rv">★ ' + Number(p.rating_staff).toFixed(2) + '</div></div>';
+        }
+        html += '</div>';
+        html += '<div class="seg-toggle">' +
+            '<button class="' + (status==='active'?'active':'') + '" onclick="window._profileStatus=\'active\';renderUserProfile()">Действующие</button>' +
+            '<button class="' + (status==='completed'?'active':'') + '" onclick="window._profileStatus=\'completed\';renderUserProfile()">Завершённые</button>' +
+            '</div>';
+        var items = p.listings || [];
+        if (!items.length) {
+            html += '<div class="empty">Нет объявлений</div>';
+        } else {
+            html += items.map(function(l) {
+                return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                    '<div class="ltitle">' + (l.title||'').replace(/</g,'&lt;') + '</div>' +
+                    '<div class="ldesc">' + (l.description||'').replace(/</g,'&lt;') + '</div>' +
+                    '<div class="meta"><div class="price">' + Number(l.price).toLocaleString('ru-RU') +
+                    ' <small>$</small></div><span class="badge badge-processing">' + (l.status||'') + '</span></div></div>';
+            }).join('');
+        }
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
 
 async function loadListings() {
     var box = document.getElementById('listings-feed');
@@ -1182,7 +1282,7 @@ async function loadListings() {
             var isFav = !!l.is_favorite;
             var priceNum = Number(l.price).toLocaleString('ru-RU');
             return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
-                '<div class="lseller">' + seller + '</div>' +
+                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
                 '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
                 '<div class="ldesc">' + desc + '</div>' +
                 '<div class="meta">' +
@@ -1209,7 +1309,7 @@ async function openListing(id) {
             '</div>' +
             '<div class="section-title" style="font-size:17px;">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
             '<div class="info-block" style="white-space:pre-line;">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
-            '<div class="info-block">Продавец: <b>' + seller + '</b>' +
+            '<div class="info-block">Продавец: ' + sellerLinkHtml(l) +
             (l.bot_username ? '<br>Бот: <b>@' + l.bot_username + '</b>' : '') +
             '<br>Опубликовано: ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
         var isFav = !!l.is_favorite;
@@ -1504,10 +1604,9 @@ async function loadFavorites() {
             return;
         }
         box.innerHTML = items.map(function(l) {
-            var seller = formatSeller(l);
             var priceNum = Number(l.price).toLocaleString('ru-RU');
             return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
-                '<div class="lseller">' + seller + '</div>' +
+                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
                 '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
                 '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
                 '<div class="meta">' +
@@ -1546,7 +1645,8 @@ function openAdminSection(section) {
         transactions: 'Модерация транзакций',
         jobs: 'Модерация заявок на работу',
         complaints: 'Модерация жалоб',
-        staff: 'Управление сотрудниками'
+        staff: 'Управление сотрудниками',
+        analytics: 'Аналитика'
     };
     document.getElementById('admin-section-title').textContent = titles[section] || section;
     showPage('admin-section');
@@ -1563,7 +1663,117 @@ function openAdminSection(section) {
             '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
     }
     else if (section === 'staff') loadAdminStaff();
+    else if (section === 'analytics') loadAnalyticsMenu();
 }
+
+function loadAnalyticsMenu() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML =
+        '<div class="support-grid">' +
+        '<button class="support-tile" onclick="openAnalytics(\'expenses\')"><div class="support-tile-icon">📤</div><div class="support-tile-title">Аналитика расходов</div></button>' +
+        '<button class="support-tile" onclick="openAnalytics(\'income\')"><div class="support-tile-icon">📥</div><div class="support-tile-title">Аналитика доходов</div></button>' +
+        '<button class="support-tile" onclick="openAnalytics(\'listings\')"><div class="support-tile-icon">🥧</div><div class="support-tile-title">Аналитика объявлений</div></button>' +
+        '</div>';
+}
+
+function defaultPeriod() {
+    var to = new Date();
+    var from = new Date();
+    from.setDate(to.getDate() - 30);
+    function fmt(d) {
+        var m = (d.getMonth()+1); m = m < 10 ? '0'+m : m;
+        var day = d.getDate(); day = day < 10 ? '0'+day : day;
+        return d.getFullYear() + '-' + m + '-' + day;
+    }
+    return { from: fmt(from), to: fmt(to) };
+}
+
+async function openAnalytics(kind) {
+    var titles = { expenses: 'Аналитика расходов', income: 'Аналитика доходов', listings: 'Аналитика объявлений' };
+    document.getElementById('admin-section-title').textContent = titles[kind] || 'Аналитика';
+    var p = defaultPeriod();
+    var box = document.getElementById('admin-content');
+    box.innerHTML =
+        '<div class="period-row">' +
+        '<div class="form-group" style="margin:0;"><label class="form-label">С</label><input class="form-input" type="date" id="an-from" value="' + p.from + '"></div>' +
+        '<div class="form-group" style="margin:0;"><label class="form-label">По</label><input class="form-input" type="date" id="an-to" value="' + p.to + '"></div>' +
+        '</div>' +
+        '<button class="btn btn-secondary" style="margin-bottom:12px;" onclick="runAnalytics('' + kind + '')">Показать</button>' +
+        '<div id="analytics-result"><div class="loading"><div class="spinner"></div></div></div>' +
+        '<button class="btn" style="margin-top:14px;" onclick="downloadAnalyticsPdf('' + kind + '')">Скачать отчёт (PDF)</button>';
+    runAnalytics(kind);
+}
+
+async function runAnalytics(kind) {
+    var from = document.getElementById('an-from').value;
+    var to = document.getElementById('an-to').value;
+    var box = document.getElementById('analytics-result');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/analytics/summary?kind=' + encodeURIComponent(kind) + '&from=' + from + '&to=' + to);
+        if (kind === 'listings') {
+            box.innerHTML = renderListingsChart(data.categories || []) +
+                '<div class="info-block" style="margin-top:10px;">Всего объявлений: <b>' + (data.total || 0) + '</b></div>';
+        } else {
+            var label = kind === 'expenses' ? 'Сумма выплат' : 'Сумма пополнений';
+            box.innerHTML =
+                '<div class="wallet-balance" style="padding:20px 0;"><div class="wallet-amount">' +
+                Number(data.total || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) +
+                ' <small>$</small></div></div>' +
+                '<div class="info-block">' + label + ' за период · операций: <b>' + (data.count || 0) + '</b></div>';
+        }
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function renderListingsChart(cats) {
+    if (!cats.length) return '<div class="empty">Нет данных за период</div>';
+    var colors = ['#2ea6ff','#34c759','#ff9500','#ff3b30','#af52de','#5ac8fa','#ffcc00','#8e8e93'];
+    var total = cats.reduce(function(s,c){ return s + c.value; }, 0) || 1;
+    var grad = [];
+    var acc = 0;
+    cats.forEach(function(c, i) {
+        var start = acc / total * 100;
+        acc += c.value;
+        var end = acc / total * 100;
+        grad.push(colors[i % colors.length] + ' ' + start + '% ' + end + '%');
+    });
+    var legend = cats.map(function(c, i) {
+        var pct = Math.round(c.value / total * 100);
+        return '<div class="pie-legend-item"><span class="pie-dot" style="background:' + colors[i % colors.length] +
+            '"></span><span style="flex:1;">' + (c.name || '').replace(/</g,'&lt;') +
+            '</span><b>' + c.value + ' (' + pct + '%)</b></div>';
+    }).join('');
+    return '<div class="pie-wrap">' +
+        '<div style="width:180px;height:180px;border-radius:50%;background:conic-gradient(' + grad.join(',') + ');"></div>' +
+        '<div class="pie-legend">' + legend + '</div></div>';
+}
+
+async function downloadAnalyticsPdf(kind) {
+    var from = document.getElementById('an-from').value;
+    var to = document.getElementById('an-to').value;
+    try {
+        var url = API_URL + '/api/admin/analytics/report.pdf?kind=' + encodeURIComponent(kind) +
+            '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
+        var res = await fetch(url, { headers: { 'X-Telegram-Init-Data': tg.initData } });
+        if (!res.ok) {
+            var err = await res.json().catch(function(){ return {}; });
+            throw new Error(err.error || ('HTTP ' + res.status));
+        }
+        var blob = await res.blob();
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'xcod_' + kind + '_' + from + '_' + to + '.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        if (tg.openLink) {
+            // also try open for telegram
+        }
+    } catch (e) { tg.showAlert(e.message); }
+}
+
 
 function loadWorkCenter() {
     var box = document.getElementById('admin-content');
