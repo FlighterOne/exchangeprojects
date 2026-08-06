@@ -4,7 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>X-Cod Exchange</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+    // Заглушка Telegram до загрузки официального скрипта (не блокирует страницу)
+    window.Telegram = window.Telegram || {};
+    if (!window.Telegram.WebApp) {
+        window.Telegram.WebApp = {
+            initData: '',
+            initDataUnsafe: {},
+            ready: function(){},
+            expand: function(){},
+            close: function(){},
+            themeParams: {},
+            colorScheme: 'dark',
+            setHeaderColor: function(){},
+            setBackgroundColor: function(){},
+            openLink: function(u){ window.open(u,'_blank'); },
+            openTelegramLink: function(u){ window.open(u,'_blank'); },
+            showAlert: function(m){ alert(m); },
+            HapticFeedback: null
+        };
+    }
+    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+    <script>
+    // Аварийный таймер: если за 10 сек init не сменил экран — показать ошибку
+    window.__xcodBoot = Date.now();
+    setTimeout(function() {
+        try {
+            var el = document.getElementById('page-loading');
+            if (!el) return;
+            if (!el.classList.contains('active')) return;
+            // всё ещё loading
+            el.innerHTML = '<div class="empty" style="padding:24px;text-align:center;">' +
+                '<div style="font-size:28px;margin-bottom:8px;">❌</div>' +
+                '<div style="margin-bottom:8px;">Загрузка зависла</div>' +
+                '<div style="font-size:12px;opacity:.7;word-break:break-all;margin-bottom:12px;">' +
+                (window.__xcodLastErr || 'Скрипт не завершил init. Проверьте API / кэш GitHub Pages.') +
+                '</div>' +
+                '<button onclick="location.reload()" style="padding:10px 16px;border:none;border-radius:10px;background:#2ea6ff;color:#fff;font-weight:600;">Повторить</button>' +
+                '<div style="margin-top:10px;font-size:11px;opacity:.5;">v2026-08-06f</div></div>';
+        } catch (e) {}
+    }, 10000);
+    </script>
     <style>
         :root {
             --bg: var(--tg-theme-bg-color, #0f0f0f);
@@ -554,7 +595,12 @@
 
     <!-- LOADING -->
     <div id="page-loading" class="page active">
-        <div class="loading"><div class="spinner"></div>Загрузка...</div>
+        <div class="loading" style="padding-top:30vh;text-align:center;">
+            <div class="spinner"></div>
+            <div style="margin-top:12px;">Загрузка...</div>
+            <div id="load-ver" style="margin-top:10px;font-size:12px;color:#8a8a8a;">v2026-08-06f</div>
+            <noscript><div style="margin-top:16px;color:#ff3b30;">Включите JavaScript</div></noscript>
+        </div>
     </div>
 
     <!-- HOME -->
@@ -1030,11 +1076,39 @@
 </div>
 
 <script>
+window.onerror = function(msg, src, line) {
+    window.__xcodLastErr = String(msg) + ' @' + line;
+    console.error('XCOD', msg, src, line);
+};
+window.addEventListener('unhandledrejection', function(ev) {
+    window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
+});
 const API_URL = "https://exchange-stavka.waw0.amvera.tech";
-const tg = window.Telegram.WebApp;
+const APP_VER = "v2026-08-06f";
+function getTg() {
+    try {
+        if (window.Telegram && Telegram.WebApp) return Telegram.WebApp;
+    } catch (e) {}
+    return {
+        initData: "",
+        initDataUnsafe: {},
+        ready: function(){},
+        expand: function(){},
+        close: function(){},
+        themeParams: {},
+        colorScheme: "dark",
+        setHeaderColor: function(){},
+        setBackgroundColor: function(){},
+        openLink: function(u){ window.open(u, "_blank"); },
+        openTelegramLink: function(u){ window.open(u, "_blank"); },
+        showAlert: function(m){ alert(m); },
+        HapticFeedback: null
+    };
+}
+var tg = getTg();
 tg.ready();
 tg.expand();
-try { tg.setHeaderColor('secondary_bg_color'); tg.setBackgroundColor('bg_color'); } catch(e){}
+try { tg = getTg(); tg.ready && tg.ready(); tg.setHeaderColor && tg.setHeaderColor('secondary_bg_color'); tg.setBackgroundColor && tg.setBackgroundColor('bg_color'); } catch(e){}
 
 let userData = null;
 let selectedDepositMethod = 'card';
@@ -1056,54 +1130,126 @@ function navTo(page) {
     });
 }
 
+function withTimeout(promise, ms, msg) {
+    return new Promise(function(resolve, reject) {
+        var done = false;
+        var timer = setTimeout(function() {
+            if (done) return;
+            done = true;
+            reject(new Error(msg || 'Таймаут'));
+        }, ms);
+        promise.then(function(v) {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            resolve(v);
+        }, function(e) {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            reject(e);
+        });
+    });
+}
+
 function apiFetch(path, options) {
     options = options || {};
-    var ctrl = new AbortController();
-    var ms = options.timeout || 15000;
-    var timer = setTimeout(function(){ ctrl.abort(); }, ms);
-    var headers = Object.assign({ 'X-Telegram-Init-Data': tg.initData || '' }, options.headers || {});
-    return fetch(API_URL + path, Object.assign({}, options, { headers: headers, signal: ctrl.signal }))
-        .then(function(res) {
-            return res.json().catch(function(){ return {}; }).then(function(data) {
-                if (!res.ok) throw new Error(data.error || ('Ошибка сервера HTTP ' + res.status));
-                return data;
-            });
-        })
-        .catch(function(e) {
-            if (e && e.name === 'AbortError') throw new Error('Сервер не отвечает (таймаут). Проверьте Amvera.');
-            if (e && e.message && e.message.indexOf('Failed to fetch') >= 0)
-                throw new Error('Нет связи с API. Проверьте URL и что Amvera онлайн.');
-            throw e;
-        })
-        .finally(function(){ clearTimeout(timer); });
+    var ms = options.timeout || 10000;
+    var initData = '';
+    try { initData = (getTg() && getTg().initData) || (tg && tg.initData) || ''; } catch (e) {}
+
+    var sep = path.indexOf('?') >= 0 ? '&' : '?';
+    var url = API_URL + path + (initData ? (sep + 'initData=' + encodeURIComponent(initData)) : '');
+
+    var headers = { 'Accept': 'application/json' };
+    if (initData) headers['X-Telegram-Init-Data'] = initData;
+    if (options.headers) {
+        for (var k in options.headers) headers[k] = options.headers[k];
+    }
+
+    var fetchOpts = { method: options.method || 'GET', headers: headers };
+    if (options.body) fetchOpts.body = options.body;
+
+    var p = fetch(url, fetchOpts).then(function(res) {
+        return res.text().then(function(text) {
+            var data = {};
+            try { data = text ? JSON.parse(text) : {}; } catch (e) {
+                throw new Error('Не JSON (HTTP ' + res.status + ')');
+            }
+            if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+            return data;
+        });
+    }).catch(function(e) {
+        if (e && e.message && String(e.message).indexOf('Failed to fetch') >= 0) {
+            throw new Error('Нет связи с API');
+        }
+        throw e;
+    });
+    return withTimeout(p, ms, 'Таймаут ' + (ms/1000) + 'с');
 }
 async function apiGet(path) {
     return apiFetch(path, { method: 'GET' });
 }
 async function apiPost(path, body) {
+    var payload = body || {};
+    try {
+        if (!payload.initData && tg && tg.initData) payload.initData = tg.initData;
+    } catch (e) {}
     return apiFetch(path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body || {})
+        body: JSON.stringify(payload)
     });
 }
 
 async function init() {
-    applyThemeFromStorage();
-
+    var box = document.getElementById('page-loading');
+    function setLoad(msg) {
+        try {
+            var v = document.getElementById('load-ver');
+            if (v) v.textContent = 'v2026-08-06f · ' + msg;
+        } catch (e) {}
+    }
+    try { applyThemeFromStorage(); } catch (e) {}
     try {
-        if (!tg.initData) {
-            document.getElementById('page-loading').innerHTML =
-                '<div class="empty"><div class="icon">⚠️</div>Откройте через Telegram</div>';
+        setLoad('Telegram...');
+        if (!window.Telegram || !Telegram.WebApp) {
+            box.innerHTML = '<div class="empty"><div class="icon">⚠️</div>Нет Telegram.WebApp</div>';
             return;
         }
+        var tgLocal = Telegram.WebApp;
+        try { tgLocal.ready(); tgLocal.expand(); } catch (e) {}
+        if (!tgLocal.initData) {
+            box.innerHTML = '<div class="empty"><div class="icon">⚠️</div>Откройте через кнопку бота в Telegram<br><small>initData пустой</small></div>';
+            return;
+        }
+        setLoad('API health...');
+        try {
+            await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
+        } catch (he) {
+            window.__xcodLastErr = he.message;
+            box.innerHTML = '<div class="empty"><div class="icon">❌</div>API недоступен<br><small>' +
+                API_URL + '</small><br><small>' + he.message +
+                '</small><br><button class="btn" style="margin-top:16px;" onclick="location.reload()">Повторить</button></div>';
+            return;
+        }
+        setLoad('Пользователь...');
         userData = await apiGet('/api/user');
-        renderMain();
+        setLoad('Интерфейс...');
+        try { renderMain(); } catch (re) {
+            window.__xcodLastErr = re.message;
+            box.innerHTML = '<div class="empty"><div class="icon">❌</div>Ошибка UI: ' + re.message + '</div>';
+            return;
+        }
         showPage('home');
+        window.__xcodBootOk = true;
     } catch (e) {
-        document.getElementById('page-loading').innerHTML =
-            '<div class="empty"><div class="icon">❌</div>' + e.message +
-            '<br><button class="btn" style="margin-top:16px;" onclick="location.reload()">Повторить</button></div>';
+        window.__xcodLastErr = (e && e.message) ? e.message : String(e);
+        box.innerHTML =
+            '<div class="empty"><div class="icon">❌</div>' + window.__xcodLastErr +
+            '<br><small style="word-break:break-all;">' + API_URL + '</small>' +
+            '<br><button class="btn" style="margin-top:16px;" onclick="location.reload()">Повторить</button>' +
+            '<div style="margin-top:8px;font-size:11px;opacity:.5;">v2026-08-06f</div></div>';
     }
 }
 
@@ -1708,14 +1854,33 @@ async function openAnalytics(kind) {
     document.getElementById('admin-section-title').textContent = titles[kind] || 'Аналитика';
     var p = defaultPeriod();
     var box = document.getElementById('admin-content');
-    box.innerHTML =
-        '<div class="period-row">' +
-        '<div class="form-group" style="margin:0;"><label class="form-label">С</label><input class="form-input" type="date" id="an-from" value="' + p.from + '"></div>' +
-        '<div class="form-group" style="margin:0;"><label class="form-label">По</label><input class="form-input" type="date" id="an-to" value="' + p.to + '"></div>' +
-        '</div>' +
-        '<button class="btn btn-secondary" style="margin-bottom:12px;" onclick="runAnalytics('' + kind + '')">Показать</button>' +
-        '<div id="analytics-result"><div class="loading"><div class="spinner"></div></div></div>' +
-        '<button class="btn" style="margin-top:14px;" onclick="downloadAnalyticsPdf('' + kind + '')">Скачать отчёт (PDF)</button>';
+    box.innerHTML = '';
+
+    var period = document.createElement('div');
+    period.className = 'period-row';
+    period.innerHTML = '<div class="form-group" style="margin:0;"><label class="form-label">С</label><input class="form-input" type="date" id="an-from" value="' + p.from + '"></div>' +
+        '<div class="form-group" style="margin:0;"><label class="form-label">По</label><input class="form-input" type="date" id="an-to" value="' + p.to + '"></div>';
+    box.appendChild(period);
+
+    var btnShow = document.createElement('button');
+    btnShow.className = 'btn btn-secondary';
+    btnShow.style.marginBottom = '12px';
+    btnShow.textContent = 'Показать';
+    btnShow.onclick = function() { runAnalytics(kind); };
+    box.appendChild(btnShow);
+
+    var result = document.createElement('div');
+    result.id = 'analytics-result';
+    result.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    box.appendChild(result);
+
+    var btnPdf = document.createElement('button');
+    btnPdf.className = 'btn';
+    btnPdf.style.marginTop = '14px';
+    btnPdf.textContent = 'Скачать отчёт (PDF)';
+    btnPdf.onclick = function() { downloadAnalyticsPdf(kind); };
+    box.appendChild(btnPdf);
+
     runAnalytics(kind);
 }
 
@@ -2183,7 +2348,27 @@ function openExternal(url) {
     else window.open(url, '_blank');
 }
 
-init();
+(function boot() {
+    function start() {
+        try {
+            // если официальный скрипт уже подменил WebApp — берём его
+            tg = getTg();
+            if (tg.ready) tg.ready();
+            if (tg.expand) tg.expand();
+        } catch (e) {}
+        init();
+    }
+    // стартуем сразу (есть заглушка), через 300мс ещё раз если пришёл реальный WebApp
+    start();
+    setTimeout(function() {
+        try {
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+                tg = Telegram.WebApp;
+                if (!window.__xcodBootOk) start();
+            }
+        } catch (e) {}
+    }, 400);
+})();
 </script>
 </body>
 </html>
