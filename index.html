@@ -1056,21 +1056,36 @@ function navTo(page) {
     });
 }
 
+function apiFetch(path, options) {
+    options = options || {};
+    var ctrl = new AbortController();
+    var ms = options.timeout || 15000;
+    var timer = setTimeout(function(){ ctrl.abort(); }, ms);
+    var headers = Object.assign({ 'X-Telegram-Init-Data': tg.initData || '' }, options.headers || {});
+    return fetch(API_URL + path, Object.assign({}, options, { headers: headers, signal: ctrl.signal }))
+        .then(function(res) {
+            return res.json().catch(function(){ return {}; }).then(function(data) {
+                if (!res.ok) throw new Error(data.error || ('Ошибка сервера HTTP ' + res.status));
+                return data;
+            });
+        })
+        .catch(function(e) {
+            if (e && e.name === 'AbortError') throw new Error('Сервер не отвечает (таймаут). Проверьте Amvera.');
+            if (e && e.message && e.message.indexOf('Failed to fetch') >= 0)
+                throw new Error('Нет связи с API. Проверьте URL и что Amvera онлайн.');
+            throw e;
+        })
+        .finally(function(){ clearTimeout(timer); });
+}
 async function apiGet(path) {
-    var res = await fetch(API_URL + path, { headers: { 'X-Telegram-Init-Data': tg.initData } });
-    var data = await res.json().catch(function(){ return {}; });
-    if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-    return data;
+    return apiFetch(path, { method: 'GET' });
 }
 async function apiPost(path, body) {
-    var res = await fetch(API_URL + path, {
+    return apiFetch(path, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
-        body: JSON.stringify(body)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {})
     });
-    var data = await res.json().catch(function(){ return {}; });
-    if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-    return data;
 }
 
 async function init() {
