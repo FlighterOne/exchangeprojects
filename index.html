@@ -1,0 +1,2419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>X-Cod Exchange</title>
+    <script>
+    // Заглушка Telegram до загрузки официального скрипта (не блокирует страницу)
+    window.Telegram = window.Telegram || {};
+    if (!window.Telegram.WebApp) {
+        window.Telegram.WebApp = {
+            initData: '',
+            initDataUnsafe: {},
+            ready: function(){},
+            expand: function(){},
+            close: function(){},
+            themeParams: {},
+            colorScheme: 'dark',
+            setHeaderColor: function(){},
+            setBackgroundColor: function(){},
+            openLink: function(u){ window.open(u,'_blank'); },
+            openTelegramLink: function(u){ window.open(u,'_blank'); },
+            showAlert: function(m){ alert(m); },
+            HapticFeedback: null
+        };
+    }
+    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+    <script>
+    // Аварийный таймер: если за 10 сек init не сменил экран — показать ошибку
+    window.__xcodBoot = Date.now();
+    setTimeout(function() {
+        try {
+            var el = document.getElementById('page-loading');
+            if (!el) return;
+            if (!el.classList.contains('active')) return;
+            // всё ещё loading
+            el.innerHTML = '<div class="empty" style="padding:24px;text-align:center;">' +
+                '<div style="font-size:28px;margin-bottom:8px;">❌</div>' +
+                '<div style="margin-bottom:8px;">Загрузка зависла</div>' +
+                '<div style="font-size:12px;opacity:.7;word-break:break-all;margin-bottom:12px;">' +
+                (window.__xcodLastErr || 'Скрипт не завершил init. Проверьте API / кэш GitHub Pages.') +
+                '</div>' +
+                '<button onclick="location.reload()" style="padding:10px 16px;border:none;border-radius:10px;background:#2ea6ff;color:#fff;font-weight:600;">Повторить</button>' +
+                '<div style="margin-top:10px;font-size:11px;opacity:.5;">v2026-08-06g</div></div>';
+        } catch (e) {}
+    }, 10000);
+    </script>
+    <style>
+        :root {
+            --bg: var(--tg-theme-bg-color, #0f0f0f);
+            --text: var(--tg-theme-text-color, #ffffff);
+            --hint: var(--tg-theme-hint-color, #8a8a8a);
+            --button: var(--tg-theme-button-color, #2ea6ff);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #1c1c1c);
+            --link: var(--tg-theme-link-color, #2ea6ff);
+            --destructive: #ff3b30;
+            --success: #34c759;
+            --warning: #ff9500;
+            --header-h: 52px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg); color: var(--text); min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: var(--header-h);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 12px;
+            background: var(--bg);
+            border-bottom: 1px solid rgba(128,128,128,0.15);
+        }
+        .topbar-left { display: flex; align-items: center; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .icon-btn {
+            width: 40px; height: 40px; border: none; background: transparent;
+            color: var(--text); font-size: 22px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 10px;
+        }
+        .icon-btn:active { background: var(--secondary-bg); }
+
+        .lang-btn {
+            height: 32px; padding: 0 10px; border-radius: 8px;
+            border: 1px solid rgba(128,128,128,0.3); background: var(--secondary-bg);
+            color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        .balance-chip {
+            height: 32px; padding: 0 12px; border-radius: 16px;
+            background: var(--secondary-bg); color: var(--text);
+            font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px;
+            cursor: pointer;
+        }
+        .user-chip {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--button); color: var(--button-text);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 700; cursor: pointer;
+        }
+
+        /* ===== DRAWER ===== */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        }
+        .overlay.open { opacity: 1; pointer-events: auto; }
+
+        .drawer {
+            position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 80vw;
+            background: var(--secondary-bg); z-index: 210;
+            transform: translateX(-100%); transition: transform 0.28s ease;
+            display: flex; flex-direction: column;
+            padding-top: env(safe-area-inset-top, 0);
+        }
+        .drawer.open { transform: translateX(0); }
+
+        .drawer-header {
+            padding: 20px 16px 16px;
+            border-bottom: 1px solid rgba(128,128,128,0.15);
+        }
+        .drawer-header .title { font-size: 18px; font-weight: 700; }
+        .drawer-header .sub { font-size: 12px; color: var(--hint); margin-top: 2px; }
+
+        .drawer-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .drawer-item {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; padding: 11px 18px; border: none; background: transparent;
+            color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left;
+        }
+        .drawer-item:active { background: rgba(128,128,128,0.12); }
+        .drawer-item.active { color: var(--button); background: rgba(46,166,255,0.08); }
+        .drawer-item .di { font-size: 17px; width: 24px; text-align: center; }
+
+        .drawer-spacer { height: 20px; flex-shrink: 0; }
+
+        .drawer-bottom {
+            border-top: 1px solid rgba(128,128,128,0.15);
+            margin-top: 8px;
+            padding: 12px 0 calc(16px + env(safe-area-inset-bottom, 0));
+        }
+
+        /* ===== CONTENT ===== */
+        .content {
+            padding: calc(var(--header-h) + 12px) 16px 24px;
+            max-width: 480px; margin: 0 auto;
+        }
+
+        .page { display: none; animation: fadeIn 0.2s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+
+        .card { background: var(--secondary-bg); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+        .card-title { font-size: 12px; color: var(--hint); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .card-value { font-size: 28px; font-weight: 700; }
+        .card-value small { font-size: 15px; font-weight: 500; color: var(--hint); }
+
+        .btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+            padding: 14px 16px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600;
+            cursor: pointer; background: var(--button); color: var(--button-text);
+        }
+        .btn:active { opacity: 0.8; }
+        .btn:disabled { opacity: 0.5; pointer-events: none; }
+        .btn-secondary { background: var(--secondary-bg); color: var(--text); }
+        .btn-danger { background: rgba(255,59,48,0.15); color: var(--destructive); }
+        .btn-success { background: rgba(52,199,89,0.15); color: var(--success); }
+        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .btn-stack { display: flex; flex-direction: column; gap: 10px; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .menu-item {
+            background: var(--secondary-bg); border-radius: 16px; padding: 18px 12px;
+            text-align: center; border: none; color: var(--text); cursor: pointer;
+        }
+        .menu-item:active { opacity: 0.8; }
+        .menu-item .icon { font-size: 26px; margin-bottom: 6px; }
+        .menu-item .label { font-size: 13px; font-weight: 600; }
+
+        .list-item { background: var(--secondary-bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; }
+        .list-item .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .list-item .title { font-weight: 600; font-size: 15px; }
+        .list-item .subtitle { font-size: 13px; color: var(--hint); line-height: 1.4; }
+        .list-item .actions { display: flex; gap: 8px; margin-top: 10px; }
+        .list-item .actions .btn { padding: 10px 12px; font-size: 13px; }
+
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-pending { background: rgba(255,149,0,0.15); color: var(--warning); }
+        .badge-processing { background: rgba(46,166,255,0.15); color: var(--button); }
+        .badge-completed { background: rgba(52,199,89,0.15); color: var(--success); }
+        .badge-cancelled { background: rgba(255,59,48,0.15); color: var(--destructive); }
+
+        .form-group { margin-bottom: 14px; }
+        .form-label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 6px; }
+        .form-input {
+            width: 100%; padding: 14px 16px; border: 1px solid rgba(128,128,128,0.3);
+            border-radius: 12px; background: var(--secondary-bg); color: var(--text); font-size: 16px; outline: none;
+        }
+        .form-input:focus { border-color: var(--button); }
+
+        .info-block {
+            background: var(--secondary-bg); border-radius: 12px; padding: 14px 16px;
+            margin-bottom: 12px; font-size: 14px; line-height: 1.5; color: var(--hint);
+        }
+        .info-block b { color: var(--text); }
+        .info-block code {
+            background: rgba(128,128,128,0.2); padding: 2px 6px; border-radius: 4px;
+            font-size: 13px; color: var(--text); word-break: break-all;
+        }
+
+        .empty { text-align: center; padding: 40px 20px; color: var(--hint); }
+        .empty .icon { font-size: 44px; margin-bottom: 10px; }
+        .loading { text-align: center; padding: 50px 20px; color: var(--hint); }
+        .spinner {
+            width: 32px; height: 32px; border: 3px solid rgba(128,128,128,0.2);
+            border-top-color: var(--button); border-radius: 50%;
+            animation: spin 0.7s linear infinite; margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .method-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .method-item {
+            background: var(--secondary-bg); border-radius: 12px; padding: 14px;
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .method-item.selected { border-color: var(--button); }
+        .method-item .icon { font-size: 22px; }
+        .method-item .title { font-weight: 600; font-size: 15px; }
+        .method-item .desc { font-size: 12px; color: var(--hint); margin-top: 2px; }
+
+        .payment-card { background: var(--secondary-bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .payment-card .row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .payment-card .label { color: var(--hint); }
+        .payment-card .value { font-weight: 600; text-align: right; word-break: break-all; }
+
+        .news-card {
+            background: var(--secondary-bg); border-radius: 14px; padding: 16px; margin-bottom: 10px;
+        }
+        .news-card .date { font-size: 12px; color: var(--hint); margin-bottom: 6px; }
+        .news-card .title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .news-card .text { font-size: 13px; color: var(--hint); line-height: 1.4; }
+
+        .exchange-placeholder {
+            text-align: center; padding: 48px 20px; color: var(--hint);
+        }
+        .exchange-placeholder .big { font-size: 48px; margin-bottom: 12px; }
+
+        .listing-card {
+            background: var(--secondary-bg); border-radius: 16px; padding: 16px;
+            margin-bottom: 12px; cursor: pointer; transition: opacity 0.15s;
+        }
+        .listing-card:active { opacity: 0.85; }
+        .listing-card .lseller {
+            font-size: 13px; color: var(--link); font-weight: 500; margin-bottom: 8px;
+        }
+        .listing-card .ltitle {
+            font-size: 16px; font-weight: 600; margin-bottom: 6px; line-height: 1.3;
+        }
+        .listing-card .ldesc {
+            font-size: 13px; color: var(--hint); line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+            white-space: pre-line;
+        }
+        .listing-card .meta {
+            margin-top: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .listing-card .price {
+            font-size: 18px; font-weight: 700; color: var(--text); margin: 0;
+        }
+        .listing-card .price small { font-size: 13px; font-weight: 500; color: var(--hint); }
+
+        /* Wallet-style balance */
+        .wallet-balance {
+            text-align: center;
+            padding: 36px 16px 28px;
+        }
+        .wallet-amount {
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+        .wallet-amount small {
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--hint);
+            margin-left: 4px;
+        }
+        .wallet-actions {
+            display: flex;
+            justify-content: center;
+            gap: 36px;
+            margin-bottom: 8px;
+        }
+        .wallet-action {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 0;
+        }
+        .wallet-action:active { opacity: 0.7; }
+        .wallet-action-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 500;
+            line-height: 1;
+        }
+        .wallet-action-icon.plus {
+            background: var(--button);
+            color: var(--button-text);
+        }
+        .wallet-action-icon.minus {
+            background: var(--secondary-bg);
+            color: var(--text);
+            border: 1.5px solid rgba(128,128,128,0.25);
+        }
+        .wallet-action-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--hint);
+        }
+
+        .min-hint {
+            color: var(--destructive);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        .field-hint {
+            font-size: 12px;
+            color: var(--hint);
+            margin-top: 6px;
+        }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: none; border: none; color: var(--link);
+            font-size: 15px; font-weight: 500; cursor: pointer;
+            padding: 0; margin-bottom: 14px;
+        }
+        .method-list { gap: 8px; }
+        .method-item {
+            padding: 14px 16px;
+            justify-content: flex-start;
+        }
+        .method-item .title { font-weight: 600; font-size: 15px; }
+        .form-group { margin-bottom: 20px; }
+
+        .profile-header {
+            text-align: center;
+            padding: 24px 0 20px;
+        }
+        .profile-avatar-wrap {
+            width: 88px; height: 88px; border-radius: 50%;
+            margin: 0 auto 14px; overflow: hidden;
+            background: var(--button);
+            position: relative;
+        }
+        .profile-avatar-img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .profile-avatar-fallback {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px; font-weight: 700; color: var(--button-text);
+        }
+        .profile-fullname {
+            font-size: 22px; font-weight: 700; margin-bottom: 4px;
+        }
+        .profile-username {
+            font-size: 14px; color: var(--hint);
+        }
+
+        .user-chip {
+            overflow: hidden;
+            padding: 0;
+        }
+        .user-chip img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+        }
+
+        .check-row {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: 14px; color: var(--text); margin-bottom: 12px; cursor: pointer;
+        }
+        .check-row input { margin-top: 3px; width: 18px; height: 18px; flex-shrink: 0; }
+        .fav-btn {
+            border: none; background: transparent; font-size: 26px; cursor: pointer;
+            padding: 4px 6px; line-height: 1; color: var(--hint);
+        }
+        .fav-btn.active {
+            color: #ffcc00;
+        }
+        @media (prefers-color-scheme: light) {
+            .fav-btn.active { color: #e6a800; }
+        }
+
+        .type-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .type-toggle-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--secondary-bg);
+            color: var(--text);
+            transition: background 0.15s, color 0.15s;
+        }
+        .type-toggle-btn:active { opacity: 0.85; }
+        .type-toggle-btn.selected {
+            background: var(--button);
+            color: var(--button-text);
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .support-tile {
+            aspect-ratio: 1;
+            background: var(--secondary-bg);
+            border: none;
+            border-radius: 16px;
+            padding: 16px 12px;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 6px;
+        }
+        .support-tile:active { opacity: 0.8; }
+        .support-tile-icon { font-size: 28px; line-height: 1; }
+        .support-tile-title { font-size: 13px; font-weight: 600; line-height: 1.25; }
+        .support-tile-sub { font-size: 11px; color: var(--hint); line-height: 1.2; word-break: break-all; }
+
+        .lang-tag {
+            font-size: 11px; font-weight: 500; color: var(--hint);
+            margin-left: 6px;
+        }
+        .lang-btn, .theme-btn { text-align: left; }
+        .theme-btn.active {
+            background: var(--button) !important;
+            color: var(--button-text) !important;
+        }
+        html[data-theme="light"] {
+            --bg: #ffffff;
+            --text: #000000;
+            --hint: #8e8e93;
+            --button: #2ea6ff;
+            --button-text: #ffffff;
+            --secondary-bg: #f2f2f7;
+            --link: #2ea6ff;
+        }
+        html[data-theme="dark"] {
+            --bg: #0f0f0f;
+            --text: #ffffff;
+            --hint: #8a8a8a;
+            --button: #2ea6ff;
+            --button-text: #ffffff;
+            --secondary-bg: #1c1c1c;
+            --link: #2ea6ff;
+        }
+
+        .flag-img {
+            width: 22px;
+            height: 16px;
+            object-fit: cover;
+            border-radius: 2px;
+            vertical-align: -2px;
+            margin-right: 6px;
+            display: inline-block;
+            box-shadow: 0 0 0 1px rgba(128,128,128,0.25);
+        }
+        .flag-img.sm {
+            width: 18px;
+            height: 13px;
+            margin-right: 0;
+            vertical-align: middle;
+        }
+
+        .rating-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 14px; }
+        .rating-chip {
+            background: var(--secondary-bg); border-radius: 12px; padding: 10px 14px;
+            min-width: 100px; flex: 1;
+        }
+        .rating-chip .rl { font-size: 12px; color: var(--hint); }
+        .rating-chip .rv { font-size: 20px; font-weight: 700; margin-top: 4px; }
+        .seller-link { color: var(--link); font-weight: 500; cursor: pointer; }
+        .seller-link:active { opacity: 0.7; }
+        .pie-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; margin: 12px 0; }
+        .pie-legend { width: 100%; }
+        .pie-legend-item {
+            display: flex; align-items: center; gap: 8px; font-size: 13px;
+            margin-bottom: 6px;
+        }
+        .pie-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+        .seg-toggle {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+        }
+        .seg-toggle button {
+            border: none; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 600;
+            background: var(--secondary-bg); color: var(--text); cursor: pointer;
+        }
+        .seg-toggle button.active { background: var(--button); color: var(--button-text); }
+        .period-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+
+        .role-frame {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 12px;
+            border: 1.5px solid var(--button);
+            border-radius: 10px;
+            color: var(--button);
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(46,166,255,0.08);
+        }
+        .period-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .period-row .form-label { font-size: 11px; margin-bottom: 4px; }
+        .period-row .form-input {
+            font-size: 12px;
+            padding: 8px 8px;
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .period-row .form-group { min-width: 0; overflow: hidden; }
+        .pie-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 8px 0 4px;
+            padding: 12px 0;
+        }
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 0 6px rgba(128,128,128,0.12);
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
+    </div>
+    <div class="topbar-right">
+        <button class="lang-btn" onclick="showPage('settings-lang')"><img class="flag-img sm" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"></button>
+        <div class="balance-chip" onclick="showPage('balance')" id="top-balance">0 $</div>
+        <div class="user-chip" id="top-avatar" onclick="showPage('profile')"><span id="top-avatar-letter">?</span></div>
+    </div>
+</div>
+
+<!-- DRAWER -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+    <div class="drawer-header">
+        <div class="title">X-Cod Exchange</div>
+        <div class="sub">Меню</div>
+    </div>
+    <div class="drawer-nav">
+        <button class="drawer-item active" data-page="home" onclick="navTo('home')">
+            <span class="di">🏠</span> Главная
+        </button>
+        <button class="drawer-item" data-page="news" onclick="navTo('news')">
+            <span class="di">📰</span> Новости
+        </button>
+        <button class="drawer-item" data-page="exchange" onclick="navTo('exchange')">
+            <span class="di">📊</span> Биржа
+        </button>
+        <button class="drawer-item" data-page="balance" onclick="navTo('balance')">
+            <span class="di">💵</span> Баланс
+        </button>
+        <button class="drawer-item" data-page="favorites" onclick="navTo('favorites')">
+            <span class="di">⭐</span> Избранные
+        </button>
+        <button class="drawer-item" data-page="my-listings" onclick="navTo('my-listings')">
+            <span class="di">📋</span> Мои объявления
+        </button>
+        <button class="drawer-item" data-page="orders" onclick="navTo('orders')">
+            <span class="di">📦</span> История заказов
+        </button>
+    </div>
+    <div class="drawer-bottom">
+        <button class="drawer-item" data-page="settings" onclick="navTo('settings')">
+            <span class="di">⚙️</span> Настройки
+        </button>
+        <button class="drawer-item" data-page="support" onclick="navTo('support')">
+            <span class="di">💬</span> Поддержка
+        </button>
+        <button class="drawer-item" data-page="admin" id="drawer-admin" style="display:none;" onclick="navTo('admin')">
+            <span class="di">🛡</span> Панель
+        </button>
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+    <!-- LOADING -->
+    <div id="page-loading" class="page active">
+        <div class="loading" style="padding-top:30vh;text-align:center;">
+            <div class="spinner"></div>
+            <div style="margin-top:12px;">Загрузка...</div>
+            <div id="load-ver" style="margin-top:10px;font-size:12px;color:#8a8a8a;">v2026-08-06g</div>
+            <noscript><div style="margin-top:16px;color:#ff3b30;">Включите JavaScript</div></noscript>
+        </div>
+    </div>
+
+    <!-- HOME -->
+    <div id="page-home" class="page">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <div class="section-title" style="margin-bottom:0;">Объявления</div>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showPage('listing-create')">+ Создать</button>
+        </div>
+        <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- LISTING DETAIL -->
+    <div id="page-listing-detail" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('home')">← Назад</button>
+        <div id="listing-detail-content"></div>
+    </div>
+
+    <!-- CREATE LISTING -->
+    <div id="page-listing-create" class="page">
+        <button class="back-link" onclick="showPage('home')">← Назад</button>
+        <div class="section-title">Новое объявление</div>
+        <div class="form-group">
+            <label class="form-label">Название</label>
+            <input class="form-input" type="text" id="listing-title" placeholder="Название бота / проекта">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea class="form-input" id="listing-desc" rows="4" placeholder="Описание" style="resize:vertical;min-height:100px;"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Тип товара</label>
+            <div class="type-toggle">
+                <button type="button" class="type-toggle-btn" id="type-partner" data-type="partner" onclick="selectListingType(this)">Партнер X-Cod</button>
+                <button type="button" class="type-toggle-btn" id="type-own" data-type="own" onclick="selectListingType(this)">Свой товар</button>
+            </div>
+        </div>
+        <div id="fields-partner" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">Номер договора X-Cod</label>
+                <input class="form-input" type="text" id="listing-contract" placeholder="XC-0000">
+            </div>
+            <label class="check-row">
+                <input type="checkbox" id="listing-analytics">
+                <span>Согласие на передачу данных и аналитики</span>
+            </label>
+            <div class="info-block" style="margin-top:12px;">Цена определяется компанией X-Cod по аналитике после модерации.</div>
+        </div>
+        <div id="fields-own" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">Вид товара</label>
+                <input class="form-input" type="text" id="listing-product-type" placeholder="TG бот / Mini App + сайт / другое">
+            </div>
+            <div class="form-group" id="tgstat-group">
+                <label class="form-label">Ссылка на TGStat</label>
+                <input class="form-input" type="text" id="listing-tgstat" placeholder="https://tgstat.ru/...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input class="form-input" type="text" id="listing-bot" placeholder="@my_bot">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цена ($)</label>
+                <input class="form-input" type="number" id="listing-price" placeholder="100" min="1">
+            </div>
+        </div>
+        <button class="btn" id="listing-create-btn" onclick="createListing()">Отправить на модерацию</button>
+    </div>
+
+    <!-- FAVORITES -->
+    <div id="page-favorites" class="page">
+        <div class="section-title">Избранные</div>
+        <div id="favorites-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- EDIT LISTING -->
+    <div id="page-listing-edit" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('home')">← Назад</button>
+        <div class="section-title">Редактировать</div>
+        <input type="hidden" id="edit-listing-id">
+        <div class="form-group">
+            <label class="form-label">Название</label>
+            <input class="form-input" type="text" id="edit-listing-title">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea class="form-input" id="edit-listing-desc" rows="4" style="resize:vertical;min-height:100px;"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Цена ($)</label>
+            <input class="form-input" type="number" id="edit-listing-price" min="1">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Username бота</label>
+            <input class="form-input" type="text" id="edit-listing-bot">
+        </div>
+        <div class="btn-stack">
+            <button class="btn" id="listing-save-btn" onclick="saveListing()">Сохранить</button>
+            <button class="btn btn-danger" onclick="deleteListing()">Удалить объявление</button>
+        </div>
+    </div>
+
+    <!-- NEWS -->
+    <div id="page-news" class="page">
+        <div class="section-title">Новости</div>
+        <div class="news-card">
+            <div class="date">Сегодня</div>
+            <div class="title">Добро пожаловать в X-Cod Exchange</div>
+            <div class="text">Платформа для безопасной покупки и продажи Telegram-ботов запущена. Следите за обновлениями!</div>
+        </div>
+        <div class="news-card">
+            <div class="date">Недавно</div>
+            <div class="title">Mini App доступен</div>
+            <div class="text">Теперь вы можете управлять балансом и заявками прямо из мини-приложения.</div>
+        </div>
+    </div>
+
+    <!-- EXCHANGE -->
+    <div id="page-exchange" class="page">
+        <div class="section-title">Биржа</div>
+        <div class="exchange-placeholder">
+            <div class="big">📊</div>
+            <div>Раздел биржи в разработке</div>
+            <div style="font-size:13px;margin-top:8px;">Скоро здесь появится каталог ботов</div>
+        </div>
+    </div>
+
+    <!-- MY LISTINGS -->
+    <div id="page-my-listings" class="page">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <div class="section-title" style="margin-bottom:0;">Мои объявления</div>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showPage('listing-create')">+ Создать</button>
+        </div>
+        <div id="my-listings-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="page-orders" class="page">
+        <div class="section-title">История заказов</div>
+        <div id="orders-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- BALANCE -->
+    <div id="page-balance" class="page">
+        <div class="wallet-balance">
+            <div class="wallet-amount" id="balance-value">0.00 <small>$</small></div>
+        </div>
+        <div class="wallet-actions">
+            <button class="wallet-action" onclick="showPage('deposit')">
+                <div class="wallet-action-icon plus">+</div>
+                <div class="wallet-action-label">Пополнить</div>
+            </button>
+            <button class="wallet-action" onclick="showPage('withdraw')">
+                <div class="wallet-action-icon minus">−</div>
+                <div class="wallet-action-label">Вывести</div>
+            </button>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:28px;" onclick="showPage('requests')">📜 Мои транзакции</button>
+    </div>
+
+    <!-- DEPOSIT -->
+    <div id="page-deposit" class="page">
+        <button class="back-link" onclick="showPage('balance')">← Назад</button>
+        <div class="section-title">Пополнение</div>
+
+        <div class="min-hint">Минимум 1$</div>
+
+        <div class="form-group">
+            <label class="form-label">Сумма</label>
+            <input class="form-input" type="number" id="deposit-amount" placeholder="0.00" min="1" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Способ оплаты</label>
+            <div class="method-list">
+                <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
+                    <div class="title">СБП</div>
+                </div>
+                <div class="method-item" data-method="crypto" onclick="selectMethod(this,'deposit')">
+                    <div class="title">USDT TRC20</div>
+                </div>
+                <div class="method-item" data-method="stars" onclick="selectMethod(this,'deposit')">
+                    <div class="title">Telegram Stars</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Комментарий</label>
+            <input class="form-input" type="text" id="deposit-comment" placeholder="Необязательно">
+        </div>
+
+        <button class="btn" id="deposit-btn" onclick="startDeposit()">Продолжить</button>
+    </div>
+
+    <!-- DEPOSIT RESULT -->
+    <div id="page-deposit-result" class="page">
+        <button class="back-link" onclick="showPage('balance')">← К балансу</button>
+        <div class="section-title">Реквизиты</div>
+        <div id="deposit-result-content"></div>
+    </div>
+
+    <!-- WITHDRAW -->
+    <div id="page-withdraw" class="page">
+        <button class="back-link" onclick="showPage('balance')">← Назад</button>
+        <div class="section-title">Вывод</div>
+
+        <div class="min-hint">Минимум 5$</div>
+
+        <div class="form-group">
+            <label class="form-label">Сумма</label>
+            <input class="form-input" type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01">
+            <div class="field-hint">Доступно: <span id="withdraw-available">0.00</span> $</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Способ вывода</label>
+            <div class="method-list">
+                <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
+                    <div class="title">СБП / карта</div>
+                </div>
+                <div class="method-item" data-method="crypto" onclick="selectMethod(this,'withdraw')">
+                    <div class="title">USDT TRC20</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" id="withdraw-recipient-label">Реквизиты</label>
+            <input class="form-input" type="text" id="withdraw-recipient" placeholder="Номер карты, Иванов И.И.">
+        </div>
+
+        <button class="btn" id="withdraw-btn" onclick="startWithdraw()">Вывести</button>
+    </div>
+
+    <!-- REQUESTS -->
+    <div id="page-requests" class="page">
+        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← Назад</button>
+        <div class="section-title">Мои транзакции</div>
+        <div id="requests-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="page-settings" class="page">
+        <div class="section-title">Настройки</div>
+        <div class="support-grid">
+            <button class="support-tile" onclick="showPage('settings-lang')">
+                <div class="support-tile-icon">🌐</div>
+                <div class="support-tile-title">Язык</div>
+                <div class="support-tile-sub" id="settings-lang-label"><img class="flag-img sm" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"> Русский</div>
+            </button>
+            <button class="support-tile" onclick="showPage('settings-theme')">
+                <div class="support-tile-icon">🎨</div>
+                <div class="support-tile-title">Тема</div>
+                <div class="support-tile-sub" id="settings-theme-label">Как в Telegram</div>
+            </button>
+        </div>
+    </div>
+
+    <div id="page-settings-lang" class="page">
+        <button class="back-link" onclick="showPage('settings')">← Назад</button>
+        <div class="section-title">Язык</div>
+        <div class="btn-stack" id="lang-list">
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('ru')"><img class="flag-img" src="https://flagcdn.com/w40/ru.png" alt="" width="22" height="16"> Русский <span class="lang-tag">original</span></button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('en')"><img class="flag-img" src="https://flagcdn.com/w40/gb.png" alt="" width="22" height="16"> English <span class="lang-tag">original</span></button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('de')"><img class="flag-img" src="https://flagcdn.com/w40/de.png" alt="" width="22" height="16"> Deutsch</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('fr')"><img class="flag-img" src="https://flagcdn.com/w40/fr.png" alt="" width="22" height="16"> Français</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('es')"><img class="flag-img" src="https://flagcdn.com/w40/es.png" alt="" width="22" height="16"> Español</button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('zh')"><img class="flag-img" src="https://flagcdn.com/w40/cn.png" alt="" width="22" height="16"> 中文</button>
+        </div>
+    </div>
+
+    <div id="page-settings-theme" class="page">
+        <button class="back-link" onclick="showPage('settings')">← Назад</button>
+        <div class="section-title">Тема</div>
+        <div class="btn-stack">
+            <button class="btn btn-secondary theme-btn" id="theme-auto" onclick="setAppTheme('auto')">Как в Telegram</button>
+            <button class="btn btn-secondary theme-btn" id="theme-light" onclick="setAppTheme('light')">Светлая</button>
+            <button class="btn btn-secondary theme-btn" id="theme-dark" onclick="setAppTheme('dark')">Тёмная</button>
+        </div>
+    </div>
+
+    <!-- SUPPORT -->
+    <div id="page-support" class="page">
+        <div class="section-title">Поддержка</div>
+        <div class="support-grid">
+            <button class="support-tile" onclick="openLink('https://t.me/xcodmanager')">
+                <div class="support-tile-icon">✈️</div>
+                <div class="support-tile-title">Написать в Telegram</div>
+                <div class="support-tile-sub">@xcodmanager</div>
+            </button>
+            <button class="support-tile" onclick="openEmail('xcodsupport@gmail.com')">
+                <div class="support-tile-icon">✉️</div>
+                <div class="support-tile-title">Написать на почту</div>
+                <div class="support-tile-sub">xcodsupport@gmail.com</div>
+            </button>
+            <button class="support-tile" onclick="showPage('collaborate')">
+                <div class="support-tile-icon">🤝</div>
+                <div class="support-tile-title">Сотрудничать</div>
+                <div class="support-tile-sub">Вакансии</div>
+            </button>
+            <button class="support-tile" onclick="openExternal('https://xcodinfo.ru/faq')">
+                <div class="support-tile-icon">❓</div>
+                <div class="support-tile-title">FAQ</div>
+                <div class="support-tile-sub">Частые вопросы</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- COLLABORATE -->
+    <div id="page-collaborate" class="page">
+        <button class="back-link" onclick="showPage('support')">← Назад</button>
+        <div class="section-title">Сотрудничать</div>
+        <div class="info-block">
+            <b>Модератор</b><br><br>
+            • Зарплата: <b>25$ / 12 ч</b><br>
+            • Обязательно: <b>3 смены в неделю</b><br><br>
+            <b>Стажировка</b><br><br>
+            • Срок: <b>1 месяц</b><br>
+            • Стажировочная смена: <b>6 ч</b><br>
+            • Оплата за стажировочную смену: <b>10$</b>
+        </div>
+        <div class="btn-stack">
+            <button class="btn" onclick="showPage('job-form')">Составить анкету</button>
+            <button class="btn btn-secondary" onclick="openLink('https://t.me/xcodmanager')">Написать менеджеру</button>
+        </div>
+    </div>
+
+    <!-- JOB APPLICATION FORM -->
+    <div id="page-job-form" class="page">
+        <button class="back-link" onclick="showPage('collaborate')">← Назад</button>
+        <div class="section-title">Анкета</div>
+        <div class="form-group">
+            <label class="form-label">ФИО</label>
+            <input class="form-input" type="text" id="job-fio" placeholder="Иванов Иван Иванович">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Возраст (минимум 16)</label>
+            <input class="form-input" type="number" id="job-age" placeholder="18" min="16">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Занятость</label>
+            <div class="method-list" id="job-employment-list">
+                <div class="method-item" data-emp="school" onclick="selectEmployment(this)"><div class="title">Школьник</div></div>
+                <div class="method-item" data-emp="student" onclick="selectEmployment(this)"><div class="title">Студент</div></div>
+                <div class="method-item" data-emp="working" onclick="selectEmployment(this)"><div class="title">Работаю</div></div>
+                <div class="method-item" data-emp="retired" onclick="selectEmployment(this)"><div class="title">На пенсии</div></div>
+                <div class="method-item" data-emp="searching" onclick="selectEmployment(this)"><div class="title">Окончил обучение, в активных поисках работы</div></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Username</label>
+            <input class="form-input" type="text" id="job-username" placeholder="@username">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Номер телефона</label>
+            <input class="form-input" type="tel" id="job-phone" placeholder="+7...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Почта</label>
+            <input class="form-input" type="email" id="job-email" placeholder="mail@example.com">
+        </div>
+        <button class="btn" id="job-submit-btn" onclick="submitJobApplication()">Отправить анкету</button>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="page-profile" class="page">
+        <div class="profile-header">
+            <div class="profile-avatar-wrap" id="profile-avatar-wrap">
+                <img id="profile-avatar-img" class="profile-avatar-img" alt="" style="display:none;">
+                <div class="profile-avatar-fallback" id="profile-avatar-fallback">?</div>
+            </div>
+            <div class="profile-fullname" id="profile-name">—</div>
+            <div class="profile-username" id="profile-username"></div>
+        </div>
+        <div class="list-item">
+            <div class="top"><div class="title">Роль</div><span class="badge badge-processing" id="profile-role">—</span></div>
+        </div>
+        <div class="list-item">
+            <div class="top"><div class="title">ID</div><span style="font-weight:600;color:var(--hint);" id="profile-id">—</span></div>
+        </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="page-admin" class="page">
+        <div class="section-title">Панель</div>
+        <div class="card" style="margin-bottom:14px;">
+            <div class="card-title">Ваша роль</div>
+            <div style="font-size:18px;font-weight:600;" id="admin-role">—</div>
+        </div>
+        <div class="support-grid" id="admin-tiles">
+            <button class="support-tile" onclick="openAdminSection('workcenter')">
+                <div class="support-tile-icon">🗓️</div>
+                <div class="support-tile-title">Рабочий центр</div>
+            </button>
+            <button class="support-tile" onclick="openAdminSection('career')">
+                <div class="support-tile-icon">📈</div>
+                <div class="support-tile-title">Трекер должностного роста</div>
+            </button>
+            <button class="support-tile" onclick="openAdminSection('listings')">
+                <div class="support-tile-icon">📄</div>
+                <div class="support-tile-title">Модерация объявлений</div>
+            </button>
+            <button class="support-tile" onclick="openAdminSection('transactions')">
+                <div class="support-tile-icon">💳</div>
+                <div class="support-tile-title">Модерация транзакций</div>
+            </button>
+            <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
+                <div class="support-tile-icon">💼</div>
+                <div class="support-tile-title">Модерация заявок на работу</div>
+            </button>
+            <button class="support-tile" onclick="openAdminSection('complaints')">
+                <div class="support-tile-icon">⚠️</div>
+                <div class="support-tile-title">Модерация жалоб</div>
+            </button>
+            <button class="support-tile" id="admin-staff-tile" style="display:none;" onclick="openAdminSection('staff')">
+                <div class="support-tile-icon">👥</div>
+                <div class="support-tile-title">Управление сотрудниками</div>
+            </button>
+            <button class="support-tile" onclick="openAdminSection('analytics')">
+                <div class="support-tile-icon">📊</div>
+                <div class="support-tile-title">Аналитика</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- ADMIN SECTION LIST -->
+    <div id="page-admin-section" class="page">
+        <button class="back-link" onclick="showPage('admin')">← Панель</button>
+        <div class="section-title" id="admin-section-title">—</div>
+        <div id="admin-content"></div>
+    </div>
+
+    <!-- ADMIN ITEM DETAIL -->
+    <div id="page-admin-detail" class="page">
+        <button class="back-link" id="admin-detail-back" onclick="showPage('admin-section')">← Назад</button>
+        <div class="section-title" id="admin-detail-title">Детали</div>
+        <div id="admin-detail-content"></div>
+    </div>
+
+    <!-- ADMIN STAFF DETAIL -->
+    <div id="page-admin-staff-detail" class="page">
+        <button class="back-link" onclick="openAdminSection('staff')">← Сотрудники</button>
+        <div class="section-title">Сотрудник</div>
+        <div id="staff-detail-content"></div>
+    </div>
+
+    <div id="page-user-profile" class="page">
+        <button class="back-link" id="user-profile-back" onclick="showPage('home')">← Назад</button>
+        <div id="user-profile-content"></div>
+    </div>
+
+    <!-- ADD STAFF -->
+    <div id="page-admin-add-staff" class="page">
+        <button class="back-link" onclick="showPage('admin')">← Назад</button>
+        <div class="section-title">Добавить сотрудника</div>
+        <div class="form-group">
+            <label class="form-label">ID пользователя Telegram</label>
+            <input class="form-input" type="number" id="add-staff-id" placeholder="Например: 123456789">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Роль</label>
+            <div class="method-list" id="add-staff-roles">
+                <div class="method-item selected" data-role="1" onclick="selectStaffRole(this)"><div class="title">Партнер</div></div>
+                <div class="method-item" data-role="2" onclick="selectStaffRole(this)"><div class="title">Корпоративный</div></div>
+                <div class="method-item" data-role="3" onclick="selectStaffRole(this)"><div class="title">Стажер</div></div>
+                <div class="method-item" data-role="4" onclick="selectStaffRole(this)"><div class="title">Модератор</div></div>
+                <div class="method-item" data-role="5" onclick="selectStaffRole(this)"><div class="title">Админ</div></div>
+            </div>
+        </div>
+        <button class="btn" id="add-staff-btn" onclick="submitAddStaff()">Назначить</button>
+    </div>
+
+</div>
+
+<script>
+window.onerror = function(msg, src, line) {
+    window.__xcodLastErr = String(msg) + ' @' + line;
+    console.error('XCOD', msg, src, line);
+};
+window.addEventListener('unhandledrejection', function(ev) {
+    window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
+});
+const API_URL = "https://exchange-stavka.waw0.amvera.tech";
+const APP_VER = "v2026-08-06g";
+function getTg() {
+    try {
+        if (window.Telegram && Telegram.WebApp) return Telegram.WebApp;
+    } catch (e) {}
+    return {
+        initData: "",
+        initDataUnsafe: {},
+        ready: function(){},
+        expand: function(){},
+        close: function(){},
+        themeParams: {},
+        colorScheme: "dark",
+        setHeaderColor: function(){},
+        setBackgroundColor: function(){},
+        openLink: function(u){ window.open(u, "_blank"); },
+        openTelegramLink: function(u){ window.open(u, "_blank"); },
+        showAlert: function(m){ alert(m); },
+        HapticFeedback: null
+    };
+}
+var tg = getTg();
+tg.ready();
+tg.expand();
+try { tg = getTg(); tg.ready && tg.ready(); tg.setHeaderColor && tg.setHeaderColor('secondary_bg_color'); tg.setBackgroundColor && tg.setBackgroundColor('bg_color'); } catch(e){}
+
+let userData = null;
+let selectedDepositMethod = 'card';
+let selectedWithdrawMethod = 'card';
+
+function openDrawer() {
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+}
+function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+}
+function navTo(page) {
+    closeDrawer();
+    showPage(page);
+    document.querySelectorAll('.drawer-item').forEach(function(el) {
+        el.classList.toggle('active', el.dataset.page === page);
+    });
+}
+
+function withTimeout(promise, ms, msg) {
+    return new Promise(function(resolve, reject) {
+        var done = false;
+        var timer = setTimeout(function() {
+            if (done) return;
+            done = true;
+            reject(new Error(msg || 'Таймаут'));
+        }, ms);
+        promise.then(function(v) {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            resolve(v);
+        }, function(e) {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            reject(e);
+        });
+    });
+}
+
+function apiFetch(path, options) {
+    options = options || {};
+    var ms = options.timeout || 10000;
+    var initData = '';
+    try { initData = (getTg() && getTg().initData) || (tg && tg.initData) || ''; } catch (e) {}
+
+    var sep = path.indexOf('?') >= 0 ? '&' : '?';
+    var url = API_URL + path + (initData ? (sep + 'initData=' + encodeURIComponent(initData)) : '');
+
+    var headers = { 'Accept': 'application/json' };
+    if (initData) headers['X-Telegram-Init-Data'] = initData;
+    if (options.headers) {
+        for (var k in options.headers) headers[k] = options.headers[k];
+    }
+
+    var fetchOpts = { method: options.method || 'GET', headers: headers };
+    if (options.body) fetchOpts.body = options.body;
+
+    var p = fetch(url, fetchOpts).then(function(res) {
+        return res.text().then(function(text) {
+            var data = {};
+            try { data = text ? JSON.parse(text) : {}; } catch (e) {
+                throw new Error('Не JSON (HTTP ' + res.status + ')');
+            }
+            if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+            return data;
+        });
+    }).catch(function(e) {
+        if (e && e.message && String(e.message).indexOf('Failed to fetch') >= 0) {
+            throw new Error('Нет связи с API');
+        }
+        throw e;
+    });
+    return withTimeout(p, ms, 'Таймаут ' + (ms/1000) + 'с');
+}
+async function apiGet(path) {
+    return apiFetch(path, { method: 'GET' });
+}
+async function apiPost(path, body) {
+    var payload = body || {};
+    try {
+        if (!payload.initData && tg && tg.initData) payload.initData = tg.initData;
+    } catch (e) {}
+    return apiFetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+}
+
+async function init() {
+    var box = document.getElementById('page-loading');
+    function setLoad(msg) {
+        try {
+            var v = document.getElementById('load-ver');
+            if (v) v.textContent = 'v2026-08-06g · ' + msg;
+        } catch (e) {}
+    }
+    try { applyThemeFromStorage(); } catch (e) {}
+    try {
+        setLoad('Telegram...');
+        if (!window.Telegram || !Telegram.WebApp) {
+            box.innerHTML = '<div class="empty"><div class="icon">⚠️</div>Нет Telegram.WebApp</div>';
+            return;
+        }
+        var tgLocal = Telegram.WebApp;
+        try { tgLocal.ready(); tgLocal.expand(); } catch (e) {}
+        if (!tgLocal.initData) {
+            box.innerHTML = '<div class="empty"><div class="icon">⚠️</div>Откройте через кнопку бота в Telegram<br><small>initData пустой</small></div>';
+            return;
+        }
+        setLoad('API health...');
+        try {
+            await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
+        } catch (he) {
+            window.__xcodLastErr = he.message;
+            box.innerHTML = '<div class="empty"><div class="icon">❌</div>API недоступен<br><small>' +
+                API_URL + '</small><br><small>' + he.message +
+                '</small><br><button class="btn" style="margin-top:16px;" onclick="location.reload()">Повторить</button></div>';
+            return;
+        }
+        setLoad('Пользователь...');
+        userData = await apiGet('/api/user');
+        setLoad('Интерфейс...');
+        try { renderMain(); } catch (re) {
+            window.__xcodLastErr = re.message;
+            box.innerHTML = '<div class="empty"><div class="icon">❌</div>Ошибка UI: ' + re.message + '</div>';
+            return;
+        }
+        showPage('home');
+        window.__xcodBootOk = true;
+    } catch (e) {
+        window.__xcodLastErr = (e && e.message) ? e.message : String(e);
+        box.innerHTML =
+            '<div class="empty"><div class="icon">❌</div>' + window.__xcodLastErr +
+            '<br><small style="word-break:break-all;">' + API_URL + '</small>' +
+            '<br><button class="btn" style="margin-top:16px;" onclick="location.reload()">Повторить</button>' +
+            '<div style="margin-top:8px;font-size:11px;opacity:.5;">v2026-08-06g</div></div>';
+    }
+}
+
+function renderMain() {
+    var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
+    var first = tgUser.first_name || userData.first_name || '';
+    var last = tgUser.last_name || userData.last_name || '';
+    var fullName = (first + ' ' + last).trim() || userData.username || 'User';
+    var username = tgUser.username || userData.username || '';
+    var initial = fullName.charAt(0).toUpperCase();
+    var photo = tgUser.photo_url || null;
+
+    // Top bar avatar
+    var topEl = document.getElementById('top-avatar');
+    if (photo) {
+        topEl.innerHTML = '<img src="' + photo + '" alt="">';
+    } else {
+        topEl.innerHTML = '<span id="top-avatar-letter">' + initial + '</span>';
+    }
+
+    // Profile page
+    document.getElementById('profile-name').textContent = fullName;
+    document.getElementById('profile-username').textContent = username ? '@' + username : '';
+    document.getElementById('profile-role').textContent = userData.role_name || '—';
+    document.getElementById('profile-id').textContent = userData.user_id;
+    document.getElementById('admin-role').textContent = userData.role_name || '—';
+
+    var img = document.getElementById('profile-avatar-img');
+    var fallback = document.getElementById('profile-avatar-fallback');
+    if (photo) {
+        img.src = photo;
+        img.style.display = 'block';
+        fallback.style.display = 'none';
+    } else {
+        img.style.display = 'none';
+        fallback.style.display = 'flex';
+        fallback.textContent = initial;
+    }
+
+    setBalance(userData.balance);
+    if (userData.role >= 2) {
+        document.getElementById('drawer-admin').style.display = 'flex';
+    }
+    if (userData.role >= 5) {
+        document.getElementById('admin-staff-tile').style.display = 'flex';
+        var jt = document.getElementById('admin-jobs-tile');
+        if (jt) jt.style.display = 'flex';
+    }
+}
+
+var selectedStaffRole = 1;
+function selectStaffRole(el) {
+    el.parentElement.querySelectorAll('.method-item').forEach(function(i){ i.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedStaffRole = parseInt(el.dataset.role, 10);
+}
+
+async function submitAddStaff() {
+    var targetId = parseInt(document.getElementById('add-staff-id').value, 10);
+    var btn = document.getElementById('add-staff-btn');
+    if (!targetId) { tg.showAlert('Укажите ID пользователя'); return; }
+    btn.disabled = true; btn.textContent = 'Назначение...';
+    try {
+        await apiPost('/api/admin/staff', { user_id: targetId, role: selectedStaffRole });
+        tg.showAlert('Сотрудник добавлен');
+        document.getElementById('add-staff-id').value = '';
+        showPage('admin');
+        loadAdminStaff();
+    } catch (e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Назначить'; }
+}
+
+function setBalance(bal) {
+    userData.balance = bal;
+    var formatted = Number(bal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var html = formatted + ' <small>$</small>';
+    document.getElementById('balance-value').innerHTML = html;
+    document.getElementById('top-balance').textContent = formatted + ' $';
+    var avail = document.getElementById('withdraw-available');
+    if (avail) avail.textContent = formatted;
+}
+
+function showPage(name) {
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    var page = document.getElementById('page-' + name);
+    if (page) page.classList.add('active');
+    if (name === 'home') loadListings();
+    if (name === 'my-listings') loadMyListings();
+    if (name === 'favorites') loadFavorites();
+    if (name === 'orders') loadOrders();
+    if (name === 'balance' || name === 'withdraw') refreshBalance();
+    if (name === 'requests') loadRequests();
+    if (name === 'admin') { document.getElementById('admin-content').innerHTML = ''; }
+    if (name === 'job-form') {
+        try {
+            var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
+            var un = tgUser.username || (userData && userData.username) || '';
+            var el = document.getElementById('job-username');
+            if (el && !el.value && un) el.value = '@' + un;
+        } catch (e) {}
+    }
+    window.scrollTo(0, 0);
+}
+
+
+function formatSeller(l) {
+    var label;
+    if (l.seller_username) label = '@' + l.seller_username;
+    else {
+        var name = ((l.seller_name || '') + ' ' + (l.seller_last_name || '')).trim();
+        label = name || ('ID ' + l.seller_id);
+    }
+    return label;
+}
+function sellerLinkHtml(l) {
+    var label = formatSeller(l).replace(/</g, '&lt;');
+    var id = l.seller_id || l.user_id;
+    return '<span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + id + ')">' + label + '</span>';
+}
+
+var _profileBack = 'home';
+async function openUserProfile(uid, backPage) {
+    if (backPage) _profileBack = backPage;
+    else if (document.getElementById('page-home').classList.contains('active')) _profileBack = 'home';
+    else if (document.getElementById('page-listing-detail').classList.contains('active')) _profileBack = 'listing-detail';
+    else if (document.getElementById('page-favorites').classList.contains('active')) _profileBack = 'favorites';
+    else if (document.getElementById('page-my-listings').classList.contains('active')) _profileBack = 'my-listings';
+    else if (document.getElementById('page-admin-section').classList.contains('active')) _profileBack = 'admin-section';
+    document.getElementById('user-profile-back').setAttribute('onclick', "showPage('" + _profileBack + "')");
+    var box = document.getElementById('user-profile-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    showPage('user-profile');
+    window._profileUid = uid;
+    window._profileStatus = 'active';
+    await renderUserProfile();
+}
+
+async function renderUserProfile() {
+    var uid = window._profileUid;
+    var status = window._profileStatus || 'active';
+    var box = document.getElementById('user-profile-content');
+    try {
+        var p = await apiGet('/api/users/' + uid + '/profile?status=' + status);
+        var uname = p.username ? ('@' + p.username) : ((p.first_name || '') + ' ' + (p.last_name || '')).trim() || ('ID ' + p.user_id);
+        var html = '<div class="profile-header" style="padding-top:8px;">' +
+            '<div class="profile-fullname">' + uname.replace(/</g,'&lt;') + '</div>' +
+            '<div class="profile-username">ID ' + p.user_id + '</div>' +
+            (p.role_name ? '<div class="role-frame">' + String(p.role_name).replace(/</g,'&lt;') + '</div>' : '') +
+            '</div>';
+        html += '<div class="rating-row">' +
+            '<div class="rating-chip"><div class="rl">Рейтинг продавца</div><div class="rv">★ ' + Number(p.rating_seller).toFixed(2) + '</div></div>' +
+            '<div class="rating-chip"><div class="rl">Рейтинг покупателя</div><div class="rv">★ ' + Number(p.rating_buyer).toFixed(2) + '</div></div>';
+        if (p.rating_staff != null) {
+            html += '<div class="rating-chip"><div class="rl">Рейтинг сотрудника</div><div class="rv">★ ' + Number(p.rating_staff).toFixed(2) + '</div></div>';
+        }
+        html += '</div>';
+        html += '<div class="seg-toggle">' +
+            '<button class="' + (status==='active'?'active':'') + '" onclick="window._profileStatus=\'active\';renderUserProfile()">Действующие</button>' +
+            '<button class="' + (status==='completed'?'active':'') + '" onclick="window._profileStatus=\'completed\';renderUserProfile()">Завершённые</button>' +
+            '</div>';
+        var items = p.listings || [];
+        if (!items.length) {
+            html += '<div class="empty">Нет объявлений</div>';
+        } else {
+            html += items.map(function(l) {
+                return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                    '<div class="ltitle">' + (l.title||'').replace(/</g,'&lt;') + '</div>' +
+                    '<div class="ldesc">' + (l.description||'').replace(/</g,'&lt;') + '</div>' +
+                    '<div class="meta"><div class="price">' + Number(l.price).toLocaleString('ru-RU') +
+                    ' <small>$</small></div><span class="badge badge-processing">' + (l.status||'') + '</span></div></div>';
+            }).join('');
+        }
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+
+async function loadListings() {
+    var box = document.getElementById('listings-feed');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/listings');
+        var items = data.listings || [];
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">📭</div>Пока нет объявлений</div>';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            var seller = formatSeller(l);
+            var desc = (l.description || '').replace(/</g, '&lt;');
+            var isFav = !!l.is_favorite;
+            var priceNum = Number(l.price).toLocaleString('ru-RU');
+            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
+                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="ldesc">' + desc + '</div>' +
+                '<div class="meta">' +
+                '<div class="price">' + priceNum + ' <small>$</small></div>' +
+                '<button class="fav-btn' + (isFav ? ' active' : '') + '" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' + (isFav ? '★' : '☆') + '</button>' +
+                '</div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+async function openListing(id) {
+    var box = document.getElementById('listing-detail-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    showPage('listing-detail');
+    try {
+        var l = await apiGet('/api/listings/' + id);
+        var seller = formatSeller(l);
+        var canEdit = (l.seller_id === userData.user_id) || (userData.role >= 5);
+        var html = '<div class="card">' +
+            '<div class="card-title">Цена</div>' +
+            '<div class="card-value" style="color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>' +
+            '</div>' +
+            '<div class="section-title" style="font-size:17px;">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+            '<div class="info-block" style="white-space:pre-line;">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
+            '<div class="info-block">Продавец: ' + sellerLinkHtml(l) +
+            (l.bot_username ? '<br>Бот: <b>@' + l.bot_username + '</b>' : '') +
+            '<br>Опубликовано: ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
+        var isFav = !!l.is_favorite;
+        html += '<div class="btn-stack" style="margin-top:12px;">' +
+            '<button class="btn btn-secondary" onclick="toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' + (isFav ? '★ В избранном' : '☆ В избранное') + '</button>';
+        if (canEdit) {
+            html += '<button class="btn btn-secondary" onclick="openEditListing(' + l.id + ')">Редактировать</button>';
+        }
+        html += '<button class="btn" onclick="tg.showAlert(\'Свяжитесь с продавцом через поддержку или бота\')">Связаться</button></div>';
+        box.innerHTML = html;
+        window._currentListing = l;
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function openEditListing(id) {
+    var l = window._currentListing;
+    if (!l || l.id !== id) return;
+    document.getElementById('edit-listing-id').value = l.id;
+    document.getElementById('edit-listing-title').value = l.title || '';
+    document.getElementById('edit-listing-desc').value = l.description || '';
+    document.getElementById('edit-listing-price').value = l.price || '';
+    document.getElementById('edit-listing-bot').value = l.bot_username || '';
+    showPage('listing-edit');
+}
+
+async function createListing() {
+    var title = document.getElementById('listing-title').value.trim();
+    var description = document.getElementById('listing-desc').value.trim();
+    var btn = document.getElementById('listing-create-btn');
+    if (!title) { tg.showAlert('Укажите название'); return; }
+    if (!description) { tg.showAlert('Укажите описание'); return; }
+    if (!selectedListingType) { tg.showAlert('Выберите тип товара'); return; }
+
+    var body = {
+        title: title,
+        description: description,
+        listing_type: selectedListingType
+    };
+
+    if (selectedListingType === 'partner') {
+        body.contract_number = document.getElementById('listing-contract').value.trim();
+        body.analytics_consent = document.getElementById('listing-analytics').checked;
+    } else {
+        body.product_type = document.getElementById('listing-product-type').value.trim();
+        body.tgstat_url = document.getElementById('listing-tgstat').value.trim();
+        body.bot_username = document.getElementById('listing-bot').value.trim();
+        body.price = parseFloat(document.getElementById('listing-price').value) || 0;
+    }
+
+    btn.disabled = true; btn.textContent = 'Отправка...';
+    try {
+        await apiPost('/api/listings', body);
+        tg.showAlert('Объявление отправлено на модерацию');
+        document.getElementById('listing-title').value = '';
+        document.getElementById('listing-desc').value = '';
+        document.getElementById('listing-contract').value = '';
+        document.getElementById('listing-analytics').checked = false;
+        document.getElementById('listing-product-type').value = '';
+        document.getElementById('listing-tgstat').value = '';
+        document.getElementById('listing-bot').value = '';
+        document.getElementById('listing-price').value = '';
+        selectedListingType = null;
+        document.querySelectorAll('.type-toggle-btn').forEach(function(el){ el.classList.remove('selected'); });
+        document.getElementById('fields-partner').style.display = 'none';
+        document.getElementById('fields-own').style.display = 'none';
+        showPage('my-listings');
+    } catch (e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Отправить на модерацию'; }
+}
+
+var selectedListingType = null;
+function selectListingType(el) {
+    document.querySelectorAll('.type-toggle-btn').forEach(function(i){ i.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedListingType = el.dataset.type;
+    document.getElementById('fields-partner').style.display = selectedListingType === 'partner' ? 'block' : 'none';
+    document.getElementById('fields-own').style.display = selectedListingType === 'own' ? 'block' : 'none';
+}
+
+async function saveListing() {
+    var id = document.getElementById('edit-listing-id').value;
+    var btn = document.getElementById('listing-save-btn');
+    btn.disabled = true; btn.textContent = 'Сохранение...';
+    try {
+        var res = await fetch(API_URL + '/api/listings/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
+            body: JSON.stringify({
+                title: document.getElementById('edit-listing-title').value.trim(),
+                description: document.getElementById('edit-listing-desc').value.trim(),
+                price: parseFloat(document.getElementById('edit-listing-price').value),
+                bot_username: document.getElementById('edit-listing-bot').value.trim()
+            })
+        });
+        var data = await res.json().catch(function(){ return {}; });
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        tg.showAlert('✅ Сохранено');
+        showPage('home');
+    } catch (e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Сохранить'; }
+}
+
+async function deleteListing() {
+    var id = document.getElementById('edit-listing-id').value;
+    try {
+        var res = await fetch(API_URL + '/api/listings/' + id, {
+            method: 'DELETE',
+            headers: { 'X-Telegram-Init-Data': tg.initData }
+        });
+        var data = await res.json().catch(function(){ return {}; });
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        tg.showAlert('Объявление удалено');
+        showPage('home');
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function refreshBalance() {
+    try { var d = await apiGet('/api/balance'); setBalance(d.balance); } catch(e){}
+}
+
+function selectMethod(el, type) {
+    el.parentElement.querySelectorAll('.method-item').forEach(function(i){ i.classList.remove('selected'); });
+    el.classList.add('selected');
+    if (type === 'deposit') selectedDepositMethod = el.dataset.method;
+    else {
+        selectedWithdrawMethod = el.dataset.method;
+        var label = document.getElementById('withdraw-recipient-label');
+        var input = document.getElementById('withdraw-recipient');
+        if (selectedWithdrawMethod === 'card') {
+            label.textContent = 'Реквизиты';
+            input.placeholder = 'Номер карты, Иванов И.И.';
+        } else {
+            label.textContent = 'Адрес кошелька';
+            input.placeholder = 'Адрес USDT TRC20';
+        }
+    }
+}
+
+async function startDeposit() {
+    var amount = parseFloat(document.getElementById('deposit-amount').value);
+    var comment = document.getElementById('deposit-comment').value.trim();
+    var btn = document.getElementById('deposit-btn');
+    if (!amount || amount < 1) { tg.showAlert('Минимум 1$'); return; }
+    btn.disabled = true; btn.textContent = 'Создание...';
+    try {
+        var result = await apiPost('/api/deposit', { amount: amount, method: selectedDepositMethod, comment: comment });
+        if (selectedDepositMethod === 'stars') {
+            tg.showAlert('Заявка #' + result.request_id + ' создана. Оплатите Stars через бота.');
+            showPage('requests'); return;
+        }
+        var html = '<div class="payment-card">' +
+            '<div class="row"><span class="label">Заявка</span><span class="value">#' + result.request_id + '</span></div>' +
+            '<div class="row"><span class="label">Сумма</span><span class="value">' + result.amount + '$</span></div>';
+        if (result.method === 'card') {
+            html += '<div class="row"><span class="label">К оплате</span><span class="value">' + result.rub_amount + ' ₽</span></div>' +
+                '<div class="row"><span class="label">Телефон</span><span class="value"><code>' + result.payment_info.phone + '</code></span></div>' +
+                '<div class="row"><span class="label">Банк</span><span class="value">' + result.payment_info.bank + '</span></div>' +
+                '<div class="row"><span class="label">Получатель</span><span class="value">' + result.payment_info.recipient_name + '</span></div>';
+        } else {
+            html += '<div class="row"><span class="label">Сеть</span><span class="value">' + result.payment_info.network + '</span></div>' +
+                '<div class="row"><span class="label">Адрес</span><span class="value"><code>' + result.payment_info.wallet + '</code></span></div>';
+        }
+        html += '</div><div class="info-block">После оплаты нажмите «Я оплатил»</div>' +
+            '<div class="btn-stack">' +
+            '<button class="btn btn-success" onclick="confirmRequest(' + result.request_id + ')">✅ Я оплатил</button>' +
+            '<button class="btn btn-danger" onclick="cancelRequest(' + result.request_id + ')">❌ Отменить</button>' +
+            '<button class="btn btn-secondary" onclick="showPage(\'requests\')">📜 Мои транзакции</button></div>';
+        document.getElementById('deposit-result-content').innerHTML = html;
+        showPage('deposit-result');
+    } catch(e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Создать заявку'; }
+}
+
+async function startWithdraw() {
+    var amount = parseFloat(document.getElementById('withdraw-amount').value);
+    var raw = document.getElementById('withdraw-recipient').value.trim();
+    var btn = document.getElementById('withdraw-btn');
+    if (!amount || amount < 5) { tg.showAlert('Минимум 5$'); return; }
+    if (amount > userData.balance) { tg.showAlert('Недостаточно средств'); return; }
+    if (!raw) { tg.showAlert('Укажите реквизиты'); return; }
+    var recipient = raw, recipient_name = '';
+    if (selectedWithdrawMethod === 'card' && raw.indexOf(',') !== -1) {
+        var p = raw.split(','); recipient = p[0].trim(); recipient_name = (p[1]||'').trim();
+    }
+    btn.disabled = true; btn.textContent = 'Создание...';
+    try {
+        var result = await apiPost('/api/withdraw', {
+            amount: amount, method: selectedWithdrawMethod,
+            recipient: recipient, recipient_name: recipient_name
+        });
+        setBalance(result.new_balance);
+        tg.showAlert('✅ Заявка #' + result.request_id + ' создана');
+        document.getElementById('withdraw-amount').value = '';
+        document.getElementById('withdraw-recipient').value = '';
+        showPage('requests');
+    } catch(e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Создать заявку'; }
+}
+
+async function loadRequests() {
+    var box = document.getElementById('requests-list');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/requests');
+        var reqs = data.requests || [];
+        if (!reqs.length) { box.innerHTML = '<div class="empty"><div class="icon">📭</div>Нет заявок</div>'; return; }
+        var statusMap = {
+            pending: ['Ожидает', 'badge-pending'], processing: ['В обработке', 'badge-processing'],
+            completed: ['Выполнено', 'badge-completed'], cancelled: ['Отменена', 'badge-cancelled']
+        };
+        var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
+        box.innerHTML = reqs.map(function(r) {
+            var st = statusMap[r.status] || [r.status, 'badge-pending'];
+            var typeEmoji = r.type === 'deposit' ? '💰' : '💳';
+            var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+            var actions = '';
+            if (r.status === 'pending' && r.type === 'deposit') {
+                actions = '<div class="actions">' +
+                    '<button class="btn btn-success" onclick="confirmRequest(' + r.id + ')">✅ Я оплатил</button>' +
+                    '<button class="btn btn-danger" onclick="cancelRequest(' + r.id + ')">❌ Отменить</button></div>';
+            }
+            var extra = '';
+            if (r.recipient) extra += '<br>Получатель: ' + r.recipient;
+            if (r.comment) extra += '<br>' + r.comment;
+            return '<div class="list-item"><div class="top"><div class="title">' + typeEmoji + ' ' + typeName +
+                ' #' + r.id + '</div><span class="badge ' + st[1] + '">' + st[0] +
+                '</span></div><div class="subtitle">' + r.amount + '$ · ' + (methodMap[r.method]||r.method) +
+                extra + '</div>' + actions + '</div>';
+        }).join('');
+    } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+}
+
+async function confirmRequest(id) {
+    try {
+        await apiPost('/api/request/confirm', { request_id: id });
+        tg.showAlert('✅ Заявка #' + id + ' на проверке');
+        loadRequests();
+        if (document.getElementById('page-deposit-result').classList.contains('active')) showPage('requests');
+    } catch(e) { tg.showAlert(e.message); }
+}
+async function cancelRequest(id) {
+    try {
+        await apiPost('/api/request/cancel', { request_id: id });
+        tg.showAlert('❌ Заявка #' + id + ' отменена');
+        loadRequests();
+        if (document.getElementById('page-deposit-result').classList.contains('active')) showPage('balance');
+    } catch(e) { tg.showAlert(e.message); }
+}
+
+async function loadMyListings() {
+    var box = document.getElementById('my-listings-list');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/my-listings');
+        var items = data.listings || [];
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">📋</div>У вас пока нет объявлений</div>';
+            return;
+        }
+        var statusMap = {
+            pending: ['На модерации', 'badge-pending'],
+            active: ['Опубликовано', 'badge-completed'],
+            rejected: ['Отклонено', 'badge-cancelled'],
+            deleted: ['Удалено', 'badge-cancelled']
+        };
+        box.innerHTML = items.map(function(l) {
+            var st = statusMap[l.status] || [l.status, 'badge-pending'];
+            var date = (l.created_at || '').slice(0, 10);
+            var priceText = (l.listing_type === 'partner' && !l.price) ? 'Цена по аналитике' : (Number(l.price).toLocaleString('ru-RU') + ' $');
+            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                '<div class="top" style="display:flex;justify-content:space-between;margin-bottom:6px;"><div class="price" style="margin:0;">' + priceText + '</div><span class="badge ' + st[1] + '">' + st[0] + '</span></div>' +
+                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="meta"><span>' + (l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар') + '</span><span>' + date + '</span></div>' +
+                '</div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+async function loadFavorites() {
+    var box = document.getElementById('favorites-list');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/favorites');
+        var items = data.listings || [];
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">⭐</div>Избранных пока нет</div>';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            var priceNum = Number(l.price).toLocaleString('ru-RU');
+            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
+                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="meta">' +
+                '<div class="price">' + priceNum + ' <small>$</small></div>' +
+                '<button class="fav-btn active" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', true)">★</button>' +
+                '</div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+async function toggleFavorite(id, isFav) {
+    try {
+        if (isFav) {
+            await fetch(API_URL + '/api/favorites/' + id, { method: 'DELETE', headers: { 'X-Telegram-Init-Data': tg.initData } });
+        } else {
+            await apiPost('/api/favorites/' + id, {});
+        }
+        if (document.getElementById('page-favorites').classList.contains('active')) loadFavorites();
+        else if (document.getElementById('page-home').classList.contains('active')) loadListings();
+        else if (document.getElementById('page-listing-detail').classList.contains('active')) openListing(id);
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+
+var _adminSection = '';
+var _adminCache = { listings: [], transactions: [], jobs: [], staff: [] };
+
+function openAdminSection(section) {
+    _adminSection = section;
+    var titles = {
+        workcenter: 'Рабочий центр',
+        career: 'Трекер должностного роста',
+        listings: 'Модерация объявлений',
+        transactions: 'Модерация транзакций',
+        jobs: 'Модерация заявок на работу',
+        complaints: 'Модерация жалоб',
+        staff: 'Управление сотрудниками',
+        analytics: 'Аналитика'
+    };
+    document.getElementById('admin-section-title').textContent = titles[section] || section;
+    showPage('admin-section');
+    if (section === 'workcenter') loadWorkCenter();
+    else if (section === 'career') loadCareerTracker();
+    else if (section === 'listings') loadAdminListings();
+    else if (section === 'transactions') loadAdminRequests();
+    else if (section === 'jobs') {
+        if (userData.role < 5) { tg.showAlert('Доступ только для админа и выше'); showPage('admin'); return; }
+        loadAdminJobs();
+    }
+    else if (section === 'complaints') {
+        document.getElementById('admin-content').innerHTML =
+            '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
+    }
+    else if (section === 'staff') loadAdminStaff();
+    else if (section === 'analytics') loadAnalyticsMenu();
+}
+
+function loadAnalyticsMenu() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML =
+        '<div class="support-grid">' +
+        '<button class="support-tile" onclick="openAnalytics(\'expenses\')"><div class="support-tile-icon">📤</div><div class="support-tile-title">Аналитика расходов</div></button>' +
+        '<button class="support-tile" onclick="openAnalytics(\'income\')"><div class="support-tile-icon">📥</div><div class="support-tile-title">Аналитика доходов</div></button>' +
+        '<button class="support-tile" onclick="openAnalytics(\'listings\')"><div class="support-tile-icon">🥧</div><div class="support-tile-title">Аналитика объявлений</div></button>' +
+        '</div>';
+}
+
+function defaultPeriod() {
+    var to = new Date();
+    var from = new Date();
+    from.setDate(to.getDate() - 30);
+    function fmt(d) {
+        var m = (d.getMonth()+1); m = m < 10 ? '0'+m : m;
+        var day = d.getDate(); day = day < 10 ? '0'+day : day;
+        return d.getFullYear() + '-' + m + '-' + day;
+    }
+    return { from: fmt(from), to: fmt(to) };
+}
+
+async function openAnalytics(kind) {
+    var titles = { expenses: 'Аналитика расходов', income: 'Аналитика доходов', listings: 'Аналитика объявлений' };
+    document.getElementById('admin-section-title').textContent = titles[kind] || 'Аналитика';
+    var p = defaultPeriod();
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '';
+
+    var period = document.createElement('div');
+    period.className = 'period-row';
+    period.innerHTML = '<div class="form-group" style="margin:0;"><label class="form-label">С</label><input class="form-input" type="date" id="an-from" value="' + p.from + '"></div>' +
+        '<div class="form-group" style="margin:0;"><label class="form-label">По</label><input class="form-input" type="date" id="an-to" value="' + p.to + '"></div>';
+    box.appendChild(period);
+
+    var btnShow = document.createElement('button');
+    btnShow.className = 'btn btn-secondary';
+    btnShow.style.marginBottom = '12px';
+    btnShow.textContent = 'Показать';
+    btnShow.onclick = function() { runAnalytics(kind); };
+    box.appendChild(btnShow);
+
+    var result = document.createElement('div');
+    result.id = 'analytics-result';
+    result.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    box.appendChild(result);
+
+    var btnPdf = document.createElement('button');
+    btnPdf.className = 'btn';
+    btnPdf.style.marginTop = '14px';
+    btnPdf.textContent = 'Скачать отчёт (PDF)';
+    btnPdf.onclick = function() { downloadAnalyticsPdf(kind); };
+    box.appendChild(btnPdf);
+
+    runAnalytics(kind);
+}
+
+async function runAnalytics(kind) {
+    var from = document.getElementById('an-from').value;
+    var to = document.getElementById('an-to').value;
+    var box = document.getElementById('analytics-result');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/analytics/summary?kind=' + encodeURIComponent(kind) + '&from=' + from + '&to=' + to);
+        if (kind === 'listings') {
+            box.innerHTML = renderListingsChart(data.categories || []) +
+                '<div class="info-block" style="margin-top:10px;">Всего объявлений: <b>' + (data.total || 0) + '</b></div>';
+        } else {
+            var label = kind === 'expenses' ? 'Сумма выплат' : 'Сумма пополнений';
+            box.innerHTML =
+                '<div class="wallet-balance" style="padding:20px 0;"><div class="wallet-amount">' +
+                Number(data.total || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) +
+                ' <small>$</small></div></div>' +
+                '<div class="info-block">' + label + ' за период · операций: <b>' + (data.count || 0) + '</b></div>';
+        }
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function renderListingsChart(cats) {
+    if (!cats.length) return '<div class="empty"><div class="icon">📭</div>Нет объявлений за период</div>';
+    var colors = ['#2ea6ff','#34c759','#ff9500','#ff3b30','#af52de','#5ac8fa','#ffcc00','#8e8e93'];
+    var total = cats.reduce(function(s,c){ return s + (c.value || 0); }, 0) || 1;
+    var grad = [];
+    var acc = 0;
+    cats.forEach(function(c, i) {
+        var start = (acc / total) * 100;
+        acc += (c.value || 0);
+        var end = (acc / total) * 100;
+        if (end > start) grad.push(colors[i % colors.length] + ' ' + start.toFixed(2) + '% ' + end.toFixed(2) + '%');
+    });
+    if (!grad.length) grad.push('#2ea6ff 0% 100%');
+    var legend = cats.map(function(c, i) {
+        var pct = Math.round((c.value || 0) / total * 100);
+        return '<div class="pie-legend-item"><span class="pie-dot" style="background:' + colors[i % colors.length] +
+            '"></span><span style="flex:1;">' + String(c.name || 'Другое').replace(/</g,'&lt;') +
+            '</span><b>' + (c.value || 0) + ' · ' + pct + '%</b></div>';
+    }).join('');
+    return '<div class="pie-wrap">' +
+        '<div class="pie-chart" style="background:conic-gradient(' + grad.join(',') + ');"></div>' +
+        '<div class="pie-legend" style="width:100%;max-width:320px;">' + legend + '</div></div>';
+}
+
+async function downloadAnalyticsPdf(kind) {
+    var from = document.getElementById('an-from').value;
+    var to = document.getElementById('an-to').value;
+    try {
+        var url = API_URL + '/api/admin/analytics/report.pdf?kind=' + encodeURIComponent(kind) +
+            '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
+        var res = await fetch(url, { headers: { 'X-Telegram-Init-Data': tg.initData } });
+        if (!res.ok) {
+            var err = await res.json().catch(function(){ return {}; });
+            throw new Error(err.error || ('HTTP ' + res.status));
+        }
+        var blob = await res.blob();
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'xcod_' + kind + '_' + from + '_' + to + '.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        if (tg.openLink) {
+            // also try open for telegram
+        }
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+
+function loadWorkCenter() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML =
+        '<div class="support-grid">' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">📝</div><div class="support-tile-title">Записаться на смену</div></button>' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">✅</div><div class="support-tile-title">Отработанные смены</div></button>' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">📜</div><div class="support-tile-title">История моих смен</div></button>' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">🗂️</div><div class="support-tile-title">История действий</div></button>' +
+        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">🚫</div><div class="support-tile-title">Список блокировок</div></button>' +
+        '</div>';
+}
+
+function loadCareerTracker() {
+    var box = document.getElementById('admin-content');
+    var role = (userData && userData.role) || 0;
+    var roleName = (userData && userData.role_name) || '—';
+    var html = '<div class="info-block"><b>Ваша роль:</b> ' + roleName + '</div>';
+
+    // Стажер (3) -> Модератор (4)
+    var internDone = role >= 4;
+    html += '<div class="list-item">' +
+        '<div class="top"><div class="title">Стажёр → Модератор</div>' +
+        '<span class="badge ' + (internDone ? 'badge-completed' : 'badge-pending') + '">' +
+        (internDone ? 'Выполнено' : 'В процессе') + '</span></div>' +
+        '<div class="subtitle">Нужно: <b>30 дней</b> и <b>12 смен</b></div></div>';
+
+    // Модератор (4) -> Админ (5)
+    var modDone = role >= 5;
+    html += '<div class="list-item">' +
+        '<div class="top"><div class="title">Модератор → Админ</div>' +
+        '<span class="badge ' + (modDone ? 'badge-completed' : 'badge-pending') + '">' +
+        (modDone ? 'Выполнено' : 'В процессе') + '</span></div>' +
+        '<div class="subtitle">Нужно: <b>360 дней</b>, <b>150 смен</b>, рейтинг <b>выше 4.75</b></div></div>';
+
+    // Placeholder progress (until shifts system is live)
+    html += '<div class="info-block" style="margin-top:8px;">Учёт смен и рейтинга подключится вместе с рабочим центром. Пока показаны условия повышения.</div>';
+
+    // Promotion request button - show when role is intern or moderator (eligible track)
+    // Without real shift data, only show message about conditions; when "met" we'd enable
+    // For now: if role is 3 (intern) or 4 (mod) show disabled-style info; if somehow we mark ready, show button
+    if (role === 3 || role === 4) {
+        html += '<button class="btn" style="margin-top:12px;" onclick="requestPromotion()">Подать заявку на повышение</button>';
+        html += '<div class="field-hint" style="margin-top:8px;">Заявка доступна после выполнения условий. Сейчас функция в подготовке — заявка уйдёт на рассмотрение админам.</div>';
+    } else if (role >= 5) {
+        html += '<div class="info-block">Вы уже на уровне админа или выше.</div>';
+    } else {
+        html += '<div class="info-block">Трекер доступен сотрудникам от роли «Стажёр».</div>';
+    }
+    box.innerHTML = html;
+}
+
+function requestPromotion() {
+    tg.showAlert('Заявка на повышение: пока в разработке. Условия будут проверяться автоматически по сменам.');
+}
+
+
+async function loadAdminListings() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/listings');
+        var items = data.listings || [];
+        _adminCache.listings = items;
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет объявлений на модерации</div>';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            var typeLabel = l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар';
+            return '<div class="list-item" style="cursor:pointer;" onclick="openAdminListingDetail(' + l.id + ')">' +
+                '<div class="top"><div class="title">' + (l.title || '').replace(/</g, '&lt;') +
+                ' #' + l.id + '</div></div>' +
+                '<div class="subtitle">' + typeLabel + ' · User: ' + l.seller_id +
+                '<br>' + (l.description || '').replace(/</g, '&lt;').slice(0, 80) + '…</div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function openAdminListingDetail(id) {
+    var l = (_adminCache.listings || []).find(function(x){ return x.id === id; });
+    if (!l) { tg.showAlert('Объявление не найдено'); return; }
+    document.getElementById('admin-detail-title').textContent = 'Объявление #' + id;
+    var typeLabel = l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар';
+    var html = '<div class="info-block">' +
+        '<b>Название:</b> ' + (l.title || '').replace(/</g, '&lt;') + '<br><br>' +
+        '<b>Описание:</b><br>' + (l.description || '').replace(/</g, '&lt;') + '<br><br>' +
+        '<b>Тип:</b> ' + typeLabel + '<br>' +
+        '<b>Продавец ID:</b> ' + l.seller_id + '<br>' +
+        (l.seller_username ? '<b>Username:</b> @' + l.seller_username + '<br>' : '') +
+        (l.seller_name ? '<b>Имя:</b> ' + l.seller_name + '<br>' : '');
+    if (l.listing_type === 'partner') {
+        html += '<b>Договор:</b> ' + (l.contract_number || '—') + '<br>' +
+            '<b>Согласие на аналитику:</b> ' + (l.analytics_consent ? 'да' : 'нет') + '<br>';
+    } else {
+        html += '<b>Вид товара:</b> ' + (l.product_type || '—') + '<br>' +
+            (l.bot_username ? '<b>Бот:</b> @' + l.bot_username + '<br>' : '') +
+            (l.tgstat_url ? '<b>TGStat:</b> ' + l.tgstat_url + '<br>' : '') +
+            '<b>Цена:</b> ' + l.price + '$<br>';
+    }
+    html += '<b>Создано:</b> ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
+    html += '<div class="btn-stack">';
+    if (l.listing_type === 'partner') {
+        html += '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', true)">Одобрить (указать цену)</button>';
+    } else {
+        html += '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', false)">Одобрить</button>';
+    }
+    html += '<button class="btn btn-danger" onclick="adminRejectListing(' + l.id + ')">Отклонить</button></div>';
+    document.getElementById('admin-detail-content').innerHTML = html;
+    showPage('admin-detail');
+}
+
+async function adminApproveListing(id, needPrice) {
+    var price = null;
+    if (needPrice) {
+        var p = prompt('Укажите цену для партнерского товара ($)');
+        if (p === null) return;
+        price = parseFloat(p);
+        if (!price || price < 1) { tg.showAlert('Некорректная цена'); return; }
+    }
+    try {
+        var body = price ? { price: price } : {};
+        await apiPost('/api/admin/listings/' + id + '/approve', body);
+        tg.showAlert('Объявление #' + id + ' одобрено');
+        openAdminSection('listings');
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function adminRejectListing(id) {
+    try {
+        await apiPost('/api/admin/listings/' + id + '/reject', {});
+        tg.showAlert('Объявление #' + id + ' отклонено');
+        openAdminSection('listings');
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function loadAdminRequests() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/requests');
+        var reqs = data.requests || [];
+        _adminCache.transactions = reqs;
+        if (!reqs.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на рассмотрении</div>';
+            return;
+        }
+        var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
+        box.innerHTML = reqs.map(function(r) {
+            var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+            return '<div class="list-item" style="cursor:pointer;" onclick="openAdminTxDetail(' + r.id + ')">' +
+                '<div class="top"><div class="title">' + typeName + ' #' + r.id + '</div></div>' +
+                '<div class="subtitle">User: ' + r.user_id + ' · ' + r.amount + '$ · ' +
+                (methodMap[r.method] || r.method || '') + '</div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function openAdminTxDetail(id) {
+    var r = (_adminCache.transactions || []).find(function(x){ return x.id === id; });
+    if (!r) { tg.showAlert('Заявка не найдена'); return; }
+    var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
+    var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+    document.getElementById('admin-detail-title').textContent = typeName + ' #' + id;
+    var html = '<div class="info-block">' +
+        '<b>Тип:</b> ' + typeName + '<br>' +
+        '<b>User ID:</b> ' + r.user_id + '<br>' +
+        '<b>Сумма:</b> ' + r.amount + '$<br>' +
+        '<b>Метод:</b> ' + (methodMap[r.method] || r.method || '—') + '<br>' +
+        (r.recipient ? '<b>Реквизиты:</b> ' + r.recipient + '<br>' : '') +
+        (r.recipient_name ? '<b>Имя:</b> ' + r.recipient_name + '<br>' : '') +
+        (r.comment ? '<b>Комментарий:</b> ' + r.comment + '<br>' : '') +
+        '<b>Статус:</b> ' + r.status + '<br>' +
+        '<b>Создано:</b> ' + (r.created_at || '').slice(0, 16).replace('T', ' ') +
+        '</div>' +
+        '<div class="btn-stack">' +
+        '<button class="btn btn-success" onclick="adminApprove(' + r.id + ')">Одобрить</button>' +
+        '<button class="btn btn-danger" onclick="adminReject(' + r.id + ')">Отклонить</button></div>';
+    document.getElementById('admin-detail-content').innerHTML = html;
+    showPage('admin-detail');
+}
+
+async function adminApprove(id) {
+    try {
+        await apiPost('/api/admin/approve', { request_id: id });
+        tg.showAlert('Заявка #' + id + ' одобрена');
+        openAdminSection('transactions');
+    } catch (e) { tg.showAlert(e.message); }
+}
+async function adminReject(id) {
+    try {
+        await apiPost('/api/admin/reject', { request_id: id });
+        tg.showAlert('Заявка #' + id + ' отклонена');
+        openAdminSection('transactions');
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function loadAdminJobs() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/job-applications');
+        var apps = data.applications || [];
+        _adminCache.jobs = apps;
+        if (!apps.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на работу</div>';
+            return;
+        }
+        box.innerHTML = apps.map(function(a) {
+            return '<div class="list-item" style="cursor:pointer;" onclick="openAdminJobDetail(' + a.id + ')">' +
+                '<div class="top"><div class="title">' + (a.full_name || '').replace(/</g, '&lt;') +
+                ' #' + a.id + '</div></div>' +
+                '<div class="subtitle">Возраст: ' + a.age + ' · ' + (a.employment_label || a.employment) + '</div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function openAdminJobDetail(id) {
+    var a = (_adminCache.jobs || []).find(function(x){ return x.id === id; });
+    if (!a) { tg.showAlert('Заявка не найдена'); return; }
+    document.getElementById('admin-detail-title').textContent = 'Заявка на работу #' + id;
+    var html = '<div class="info-block">' +
+        '<b>ФИО:</b> ' + (a.full_name || '').replace(/</g, '&lt;') + '<br>' +
+        '<b>Возраст:</b> ' + a.age + '<br>' +
+        '<b>Занятость:</b> ' + (a.employment_label || a.employment) + '<br>' +
+        '<b>Username:</b> @' + (a.username || '—') + '<br>' +
+        '<b>Телефон:</b> ' + (a.phone || '—') + '<br>' +
+        '<b>Почта:</b> ' + (a.email || '—') + '<br>' +
+        '<b>TG ID:</b> ' + a.user_id + '<br>' +
+        '<b>Создано:</b> ' + (a.created_at || '').slice(0, 16).replace('T', ' ') +
+        '</div>' +
+        '<div class="btn-stack">' +
+        '<button class="btn btn-success" onclick="setJobStatus(' + a.id + ', \'accepted\')">Принять</button>' +
+        '<button class="btn btn-danger" onclick="setJobStatus(' + a.id + ', \'rejected\')">Отклонить</button></div>';
+    document.getElementById('admin-detail-content').innerHTML = html;
+    showPage('admin-detail');
+}
+
+async function setJobStatus(id, status) {
+    try {
+        await apiPost('/api/admin/job-applications/' + id + '/status', { status: status });
+        tg.showAlert(status === 'accepted' ? 'Заявка принята' : 'Заявка отклонена');
+        openAdminSection('jobs');
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function loadAdminStaff() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/staff');
+        var staff = data.staff || [];
+        _adminCache.staff = staff;
+        var html = '';
+        if (userData.role >= 5) {
+            html += '<button class="btn" style="margin-bottom:12px;" onclick="showPage(\'admin-add-staff\')">Добавить сотрудника</button>';
+        }
+        if (!staff.length) {
+            html += '<div class="empty">Нет сотрудников</div>';
+            box.innerHTML = html;
+            return;
+        }
+        html += staff.map(function(s) {
+            var name = s.username ? ('@' + s.username) : (s.first_name || s.user_id);
+            return '<div class="list-item" style="cursor:pointer;" onclick="openStaffDetail(' + s.user_id + ')">' +
+                '<div class="top"><div class="title">' + name + '</div>' +
+                '<span class="badge badge-processing">' + s.role_name + '</span></div>' +
+                '<div class="subtitle">ID: ' + s.user_id + ' · Баланс: ' + s.balance + '$</div></div>';
+        }).join('');
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+function openStaffDetail(uid) {
+    if (userData.role < 5) {
+        tg.showAlert('Доступ только для админа и выше');
+        return;
+    }
+    var s = (_adminCache.staff || []).find(function(x){ return x.user_id === uid; });
+    if (!s) { tg.showAlert('Сотрудник не найден'); return; }
+    window._currentStaff = s;
+    var name = s.username ? ('@' + s.username) : (s.first_name || s.user_id);
+    var roles = [
+        { id: 0, name: 'Пользователь' },
+        { id: 1, name: 'Партнер' },
+        { id: 2, name: 'Корпоративный' },
+        { id: 3, name: 'Стажер' },
+        { id: 4, name: 'Модератор' },
+        { id: 5, name: 'Админ' },
+        { id: 6, name: 'Создатель' }
+    ];
+    var roleBtns = roles.filter(function(r){
+        return r.id !== s.role && r.id <= userData.role && (r.id < 6 || userData.role >= 6);
+    }).map(function(r) {
+        return '<button class="btn btn-secondary" style="margin-bottom:6px;" onclick="adminSetStaffRole(' + s.user_id + ', ' + r.id + ')">' + r.name + '</button>';
+    }).join('');
+
+    var html = '<div class="info-block">' +
+        '<b>Имя:</b> ' + (s.first_name || '—') + '<br>' +
+        '<b>Username:</b> ' + (s.username ? '@' + s.username : '—') + '<br>' +
+        '<b>ID:</b> ' + s.user_id + '<br>' +
+        '<b>Роль:</b> ' + s.role_name + '<br>' +
+        '<b>Баланс:</b> ' + s.balance + '$' +
+        '</div>' +
+        '<div class="section-title" style="font-size:16px;">Изменить роль</div>' +
+        (roleBtns || '<div class="info-block">Нет доступных ролей для назначения</div>') +
+        '<div class="section-title" style="font-size:16px;margin-top:16px;">Изменить баланс</div>' +
+        '<div class="form-group"><label class="form-label">Новый баланс ($)</label>' +
+        '<input class="form-input" type="number" id="staff-balance-input" value="' + s.balance + '"></div>' +
+        '<button class="btn" onclick="adminSetStaffBalance(' + s.user_id + ')">Сохранить баланс</button>';
+    document.getElementById('staff-detail-content').innerHTML = html;
+    showPage('admin-staff-detail');
+}
+
+async function adminSetStaffRole(uid, role) {
+    try {
+        await apiPost('/api/admin/staff', { user_id: uid, role: role });
+        tg.showAlert('Роль обновлена');
+        var data = await apiGet('/api/admin/staff');
+        _adminCache.staff = data.staff || [];
+        openStaffDetail(uid);
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function adminSetStaffBalance(uid) {
+    var val = parseFloat(document.getElementById('staff-balance-input').value);
+    if (isNaN(val) || val < 0) { tg.showAlert('Некорректная сумма'); return; }
+    try {
+        await apiPost('/api/admin/user/balance', { user_id: uid, balance: val, mode: 'set' });
+        tg.showAlert('Баланс обновлён');
+        var data = await apiGet('/api/admin/staff');
+        _adminCache.staff = data.staff || [];
+        openStaffDetail(uid);
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+
+function pickLanguage(code) {
+    tg.showAlert('Пока в разработке');
+}
+
+function applyThemeFromStorage() {
+    var theme = localStorage.getItem('xcod_theme') || 'auto';
+    setAppTheme(theme, true);
+}
+
+function setAppTheme(theme, silent) {
+    localStorage.setItem('xcod_theme', theme);
+    var root = document.documentElement;
+    if (theme === 'light') {
+        root.setAttribute('data-theme', 'light');
+        try { tg.setHeaderColor && tg.setHeaderColor('#ffffff'); } catch(e){}
+        try { tg.setBackgroundColor && tg.setBackgroundColor('#ffffff'); } catch(e){}
+    } else if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        try { tg.setHeaderColor && tg.setHeaderColor('#0f0f0f'); } catch(e){}
+        try { tg.setBackgroundColor && tg.setBackgroundColor('#0f0f0f'); } catch(e){}
+    } else {
+        root.removeAttribute('data-theme');
+        try {
+            if (tg.themeParams && tg.themeParams.bg_color) {
+                tg.setHeaderColor && tg.setHeaderColor(tg.themeParams.bg_color);
+                tg.setBackgroundColor && tg.setBackgroundColor(tg.themeParams.bg_color);
+            }
+        } catch(e){}
+    }
+    var labels = { auto: 'Как в Telegram', light: 'Светлая', dark: 'Тёмная' };
+    var el = document.getElementById('settings-theme-label');
+    if (el) el.textContent = labels[theme] || labels.auto;
+    document.querySelectorAll('.theme-btn').forEach(function(b){ b.classList.remove('active'); });
+    var btn = document.getElementById('theme-' + theme);
+    if (btn) btn.classList.add('active');
+    if (!silent) tg.HapticFeedback && tg.HapticFeedback.selectionChanged && tg.HapticFeedback.selectionChanged();
+}
+
+function openLink(url) { tg.openTelegramLink(url); }
+function openEmail(email) {
+    var mailto = 'mailto:' + email;
+    if (tg.openLink) tg.openLink(mailto);
+    else window.location.href = mailto;
+}
+function openExternal(url) {
+    if (tg.openLink) tg.openLink(url);
+    else window.open(url, '_blank');
+}
+
+(function boot() {
+    function start() {
+        try {
+            // если официальный скрипт уже подменил WebApp — берём его
+            tg = getTg();
+            if (tg.ready) tg.ready();
+            if (tg.expand) tg.expand();
+        } catch (e) {}
+        init();
+    }
+    // стартуем сразу (есть заглушка), через 300мс ещё раз если пришёл реальный WebApp
+    start();
+    setTimeout(function() {
+        try {
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+                tg = Telegram.WebApp;
+                if (!window.__xcodBootOk) start();
+            }
+        } catch (e) {}
+    }, 400);
+})();
+</script>
+</body>
+</html>
