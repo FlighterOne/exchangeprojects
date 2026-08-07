@@ -36,13 +36,9 @@
             if (!el.classList.contains('active')) return;
             // всё ещё loading
             el.innerHTML = '<div class="empty" style="padding:24px;text-align:center;">' +
-                '<div style="font-size:28px;margin-bottom:8px;">❌</div>' +
-                '<div style="margin-bottom:8px;">Загрузка зависла</div>' +
-                '<div style="font-size:12px;opacity:.7;word-break:break-all;margin-bottom:12px;">' +
-                (window.__xcodLastErr || 'Скрипт не завершил init. Проверьте API / кэш GitHub Pages.') +
-                '</div>' +
-                '<button onclick="location.reload()" style="padding:10px 16px;border:none;border-radius:10px;background:#2ea6ff;color:#fff;font-weight:600;">Повторить</button>' +
-                '</div>';
+                '<div class="spinner" style="margin:0 auto 12px;"></div>' +
+                '<div style="margin-bottom:8px;">Загрузка данных с сервера...</div>' +
+                '<button onclick="location.reload()" style="padding:10px 16px;border:none;border-radius:10px;background:#2ea6ff;color:#fff;font-weight:600;margin-top:12px;">Обновить</button></div>';
         } catch (e) {}
     }, 10000);
     </script>
@@ -1023,6 +1019,11 @@
             </div>
         </div>
         <div class="rating-row" id="profile-ratings"></div>
+        <div class="seg-toggle" id="profile-seg">
+            <button type="button" class="active" id="profile-seg-active" onclick="setOwnProfileStatus('active')">Действующие</button>
+            <button type="button" id="profile-seg-completed" onclick="setOwnProfileStatus('completed')">Завершённые</button>
+        </div>
+        <div id="profile-listings"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
     <!-- ADMIN -->
@@ -1245,54 +1246,53 @@ async function apiPost(path, body) {
 
 async function init() {
     var box = document.getElementById('page-loading');
-    function setLoad(msg) {
+    function setLoad() {
         try {
-            var box = document.getElementById('page-loading');
-            if (!box) return;
-            var lab = box.querySelector('.load-msg');
-            if (lab) lab.textContent = msg || 'Загрузка...';
+            var lab = box && box.querySelector('.load-msg');
+            if (lab) lab.textContent = 'Загрузка данных с сервера...';
         } catch (e) {}
     }
     try { applyThemeFromStorage(); } catch (e) {}
+    setLoad();
+
     try {
-        setLoad('Telegram...');
         if (!window.Telegram || !Telegram.WebApp) {
-            box.innerHTML = '<div class="empty"><div class="icon">⚠️</div>Нет Telegram.WebApp</div>';
-            return;
+            // тихо ждём / пробуем дальше через заглушку
         }
-        var tgLocal = Telegram.WebApp;
-        try { tgLocal.ready(); tgLocal.expand(); } catch (e) {}
+        var tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tg;
+        try { tgLocal.ready && tgLocal.ready(); tgLocal.expand && tgLocal.expand(); } catch (e) {}
+
         if (!tgLocal.initData) {
-            box.innerHTML = '<div class="empty"><div class="icon">⚠️</div>Откройте через кнопку бота в Telegram<br><small>initData пустой</small></div>';
+            // для клиента без тех. деталей
+            box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
             return;
         }
-        setLoad('API health...');
-        try {
-            await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
-        } catch (he) {
-            window.__xcodLastErr = he.message;
-            box.innerHTML = '<div class="empty"><div class="icon">❌</div>API недоступен<br><small>' +
-                API_URL + '</small><br><small>' + he.message +
-                '</small><br><button class="btn" style="margin-top:16px;" onclick="location.reload()">Повторить</button></div>';
+
+        // health + user с повтором, без показа технических ошибок
+        var ok = false;
+        for (var attempt = 0; attempt < 3 && !ok; attempt++) {
+            try {
+                await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
+                userData = await apiGet('/api/user');
+                ok = true;
+            } catch (e) {
+                await new Promise(function(r){ setTimeout(r, 800); });
+            }
+        }
+        if (!ok) {
+            box.innerHTML = '<div class="empty"><div class="spinner"></div>' +
+                '<div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div>' +
+                '<button class="btn" style="margin-top:16px;" onclick="location.reload()">Обновить</button></div>';
             return;
         }
-        setLoad('Пользователь...');
-        userData = await apiGet('/api/user');
-        setLoad('Интерфейс...');
-        try { renderMain(); } catch (re) {
-            window.__xcodLastErr = re.message;
-            box.innerHTML = '<div class="empty"><div class="icon">❌</div>Ошибка UI: ' + re.message + '</div>';
-            return;
-        }
+
+        try { renderMain(); } catch (re) {}
         showPage('home');
         window.__xcodBootOk = true;
     } catch (e) {
-        window.__xcodLastErr = (e && e.message) ? e.message : String(e);
-        box.innerHTML =
-            '<div class="empty"><div class="icon">❌</div>' + window.__xcodLastErr +
-            '<br><small style="word-break:break-all;">' + API_URL + '</small>' +
-            '<br><button class="btn" style="margin-top:16px;" onclick="location.reload()">Повторить</button>' +
-            '</div>';
+        box.innerHTML = '<div class="empty"><div class="spinner"></div>' +
+            '<div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div>' +
+            '<button class="btn" style="margin-top:16px;" onclick="location.reload()">Обновить</button></div>';
     }
 }
 
@@ -1392,6 +1392,7 @@ function showPage(name) {
     var page = document.getElementById('page-' + name);
     if (page) page.classList.add('active');
     if (name === 'home') loadListings();
+    if (name === 'profile') loadOwnProfileListings();
     if (name === 'my-listings') loadMyListings();
     if (name === 'favorites') loadFavorites();
     if (name === 'orders') loadOrders();
@@ -1485,6 +1486,43 @@ async function renderUserProfile() {
     }
 }
 
+
+
+var _ownProfileStatus = 'active';
+function setOwnProfileStatus(status) {
+    _ownProfileStatus = status || 'active';
+    var a = document.getElementById('profile-seg-active');
+    var c = document.getElementById('profile-seg-completed');
+    if (a && c) {
+        a.classList.toggle('active', _ownProfileStatus === 'active');
+        c.classList.toggle('active', _ownProfileStatus === 'completed');
+    }
+    loadOwnProfileListings();
+}
+
+async function loadOwnProfileListings() {
+    var box = document.getElementById('profile-listings');
+    if (!box || !userData || !userData.user_id) return;
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var status = _ownProfileStatus || 'active';
+        var p = await apiGet('/api/users/' + userData.user_id + '/profile?status=' + status);
+        var items = p.listings || [];
+        if (!items.length) {
+            box.innerHTML = '<div class="empty">Нет объявлений</div>';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                '<div class="ltitle">' + (l.title||'').replace(/</g,'&lt;') + '</div>' +
+                '<div class="ldesc">' + (l.description||'').replace(/</g,'&lt;') + '</div>' +
+                '<div class="meta"><div class="price">' + Number(l.price).toLocaleString('ru-RU') +
+                ' <small>$</small></div><span class="badge badge-processing">' + (l.status||'') + '</span></div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty">Нет объявлений</div>';
+    }
+}
 
 async function loadListings() {
     var box = document.getElementById('listings-feed');
