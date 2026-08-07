@@ -1464,6 +1464,17 @@ async function renderUserProfile() {
             html += '<div class="rating-chip"><div class="rl">Рейтинг сотрудника</div><div class="rv">★ ' + Number(p.rating_staff).toFixed(2) + '</div></div>';
         }
         html += '</div>';
+        // moderation actions
+        var myRole = (userData && userData.role) || 0;
+        var theirRole = p.role || 0;
+        if (myRole >= 4 && theirRole < myRole && p.user_id !== userData.user_id) {
+            html += '<div style="display:flex;gap:8px;margin:12px 0;">';
+            html += '<button class="btn btn-secondary" style="flex:1;" onclick="openRestrictPublish(' + p.user_id + ')">Ограничить публикацию</button>';
+            if (myRole >= 5) {
+                html += '<button class="btn" style="flex:1;background:var(--destructive);" onclick="openBanUser(' + p.user_id + ')">Заблокировать</button>';
+            }
+            html += '</div>';
+        }
         html += '<div class="seg-toggle">' +
             '<button class="' + (status==='active'?'active':'') + '" onclick="window._profileStatus=\'active\';renderUserProfile()">Действующие</button>' +
             '<button class="' + (status==='completed'?'active':'') + '" onclick="window._profileStatus=\'completed\';renderUserProfile()">Завершённые</button>' +
@@ -1553,36 +1564,175 @@ async function loadListings() {
     }
 }
 
+
+function openRestrictPublish(uid) {
+    var days = prompt('Срок ограничения публикации (дней):', '7');
+    if (days === null) return;
+    days = parseInt(days, 10);
+    if (!days || days < 1) { tg.showAlert('Укажите срок в днях'); return; }
+    var reason = prompt('Причина:', '');
+    if (reason === null) return;
+    apiPost('/api/admin/user/restrict-publish', { user_id: uid, days: days, reason: reason || '' })
+        .then(function(){ tg.showAlert('Публикация ограничена'); })
+        .catch(function(e){ tg.showAlert(e.message); });
+}
+function openBanUser(uid) {
+    var reason = prompt('Причина блокировки:', '');
+    if (reason === null) return;
+    if (!confirm('Заблокировать пользователя?')) return;
+    apiPost('/api/admin/user/ban', { user_id: uid, reason: reason || '' })
+        .then(function(){ tg.showAlert('Пользователь заблокирован'); })
+        .catch(function(e){ tg.showAlert(e.message); });
+}
+
 async function openListing(id) {
     var box = document.getElementById('listing-detail-content');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     showPage('listing-detail');
     try {
         var l = await apiGet('/api/listings/' + id);
-        var seller = formatSeller(l);
-        var canEdit = (l.seller_id === userData.user_id) || (userData.role >= 5);
-        var html = '<div class="card">' +
-            '<div class="card-title">Цена</div>' +
-            '<div class="card-value" style="color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>' +
-            '</div>' +
-            '<div class="section-title" style="font-size:17px;">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
-            '<div class="info-block" style="white-space:pre-line;">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
-            '<div class="info-block">Продавец: ' + sellerLinkHtml(l) +
-            (l.bot_username ? '<br>Бот: <b>@' + l.bot_username + '</b>' : '') +
-            '<br>Опубликовано: ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
-        var isFav = !!l.is_favorite;
-        html += '<div class="btn-stack" style="margin-top:12px;">' +
-            '<button class="btn btn-secondary" onclick="toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' + (isFav ? '★ В избранном' : '☆ В избранное') + '</button>';
-        if (canEdit) {
-            html += '<button class="btn btn-secondary" onclick="openEditListing(' + l.id + ')">Редактировать</button>';
-        }
-        html += '<button class="btn" onclick="tg.showAlert(\'Свяжитесь с продавцом через поддержку или бота\')">Связаться</button></div>';
-        box.innerHTML = html;
         window._currentListing = l;
+        var isFav = !!l.is_favorite;
+        var sellerLabel = l.seller_username ? ('@' + l.seller_username) :
+            (((l.seller_name || '') + ' ' + (l.seller_last_name || '')).trim() || ('ID ' + l.seller_id));
+        var canBuy = userData && userData.user_id !== l.seller_id && l.status === 'active';
+
+        var html = '';
+        html += '<div class="section-title" style="font-size:18px;margin-top:4px;">' + (l.title || '').replace(/</g,'&lt;') + '</div>';
+        html += '<div class="info-block" style="white-space:pre-line;margin-bottom:12px;">' + (l.description || '').replace(/</g,'&lt;') + '</div>';
+        html += '<button class="btn btn-secondary" style="margin-bottom:14px;" onclick="toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' +
+            (isFav ? '★ В избранном' : '☆ В избранное') + '</button>';
+        html += '<div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:10px;">' +
+            '<div style="font-size:22px;font-weight:700;color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div></div>';
+        html += '<div style="text-align:right;margin-bottom:14px;">' +
+            '<span class="seller-link" onclick="openUserProfile(' + l.seller_id + ')">' + sellerLabel.replace(/</g,'&lt;') + '</span></div>';
+        if (l.seller_username) {
+            html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="openExternal(\'https://t.me/' +
+                String(l.seller_username).replace(/'/g,'') + '\')">Написать</button>';
+        } else {
+            html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="tg.showAlert(\'У продавца нет username в Telegram\')">Написать</button>';
+        }
+        if (canBuy) {
+            html += '<button class="btn" onclick="startBuyListing(' + l.id + ')">Купить</button>';
+        }
+        box.innerHTML = html;
     } catch (e) {
         box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
     }
 }
+
+function startBuyListing(id) {
+    var l = window._currentListing;
+    if (!l || l.id !== id) return;
+    var price = Number(l.price) || 0;
+    var bal = Number(userData.balance) || 0;
+    if (bal < price) {
+        tg.showAlert('Недостаточно средств. Баланс: ' + bal + '$');
+        return;
+    }
+    var ok = confirm('Точно хотите купить этот товар за ' + price + '$?\\n\\nПосле оплаты у вас будет 120 минут на проверку файлов от продавца.');
+    if (!ok) return;
+    confirmBuyListing(id);
+}
+
+async function confirmBuyListing(id) {
+    try {
+        var res = await apiPost('/api/orders', { listing_id: id });
+        if (res.balance != null) setBalance(res.balance);
+        tg.showAlert('Заказ #' + res.order_id + ' создан. Ожидайте файлы от продавца.');
+        showPage('orders');
+        loadOrders();
+    } catch (e) {
+        tg.showAlert(e.message);
+    }
+}
+
+async function loadOrders() {
+    var box = document.getElementById('orders-list');
+    if (!box) return;
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/orders');
+        var items = data.orders || [];
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">📦</div>Заказов пока нет</div>';
+            return;
+        }
+        var stageMap = {
+            awaiting_seller: 'Продавец передаёт данные',
+            buyer_review: 'Проверка покупателем',
+            completed: 'Завершена',
+            refund_moderation: 'Модерация: возврат средств внутри процесса',
+            cancelled: 'Отменён'
+        };
+        box.innerHTML = items.map(function(o) {
+            var stage = stageMap[o.status] || o.status;
+            var title = (o.listing_title || ('Заказ #' + o.id)).replace(/</g,'&lt;');
+            var role = (userData.user_id === o.buyer_id) ? 'Покупка' : 'Продажа';
+            var actions = '';
+            if (o.status === 'awaiting_seller' && userData.user_id === o.seller_id) {
+                actions = '<button class="btn" style="margin-top:8px;" onclick="orderSellerSent(' + o.id + ')">Я отправил</button>';
+            }
+            if (o.status === 'buyer_review' && userData.user_id === o.buyer_id) {
+                actions = '<div class="btn-stack" style="margin-top:8px;">' +
+                    '<button class="btn" onclick="orderBuyerConfirm(' + o.id + ')">Всё в порядке</button>' +
+                    '<button class="btn btn-secondary" onclick="orderBuyerReject(' + o.id + ')">Файлы не в порядке</button></div>';
+            }
+            if (o.status === 'completed') {
+                var needRate = (userData.user_id === o.buyer_id && !o.buyer_rating) ||
+                    (userData.user_id === o.seller_id && !o.seller_rating);
+                if (needRate) {
+                    actions = '<div style="margin-top:8px;font-size:13px;color:var(--hint);">Оцените от 1 до 5:</div>' +
+                        '<div style="display:flex;gap:6px;margin-top:6px;">' +
+                        [1,2,3,4,5].map(function(s){
+                            return '<button class="btn btn-secondary" style="padding:8px 0;flex:1;" onclick="orderRate(' + o.id + ',' + s + ')">' + s + '★</button>';
+                        }).join('') + '</div>';
+                }
+            }
+            return '<div class="list-item">' +
+                '<div class="top"><div class="title">' + title + '</div>' +
+                '<span class="badge badge-processing">' + role + '</span></div>' +
+                '<div class="subtitle">#' + o.id + ' · ' + Number(o.amount).toLocaleString('ru-RU') + '$</div>' +
+                '<div class="subtitle" style="margin-top:4px;"><b>' + stage + '</b></div>' +
+                actions + '</div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty">Не удалось загрузить заказы</div>';
+    }
+}
+
+async function orderSellerSent(id) {
+    try {
+        await apiPost('/api/orders/' + id + '/seller-sent', {});
+        tg.showAlert('Отмечено: файлы отправлены');
+        loadOrders();
+    } catch (e) { tg.showAlert(e.message); }
+}
+async function orderBuyerConfirm(id) {
+    try {
+        await apiPost('/api/orders/' + id + '/buyer-confirm', {});
+        tg.showAlert('Сделка завершена');
+        userData = await apiGet('/api/user');
+        setBalance(userData.balance);
+        loadOrders();
+    } catch (e) { tg.showAlert(e.message); }
+}
+async function orderBuyerReject(id) {
+    if (!confirm('Отправить на модерацию (возврат средств внутри процесса)?')) return;
+    try {
+        await apiPost('/api/orders/' + id + '/buyer-reject', {});
+        tg.showAlert('Отправлено на модерацию');
+        loadOrders();
+    } catch (e) { tg.showAlert(e.message); }
+}
+async function orderRate(id, stars) {
+    try {
+        await apiPost('/api/orders/' + id + '/rate', { stars: stars });
+        tg.showAlert('Спасибо за оценку: ' + stars + '★');
+        loadOrders();
+    } catch (e) { tg.showAlert(e.message); }
+}
+
 
 function openEditListing(id) {
     var l = window._currentListing;
