@@ -770,7 +770,18 @@
             <div class="section-title" style="margin-bottom:0;">Мои объявления</div>
             <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showPage('listing-create')">+ Создать</button>
         </div>
+        <div class="seg-toggle" id="my-listings-seg" style="grid-template-columns:1fr 1fr 1fr;">
+            <button type="button" class="active" id="my-seg-mod" onclick="setMyListingsTab('moderation')">На модерации</button>
+            <button type="button" id="my-seg-active" onclick="setMyListingsTab('active')">Активные</button>
+            <button type="button" id="my-seg-done" onclick="setMyListingsTab('completed')">Завершённые</button>
+        </div>
         <div id="my-listings-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <div id="page-order-detail" class="page">
+        <button class="back-link" onclick="showPage('orders')">← История заказов</button>
+        <div class="section-title">Заказ</div>
+        <div id="order-detail-content"></div>
     </div>
 
     <!-- ORDERS -->
@@ -1412,13 +1423,12 @@ function showPage(name) {
 
 
 function formatSeller(l) {
-    var label;
-    if (l.seller_username) label = '@' + l.seller_username;
-    else {
-        var name = ((l.seller_name || '') + ' ' + (l.seller_last_name || '')).trim();
-        label = name || ('ID ' + l.seller_id);
-    }
-    return label;
+    if (l.seller_username) return '@' + l.seller_username;
+    if (l.username) return '@' + l.username;
+    var name = ((l.seller_name || l.first_name || '') + ' ' + (l.seller_last_name || l.last_name || '')).trim();
+    var bad = {staff:1, 'сотрудник':1, 'новый пользователь':1};
+    if (name && !bad[name.toLowerCase()]) return name;
+    return 'ID ' + (l.seller_id || l.user_id || '');
 }
 function sellerLinkHtml(l) {
     var label = formatSeller(l).replace(/</g, '&lt;');
@@ -1449,9 +1459,19 @@ async function renderUserProfile() {
     var box = document.getElementById('user-profile-content');
     try {
         var p = await apiGet('/api/users/' + uid + '/profile?status=' + status);
-        var uname = p.username ? ('@' + p.username) : ((p.first_name || '') + ' ' + (p.last_name || '')).trim() || ('ID ' + p.user_id);
+        var rawName = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
+        var badNames = {staff:1, 'сотрудник':1, 'новый пользователь':1};
+        if (rawName && badNames[rawName.toLowerCase()]) rawName = '';
+        var uname = p.username ? ('@' + p.username) : (rawName || ('ID ' + p.user_id));
+        var photo = p.photo_url || '';
+        var initial = uname.replace('@','').charAt(0).toUpperCase() || '?';
         var html = '<div class="profile-header" style="padding-top:8px;">' +
-            '<div class="profile-fullname">' + uname.replace(/</g,'&lt;') + '</div>' +
+            '<div class="profile-avatar-wrap" style="margin:0 auto 10px;">' +
+            (photo
+                ? '<img class="profile-avatar-img" src="' + String(photo).replace(/"/g,'') + '" alt="" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;">'
+                : '<div class="profile-avatar-fallback" style="display:flex;">' + initial + '</div>') +
+            '</div>' +
+            '<div class="profile-name">' + uname.replace(/</g,'&lt;') + '</div>' +
             '</div>' +
             '<div class="list-item"><div class="top">' +
             '<div class="title">ID <span style="font-weight:600;color:var(--hint);">' + p.user_id + '</span></div>' +
@@ -1593,32 +1613,81 @@ async function openListing(id) {
         var l = await apiGet('/api/listings/' + id);
         window._currentListing = l;
         var isFav = !!l.is_favorite;
-        var sellerLabel = l.seller_username ? ('@' + l.seller_username) :
-            (((l.seller_name || '') + ' ' + (l.seller_last_name || '')).trim() || ('ID ' + l.seller_id));
-        var canBuy = userData && userData.user_id !== l.seller_id && l.status === 'active';
+        var sellerLabel = formatSeller(l);
+        var isOwner = userData && userData.user_id === l.seller_id;
+        var canBuy = userData && !isOwner && l.status === 'active';
 
         var html = '';
         html += '<div class="section-title" style="font-size:18px;margin-top:4px;">' + (l.title || '').replace(/</g,'&lt;') + '</div>';
-        html += '<div class="info-block" style="white-space:pre-line;margin-bottom:12px;">' + (l.description || '').replace(/</g,'&lt;') + '</div>';
-        html += '<button class="btn btn-secondary" style="margin-bottom:14px;" onclick="toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' +
+        html += '<div class="info-block" style="white-space:pre-line;margin-bottom:14px;">' + (l.description || '').replace(/</g,'&lt;') + '</div>';
+
+        // price left + profile right
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">';
+        html += '<div style="font-size:22px;font-weight:700;color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>';
+        html += '<span class="seller-link" style="text-align:right;" onclick="openUserProfile(' + l.seller_id + ')">' + sellerLabel.replace(/</g,'&lt;') + '</span>';
+        html += '</div>';
+
+        html += '<button class="btn btn-secondary" style="margin-bottom:12px;" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' +
             (isFav ? '★ В избранном' : '☆ В избранное') + '</button>';
-        html += '<div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:10px;">' +
-            '<div style="font-size:22px;font-weight:700;color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div></div>';
-        html += '<div style="text-align:right;margin-bottom:14px;">' +
-            '<span class="seller-link" onclick="openUserProfile(' + l.seller_id + ')">' + sellerLabel.replace(/</g,'&lt;') + '</span></div>';
+
         if (l.seller_username) {
             html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="openExternal(\'https://t.me/' +
-                String(l.seller_username).replace(/'/g,'') + '\')">Написать</button>';
+                String(l.seller_username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Написать</button>';
         } else {
             html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="tg.showAlert(\'У продавца нет username в Telegram\')">Написать</button>';
         }
+
         if (canBuy) {
             html += '<button class="btn" onclick="startBuyListing(' + l.id + ')">Купить</button>';
+        }
+
+        // owner actions
+        if (isOwner) {
+            if (l.status === 'active') {
+                html += '<button class="btn btn-secondary" style="margin-top:10px;" onclick="unpublishListing(' + l.id + ')">Снять с публикации</button>';
+            } else if (l.status === 'unpublished' || l.status === 'rejected') {
+                html += '<div class="btn-stack" style="margin-top:10px;">';
+                html += '<button class="btn" onclick="republishListing(' + l.id + ')">Опубликовать</button>';
+                html += '<button class="btn btn-secondary" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
+                html += '</div>';
+            }
         }
         box.innerHTML = html;
     } catch (e) {
         box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
     }
+}
+
+async function unpublishListing(id) {
+    if (!confirm('Снять объявление с публикации?')) return;
+    try {
+        await apiPost('/api/listings/' + id + '/unpublish', {});
+        tg.showAlert('Снято с публикации');
+        openListing(id);
+        loadMyListings();
+    } catch (e) { tg.showAlert(e.message); }
+}
+async function republishListing(id) {
+    try {
+        await apiPost('/api/listings/' + id + '/republish', {});
+        tg.showAlert('Отправлено на модерацию');
+        openListing(id);
+        loadMyListings();
+    } catch (e) { tg.showAlert(e.message); }
+}
+async function deleteListingHistory(id) {
+    if (!confirm('Удалить объявление из истории?')) return;
+    try {
+        var res = await fetch(API_URL + '/api/listings/' + id + '?initData=' + encodeURIComponent(tg.initData || ''), {
+            method: 'DELETE',
+            headers: { 'X-Telegram-Init-Data': tg.initData || '' }
+        });
+        var data = await res.json().catch(function(){ return {}; });
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        tg.showAlert('Удалено');
+        showPage('my-listings');
+        loadMyListings();
+    } catch (e) { tg.showAlert(e.message); }
 }
 
 function startBuyListing(id) {
@@ -1654,6 +1723,7 @@ async function loadOrders() {
     try {
         var data = await apiGet('/api/orders');
         var items = data.orders || [];
+        window._ordersCache = items;
         if (!items.length) {
             box.innerHTML = '<div class="empty"><div class="icon">📦</div>Заказов пока нет</div>';
             return;
@@ -1662,50 +1732,81 @@ async function loadOrders() {
             awaiting_seller: 'Продавец передаёт данные',
             buyer_review: 'Проверка покупателем',
             completed: 'Завершена',
-            refund_moderation: 'Модерация: возврат средств внутри процесса',
+            refund_moderation: 'Модерация: возврат',
             cancelled: 'Отменён'
         };
         box.innerHTML = items.map(function(o) {
             var stage = stageMap[o.status] || o.status;
             var title = (o.listing_title || ('Заказ #' + o.id)).replace(/</g,'&lt;');
             var role = (userData.user_id === o.buyer_id) ? 'Покупка' : 'Продажа';
-            var actions = '';
-            if (o.status === 'awaiting_seller' && userData.user_id === o.seller_id) {
-                actions = '<button class="btn" style="margin-top:8px;" onclick="orderSellerSent(' + o.id + ')">Я отправил</button>';
-            }
-            if (o.status === 'buyer_review' && userData.user_id === o.buyer_id) {
-                actions = '<div class="btn-stack" style="margin-top:8px;">' +
-                    '<button class="btn" onclick="orderBuyerConfirm(' + o.id + ')">Всё в порядке</button>' +
-                    '<button class="btn btn-secondary" onclick="orderBuyerReject(' + o.id + ')">Файлы не в порядке</button></div>';
-            }
-            if (o.status === 'completed') {
-                var needRate = (userData.user_id === o.buyer_id && !o.buyer_rating) ||
-                    (userData.user_id === o.seller_id && !o.seller_rating);
-                if (needRate) {
-                    actions = '<div style="margin-top:8px;font-size:13px;color:var(--hint);">Оцените от 1 до 5:</div>' +
-                        '<div style="display:flex;gap:6px;margin-top:6px;">' +
-                        [1,2,3,4,5].map(function(s){
-                            return '<button class="btn btn-secondary" style="padding:8px 0;flex:1;" onclick="orderRate(' + o.id + ',' + s + ')">' + s + '★</button>';
-                        }).join('') + '</div>';
-                }
-            }
-            return '<div class="list-item">' +
+            return '<div class="list-item" style="cursor:pointer;" onclick="openOrderDetail(' + o.id + ')">' +
                 '<div class="top"><div class="title">' + title + '</div>' +
                 '<span class="badge badge-processing">' + role + '</span></div>' +
                 '<div class="subtitle">#' + o.id + ' · ' + Number(o.amount).toLocaleString('ru-RU') + '$</div>' +
-                '<div class="subtitle" style="margin-top:4px;"><b>' + stage + '</b></div>' +
-                actions + '</div>';
+                '<div class="subtitle" style="margin-top:4px;"><b>' + stage + '</b></div></div>';
         }).join('');
     } catch (e) {
         box.innerHTML = '<div class="empty">Не удалось загрузить заказы</div>';
     }
 }
 
+function openOrderDetail(id) {
+    var items = window._ordersCache || [];
+    var o = null;
+    for (var i = 0; i < items.length; i++) if (items[i].id === id) o = items[i];
+    if (!o) { loadOrders(); return; }
+    var stageMap = {
+        awaiting_seller: 'Продавец передаёт данные',
+        buyer_review: 'Проверка покупателем',
+        completed: 'Завершена',
+        refund_moderation: 'Модерация: возврат средств внутри процесса',
+        cancelled: 'Отменён'
+    };
+    var box = document.getElementById('order-detail-content');
+    var title = (o.listing_title || ('Заказ #' + o.id)).replace(/</g,'&lt;');
+    var role = (userData.user_id === o.buyer_id) ? 'Покупка' : 'Продажа';
+    var html = '<div class="list-item"><div class="top"><div class="title">' + title + '</div>' +
+        '<span class="badge badge-processing">' + role + '</span></div>' +
+        '<div class="subtitle">Заказ #' + o.id + '</div></div>';
+    html += '<div class="info-block">Сумма: <b>' + Number(o.amount).toLocaleString('ru-RU') + '$</b><br>' +
+        'Этап: <b>' + (stageMap[o.status] || o.status) + '</b><br>' +
+        'Создан: ' + String(o.created_at || '').slice(0, 19).replace('T', ' ') + '</div>';
+    if (o.status === 'awaiting_seller' && userData.user_id === o.seller_id) {
+        html += '<button class="btn" style="margin-top:12px;" onclick="orderSellerSent(' + o.id + ')">Я отправил</button>';
+    }
+    if (o.status === 'buyer_review' && userData.user_id === o.buyer_id) {
+        html += '<div class="btn-stack" style="margin-top:12px;">' +
+            '<button class="btn" onclick="orderBuyerConfirm(' + o.id + ')">Всё в порядке</button>' +
+            '<button class="btn btn-secondary" onclick="orderBuyerReject(' + o.id + ')">Файлы не в порядке</button></div>';
+    }
+    if (o.status === 'completed') {
+        var needRate = (userData.user_id === o.buyer_id && !o.buyer_rating) ||
+            (userData.user_id === o.seller_id && !o.seller_rating);
+        if (needRate) {
+            html += '<div style="margin-top:12px;font-size:13px;color:var(--hint);">Оцените от 1 до 5:</div>' +
+                '<div style="display:flex;gap:6px;margin-top:6px;">' +
+                [1,2,3,4,5].map(function(s){
+                    return '<button class="btn btn-secondary" style="padding:8px 0;flex:1;" onclick="orderRate(' + o.id + ',' + s + ')">' + s + '★</button>';
+                }).join('') + '</div>';
+        } else {
+            html += '<div class="info-block">Сделка завершена</div>';
+        }
+    }
+    box.innerHTML = html;
+    showPage('order-detail');
+}
+
+async function refreshOrdersAndDetail(id) {
+    await loadOrders();
+    if (document.getElementById('page-order-detail') && document.getElementById('page-order-detail').classList.contains('active')) {
+        openOrderDetail(id);
+    }
+}
 async function orderSellerSent(id) {
     try {
         await apiPost('/api/orders/' + id + '/seller-sent', {});
         tg.showAlert('Отмечено: файлы отправлены');
-        loadOrders();
+        await refreshOrdersAndDetail(id);
     } catch (e) { tg.showAlert(e.message); }
 }
 async function orderBuyerConfirm(id) {
@@ -1714,7 +1815,7 @@ async function orderBuyerConfirm(id) {
         tg.showAlert('Сделка завершена');
         userData = await apiGet('/api/user');
         setBalance(userData.balance);
-        loadOrders();
+        await refreshOrdersAndDetail(id);
     } catch (e) { tg.showAlert(e.message); }
 }
 async function orderBuyerReject(id) {
@@ -1722,14 +1823,14 @@ async function orderBuyerReject(id) {
     try {
         await apiPost('/api/orders/' + id + '/buyer-reject', {});
         tg.showAlert('Отправлено на модерацию');
-        loadOrders();
+        await refreshOrdersAndDetail(id);
     } catch (e) { tg.showAlert(e.message); }
 }
 async function orderRate(id, stars) {
     try {
         await apiPost('/api/orders/' + id + '/rate', { stars: stars });
         tg.showAlert('Спасибо за оценку: ' + stars + '★');
-        loadOrders();
+        await refreshOrdersAndDetail(id);
     } catch (e) { tg.showAlert(e.message); }
 }
 
@@ -1969,36 +2070,73 @@ async function cancelRequest(id) {
     } catch(e) { tg.showAlert(e.message); }
 }
 
+var _myListingsTab = 'moderation';
+var _myListingsCache = [];
+function setMyListingsTab(tab) {
+    _myListingsTab = tab || 'moderation';
+    ['mod','active','done'].forEach(function(k) {
+        var el = document.getElementById('my-seg-' + k);
+        // ids: my-seg-mod, my-seg-active, my-seg-done
+    });
+    var map = { moderation: 'my-seg-mod', active: 'my-seg-active', completed: 'my-seg-done' };
+    Object.keys(map).forEach(function(k) {
+        var el = document.getElementById(map[k]);
+        if (el) el.classList.toggle('active', k === _myListingsTab);
+    });
+    renderMyListings();
+}
+
 async function loadMyListings() {
     var box = document.getElementById('my-listings-list');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     try {
         var data = await apiGet('/api/my-listings');
-        var items = data.listings || [];
-        if (!items.length) {
-            box.innerHTML = '<div class="empty"><div class="icon">📋</div>У вас пока нет объявлений</div>';
-            return;
-        }
-        var statusMap = {
-            pending: ['На модерации', 'badge-pending'],
-            active: ['Опубликовано', 'badge-completed'],
-            rejected: ['Отклонено', 'badge-cancelled'],
-            deleted: ['Удалено', 'badge-cancelled']
-        };
-        box.innerHTML = items.map(function(l) {
-            var st = statusMap[l.status] || [l.status, 'badge-pending'];
-            var date = (l.created_at || '').slice(0, 10);
-            var priceText = (l.listing_type === 'partner' && !l.price) ? 'Цена по аналитике' : (Number(l.price).toLocaleString('ru-RU') + ' $');
-            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
-                '<div class="top" style="display:flex;justify-content:space-between;margin-bottom:6px;"><div class="price" style="margin:0;">' + priceText + '</div><span class="badge ' + st[1] + '">' + st[0] + '</span></div>' +
-                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
-                '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
-                '<div class="meta"><span>' + (l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар') + '</span><span>' + date + '</span></div>' +
-                '</div>';
-        }).join('');
+        _myListingsCache = data.listings || [];
+        renderMyListings();
     } catch (e) {
         box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
     }
+}
+
+function renderMyListings() {
+    var box = document.getElementById('my-listings-list');
+    if (!box) return;
+    var items = _myListingsCache || [];
+    var filtered;
+    if (_myListingsTab === 'moderation') {
+        filtered = items.filter(function(l){ return l.status === 'pending'; });
+    } else if (_myListingsTab === 'active') {
+        filtered = items.filter(function(l){ return l.status === 'active' || l.status === 'unpublished'; });
+    } else {
+        filtered = items.filter(function(l){
+            return ['sold','completed','rejected','deleted','refund_moderation'].indexOf(l.status) >= 0;
+        });
+    }
+    if (!filtered.length) {
+        box.innerHTML = '<div class="empty"><div class="icon">📋</div>Нет объявлений в этом разделе</div>';
+        return;
+    }
+    var statusMap = {
+        pending: ['На модерации', 'badge-pending'],
+        active: ['Активно', 'badge-completed'],
+        unpublished: ['Снято', 'badge-cancelled'],
+        rejected: ['Отклонено', 'badge-cancelled'],
+        sold: ['Продано', 'badge-completed'],
+        completed: ['Завершено', 'badge-completed'],
+        refund_moderation: ['Возврат', 'badge-pending'],
+        deleted: ['Удалено', 'badge-cancelled']
+    };
+    box.innerHTML = filtered.map(function(l) {
+        var st = statusMap[l.status] || [l.status, 'badge-pending'];
+        var date = (l.created_at || '').slice(0, 10);
+        var priceText = (l.listing_type === 'partner' && !l.price) ? 'Цена по аналитике' : (Number(l.price).toLocaleString('ru-RU') + ' $');
+        return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+            '<div class="top" style="display:flex;justify-content:space-between;margin-bottom:6px;"><div class="price" style="margin:0;">' + priceText + '</div><span class="badge ' + st[1] + '">' + st[0] + '</span></div>' +
+            '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+            '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
+            '<div class="meta"><span>' + (l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар') + '</span><span>' + date + '</span></div>' +
+            '</div>';
+    }).join('');
 }
 
 async function loadFavorites() {
