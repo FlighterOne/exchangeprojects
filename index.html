@@ -255,11 +255,17 @@
             margin-bottom: 12px; cursor: pointer; transition: opacity 0.15s;
         }
         .listing-card:active { opacity: 0.85; }
-        .listing-card .lseller {
-            font-size: 13px; color: var(--link); font-weight: 500; margin-bottom: 8px;
+        .listing-card .ltitle-row {
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+            margin-bottom: 6px;
         }
         .listing-card .ltitle {
-            font-size: 16px; font-weight: 600; margin-bottom: 6px; line-height: 1.3;
+            font-size: 16px; font-weight: 600; line-height: 1.3; flex: 1; min-width: 0;
+        }
+        .listing-card .lseller {
+            font-size: 13px; color: var(--link); font-weight: 500;
+            flex-shrink: 0; max-width: 42%; text-align: right; line-height: 1.3;
+            padding-top: 2px;
         }
         .listing-card .ldesc {
             font-size: 13px; color: var(--hint); line-height: 1.4;
@@ -1571,8 +1577,10 @@ async function loadListings() {
             var isFav = !!l.is_favorite;
             var priceNum = Number(l.price).toLocaleString('ru-RU');
             return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
-                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
+                '<div class="ltitle-row">' +
                 '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
+                '</div>' +
                 '<div class="ldesc">' + desc + '</div>' +
                 '<div class="meta">' +
                 '<div class="price">' + priceNum + ' <small>$</small></div>' +
@@ -2131,10 +2139,11 @@ function renderMyListings() {
         var date = (l.created_at || '').slice(0, 10);
         var priceText = (l.listing_type === 'partner' && !l.price) ? 'Цена по аналитике' : (Number(l.price).toLocaleString('ru-RU') + ' $');
         return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
-            '<div class="top" style="display:flex;justify-content:space-between;margin-bottom:6px;"><div class="price" style="margin:0;">' + priceText + '</div><span class="badge ' + st[1] + '">' + st[0] + '</span></div>' +
+            '<div class="ltitle-row">' +
             '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+            '<span class="badge ' + st[1] + '">' + st[0] + '</span></div>' +
             '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
-            '<div class="meta"><span>' + (l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар') + '</span><span>' + date + '</span></div>' +
+            '<div class="meta"><div class="price">' + priceText + '</div><span style="font-size:12px;color:var(--hint);">' + date + '</span></div>' +
             '</div>';
     }).join('');
 }
@@ -2152,8 +2161,10 @@ async function loadFavorites() {
         box.innerHTML = items.map(function(l) {
             var priceNum = Number(l.price).toLocaleString('ru-RU');
             return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
-                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
+                '<div class="ltitle-row">' +
                 '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
+                '</div>' +
                 '<div class="ldesc">' + (l.description || '').replace(/</g, '&lt;') + '</div>' +
                 '<div class="meta">' +
                 '<div class="price">' + priceNum + ' <small>$</small></div>' +
