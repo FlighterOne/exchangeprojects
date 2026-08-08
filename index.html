@@ -193,6 +193,8 @@
         .badge-processing { background: rgba(46,166,255,0.15); color: var(--button); }
         .badge-completed { background: rgba(52,199,89,0.15); color: var(--success); }
         .badge-cancelled { background: rgba(255,59,48,0.15); color: var(--destructive); }
+        .badge-muted { background: rgba(128,128,128,0.18); color: var(--hint); }
+        .badge-moderation { background: rgba(255,204,0,0.2); color: #e6a800; }
 
         .form-group { margin-bottom: 14px; }
         .form-label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 6px; }
@@ -1428,6 +1430,21 @@ function showPage(name) {
 }
 
 
+
+function listingStatusBadge(status) {
+    var map = {
+        pending: ['На модерации', 'badge-moderation'],
+        active: ['Активно', 'badge-muted'],
+        unpublished: ['Снято', 'badge-muted'],
+        rejected: ['Отклонено', 'badge-cancelled'],
+        sold: ['Завершён', 'badge-muted'],
+        completed: ['Завершён', 'badge-muted'],
+        refund_moderation: ['Возврат', 'badge-moderation'],
+        deleted: ['Удалено', 'badge-muted']
+    };
+    return map[status] || [status || '—', 'badge-muted'];
+}
+
 function formatSeller(l) {
     if (l.seller_username) return '@' + l.seller_username;
     if (l.username) return '@' + l.username;
@@ -1514,7 +1531,7 @@ async function renderUserProfile() {
                     '<div class="ltitle">' + (l.title||'').replace(/</g,'&lt;') + '</div>' +
                     '<div class="ldesc">' + (l.description||'').replace(/</g,'&lt;') + '</div>' +
                     '<div class="meta"><div class="price">' + Number(l.price).toLocaleString('ru-RU') +
-                    ' <small>$</small></div><span class="badge badge-processing">' + (l.status||'') + '</span></div></div>';
+                    ' <small>$</small></div><span class="badge ' + listingStatusBadge(l.status)[1] + '">' + listingStatusBadge(l.status)[0] + '</span></div></div>';
             }).join('');
         }
         box.innerHTML = html;
@@ -1554,7 +1571,7 @@ async function loadOwnProfileListings() {
                 '<div class="ltitle">' + (l.title||'').replace(/</g,'&lt;') + '</div>' +
                 '<div class="ldesc">' + (l.description||'').replace(/</g,'&lt;') + '</div>' +
                 '<div class="meta"><div class="price">' + Number(l.price).toLocaleString('ru-RU') +
-                ' <small>$</small></div><span class="badge badge-processing">' + (l.status||'') + '</span></div></div>';
+                ' <small>$</small></div><span class="badge ' + listingStatusBadge(l.status)[1] + '">' + listingStatusBadge(l.status)[0] + '</span></div></div>';
         }).join('');
     } catch (e) {
         box.innerHTML = '<div class="empty">Нет объявлений</div>';
@@ -2125,14 +2142,14 @@ function renderMyListings() {
         return;
     }
     var statusMap = {
-        pending: ['На модерации', 'badge-pending'],
-        active: ['Активно', 'badge-completed'],
-        unpublished: ['Снято', 'badge-cancelled'],
+        pending: ['На модерации', 'badge-moderation'],
+        active: ['Активно', 'badge-muted'],
+        unpublished: ['Снято', 'badge-muted'],
         rejected: ['Отклонено', 'badge-cancelled'],
-        sold: ['Продано', 'badge-completed'],
-        completed: ['Завершено', 'badge-completed'],
-        refund_moderation: ['Возврат', 'badge-pending'],
-        deleted: ['Удалено', 'badge-cancelled']
+        sold: ['Завершён', 'badge-muted'],
+        completed: ['Завершён', 'badge-muted'],
+        refund_moderation: ['Возврат', 'badge-moderation'],
+        deleted: ['Удалено', 'badge-muted']
     };
     box.innerHTML = filtered.map(function(l) {
         var st = statusMap[l.status] || [l.status, 'badge-pending'];
