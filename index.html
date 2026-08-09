@@ -401,8 +401,12 @@
             font-size: 22px; font-weight: 700; margin-bottom: 4px;
         }
         .profile-username {
-            font-size: 14px; color: var(--hint);
+            font-size: 15px; color: var(--link); font-weight: 500;
+            cursor: pointer; display: inline-block;
+            border: none; background: none; padding: 0; margin: 0;
+            text-decoration: none;
         }
+        .profile-username:active { opacity: 0.7; }
 
         .user-chip {
             overflow: hidden;
@@ -528,7 +532,7 @@
         }
         .rating-chip .rl { font-size: 12px; color: var(--hint); }
         .rating-chip .rv { font-size: 20px; font-weight: 700; margin-top: 4px; }
-        .seller-link { color: var(--link); font-weight: 500; cursor: pointer; }
+        .seller-link { color: var(--link); font-weight: 500; cursor: pointer; border: none; background: none; padding: 0; text-decoration: none; }
         .seller-link:active { opacity: 0.7; }
         .pie-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; margin: 12px 0; }
         .pie-legend { width: 100%; }
@@ -1355,7 +1359,15 @@ function renderMain() {
 
     // Profile page
     document.getElementById('profile-name').textContent = fullName;
-    document.getElementById('profile-username').textContent = username ? '@' + username : '';
+    var pun = document.getElementById('profile-username');
+    if (username) {
+        pun.textContent = '@' + username;
+        pun.style.display = '';
+        pun.onclick = function() { openExternal('https://t.me/' + username.replace(/^@/, '')); };
+    } else {
+        pun.textContent = '';
+        pun.onclick = null;
+    }
     document.getElementById('profile-role').textContent = userData.role_name || '—';
     document.getElementById('profile-id').textContent = userData.user_id;
     document.getElementById('admin-role').textContent = userData.role_name || '—';
@@ -1506,17 +1518,21 @@ async function renderUserProfile() {
         var rawName = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
         var badNames = {staff:1, 'сотрудник':1, 'новый пользователь':1};
         if (rawName && badNames[rawName.toLowerCase()]) rawName = '';
-        var uname = p.username ? ('@' + p.username) : (rawName || ('ID ' + p.user_id));
+        var displayName = rawName || (p.username ? ('@' + p.username) : ('ID ' + p.user_id));
         var photo = p.photo_url || '';
-        var initial = uname.replace('@','').charAt(0).toUpperCase() || '?';
+        var initial = displayName.replace('@','').charAt(0).toUpperCase() || '?';
         var html = '<div class="profile-header" style="padding-top:8px;">' +
             '<div class="profile-avatar-wrap" style="margin:0 auto 10px;">' +
             (photo
                 ? '<img class="profile-avatar-img" src="' + String(photo).replace(/"/g,'') + '" alt="" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;">'
                 : '<div class="profile-avatar-fallback" style="display:flex;">' + initial + '</div>') +
             '</div>' +
-            '<div class="profile-name">' + uname.replace(/</g,'&lt;') + '</div>' +
+            '<div class="profile-name">' + displayName.replace(/</g,'&lt;') + '</div>' +
+            (p.username
+                ? ('<div class="profile-username" onclick="openTgUser(\'' + String(p.username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">@' + String(p.username).replace(/</g,'&lt;') + '</div>')
+                : '') +
             '</div>' +
+
             '<div class="list-item"><div class="top">' +
             '<div class="title">ID <span style="font-weight:600;color:var(--hint);">' + p.user_id + '</span></div>' +
             (p.role_name ? '<span class="badge badge-processing">' + String(p.role_name).replace(/</g,'&lt;') + '</span>' : '') +
@@ -2833,6 +2849,10 @@ function openEmail(email) {
     var mailto = 'mailto:' + email;
     if (tg.openLink) tg.openLink(mailto);
     else window.location.href = mailto;
+}
+function openTgUser(username) {
+    if (!username) return;
+    openExternal('https://t.me/' + String(username).replace(/^@/, ''));
 }
 function openExternal(url) {
     if (tg.openLink) tg.openLink(url);
