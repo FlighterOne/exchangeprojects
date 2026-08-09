@@ -272,6 +272,30 @@
         .listing-card .ltitle {
             font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3;
         }
+        .search-bar {
+            display: flex; gap: 8px; align-items: center; margin-bottom: 12px;
+        }
+        .search-bar input {
+            flex: 1; margin: 0;
+        }
+        .search-btn {
+            width: 44px; height: 44px; border-radius: 12px; border: none;
+            background: var(--button); color: var(--button-text);
+            font-size: 18px; cursor: pointer; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .search-history {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;
+        }
+        .search-history-chip {
+            font-size: 12px; padding: 6px 10px; border-radius: 999px;
+            background: var(--secondary-bg); color: var(--text); border: none; cursor: pointer;
+        }
+        .filter-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
+        }
+        .filter-grid .form-group { margin: 0; }
+        .filter-grid .full { grid-column: 1 / -1; }
         .news-meta-row {
             display: flex; justify-content: space-between; align-items: center;
             gap: 10px; margin-top: 8px; width: 100%;
@@ -805,6 +829,14 @@
             </div>
             <div id="fields-own" style="display:none;">
                 <div class="form-group">
+                    <label class="form-label">Кол-во пользователей в месяц</label>
+                    <input class="form-input" type="number" id="listing-users-month" placeholder="1000" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Заработок за месяц ($), средний за 6 мес.</label>
+                    <input class="form-input" type="number" id="listing-earnings-month" placeholder="500" min="0" step="0.01">
+                </div>
+                <div class="form-group">
                     <label class="form-label">Вид товара</label>
                     <input class="form-input" type="text" id="listing-product-type" placeholder="TG бот / Mini App + сайт / другое">
                 </div>
@@ -901,11 +933,59 @@
     <!-- EXCHANGE -->
     <div id="page-exchange" class="page">
         <div class="section-title">Биржа</div>
-        <div class="exchange-placeholder">
-            <div class="big">📊</div>
-            <div>Раздел биржи в разработке</div>
-            <div style="font-size:13px;margin-top:8px;">Скоро здесь появится каталог ботов</div>
+        <div class="search-bar">
+            <input class="form-input" type="search" id="exchange-q" placeholder="Поиск по бирже..." enterkeyhint="search">
+            <button type="button" class="search-btn" onclick="runExchangeSearch()" title="Найти">🔍</button>
         </div>
+        <div id="exchange-history-wrap" style="display:none;">
+            <div class="form-label" style="margin-bottom:6px;">История поиска</div>
+            <div class="search-history" id="exchange-history"></div>
+        </div>
+        <div class="form-label" style="margin-bottom:8px;">Фильтры</div>
+        <div class="filter-grid">
+            <div class="form-group full">
+                <label class="form-label">Тип</label>
+                <div class="type-toggle" style="display:flex;gap:8px;">
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-all" data-v="" onclick="setExType(this)" style="flex:1;">Все</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-partner" data-v="partner" onclick="setExType(this)" style="flex:1;">Партнёр</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-own" data-v="own" onclick="setExType(this)" style="flex:1;">Свой товар</button>
+                </div>
+            </div>
+            <div class="form-group full">
+                <label class="form-label">Вид товара</label>
+                <input class="form-input" type="text" id="ex-product-type" placeholder="ТГ бот, сайт, mini app...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Рейтинг продавца от</label>
+                <input class="form-input" type="number" id="ex-rating-min" placeholder="4.5" min="0" max="5" step="0.1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цена от ($)</label>
+                <input class="form-input" type="number" id="ex-price-from" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цена до ($)</label>
+                <input class="form-input" type="number" id="ex-price-to" placeholder="10000" min="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Пользователей/мес от</label>
+                <input class="form-input" type="number" id="ex-users-from" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Пользователей/мес до</label>
+                <input class="form-input" type="number" id="ex-users-to" placeholder="" min="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Заработок/мес от ($)</label>
+                <input class="form-input" type="number" id="ex-earn-from" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Заработок/мес до ($)</label>
+                <input class="form-input" type="number" id="ex-earn-to" placeholder="" min="0">
+            </div>
+        </div>
+        <button class="btn" style="margin-bottom:14px;" onclick="runExchangeSearch()">Найти</button>
+        <div id="exchange-results"><div class="empty"><div class="icon">🔍</div>Введите запрос или задайте фильтры</div></div>
     </div>
 
     <!-- MY LISTINGS -->
@@ -1557,6 +1637,7 @@ function showPage(name) {
     if (name === 'my-listings') loadMyListings();
     if (name === 'favorites') loadFavorites();
     if (name === 'news') loadNewsPinned();
+    if (name === 'exchange') initExchangePage();
     if (name === 'orders') loadOrders();
     if (name === 'balance' || name === 'withdraw') refreshBalance();
     if (name === 'requests') loadRequests();
@@ -1891,6 +1972,132 @@ async function deleteNewsItem(id) {
     } catch (e) { tg.showAlert(e.message); }
 }
 
+
+var exchangeTypeFilter = '';
+var EX_HISTORY_KEY = 'xcod_exchange_history';
+
+function setExType(btn) {
+    exchangeTypeFilter = btn.getAttribute('data-v') || '';
+    document.querySelectorAll('#page-exchange .type-toggle-btn').forEach(function(el) {
+        el.classList.toggle('selected', el === btn);
+    });
+}
+
+function getExchangeHistory() {
+    try {
+        var raw = localStorage.getItem(EX_HISTORY_KEY);
+        var arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr.slice(0, 5) : [];
+    } catch (e) { return []; }
+}
+
+function saveExchangeHistory(q) {
+    q = (q || '').trim();
+    if (!q) return;
+    var arr = getExchangeHistory().filter(function(x){ return x !== q; });
+    arr.unshift(q);
+    arr = arr.slice(0, 5);
+    try { localStorage.setItem(EX_HISTORY_KEY, JSON.stringify(arr)); } catch (e) {}
+    renderExchangeHistory();
+}
+
+function renderExchangeHistory() {
+    var wrap = document.getElementById('exchange-history-wrap');
+    var box = document.getElementById('exchange-history');
+    if (!wrap || !box) return;
+    var arr = getExchangeHistory();
+    if (!arr.length) { wrap.style.display = 'none'; box.innerHTML = ''; return; }
+    wrap.style.display = 'block';
+    box.innerHTML = arr.map(function(q) {
+        return '<button type="button" class="search-history-chip">' + String(q).replace(/</g,'&lt;') + '</button>';
+    }).join('');
+    box.querySelectorAll('.search-history-chip').forEach(function(el) {
+        el.onclick = function() {
+            document.getElementById('exchange-q').value = el.textContent;
+            runExchangeSearch();
+        };
+    });
+}
+
+function initExchangePage() {
+    renderExchangeHistory();
+    var input = document.getElementById('exchange-q');
+    if (input && !input._bound) {
+        input._bound = true;
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                runExchangeSearch();
+            }
+        });
+    }
+    // default type All selected
+    var all = document.getElementById('ex-type-all');
+    if (all) setExType(all);
+}
+
+async function runExchangeSearch() {
+    var box = document.getElementById('exchange-results');
+    if (!box) return;
+    var q = (document.getElementById('exchange-q').value || '').trim();
+    if (q) saveExchangeHistory(q);
+    var params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (exchangeTypeFilter) params.set('listing_type', exchangeTypeFilter);
+    var pt = (document.getElementById('ex-product-type').value || '').trim();
+    if (pt) params.set('product_type', pt);
+    var rm = document.getElementById('ex-rating-min').value;
+    if (rm !== '') params.set('rating_min', rm);
+    var pf = document.getElementById('ex-price-from').value;
+    var pto = document.getElementById('ex-price-to').value;
+    if (pf !== '') params.set('price_from', pf);
+    if (pto !== '') params.set('price_to', pto);
+    var uf = document.getElementById('ex-users-from').value;
+    var ut = document.getElementById('ex-users-to').value;
+    if (uf !== '') params.set('users_from', uf);
+    if (ut !== '') params.set('users_to', ut);
+    var ef = document.getElementById('ex-earn-from').value;
+    var et = document.getElementById('ex-earn-to').value;
+    if (ef !== '') params.set('earnings_from', ef);
+    if (et !== '') params.set('earnings_to', et);
+
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/exchange/search?' + params.toString());
+        var items = data.listings || [];
+        if (!items.length) {
+            box.innerHTML = '<div class="empty"><div class="icon">📭</div>Ничего не найдено</div>';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            var desc = (l.description || '').replace(/</g, '&lt;');
+            if (desc.length > 120) desc = desc.slice(0, 120) + '…';
+            var priceNum = Number(l.price).toLocaleString('ru-RU');
+            var extra = '';
+            if (l.listing_type === 'own') {
+                if (l.users_month) extra += ' · 👥 ' + l.users_month + '/мес';
+                if (l.earnings_month) extra += ' · 💵 ' + Number(l.earnings_month).toLocaleString('ru-RU') + '$/мес';
+            }
+            var rating = (l.rating_seller != null) ? Number(l.rating_seller).toFixed(2) : '—';
+            return '<div class="listing-card" data-eid="' + l.id + '">' +
+                '<div class="ltitle-row">' +
+                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
+                '</div>' +
+                '<div class="ldesc">' + desc + '</div>' +
+                '<div class="subtitle" style="margin-top:6px;">★ ' + rating + extra + '</div>' +
+                '<div class="meta">' +
+                '<div class="price">' + priceNum + ' <small>$</small></div>' +
+                '</div></div>';
+        }).join('');
+        box.querySelectorAll('.listing-card[data-eid]').forEach(function(el){
+            el.onclick = function(){ window._listingBack = 'exchange'; openListing(parseInt(el.getAttribute('data-eid'),10)); };
+        });
+    } catch (e) {
+        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
 async function loadListings() {
     var box = document.getElementById('listings-feed');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -1959,6 +2166,8 @@ function listingExtraInfoHtml(l, opts) {
         if (l.product_type) parts.push('<b>Вид:</b> ' + String(l.product_type).replace(/</g,'&lt;'));
         if (l.bot_username) parts.push('<b>Username:</b> @' + String(l.bot_username).replace(/</g,'&lt;'));
         if (l.tgstat_url) parts.push('<b>TGStat:</b> ' + String(l.tgstat_url).replace(/</g,'&lt;'));
+        if (l.users_month) parts.push('<b>Пользователей/мес:</b> ' + l.users_month);
+        if (l.earnings_month) parts.push('<b>Заработок/мес:</b> ' + l.earnings_month + '$');
     }
     if (!parts.length) return '';
     return '<div class="info-block" style="margin-top:8px;margin-bottom:12px;">' + parts.join('<br>') + '</div>';
@@ -1995,6 +2204,8 @@ async function openListing(id) {
             window._listingBack = 'profile';
         } else if (document.getElementById('page-user-profile') && document.getElementById('page-user-profile').classList.contains('active')) {
             window._listingBack = 'user-profile';
+        } else if (document.getElementById('page-exchange') && document.getElementById('page-exchange').classList.contains('active')) {
+            window._listingBack = 'exchange';
         } else if (document.getElementById('page-news') && document.getElementById('page-news').classList.contains('active')) {
             window._listingBack = 'news';
         } else if (document.getElementById('page-home') && document.getElementById('page-home').classList.contains('active')) {
@@ -2440,6 +2651,8 @@ function resetListingCreate() {
         document.getElementById('listing-tgstat').value = '';
         document.getElementById('listing-bot').value = '';
         document.getElementById('listing-price').value = '';
+        var um = document.getElementById('listing-users-month'); if (um) um.value = '';
+        var em = document.getElementById('listing-earnings-month'); if (em) em.value = '';
         document.getElementById('listing-files').value = '';
         listingPickedFiles = [];
         window._editingListingId = null;
@@ -2619,6 +2832,8 @@ async function editRejectedListing(id) {
             document.getElementById('listing-tgstat').value = l.tgstat_url || '';
             document.getElementById('listing-bot').value = l.bot_username || '';
             document.getElementById('listing-price').value = l.price || '';
+            var um = document.getElementById('listing-users-month'); if (um) um.value = l.users_month || '';
+            var em = document.getElementById('listing-earnings-month'); if (em) em.value = l.earnings_month || '';
         }
         listingPickedFiles = parseFilesMeta(l.files_meta).map(function(f) {
             return typeof f === 'object' ? f : { name: f, content: '' };
@@ -2661,6 +2876,8 @@ async function createListing() {
         body.tgstat_url = document.getElementById('listing-tgstat').value.trim();
         body.bot_username = document.getElementById('listing-bot').value.trim();
         body.price = parseFloat(document.getElementById('listing-price').value) || 0;
+        body.users_month = parseInt(document.getElementById('listing-users-month').value, 10) || 0;
+        body.earnings_month = parseFloat(document.getElementById('listing-earnings-month').value) || 0;
     }
 
     btn.disabled = true; btn.textContent = 'Отправка...';
