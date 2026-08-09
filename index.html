@@ -690,53 +690,80 @@
 
     <!-- CREATE LISTING -->
     <div id="page-listing-create" class="page">
-        <button class="back-link" onclick="showPage('home')">← Назад</button>
-        <div class="section-title">Новое объявление</div>
-        <div class="form-group">
-            <label class="form-label">Название</label>
-            <input class="form-input" type="text" id="listing-title" placeholder="Название бота / проекта">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;">
+            <button class="btn btn-secondary btn-back" id="listing-step-back" onclick="listingCreateBack()" style="margin:0;">← Назад</button>
+            <button class="btn btn-back" onclick="cancelListingCreate()" style="margin:0;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);">Отменить</button>
         </div>
-        <div class="form-group">
-            <label class="form-label">Описание</label>
-            <textarea class="form-input" id="listing-desc" rows="4" placeholder="Описание" style="resize:vertical;min-height:100px;"></textarea>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Тип товара</label>
-            <div class="type-toggle">
-                <button type="button" class="type-toggle-btn" id="type-partner" data-type="partner" onclick="selectListingType(this)">Партнер X-Cod</button>
-                <button type="button" class="type-toggle-btn" id="type-own" data-type="own" onclick="selectListingType(this)">Свой товар</button>
-            </div>
-        </div>
-        <div id="fields-partner" style="display:none;">
+        <div class="section-title" id="listing-create-title">Новое объявление</div>
+        <div id="listing-step-1">
             <div class="form-group">
-                <label class="form-label">Номер договора X-Cod</label>
-                <input class="form-input" type="text" id="listing-contract" placeholder="XC-0000">
-            </div>
-            <label class="check-row">
-                <input type="checkbox" id="listing-analytics">
-                <span>Согласие на передачу данных и аналитики</span>
-            </label>
-            <div class="info-block" style="margin-top:12px;">Цена определяется компанией X-Cod по аналитике после модерации.</div>
-        </div>
-        <div id="fields-own" style="display:none;">
-            <div class="form-group">
-                <label class="form-label">Вид товара</label>
-                <input class="form-input" type="text" id="listing-product-type" placeholder="TG бот / Mini App + сайт / другое">
-            </div>
-            <div class="form-group" id="tgstat-group">
-                <label class="form-label">Ссылка на TGStat</label>
-                <input class="form-input" type="text" id="listing-tgstat" placeholder="https://tgstat.ru/...">
+                <label class="form-label">Название</label>
+                <input class="form-input" type="text" id="listing-title" placeholder="Название товара">
             </div>
             <div class="form-group">
-                <label class="form-label">Username</label>
-                <input class="form-input" type="text" id="listing-bot" placeholder="@my_bot">
+                <label class="form-label">Описание</label>
+                <textarea class="form-input" id="listing-desc" rows="4" style="resize:vertical;min-height:100px;" placeholder="Описание"></textarea>
             </div>
             <div class="form-group">
-                <label class="form-label">Цена ($)</label>
-                <input class="form-input" type="number" id="listing-price" placeholder="100" min="1">
+                <label class="form-label">Тип товара</label>
+                <div class="type-toggle" style="display:flex;gap:8px;">
+                    <button type="button" class="btn btn-secondary type-toggle-btn" data-type="partner" onclick="selectListingType(this)" style="flex:1;">Партнёр X-Cod</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" data-type="own" onclick="selectListingType(this)" style="flex:1;">Свой товар</button>
+                </div>
             </div>
+            <div id="fields-partner" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">Номер договора X-Cod</label>
+                    <input class="form-input" type="text" id="listing-contract" placeholder="XC-0000">
+                </div>
+                <label class="check-row">
+                    <input type="checkbox" id="listing-analytics">
+                    <span>Согласие на передачу данных и аналитики</span>
+                </label>
+                <div class="info-block" style="margin-top:12px;">Цена определяется компанией X-Cod по аналитике после модерации.</div>
+            </div>
+            <div id="fields-own" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">Вид товара</label>
+                    <input class="form-input" type="text" id="listing-product-type" placeholder="TG бот / Mini App + сайт / другое">
+                </div>
+                <div class="form-group" id="tgstat-group">
+                    <label class="form-label">Ссылка на TGStat</label>
+                    <input class="form-input" type="text" id="listing-tgstat" placeholder="https://tgstat.ru/...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input class="form-input" type="text" id="listing-bot" placeholder="@my_bot">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Цена ($)</label>
+                    <input class="form-input" type="number" id="listing-price" placeholder="100" min="1">
+                </div>
+            </div>
+            <button class="btn" onclick="listingCreateNext()">Далее</button>
         </div>
-        <button class="btn" id="listing-create-btn" onclick="createListing()">Отправить на модерацию</button>
+        <div id="listing-step-2" style="display:none;">
+            <div class="info-block" style="margin-bottom:14px;">
+                <b>Обязательно</b> должен быть файл <code>guide.txt</code> — инструкция.
+                Если его не будет, объявление отклонит модерация.
+                Если инструкция по установке будет неполной, покупатель может не разобраться и отклонить покупку.<br><br>
+                Продавец сам решает: публиковать токен сразу или отправить в ЛС.
+                Если публикуете на площадке — загрузите отдельный файл <code>apitoken.txt</code>.
+            </div>
+            <div class="form-group">
+                <label class="form-label">Файлы бота (можно несколько)</label>
+                <input class="form-input" type="file" id="listing-files" multiple>
+                <div id="listing-files-list" style="margin-top:8px;font-size:13px;color:var(--hint);"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Есть ли файлы, которые вы отправите покупателю в ЛС?</label>
+                <div class="type-toggle" style="display:flex;gap:8px;">
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-yes" onclick="selectDmFiles(true)" style="flex:1;">Да</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-no" onclick="selectDmFiles(false)" style="flex:1;">Нет</button>
+                </div>
+            </div>
+            <button class="btn" id="listing-create-btn" onclick="createListing()">Отправить на модерацию</button>
+        </div>
     </div>
 
     <!-- FAVORITES -->
@@ -812,8 +839,6 @@
     </div>
 
     <div id="page-order-detail" class="page">
-        <button class="back-link" onclick="showPage('orders')">← История заказов</button>
-        <div class="section-title">Заказ</div>
         <div id="order-detail-content"></div>
     </div>
 
@@ -1718,8 +1743,7 @@ async function openListing(id) {
                 (isFav ? '★ В избранном' : '☆ В избранное') + '</button>';
 
             if (l.seller_username) {
-                html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="openExternal(\'https://t.me/' +
-                    String(l.seller_username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Написать</button>';
+                html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="openTgUser(\'' + String(l.seller_username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Написать</button>';
             } else {
                 html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="tg.showAlert(\'У продавца нет username в Telegram\')">Написать</button>';
             }
@@ -1737,6 +1761,7 @@ async function openListing(id) {
                 html += '</div>';
             } else if (l.status === 'pending') {
                 html += '<div class="info-block" style="margin-top:8px;">На модерации</div>';
+                html += '<button class="btn" style="margin-top:10px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить</button>';
             }
         }
         box.innerHTML = html;
@@ -1807,9 +1832,9 @@ async function confirmBuyListing(id) {
     try {
         var res = await apiPost('/api/orders', { listing_id: id });
         if (res.balance != null) setBalance(res.balance);
-        tg.showAlert('Заказ #' + res.order_id + ' создан. Ожидайте файлы от продавца.');
-        showPage('orders');
-        loadOrders();
+        tg.showAlert('Заказ #' + res.order_id + ' создан. Файлы доступны в заказе.');
+        await loadOrders();
+        openOrderDetail(res.order_id);
     } catch (e) {
         tg.showAlert(e.message);
     }
@@ -1849,11 +1874,23 @@ async function loadOrders() {
     }
 }
 
+function formatRemain(deadline) {
+    if (!deadline) return '';
+    try {
+        var end = new Date(deadline).getTime();
+        var left = Math.max(0, end - Date.now());
+        var m = Math.floor(left / 60000);
+        var s = Math.floor((left % 60000) / 1000);
+        return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    } catch (e) { return ''; }
+}
+
 function openOrderDetail(id) {
     var items = window._ordersCache || [];
     var o = null;
     for (var i = 0; i < items.length; i++) if (items[i].id === id) o = items[i];
     if (!o) { loadOrders(); return; }
+    window._currentOrder = o;
     var stageMap = {
         awaiting_seller: 'Продавец передаёт данные',
         buyer_review: 'Проверка покупателем',
@@ -1863,24 +1900,78 @@ function openOrderDetail(id) {
     };
     var box = document.getElementById('order-detail-content');
     var title = (o.listing_title || ('Заказ #' + o.id)).replace(/</g,'&lt;');
-    var role = (userData.user_id === o.buyer_id) ? 'Покупка' : 'Продажа';
-    var html = '<div class="list-item"><div class="top"><div class="title">' + title + '</div>' +
+    var isBuyer = userData.user_id === o.buyer_id;
+    var isSeller = userData.user_id === o.seller_id;
+    var role = isBuyer ? 'Покупка' : 'Продажа';
+    var canCancel = (isBuyer || isSeller) && (o.status === 'awaiting_seller' || o.status === 'buyer_review');
+
+    var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;">';
+    head += '<button class="btn btn-secondary btn-back" style="margin:0;" onclick="showPage(\'orders\')">← Назад</button>';
+    if (o.status === 'buyer_review' && o.review_deadline) {
+        head += '<div id="order-timer" style="font-weight:700;font-size:15px;">' + formatRemain(o.review_deadline) + '</div>';
+    } else {
+        head += '<div></div>';
+    }
+    if (canCancel) {
+        head += '<button class="btn btn-back" style="margin:0;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="orderCancel(' + o.id + ')">Отмена</button>';
+    } else {
+        head += '<div style="width:70px;"></div>';
+    }
+    head += '</div>';
+
+    var html = head;
+    html += '<div class="list-item"><div class="top"><div class="title">' + title + '</div>' +
         '<span class="badge badge-processing">' + role + '</span></div>' +
         '<div class="subtitle">Заказ #' + o.id + '</div></div>';
     html += '<div class="info-block">Сумма: <b>' + Number(o.amount).toLocaleString('ru-RU') + '$</b><br>' +
         'Этап: <b>' + (stageMap[o.status] || o.status) + '</b><br>' +
         'Создан: ' + String(o.created_at || '').slice(0, 19).replace('T', ' ') + '</div>';
-    if (o.status === 'awaiting_seller' && userData.user_id === o.seller_id) {
-        html += '<button class="btn" style="margin-top:12px;" onclick="orderSellerSent(' + o.id + ')">Я отправил</button>';
+
+    // files
+    var files = [];
+    try {
+        if (typeof o.files_meta === 'string' && o.files_meta) files = JSON.parse(o.files_meta);
+        else if (Array.isArray(o.files_meta)) files = o.files_meta;
+    } catch (e) {}
+    if (files.length) {
+        html += '<div class="info-block"><b>Файлы с площадки:</b><br>' + files.map(function(f){
+            return '📄 ' + String(f).replace(/</g,'&lt;');
+        }).join('<br>') + '</div>';
     }
-    if (o.status === 'buyer_review' && userData.user_id === o.buyer_id) {
+
+    if (o.status === 'buyer_review' && isBuyer) {
+        html += '<div class="info-block">Пользователь получил файлы. Проверьте их в течение 120 минут.</div>';
+        if (o.has_private_files) {
+            html += '<div class="info-block">Продавец указал, что часть файлов отправит в ЛС.</div>';
+            var sellerU = o.seller_username || '';
+            if (sellerU) {
+                html += '<button class="btn btn-secondary" onclick="openTgUser(\'' + String(sellerU).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Написать</button>';
+            } else {
+                html += '<button class="btn btn-secondary" onclick="tg.showAlert(\'У продавца нет username\')">Написать</button>';
+            }
+        }
         html += '<div class="btn-stack" style="margin-top:12px;">' +
-            '<button class="btn" onclick="orderBuyerConfirm(' + o.id + ')">Всё в порядке</button>' +
+            '<button class="btn" onclick="orderBuyerConfirm(' + o.id + ')">Завершить покупку</button>' +
             '<button class="btn btn-secondary" onclick="orderBuyerReject(' + o.id + ')">Файлы не в порядке</button></div>';
     }
+
+    if (o.status === 'buyer_review' && isSeller) {
+        html += '<div class="info-block"><b>Статус:</b> покупатель получил файлы с площадки.<br>Ждите подтверждения операции покупателем.</div>';
+        if (o.has_private_files) {
+            var bu = o.buyer_username || '';
+            if (bu) {
+                html += '<button class="btn btn-secondary" onclick="openTgUser(\'' + String(bu).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Написать покупателю</button>';
+            }
+            html += '<div class="info-block" style="margin-top:8px;">Отправьте конфиденциальные файлы в ЛС, затем ждите подтверждения.</div>';
+        }
+    }
+
+    if (o.status === 'awaiting_seller' && isSeller) {
+        html += '<button class="btn" style="margin-top:12px;" onclick="orderSellerSent(' + o.id + ')">Я отправил</button>';
+    }
+
     if (o.status === 'completed') {
-        var needRate = (userData.user_id === o.buyer_id && !o.buyer_rating) ||
-            (userData.user_id === o.seller_id && !o.seller_rating);
+        var needRate = (isBuyer && !o.buyer_rating) || (isSeller && !o.seller_rating);
         if (needRate) {
             html += '<div style="margin-top:12px;font-size:13px;color:var(--hint);">Оцените от 1 до 5:</div>' +
                 '<div style="display:flex;gap:6px;margin-top:6px;">' +
@@ -1893,6 +1984,26 @@ function openOrderDetail(id) {
     }
     box.innerHTML = html;
     showPage('order-detail');
+    if (window._orderTimerIv) clearInterval(window._orderTimerIv);
+    if (o.status === 'buyer_review' && o.review_deadline) {
+        window._orderTimerIv = setInterval(function() {
+            var el = document.getElementById('order-timer');
+            if (!el) { clearInterval(window._orderTimerIv); return; }
+            el.textContent = formatRemain(o.review_deadline);
+        }, 1000);
+    }
+}
+
+async function orderCancel(id) {
+    if (!confirm('Отменить сделку? Объявление снова будет опубликовано, средства вернутся покупателю.')) return;
+    try {
+        await apiPost('/api/orders/' + id + '/cancel', {});
+        tg.showAlert('Сделка отменена');
+        userData = await apiGet('/api/user');
+        setBalance(userData.balance);
+        showPage('orders');
+        loadOrders();
+    } catch (e) { tg.showAlert(e.message); }
 }
 
 async function refreshOrdersAndDetail(id) {
@@ -1945,20 +2056,107 @@ function openEditListing(id) {
     showPage('listing-edit');
 }
 
-async function createListing() {
+var selectedListingType = null;
+var selectedHasPrivateFiles = null;
+var listingCreateStep = 1;
+var listingFilesMeta = [];
+
+function resetListingCreate() {
+    listingCreateStep = 1;
+    selectedListingType = null;
+    selectedHasPrivateFiles = null;
+    listingFilesMeta = [];
+    try {
+        document.getElementById('listing-step-1').style.display = 'block';
+        document.getElementById('listing-step-2').style.display = 'none';
+        document.getElementById('listing-create-title').textContent = 'Новое объявление';
+        document.getElementById('listing-title').value = '';
+        document.getElementById('listing-desc').value = '';
+        document.getElementById('listing-contract').value = '';
+        document.getElementById('listing-analytics').checked = false;
+        document.getElementById('listing-product-type').value = '';
+        document.getElementById('listing-tgstat').value = '';
+        document.getElementById('listing-bot').value = '';
+        document.getElementById('listing-price').value = '';
+        document.getElementById('listing-files').value = '';
+        document.getElementById('listing-files-list').textContent = '';
+        document.querySelectorAll('.type-toggle-btn').forEach(function(el){ el.classList.remove('selected'); });
+        document.getElementById('fields-partner').style.display = 'none';
+        document.getElementById('fields-own').style.display = 'none';
+    } catch (e) {}
+}
+
+function cancelListingCreate() {
+    resetListingCreate();
+    showPage('my-listings');
+}
+
+function listingCreateBack() {
+    if (listingCreateStep === 2) {
+        listingCreateStep = 1;
+        document.getElementById('listing-step-1').style.display = 'block';
+        document.getElementById('listing-step-2').style.display = 'none';
+        document.getElementById('listing-create-title').textContent = 'Новое объявление';
+        return;
+    }
+    cancelListingCreate();
+}
+
+function listingCreateNext() {
     var title = document.getElementById('listing-title').value.trim();
     var description = document.getElementById('listing-desc').value.trim();
-    var btn = document.getElementById('listing-create-btn');
     if (!title) { tg.showAlert('Укажите название'); return; }
     if (!description) { tg.showAlert('Укажите описание'); return; }
     if (!selectedListingType) { tg.showAlert('Выберите тип товара'); return; }
+    if (selectedListingType === 'partner') {
+        if (!document.getElementById('listing-contract').value.trim()) { tg.showAlert('Укажите номер договора'); return; }
+        if (!document.getElementById('listing-analytics').checked) { tg.showAlert('Нужно согласие на аналитику'); return; }
+    } else {
+        if (!document.getElementById('listing-product-type').value.trim()) { tg.showAlert('Укажите вид товара'); return; }
+        if (!document.getElementById('listing-bot').value.trim()) { tg.showAlert('Укажите username'); return; }
+        if (!(parseFloat(document.getElementById('listing-price').value) > 0)) { tg.showAlert('Укажите цену'); return; }
+    }
+    listingCreateStep = 2;
+    document.getElementById('listing-step-1').style.display = 'none';
+    document.getElementById('listing-step-2').style.display = 'block';
+    document.getElementById('listing-create-title').textContent = 'Файлы объявления';
+}
+
+function selectDmFiles(yes) {
+    selectedHasPrivateFiles = !!yes;
+    document.getElementById('dm-yes').classList.toggle('selected', yes);
+    document.getElementById('dm-no').classList.toggle('selected', !yes);
+}
+
+function selectListingType(el) {
+    document.querySelectorAll('#listing-step-1 .type-toggle-btn').forEach(function(i){ i.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedListingType = el.dataset.type;
+    document.getElementById('fields-partner').style.display = selectedListingType === 'partner' ? 'block' : 'none';
+    document.getElementById('fields-own').style.display = selectedListingType === 'own' ? 'block' : 'none';
+}
+
+async function createListing() {
+    var btn = document.getElementById('listing-create-btn');
+    if (selectedHasPrivateFiles === null) { tg.showAlert('Укажите, есть ли файлы для ЛС'); return; }
+    var fileInput = document.getElementById('listing-files');
+    var files = fileInput && fileInput.files ? Array.prototype.slice.call(fileInput.files) : [];
+    var names = files.map(function(f){ return f.name; });
+    var hasGuide = names.some(function(n){ return n.toLowerCase() === 'guide.txt'; });
+    if (!hasGuide) {
+        tg.showAlert('Обязателен файл guide.txt');
+        return;
+    }
+    // meta only (имена); содержимое для мини-апп храним как список имён
+    listingFilesMeta = names;
 
     var body = {
-        title: title,
-        description: description,
-        listing_type: selectedListingType
+        title: document.getElementById('listing-title').value.trim(),
+        description: document.getElementById('listing-desc').value.trim(),
+        listing_type: selectedListingType,
+        has_private_files: selectedHasPrivateFiles,
+        files_meta: listingFilesMeta
     };
-
     if (selectedListingType === 'partner') {
         body.contract_number = document.getElementById('listing-contract').value.trim();
         body.analytics_consent = document.getElementById('listing-analytics').checked;
@@ -1973,30 +2171,11 @@ async function createListing() {
     try {
         await apiPost('/api/listings', body);
         tg.showAlert('Объявление отправлено на модерацию');
-        document.getElementById('listing-title').value = '';
-        document.getElementById('listing-desc').value = '';
-        document.getElementById('listing-contract').value = '';
-        document.getElementById('listing-analytics').checked = false;
-        document.getElementById('listing-product-type').value = '';
-        document.getElementById('listing-tgstat').value = '';
-        document.getElementById('listing-bot').value = '';
-        document.getElementById('listing-price').value = '';
-        selectedListingType = null;
-        document.querySelectorAll('.type-toggle-btn').forEach(function(el){ el.classList.remove('selected'); });
-        document.getElementById('fields-partner').style.display = 'none';
-        document.getElementById('fields-own').style.display = 'none';
+        resetListingCreate();
         showPage('my-listings');
+        loadMyListings();
     } catch (e) { tg.showAlert(e.message); }
     finally { btn.disabled = false; btn.textContent = 'Отправить на модерацию'; }
-}
-
-var selectedListingType = null;
-function selectListingType(el) {
-    document.querySelectorAll('.type-toggle-btn').forEach(function(i){ i.classList.remove('selected'); });
-    el.classList.add('selected');
-    selectedListingType = el.dataset.type;
-    document.getElementById('fields-partner').style.display = selectedListingType === 'partner' ? 'block' : 'none';
-    document.getElementById('fields-own').style.display = selectedListingType === 'own' ? 'block' : 'none';
 }
 
 async function saveListing() {
