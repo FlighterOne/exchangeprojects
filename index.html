@@ -1882,7 +1882,7 @@ async function openListing(id) {
             if (canBuy) {
                 html += '<button class="btn" onclick="startBuyListing(' + l.id + ')">Купить</button>';
             }
-        } else {
+        } else if (isOwner) {
             // владелец
             if (l.status === 'active') {
                 html += '<button class="btn" style="margin-top:8px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="unpublishListing(' + l.id + ')">Снять с публикации</button>';
@@ -1902,6 +1902,10 @@ async function openListing(id) {
             } else if (l.status === 'refund_moderation') {
                 html += '<div class="info-block" style="margin-top:8px;">На модерации: возврат средств по сделке. Удаление недоступно до решения модерации.</div>';
             }
+        }
+        // админ и выше могут удалить чужое объявление
+        if (!isOwner && userData && userData.role >= 5 && l.status !== 'deleted') {
+            html += '<button class="btn" style="margin-top:14px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить объявление</button>';
         }
         box.innerHTML = html;
     } catch (e) {
@@ -1998,16 +2002,35 @@ async function loadOrders() {
             refund_moderation: 'Модерация: возврат',
             cancelled: 'Отменён'
         };
+        var statusBadge = {
+            awaiting_seller: 'badge-processing',
+            buyer_review: 'badge-processing',
+            completed: 'badge-completed',
+            refund_moderation: 'badge-moderation',
+            cancelled: 'badge-muted'
+        };
         box.innerHTML = items.map(function(o) {
             var stage = stageMap[o.status] || o.status;
             var title = (o.listing_title || ('#' + o.id)).replace(/</g,'&lt;');
             var role = (userData.user_id === o.buyer_id) ? 'Покупка' : 'Продажа';
+            var sb = statusBadge[o.status] || 'badge-muted';
+            var timerHtml = '';
+            if (o.status === 'buyer_review' && o.review_deadline) {
+                timerHtml = '<div class="subtitle order-list-timer" data-deadline="' + String(o.review_deadline).replace(/"/g,'') + '" style="margin-top:4px;font-weight:600;color:var(--button);">' + formatRemain(o.review_deadline) + '</div>';
+            }
             return '<div class="list-item" style="cursor:pointer;" onclick="openOrderDetail(' + o.id + ')">' +
                 '<div class="top"><div class="title">' + title + '</div>' +
                 '<span class="badge badge-processing">' + role + '</span></div>' +
                 '<div class="subtitle">#' + o.id + ' · ' + Number(o.amount).toLocaleString('ru-RU') + '$</div>' +
-                '<div class="subtitle" style="margin-top:4px;"><b>' + stage + '</b></div></div>';
+                '<div style="margin-top:6px;"><span class="badge ' + sb + '">' + stage + '</span></div>' +
+                timerHtml + '</div>';
         }).join('');
+        if (window._ordersListTimerIv) clearInterval(window._ordersListTimerIv);
+        window._ordersListTimerIv = setInterval(function() {
+            document.querySelectorAll('.order-list-timer').forEach(function(el) {
+                el.textContent = formatRemain(el.getAttribute('data-deadline'));
+            });
+        }, 1000);
     } catch (e) {
         box.innerHTML = '<div class="empty">Не удалось загрузить заказы</div>';
     }
@@ -2072,8 +2095,15 @@ function openOrderDetail(id) {
         bot_username: o.bot_username,
         tgstat_url: o.tgstat_url
     }, { hideContract: false });
+    var statusBadgeDetail = {
+        awaiting_seller: 'badge-processing',
+        buyer_review: 'badge-processing',
+        completed: 'badge-completed',
+        refund_moderation: 'badge-moderation',
+        cancelled: 'badge-muted'
+    };
     html += '<div class="info-block">Сумма: <b>' + Number(o.amount).toLocaleString('ru-RU') + '$</b><br>' +
-        'Этап: <b>' + (stageMap[o.status] || o.status) + '</b><br>' +
+        'Этап: <span class="badge ' + (statusBadgeDetail[o.status] || 'badge-muted') + '">' + (stageMap[o.status] || o.status) + '</span><br>' +
         'Создан: ' + String(o.created_at || '').slice(0, 19).replace('T', ' ') + '</div>';
 
     // files
@@ -2831,14 +2861,16 @@ function openAdminSection(section) {
 
 function loadAnalyticsMenu() {
     var box = document.getElementById('admin-content');
+    var listingsTile = (userData && userData.role >= 5)
+        ? '<button class="support-tile" onclick="openAnalytics(\'listings\')"><div class="support-tile-icon">🥧</div><div class="support-tile-title">Аналитика объявлений</div></button>'
+        : '';
     box.innerHTML =
         '<div class="support-grid">' +
         '<button class="support-tile" onclick="openAnalytics(\'expenses\')"><div class="support-tile-icon">📤</div><div class="support-tile-title">Аналитика расходов</div></button>' +
         '<button class="support-tile" onclick="openAnalytics(\'income\')"><div class="support-tile-icon">📥</div><div class="support-tile-title">Аналитика доходов</div></button>' +
-        '<button class="support-tile" onclick="openAnalytics(\'listings\')"><div class="support-tile-icon">🥧</div><div class="support-tile-title">Аналитика объявлений</div></button>' +
+        listingsTile +
         '</div>';
 }
-
 function defaultPeriod() {
     var to = new Date();
     var from = new Date();
@@ -2852,6 +2884,11 @@ function defaultPeriod() {
 }
 
 async function openAnalytics(kind) {
+    if (kind === 'listings' && (!userData || userData.role < 5)) {
+        tg.showAlert('Аналитика объявлений доступна админам и выше');
+        return;
+    }
+
     var titles = { expenses: 'Аналитика расходов', income: 'Аналитика доходов', listings: 'Аналитика объявлений' };
     document.getElementById('admin-section-title').textContent = titles[kind] || 'Аналитика';
     var p = defaultPeriod();
