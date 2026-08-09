@@ -860,6 +860,8 @@
     <!-- NEWS -->
     <div id="page-news" class="page">
         <div class="section-title">Новости</div>
+        <div id="news-pinned"><div class="loading"><div class="spinner"></div></div></div>
+        <div class="section-title" style="font-size:16px;margin-top:8px;">Лента новостей</div>
         <div class="news-card">
             <div class="date">Сегодня</div>
             <div class="title">Добро пожаловать в X-Cod Exchange</div>
@@ -1530,6 +1532,7 @@ function showPage(name) {
     if (name === 'profile') loadOwnProfileListings();
     if (name === 'my-listings') loadMyListings();
     if (name === 'favorites') loadFavorites();
+    if (name === 'news') loadNewsPinned();
     if (name === 'orders') loadOrders();
     if (name === 'balance' || name === 'withdraw') refreshBalance();
     if (name === 'requests') loadRequests();
@@ -1719,6 +1722,37 @@ async function loadOwnProfileListings() {
     }
 }
 
+
+async function loadNewsPinned() {
+    var box = document.getElementById('news-pinned');
+    if (!box) return;
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/listings/pinned');
+        var items = data.listings || [];
+        if (!items.length) {
+            box.innerHTML = '';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            var desc = String(l.description || '').replace(/</g,'&lt;');
+            if (desc.length > 160) desc = desc.slice(0, 160) + '…';
+            var nick = l.seller_username ? ('@' + l.seller_username) : (l.seller_name || 'X-Cod');
+            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                '<div class="top" style="display:flex;justify-content:space-between;gap:8px;">' +
+                '<div class="title" style="flex:1;">' + String(l.title || '').replace(/</g,'&lt;') + '</div>' +
+                '<span class="seller-link" style="font-size:12px;" onclick="event.stopPropagation();openUserProfile(' + l.seller_id + ')">' + String(nick).replace(/</g,'&lt;') + '</span></div>' +
+                '<div class="subtitle" style="margin-top:6px;white-space:pre-line;">' + desc + '</div>' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">' +
+                '<div style="font-weight:700;color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' $</div>' +
+                '<button class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:12px;" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', ' + (l.is_favorite ? 'true' : 'false') + ')">' +
+                (l.is_favorite ? '★' : '☆') + '</button></div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty" style="padding:12px;">' + e.message + '</div>';
+    }
+}
+
 async function loadListings() {
     var box = document.getElementById('listings-feed');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -1885,6 +1919,7 @@ async function openListing(id) {
         } else if (isOwner) {
             // владелец
             if (l.status === 'active') {
+                html += '<button class="btn" style="margin-top:8px;" onclick="editRejectedListing(' + l.id + ')">Редактировать</button>';
                 html += '<button class="btn" style="margin-top:8px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="unpublishListing(' + l.id + ')">Снять с публикации</button>';
             } else if (l.status === 'rejected') {
                 html += '<div class="btn-stack" style="margin-top:10px;">';
