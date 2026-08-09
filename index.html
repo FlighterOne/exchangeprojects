@@ -1795,12 +1795,12 @@ async function loadNewsPinned() {
                     if (body.length > 140) body = body.slice(0, 140) + '…';
                     var dateLabel = n.date_label || 'Недавно';
                     return '<div class="listing-card" data-nid="' + n.id + '">' +
-                        '<div class="ltitle-row"><div class="ltitle">' + String(n.title || '').replace(/</g,'&lt;') + '</div></div>' +
-                        '<div class="ldesc">' + body + '</div>' +
-                        '<div class="news-meta-row">' +
+                        '<div class="news-meta-row" style="margin-top:0;margin-bottom:8px;">' +
                         '<span class="news-date">' + String(dateLabel).replace(/</g,'&lt;') + '</span>' +
                         '<span class="news-views">👁 ' + (n.views_count || 0) + '</span>' +
-                        '</div></div>';
+                        '</div>' +
+                        '<div class="ltitle-row"><div class="ltitle">' + String(n.title || '').replace(/</g,'&lt;') + '</div></div>' +
+                        '<div class="ldesc">' + body + '</div></div>';
                 }).join('');
                 feed.querySelectorAll('.listing-card[data-nid]').forEach(function(el) {
                     el.onclick = function() {
@@ -1861,11 +1861,11 @@ async function openNewsDetail(id) {
         var n = await apiGet('/api/news/' + id);
         var dateLabel = n.date_label || 'Недавно';
         var html = '';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:4px;margin-bottom:8px;">';
-        html += '<div class="section-title" style="font-size:18px;margin:0;flex:1;">' + String(n.title || '').replace(/</g,'&lt;') + '</div>';
-        html += '<div class="news-views" style="padding-top:4px;">👁 ' + (n.views_count || 0) + '</div>';
+        html += '<div class="news-meta-row" style="margin-top:0;margin-bottom:10px;">';
+        html += '<span class="news-date">' + String(dateLabel).replace(/</g,'&lt;') + '</span>';
+        html += '<span class="news-views">👁 ' + (n.views_count || 0) + '</span>';
         html += '</div>';
-        html += '<div class="news-date" style="margin-bottom:12px;">' + String(dateLabel).replace(/</g,'&lt;') + '</div>';
+        html += '<div class="section-title" style="font-size:18px;margin:0 0 12px 0;">' + String(n.title || '').replace(/</g,'&lt;') + '</div>';
         var bodyHtml = n.body_html || n.body || '';
         if (n.body_html) {
             html += '<div class="news-body">' + sanitizeNewsHtml(bodyHtml) + '</div>';
