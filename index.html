@@ -602,6 +602,59 @@
             flex-shrink: 0;
             box-shadow: 0 0 0 6px rgba(128,128,128,0.12);
         }
+    
+        .file-drop {
+            border: 1.5px solid rgba(128,128,128,0.35);
+            border-radius: 14px;
+            padding: 40px 16px;
+            text-align: center;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--secondary-bg);
+            cursor: pointer;
+            margin-bottom: 14px;
+        }
+        .file-drop:active { opacity: 0.85; }
+        .file-drop .fd-icon { font-size: 32px; line-height: 1; }
+        .file-drop .fd-title { font-weight: 600; font-size: 15px; }
+        .file-drop .fd-sub { font-size: 12px; color: var(--hint); }
+        .files-block {
+            margin: 14px 0;
+            padding: 4px 0 2px;
+            border-top: 1px solid rgba(128,128,128,0.15);
+            border-bottom: 1px solid rgba(128,128,128,0.15);
+        }
+        .files-block .files-label {
+            font-size: 13px; font-weight: 600; color: var(--hint);
+            margin: 8px 12px 6px;
+        }
+        .file-row {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; padding: 12px 14px; margin-bottom: 8px;
+            background: var(--secondary-bg); border-radius: 12px; font-size: 14px;
+            border: 1px solid rgba(128,128,128,0.12);
+            width: 100%; box-sizing: border-box;
+        }
+        .file-row .fname {
+            flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-weight: 500;
+        }
+        .file-row .fx {
+            border: none; background: transparent; color: #ff3b30;
+            font-size: 22px; font-weight: 700; cursor: pointer;
+            padding: 0 4px; line-height: 1; flex-shrink: 0;
+            margin-left: auto;
+        }
+        .file-row .fdl {
+            border: none; background: transparent; color: var(--button);
+            font-size: 20px; cursor: pointer; padding: 0 4px; line-height: 1;
+            text-decoration: none; flex-shrink: 0; margin-left: auto;
+        }
+
     </style>
 </head>
 <body>
@@ -753,9 +806,9 @@
             <div class="form-group">
                 <label class="form-label">Файлы бота</label>
                 <div class="file-drop" onclick="document.getElementById('listing-files').click()">
-                    <div style="font-size:28px;">📁</div>
-                    <div style="font-weight:600;">Загрузить файлы</div>
-                    <div style="font-size:12px;color:var(--hint);">Нажмите, чтобы выбрать</div>
+                    <div class="fd-icon">📁</div>
+                    <div class="fd-title">Загрузить файлы</div>
+                    <div class="fd-sub">Нажмите, чтобы выбрать</div>
                 </div>
                 <input type="file" id="listing-files" multiple style="display:none;" onchange="onListingFilesPicked(this)">
                 <div id="listing-files-list"></div>
@@ -1718,6 +1771,46 @@ function openBanUser(uid) {
         .catch(function(e){ tg.showAlert(e.message); });
 }
 
+
+function listingExtraInfoHtml(l, opts) {
+    opts = opts || {};
+    var hideContract = !!opts.hideContract;
+    var parts = [];
+    if (l.listing_type === 'partner') {
+        parts.push('<b>Тип:</b> Партнёр X-Cod');
+        if (!hideContract && l.contract_number) {
+            parts.push('<b>Договор:</b> ' + String(l.contract_number).replace(/</g,'&lt;'));
+        }
+    } else {
+        parts.push('<b>Тип:</b> Свой товар');
+        if (l.product_type) parts.push('<b>Вид:</b> ' + String(l.product_type).replace(/</g,'&lt;'));
+        if (l.bot_username) parts.push('<b>Username:</b> @' + String(l.bot_username).replace(/</g,'&lt;'));
+        if (l.tgstat_url) parts.push('<b>TGStat:</b> ' + String(l.tgstat_url).replace(/</g,'&lt;'));
+    }
+    if (!parts.length) return '';
+    return '<div class="info-block" style="margin-top:8px;margin-bottom:12px;">' + parts.join('<br>') + '</div>';
+}
+function listingFilesBlockHtml(files, mode, id) {
+    // mode: remove | download-listing | download-order
+    files = files || [];
+    if (!files.length) return '';
+    var html = '<div class="files-block"><div class="files-label">Файлы</div>';
+    files.forEach(function(f, i) {
+        var nm = (typeof f === 'object' && f && f.name) ? f.name : String(f);
+        var action = '';
+        if (mode === 'remove') {
+            action = '<button type="button" class="fx" onclick="removeListingFile(' + i + ')">×</button>';
+        } else if (mode === 'download-listing') {
+            action = '<button type="button" class="fdl" onclick="downloadListingFile(' + id + ',' + i + ')">⬇</button>';
+        } else if (mode === 'download-order') {
+            action = '<button type="button" class="fdl" onclick="downloadOrderFile(' + id + ',' + i + ')">⬇</button>';
+        }
+        html += '<div class="file-row"><span class="fname">' + nm.replace(/</g,'&lt;') + '</span>' + action + '</div>';
+    });
+    html += '</div>';
+    return html;
+}
+
 async function openListing(id) {
     // запомнить откуда открыли
     try {
@@ -1750,6 +1843,14 @@ async function openListing(id) {
         var html = '';
         html += '<div class="section-title" style="font-size:18px;margin-top:4px;">' + (l.title || '').replace(/</g,'&lt;') + '</div>';
         html += '<div class="info-block" style="white-space:pre-line;margin-bottom:14px;">' + (l.description || '').replace(/</g,'&lt;') + '</div>';
+        // инфо о товаре (для покупателя без договора)
+        html += listingExtraInfoHtml(l, { hideContract: !isOwner });
+        // файлы для владельца / модерации
+        var files = parseFilesMeta(l.files_meta);
+        if (isOwner || (userData && userData.role >= 4)) {
+            html += listingFilesBlockHtml(files, 'download-listing', l.id);
+        }
+
 
         html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">';
         html += '<div style="font-size:22px;font-weight:700;color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>';
@@ -1859,7 +1960,7 @@ async function confirmBuyListing(id) {
     try {
         var res = await apiPost('/api/orders', { listing_id: id });
         if (res.balance != null) setBalance(res.balance);
-        tg.showAlert('Заказ #' + res.order_id + ' создан. Файлы доступны в заказе.');
+        tg.showAlert('#' + res.order_id + ' создан. Файлы доступны.');
         await loadOrders();
         openOrderDetail(res.order_id);
     } catch (e) {
@@ -1888,7 +1989,7 @@ async function loadOrders() {
         };
         box.innerHTML = items.map(function(o) {
             var stage = stageMap[o.status] || o.status;
-            var title = (o.listing_title || ('Заказ #' + o.id)).replace(/</g,'&lt;');
+            var title = (o.listing_title || ('#' + o.id)).replace(/</g,'&lt;');
             var role = (userData.user_id === o.buyer_id) ? 'Покупка' : 'Продажа';
             return '<div class="list-item" style="cursor:pointer;" onclick="openOrderDetail(' + o.id + ')">' +
                 '<div class="top"><div class="title">' + title + '</div>' +
@@ -1926,7 +2027,7 @@ function openOrderDetail(id) {
         cancelled: 'Отменён'
     };
     var box = document.getElementById('order-detail-content');
-    var title = (o.listing_title || ('Заказ #' + o.id)).replace(/</g,'&lt;');
+    var title = (o.listing_title || ('#' + o.id)).replace(/</g,'&lt;');
     var isBuyer = userData.user_id === o.buyer_id;
     var isSeller = userData.user_id === o.seller_id;
     var role = isBuyer ? 'Покупка' : 'Продажа';
@@ -1949,7 +2050,17 @@ function openOrderDetail(id) {
     var html = head;
     html += '<div class="list-item"><div class="top"><div class="title">' + title + '</div>' +
         '<span class="badge badge-processing">' + role + '</span></div>' +
-        '<div class="subtitle">Заказ #' + o.id + '</div></div>';
+        '<div class="subtitle">#' + o.id + '</div></div>';
+    if (o.listing_description) {
+        html += '<div class="info-block" style="white-space:pre-line;">' + String(o.listing_description).replace(/</g,'&lt;') + '</div>';
+    }
+    html += listingExtraInfoHtml({
+        listing_type: o.listing_type,
+        contract_number: o.contract_number,
+        product_type: o.product_type,
+        bot_username: o.bot_username,
+        tgstat_url: o.tgstat_url
+    }, { hideContract: false });
     html += '<div class="info-block">Сумма: <b>' + Number(o.amount).toLocaleString('ru-RU') + '$</b><br>' +
         'Этап: <b>' + (stageMap[o.status] || o.status) + '</b><br>' +
         'Создан: ' + String(o.created_at || '').slice(0, 19).replace('T', ' ') + '</div>';
@@ -1961,12 +2072,7 @@ function openOrderDetail(id) {
         else if (Array.isArray(o.files_meta)) files = o.files_meta;
     } catch (e) {}
     if (files.length) {
-        html += '<div class="section-title" style="font-size:15px;margin:8px 0;">Файлы с площадки</div>';
-        files.forEach(function(f, i) {
-            var nm = (typeof f === 'object' && f.name) ? f.name : String(f);
-            html += '<div class="file-row"><span class="fname">' + nm.replace(/</g,'&lt;') + '</span>' +
-                '<button type="button" class="fdl" onclick="downloadOrderFile(' + o.id + ',' + i + ')">⬇</button></div>';
-        });
+        html += listingFilesBlockHtml(files, 'download-order', o.id).replace('Файлы', 'Файлы с площадки');
     }
 
     if (o.status === 'buyer_review' && isBuyer) {
@@ -2183,14 +2289,7 @@ function parseFilesMeta(meta) {
 function renderListingFilesList() {
     var box = document.getElementById('listing-files-list');
     if (!box) return;
-    if (!listingPickedFiles.length) {
-        box.innerHTML = '';
-        return;
-    }
-    box.innerHTML = listingPickedFiles.map(function(f, i) {
-        return '<div class="file-row"><span class="fname">' + String(f.name).replace(/</g,'&lt;') + '</span>' +
-            '<button type="button" class="fx" onclick="removeListingFile(' + i + ')">×</button></div>';
-    }).join('');
+    box.innerHTML = listingFilesBlockHtml(listingPickedFiles, 'remove', 0).replace('Файлы', 'Выбрано') || '';
 }
 
 function removeListingFile(i) {
@@ -2914,11 +3013,7 @@ function openAdminListingDetail(id) {
     html += '<b>Создано:</b> ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
     var files = parseFilesMeta(l.files_meta);
     if (files.length) {
-        html += '<div class="section-title" style="font-size:15px;margin:12px 0 8px;">Файлы</div>';
-        files.forEach(function(f, i) {
-            html += '<div class="file-row"><span class="fname">' + String(f.name || f).replace(/</g,'&lt;') + '</span>' +
-                '<button type="button" class="fdl" onclick="downloadListingFile(' + l.id + ',' + i + ')">⬇</button></div>';
-        });
+        html += listingFilesBlockHtml(files, 'download-listing', l.id);
     } else {
         html += '<div class="info-block">Файлы не прикреплены</div>';
     }
@@ -3088,10 +3183,11 @@ async function loadAdminStaff() {
             return;
         }
         html += staff.map(function(s) {
-            var name = s.username ? ('@' + s.username) : (s.first_name || s.user_id);
+            var nick = s.username ? ('@' + s.username) : ((s.first_name || '') + ' ' + (s.last_name || '')).trim() || ('ID ' + s.user_id);
+            nick = String(nick).replace(/</g, '&lt;');
             return '<div class="list-item" style="cursor:pointer;" onclick="openStaffDetail(' + s.user_id + ')">' +
-                '<div class="top"><div class="title">' + name + '</div>' +
-                '<span class="badge badge-processing">' + s.role_name + '</span></div>' +
+                '<div class="top"><div class="title"><span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + s.user_id + ')">' + nick + '</span></div>' +
+                '<span class="badge badge-processing">' + (s.role_name || '').replace(/</g,'&lt;') + '</span></div>' +
                 '<div class="subtitle">ID: ' + s.user_id + ' · Баланс: ' + s.balance + '$</div></div>';
         }).join('');
         box.innerHTML = html;
@@ -3124,9 +3220,12 @@ function openStaffDetail(uid) {
         return '<button class="btn btn-secondary" style="margin-bottom:6px;" onclick="adminSetStaffRole(' + s.user_id + ', ' + r.id + ')">' + r.name + '</button>';
     }).join('');
 
+    var nickHtml = s.username
+        ? ('<span class="seller-link" onclick="openUserProfile(' + s.user_id + ')">@' + String(s.username).replace(/</g,'&lt;') + '</span>')
+        : '—';
     var html = '<div class="info-block">' +
         '<b>Имя:</b> ' + (s.first_name || '—') + '<br>' +
-        '<b>Username:</b> ' + (s.username ? '@' + s.username : '—') + '<br>' +
+        '<b>Username:</b> ' + nickHtml + '<br>' +
         '<b>ID:</b> ' + s.user_id + '<br>' +
         '<b>Роль:</b> ' + s.role_name + '<br>' +
         '<b>Баланс:</b> ' + s.balance + '$' +
