@@ -291,6 +291,49 @@
             font-size: 12px; padding: 6px 10px; border-radius: 999px;
             background: var(--secondary-bg); color: var(--text); border: none; cursor: pointer;
         }
+        .range-block { margin-bottom: 12px; }
+        .range-block > .form-label { margin-bottom: 6px; }
+        .range-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+        }
+        .range-row .form-input { margin: 0; }
+        .star-row {
+            display: flex; gap: 6px; flex-wrap: nowrap;
+        }
+        .star-btn {
+            flex: 1; border: 1.5px solid rgba(128,128,128,0.35);
+            background: var(--secondary-bg); color: var(--text);
+            border-radius: 10px; padding: 10px 4px; font-size: 13px;
+            font-weight: 600; cursor: pointer;
+        }
+        .star-btn.selected {
+            border-color: var(--button); background: rgba(46,166,255,0.12); color: var(--button);
+        }
+        .sheet-select {
+            width: 100%; text-align: left; padding: 12px 14px;
+            border: 1.5px solid rgba(128,128,128,0.3); border-radius: 12px;
+            background: var(--secondary-bg); color: var(--text); font-size: 14px;
+            cursor: pointer;
+        }
+        .bottom-sheet-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+            z-index: 200; display: none;
+        }
+        .bottom-sheet-overlay.open { display: block; }
+        .bottom-sheet {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 210;
+            background: var(--bg); border-radius: 16px 16px 0 0;
+            max-height: 70vh; overflow: auto; padding: 16px 16px 28px;
+            transform: translateY(110%); transition: transform .25s ease;
+        }
+        .bottom-sheet.open { transform: translateY(0); }
+        .bottom-sheet .sheet-title { font-weight: 700; font-size: 16px; margin-bottom: 12px; }
+        .sheet-option {
+            width: 100%; text-align: left; padding: 12px 10px;
+            border: none; border-bottom: 1px solid rgba(128,128,128,0.15);
+            background: transparent; color: var(--text); font-size: 15px; cursor: pointer;
+        }
+        .sheet-option:active { opacity: 0.7; }
         .filter-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
         }
@@ -764,6 +807,13 @@
             <span class="di">🛡</span> Панель
         </button>
     </div>
+
+<div class="bottom-sheet-overlay" id="product-type-overlay" onclick="closeProductTypeSheet()"></div>
+<div class="bottom-sheet" id="product-type-sheet">
+    <div class="sheet-title">Вид товара</div>
+    <div id="product-type-options"></div>
+</div>
+
 </div>
 
 <!-- CONTENT -->
@@ -941,50 +991,53 @@
             <div class="form-label" style="margin-bottom:6px;">История поиска</div>
             <div class="search-history" id="exchange-history"></div>
         </div>
-        <div class="form-label" style="margin-bottom:8px;">Фильтры</div>
-        <div class="filter-grid">
-            <div class="form-group full">
-                <label class="form-label">Тип</label>
-                <div class="type-toggle" style="display:flex;gap:8px;">
-                    <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-all" data-v="" onclick="setExType(this)" style="flex:1;">Все</button>
-                    <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-partner" data-v="partner" onclick="setExType(this)" style="flex:1;">Партнёр</button>
-                    <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-own" data-v="own" onclick="setExType(this)" style="flex:1;">Свой товар</button>
-                </div>
-            </div>
-            <div class="form-group full">
-                <label class="form-label">Вид товара</label>
-                <input class="form-input" type="text" id="ex-product-type" placeholder="ТГ бот, сайт, mini app...">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Рейтинг продавца от</label>
-                <input class="form-input" type="number" id="ex-rating-min" placeholder="4.5" min="0" max="5" step="0.1">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Цена от ($)</label>
-                <input class="form-input" type="number" id="ex-price-from" placeholder="0" min="0">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Цена до ($)</label>
-                <input class="form-input" type="number" id="ex-price-to" placeholder="10000" min="0">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Пользователей/мес от</label>
-                <input class="form-input" type="number" id="ex-users-from" placeholder="0" min="0">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Пользователей/мес до</label>
-                <input class="form-input" type="number" id="ex-users-to" placeholder="" min="0">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Заработок/мес от ($)</label>
-                <input class="form-input" type="number" id="ex-earn-from" placeholder="0" min="0">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Заработок/мес до ($)</label>
-                <input class="form-input" type="number" id="ex-earn-to" placeholder="" min="0">
+                <div class="form-label" style="margin-bottom:8px;">Фильтры</div>
+        <div class="form-group">
+            <label class="form-label">Тип</label>
+            <div class="type-toggle" style="display:flex;gap:8px;">
+                <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-all" data-v="" onclick="setExType(this)" style="flex:1;">Все</button>
+                <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-partner" data-v="partner" onclick="setExType(this)" style="flex:1;">Партнёр</button>
+                <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-own" data-v="own" onclick="setExType(this)" style="flex:1;">Свой товар</button>
             </div>
         </div>
-        <button class="btn" style="margin-bottom:14px;" onclick="runExchangeSearch()">Найти</button>
+        <div class="form-group">
+            <label class="form-label">Вид товара</label>
+            <button type="button" class="sheet-select" id="ex-product-type-btn" onclick="openProductTypeSheet()">Любой вид</button>
+            <input type="hidden" id="ex-product-type" value="">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Рейтинг продавца от</label>
+            <div class="star-row" id="ex-star-row">
+                <button type="button" class="star-btn" data-r="1" onclick="setExRating(1)">★1</button>
+                <button type="button" class="star-btn" data-r="2" onclick="setExRating(2)">★2</button>
+                <button type="button" class="star-btn" data-r="3" onclick="setExRating(3)">★3</button>
+                <button type="button" class="star-btn" data-r="4" onclick="setExRating(4)">★4</button>
+                <button type="button" class="star-btn" data-r="5" onclick="setExRating(5)">★5</button>
+            </div>
+            <input type="hidden" id="ex-rating-min" value="">
+        </div>
+        <div class="range-block">
+            <div class="form-label">Цена ($)</div>
+            <div class="range-row">
+                <input class="form-input" type="number" id="ex-price-from" placeholder="от" min="0">
+                <input class="form-input" type="number" id="ex-price-to" placeholder="до" min="0">
+            </div>
+        </div>
+        <div class="range-block">
+            <div class="form-label">Пользователей в месяц</div>
+            <div class="range-row">
+                <input class="form-input" type="number" id="ex-users-from" placeholder="от" min="0">
+                <input class="form-input" type="number" id="ex-users-to" placeholder="до" min="0">
+            </div>
+        </div>
+        <div class="range-block">
+            <div class="form-label">Заработок / мес ($)</div>
+            <div class="range-row">
+                <input class="form-input" type="number" id="ex-earn-from" placeholder="от" min="0">
+                <input class="form-input" type="number" id="ex-earn-to" placeholder="до" min="0">
+            </div>
+        </div>
+<button class="btn" style="margin-bottom:14px;" onclick="runExchangeSearch()">Найти</button>
         <div id="exchange-results"><div class="empty"><div class="icon">🔍</div>Введите запрос или задайте фильтры</div></div>
     </div>
 
@@ -2019,6 +2072,55 @@ function renderExchangeHistory() {
     });
 }
 
+var exchangeRatingMin = '';
+var exchangeProductTypes = [];
+
+function setExRating(n) {
+    if (exchangeRatingMin === String(n)) {
+        exchangeRatingMin = '';
+        document.getElementById('ex-rating-min').value = '';
+        document.querySelectorAll('#ex-star-row .star-btn').forEach(function(b){ b.classList.remove('selected'); });
+        return;
+    }
+    exchangeRatingMin = String(n);
+    document.getElementById('ex-rating-min').value = n;
+    document.querySelectorAll('#ex-star-row .star-btn').forEach(function(b){
+        b.classList.toggle('selected', parseInt(b.getAttribute('data-r'), 10) === n);
+    });
+}
+
+function openProductTypeSheet() {
+    var sheet = document.getElementById('product-type-sheet');
+    var overlay = document.getElementById('product-type-overlay');
+    var box = document.getElementById('product-type-options');
+    if (!sheet || !box) return;
+    var html = '<button type="button" class="sheet-option" data-v="">Любой вид</button>';
+    exchangeProductTypes.forEach(function(pt) {
+        html += '<button type="button" class="sheet-option" data-v="' + String(pt).replace(/"/g,'&quot;').replace(/</g,'&lt;') + '">' + String(pt).replace(/</g,'&lt;') + '</button>';
+    });
+    if (!exchangeProductTypes.length) {
+        html += '<div class="info-block" style="margin-top:8px;">Пока нет зарегистрированных видов в объявлениях</div>';
+    }
+    box.innerHTML = html;
+    box.querySelectorAll('.sheet-option').forEach(function(btn) {
+        btn.onclick = function() {
+            var v = btn.getAttribute('data-v') || '';
+            document.getElementById('ex-product-type').value = v;
+            document.getElementById('ex-product-type-btn').textContent = v || 'Любой вид';
+            closeProductTypeSheet();
+        };
+    });
+    overlay.classList.add('open');
+    sheet.classList.add('open');
+}
+
+function closeProductTypeSheet() {
+    var sheet = document.getElementById('product-type-sheet');
+    var overlay = document.getElementById('product-type-overlay');
+    if (sheet) sheet.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+}
+
 function initExchangePage() {
     renderExchangeHistory();
     var input = document.getElementById('exchange-q');
@@ -2031,9 +2133,12 @@ function initExchangePage() {
             }
         });
     }
-    // default type All selected
     var all = document.getElementById('ex-type-all');
     if (all) setExType(all);
+    // подгрузить виды товаров
+    apiGet('/api/exchange/product-types').then(function(data) {
+        exchangeProductTypes = data.types || [];
+    }).catch(function(){ exchangeProductTypes = []; });
 }
 
 async function runExchangeSearch() {
