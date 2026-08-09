@@ -1555,7 +1555,7 @@ function listingStatusBadge(status) {
         rejected: ['Отклонено модерацией', 'badge-cancelled'],
         sold: ['Завершён', 'badge-muted'],
         completed: ['Завершён', 'badge-muted'],
-        refund_moderation: ['Возврат', 'badge-moderation'],
+        refund_moderation: ['Возврат средств', 'badge-moderation'],
         deleted: ['Удалено', 'badge-muted']
     };
     return map[status] || [status || '—', 'badge-muted'];
@@ -1889,6 +1889,8 @@ async function openListing(id) {
                 html += '</div>';
             } else if (l.status === 'pending') {
                 html += '<div class="info-block" style="margin-top:8px;">На модерации</div>';
+            } else if (l.status === 'refund_moderation') {
+                html += '<div class="info-block" style="margin-top:8px;">На модерации: возврат средств по сделке</div>';
                 html += '<button class="btn" style="margin-top:10px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить</button>';
             }
         }
@@ -2071,7 +2073,8 @@ function openOrderDetail(id) {
         if (typeof o.files_meta === 'string' && o.files_meta) files = JSON.parse(o.files_meta);
         else if (Array.isArray(o.files_meta)) files = o.files_meta;
     } catch (e) {}
-    if (files.length) {
+    var canSeeFiles = (o.status === 'buyer_review' || o.status === 'completed' || o.status === 'awaiting_seller' || o.status === 'refund_moderation');
+    if (files.length && canSeeFiles) {
         html += listingFilesBlockHtml(files, 'download-order', o.id).replace('Файлы', 'Файлы с площадки');
     }
 
@@ -2595,7 +2598,7 @@ async function loadRequests() {
         box.innerHTML = reqs.map(function(r) {
             var st = statusMap[r.status] || [r.status, 'badge-pending'];
             var typeEmoji = r.type === 'deposit' ? '💰' : '💳';
-            var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+            var typeName = r.type === 'deposit' ? 'Пополнение' : (r.type === 'refund' ? 'Возврат (сделка)' : 'Вывод');
             var actions = '';
             if (r.status === 'pending' && r.type === 'deposit') {
                 actions = '<div class="actions">' +
@@ -2662,9 +2665,9 @@ function renderMyListings() {
     var box = document.getElementById('my-listings-list');
     if (!box) return;
     var items = _myListingsCache || [];
-    var cMod = items.filter(function(l){ return l.status === 'pending'; }).length;
+    var cMod = items.filter(function(l){ return l.status === 'pending' || l.status === 'refund_moderation'; }).length;
     var cAct = items.filter(function(l){ return l.status === 'active'; }).length;
-    var cDone = items.filter(function(l){ return l.status !== 'active' && l.status !== 'pending' && l.status !== 'deleted'; }).length;
+    var cDone = items.filter(function(l){ return l.status !== 'active' && l.status !== 'pending' && l.status !== 'refund_moderation' && l.status !== 'deleted'; }).length;
     var elM = document.getElementById('my-cnt-mod');
     var elA = document.getElementById('my-cnt-active');
     var elD = document.getElementById('my-cnt-done');
@@ -2673,11 +2676,11 @@ function renderMyListings() {
     if (elD) elD.textContent = cDone;
     var filtered;
     if (_myListingsTab === 'moderation') {
-        filtered = items.filter(function(l){ return l.status === 'pending'; });
+        filtered = items.filter(function(l){ return l.status === 'pending' || l.status === 'refund_moderation'; });
     } else if (_myListingsTab === 'active') {
         filtered = items.filter(function(l){ return l.status === 'active'; });
     } else {
-        filtered = items.filter(function(l){ return l.status !== 'active' && l.status !== 'pending' && l.status !== 'deleted'; });
+        filtered = items.filter(function(l){ return l.status !== 'active' && l.status !== 'pending' && l.status !== 'refund_moderation' && l.status !== 'deleted'; });
     }
     if (!filtered.length) {
         box.innerHTML = '<div class="empty"><div class="icon">📋</div>Нет объявлений в этом разделе</div>';
@@ -2690,7 +2693,7 @@ function renderMyListings() {
         rejected: ['Отклонено модерацией', 'badge-cancelled'],
         sold: ['Завершён', 'badge-muted'],
         completed: ['Завершён', 'badge-muted'],
-        refund_moderation: ['Возврат', 'badge-moderation'],
+        refund_moderation: ['Возврат средств', 'badge-moderation'],
         deleted: ['Удалено', 'badge-muted']
     };
     box.innerHTML = filtered.map(function(l) {
@@ -3065,7 +3068,7 @@ async function loadAdminRequests() {
         }
         var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
         box.innerHTML = reqs.map(function(r) {
-            var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+            var typeName = r.type === 'deposit' ? 'Пополнение' : (r.type === 'refund' ? 'Возврат (сделка)' : 'Вывод');
             return '<div class="list-item" style="cursor:pointer;" onclick="openAdminTxDetail(' + r.id + ')">' +
                 '<div class="top"><div class="title">' + typeName + ' #' + r.id + '</div></div>' +
                 '<div class="subtitle">User: ' + r.user_id + ' · ' + r.amount + '$ · ' +
@@ -3080,7 +3083,7 @@ function openAdminTxDetail(id) {
     var r = (_adminCache.transactions || []).find(function(x){ return x.id === id; });
     if (!r) { tg.showAlert('Заявка не найдена'); return; }
     var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
-    var typeName = r.type === 'deposit' ? 'Пополнение' : 'Вывод';
+    var typeName = r.type === 'deposit' ? 'Пополнение' : (r.type === 'refund' ? 'Возврат (сделка)' : 'Вывод');
     document.getElementById('admin-detail-title').textContent = typeName + ' #' + id;
     var html = '<div class="info-block">' +
         '<b>Тип:</b> ' + typeName + '<br>' +
