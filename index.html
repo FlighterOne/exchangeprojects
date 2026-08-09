@@ -534,6 +534,16 @@
             background: var(--secondary-bg); color: var(--text); cursor: pointer;
         }
         .seg-toggle button.active { background: var(--button); color: var(--button-text); }
+        .seg-toggle button {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .seg-count {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 1;
+            background: rgba(128,128,128,0.22); color: inherit;
+        }
+        .seg-toggle button.active .seg-count { background: rgba(255,255,255,0.28); }
         .period-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
 
         .role-frame {
@@ -779,9 +789,9 @@
             <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showPage('listing-create')">+ Создать</button>
         </div>
         <div class="seg-toggle" id="my-listings-seg" style="grid-template-columns:1fr 1fr 1fr;">
-            <button type="button" class="active" id="my-seg-mod" onclick="setMyListingsTab('moderation')">На модерации</button>
-            <button type="button" id="my-seg-active" onclick="setMyListingsTab('active')">Активные</button>
-            <button type="button" id="my-seg-done" onclick="setMyListingsTab('completed')">Завершённые</button>
+            <button type="button" class="active" id="my-seg-mod" onclick="setMyListingsTab('moderation')">На модерации <span class="seg-count" id="my-cnt-mod">0</span></button>
+            <button type="button" id="my-seg-active" onclick="setMyListingsTab('active')">Активные <span class="seg-count" id="my-cnt-active">0</span></button>
+            <button type="button" id="my-seg-done" onclick="setMyListingsTab('completed')">Завершённые <span class="seg-count" id="my-cnt-done">0</span></button>
         </div>
         <div id="my-listings-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
@@ -1039,8 +1049,8 @@
         </div>
         <div class="rating-row" id="profile-ratings"></div>
         <div class="seg-toggle" id="profile-seg">
-            <button type="button" class="active" id="profile-seg-active" onclick="setOwnProfileStatus('active')">Действующие</button>
-            <button type="button" id="profile-seg-completed" onclick="setOwnProfileStatus('completed')">Завершённые</button>
+            <button type="button" class="active" id="profile-seg-active" onclick="setOwnProfileStatus('active')">Активные <span class="seg-count" id="own-cnt-active">0</span></button>
+            <button type="button" id="profile-seg-completed" onclick="setOwnProfileStatus('completed')">Завершённые <span class="seg-count" id="own-cnt-done">0</span></button>
         </div>
         <div id="profile-listings"><div class="loading"><div class="spinner"></div></div></div>
     </div>
@@ -1434,7 +1444,7 @@ function showPage(name) {
 function listingStatusBadge(status) {
     var map = {
         pending: ['На модерации', 'badge-moderation'],
-        active: ['Активно', 'badge-muted'],
+        active: ['Активно', 'badge-completed'],
         unpublished: ['Снято', 'badge-muted'],
         rejected: ['Отклонено', 'badge-cancelled'],
         sold: ['Завершён', 'badge-muted'],
@@ -1519,8 +1529,8 @@ async function renderUserProfile() {
             html += '</div>';
         }
         html += '<div class="seg-toggle">' +
-            '<button class="' + (status==='active'?'active':'') + '" onclick="window._profileStatus=\'active\';renderUserProfile()">Действующие</button>' +
-            '<button class="' + (status==='completed'?'active':'') + '" onclick="window._profileStatus=\'completed\';renderUserProfile()">Завершённые</button>' +
+            '<button class="' + (status==='active'?'active':'') + '" onclick="window._profileStatus=\'active\';renderUserProfile()">Активные <span class="seg-count">' + (p.count_active != null ? p.count_active : 0) + '</span></button>' +
+            '<button class="' + (status==='completed'?'active':'') + '" onclick="window._profileStatus=\'completed\';renderUserProfile()">Завершённые <span class="seg-count">' + (p.count_completed != null ? p.count_completed : 0) + '</span></button>' +
             '</div>';
         var items = p.listings || [];
         if (!items.length) {
@@ -1561,6 +1571,10 @@ async function loadOwnProfileListings() {
     try {
         var status = _ownProfileStatus || 'active';
         var p = await apiGet('/api/users/' + userData.user_id + '/profile?status=' + status);
+        var ea = document.getElementById('own-cnt-active');
+        var ed = document.getElementById('own-cnt-done');
+        if (ea) ea.textContent = p.count_active != null ? p.count_active : 0;
+        if (ed) ed.textContent = p.count_completed != null ? p.count_completed : 0;
         var items = p.listings || [];
         if (!items.length) {
             box.innerHTML = '<div class="empty">Нет объявлений</div>';
@@ -2127,6 +2141,15 @@ function renderMyListings() {
     var box = document.getElementById('my-listings-list');
     if (!box) return;
     var items = _myListingsCache || [];
+    var cMod = items.filter(function(l){ return l.status === 'pending'; }).length;
+    var cAct = items.filter(function(l){ return l.status === 'active' || l.status === 'unpublished'; }).length;
+    var cDone = items.filter(function(l){ return ['sold','completed','rejected','deleted','refund_moderation'].indexOf(l.status) >= 0; }).length;
+    var elM = document.getElementById('my-cnt-mod');
+    var elA = document.getElementById('my-cnt-active');
+    var elD = document.getElementById('my-cnt-done');
+    if (elM) elM.textContent = cMod;
+    if (elA) elA.textContent = cAct;
+    if (elD) elD.textContent = cDone;
     var filtered;
     if (_myListingsTab === 'moderation') {
         filtered = items.filter(function(l){ return l.status === 'pending'; });
@@ -2143,7 +2166,7 @@ function renderMyListings() {
     }
     var statusMap = {
         pending: ['На модерации', 'badge-moderation'],
-        active: ['Активно', 'badge-muted'],
+        active: ['Активно', 'badge-completed'],
         unpublished: ['Снято', 'badge-muted'],
         rejected: ['Отклонено', 'badge-cancelled'],
         sold: ['Завершён', 'badge-muted'],
