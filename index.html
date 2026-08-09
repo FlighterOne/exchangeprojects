@@ -269,8 +269,12 @@
             flex-shrink: 0; max-width: 42%; text-align: right; line-height: 1.3;
             padding-top: 2px;
         }
+        .listing-card .ltitle {
+            font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3;
+        }
         .listing-card .ldesc {
-            font-size: 13px; color: var(--hint); line-height: 1.4;
+            font-size: 13px; font-weight: 400; color: var(--hint); line-height: 1.45;
+            margin-top: 8px;
             display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
             white-space: pre-line;
         }
@@ -1735,18 +1739,21 @@ async function loadNewsPinned() {
             return;
         }
         box.innerHTML = items.map(function(l) {
-            var desc = String(l.description || '').replace(/</g,'&lt;');
-            if (desc.length > 160) desc = desc.slice(0, 160) + '…';
-            var nick = l.seller_username ? ('@' + l.seller_username) : (l.seller_name || 'X-Cod');
+            var seller = formatSeller(l);
+            var desc = (l.description || '').replace(/</g, '&lt;');
+            if (desc.length > 220) desc = desc.slice(0, 220) + '…';
+            var isFav = !!l.is_favorite;
+            var priceNum = Number(l.price).toLocaleString('ru-RU');
             return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
-                '<div class="top" style="display:flex;justify-content:space-between;gap:8px;">' +
-                '<div class="title" style="flex:1;">' + String(l.title || '').replace(/</g,'&lt;') + '</div>' +
-                '<span class="seller-link" style="font-size:12px;" onclick="event.stopPropagation();openUserProfile(' + l.seller_id + ')">' + String(nick).replace(/</g,'&lt;') + '</span></div>' +
-                '<div class="subtitle" style="margin-top:6px;white-space:pre-line;">' + desc + '</div>' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">' +
-                '<div style="font-weight:700;color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' $</div>' +
-                '<button class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:12px;" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', ' + (l.is_favorite ? 'true' : 'false') + ')">' +
-                (l.is_favorite ? '★' : '☆') + '</button></div></div>';
+                '<div class="ltitle-row">' +
+                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
+                '</div>' +
+                '<div class="ldesc">' + desc + '</div>' +
+                '<div class="meta">' +
+                '<div class="price">' + priceNum + ' <small>$</small></div>' +
+                '<button class="fav-btn' + (isFav ? ' active' : '') + '" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' + (isFav ? '★' : '☆') + '</button>' +
+                '</div></div>';
         }).join('');
     } catch (e) {
         box.innerHTML = '<div class="empty" style="padding:12px;">' + e.message + '</div>';
