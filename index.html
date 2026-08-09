@@ -751,9 +751,14 @@
                 Если публикуете на площадке — загрузите отдельный файл <code>apitoken.txt</code>.
             </div>
             <div class="form-group">
-                <label class="form-label">Файлы бота (можно несколько)</label>
-                <input class="form-input" type="file" id="listing-files" multiple>
-                <div id="listing-files-list" style="margin-top:8px;font-size:13px;color:var(--hint);"></div>
+                <label class="form-label">Файлы бота</label>
+                <div class="file-drop" onclick="document.getElementById('listing-files').click()">
+                    <div style="font-size:28px;">📁</div>
+                    <div style="font-weight:600;">Загрузить файлы</div>
+                    <div style="font-size:12px;color:var(--hint);">Нажмите, чтобы выбрать</div>
+                </div>
+                <input type="file" id="listing-files" multiple style="display:none;" onchange="onListingFilesPicked(this)">
+                <div id="listing-files-list"></div>
             </div>
             <div class="form-group">
                 <label class="form-label">Есть ли файлы, которые вы отправите покупателю в ЛС?</label>
@@ -1518,14 +1523,31 @@ function sellerLinkHtml(l) {
 }
 
 var _profileBack = 'home';
+function backFromUserProfile() {
+    var b = window._profileBack || 'home';
+    if (b.indexOf('admin-section:') === 0) {
+        var sec = b.split(':')[1] || 'listings';
+        openAdminSection(sec);
+        return;
+    }
+    if (b === 'admin-detail') {
+        showPage('admin-detail');
+        return;
+    }
+    showPage(b);
+}
 async function openUserProfile(uid, backPage) {
     if (backPage) _profileBack = backPage;
-    else if (document.getElementById('page-home').classList.contains('active')) _profileBack = 'home';
-    else if (document.getElementById('page-listing-detail').classList.contains('active')) _profileBack = 'listing-detail';
-    else if (document.getElementById('page-favorites').classList.contains('active')) _profileBack = 'favorites';
-    else if (document.getElementById('page-my-listings').classList.contains('active')) _profileBack = 'my-listings';
-    else if (document.getElementById('page-admin-section').classList.contains('active')) _profileBack = 'admin-section';
-    document.getElementById('user-profile-back').setAttribute('onclick', "showPage('" + _profileBack + "')");
+    else if (document.getElementById('page-admin-detail') && document.getElementById('page-admin-detail').classList.contains('active')) {
+        _profileBack = 'admin-detail';
+    } else if (document.getElementById('page-admin-section') && document.getElementById('page-admin-section').classList.contains('active')) {
+        _profileBack = 'admin-section:' + (window._adminSection || 'listings');
+    } else if (document.getElementById('page-home') && document.getElementById('page-home').classList.contains('active')) _profileBack = 'home';
+    else if (document.getElementById('page-listing-detail') && document.getElementById('page-listing-detail').classList.contains('active')) _profileBack = 'listing-detail';
+    else if (document.getElementById('page-favorites') && document.getElementById('page-favorites').classList.contains('active')) _profileBack = 'favorites';
+    else if (document.getElementById('page-my-listings') && document.getElementById('page-my-listings').classList.contains('active')) _profileBack = 'my-listings';
+    else if (document.getElementById('page-admin') && document.getElementById('page-admin').classList.contains('active')) _profileBack = 'admin';
+    document.getElementById('user-profile-back').setAttribute('onclick', "backFromUserProfile()");
     var box = document.getElementById('user-profile-content');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     showPage('user-profile');
@@ -1754,7 +1776,12 @@ async function openListing(id) {
             // владелец
             if (l.status === 'active') {
                 html += '<button class="btn" style="margin-top:8px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="unpublishListing(' + l.id + ')">Снять с публикации</button>';
-            } else if (['unpublished','rejected','sold','completed','closed'].indexOf(l.status) >= 0) {
+            } else if (l.status === 'rejected') {
+                html += '<div class="btn-stack" style="margin-top:10px;">';
+                html += '<button class="btn" onclick="editRejectedListing(' + l.id + ')">Редактировать</button>';
+                html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
+                html += '</div>';
+            } else if (['unpublished','sold','completed','closed'].indexOf(l.status) >= 0) {
                 html += '<div class="btn-stack" style="margin-top:10px;">';
                 html += '<button class="btn" onclick="republishListing(' + l.id + ')">Опубликовать</button>';
                 html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
@@ -1934,9 +1961,12 @@ function openOrderDetail(id) {
         else if (Array.isArray(o.files_meta)) files = o.files_meta;
     } catch (e) {}
     if (files.length) {
-        html += '<div class="info-block"><b>Файлы с площадки:</b><br>' + files.map(function(f){
-            return '📄 ' + String(f).replace(/</g,'&lt;');
-        }).join('<br>') + '</div>';
+        html += '<div class="section-title" style="font-size:15px;margin:8px 0;">Файлы с площадки</div>';
+        files.forEach(function(f, i) {
+            var nm = (typeof f === 'object' && f.name) ? f.name : String(f);
+            html += '<div class="file-row"><span class="fname">' + nm.replace(/</g,'&lt;') + '</span>' +
+                '<button type="button" class="fdl" onclick="downloadOrderFile(' + o.id + ',' + i + ')">⬇</button></div>';
+        });
     }
 
     if (o.status === 'buyer_review' && isBuyer) {
@@ -2079,7 +2109,9 @@ function resetListingCreate() {
         document.getElementById('listing-bot').value = '';
         document.getElementById('listing-price').value = '';
         document.getElementById('listing-files').value = '';
-        document.getElementById('listing-files-list').textContent = '';
+        listingPickedFiles = [];
+        window._editingListingId = null;
+        renderListingFilesList();
         document.querySelectorAll('.type-toggle-btn').forEach(function(el){ el.classList.remove('selected'); });
         document.getElementById('fields-partner').style.display = 'none';
         document.getElementById('fields-own').style.display = 'none';
@@ -2136,26 +2168,165 @@ function selectListingType(el) {
     document.getElementById('fields-own').style.display = selectedListingType === 'own' ? 'block' : 'none';
 }
 
+
+var listingPickedFiles = []; // {name, content base64 or text}
+
+function parseFilesMeta(meta) {
+    if (!meta) return [];
+    try {
+        if (typeof meta === 'string') meta = JSON.parse(meta);
+    } catch (e) { return []; }
+    if (!Array.isArray(meta)) return [];
+    return meta;
+}
+
+function renderListingFilesList() {
+    var box = document.getElementById('listing-files-list');
+    if (!box) return;
+    if (!listingPickedFiles.length) {
+        box.innerHTML = '';
+        return;
+    }
+    box.innerHTML = listingPickedFiles.map(function(f, i) {
+        return '<div class="file-row"><span class="fname">' + String(f.name).replace(/</g,'&lt;') + '</span>' +
+            '<button type="button" class="fx" onclick="removeListingFile(' + i + ')">×</button></div>';
+    }).join('');
+}
+
+function removeListingFile(i) {
+    listingPickedFiles.splice(i, 1);
+    renderListingFilesList();
+}
+
+function onListingFilesPicked(input) {
+    var files = input.files ? Array.prototype.slice.call(input.files) : [];
+    input.value = '';
+    files.forEach(function(file) {
+        var reader = new FileReader();
+        reader.onload = function() {
+            var content = reader.result;
+            // data URL or text
+            if (typeof content === 'string' && content.indexOf('base64,') >= 0) {
+                content = content.split('base64,')[1];
+            }
+            // dedupe by name
+            listingPickedFiles = listingPickedFiles.filter(function(x){ return x.name !== file.name; });
+            listingPickedFiles.push({ name: file.name, content: content, size: file.size });
+            renderListingFilesList();
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function downloadFromMeta(meta, index) {
+    var files = parseFilesMeta(meta);
+    var f = files[index];
+    if (!f) { tg.showAlert('Файл не найден'); return; }
+    var name = f.name || ('file_' + index);
+    var content = f.content || '';
+    try {
+        var bin;
+        if (content && !content.startsWith && content.indexOf && content.length > 0) {
+            // base64
+            var raw = atob(content);
+            var arr = new Uint8Array(raw.length);
+            for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+            bin = new Blob([arr]);
+        } else if (typeof content === 'string') {
+            bin = new Blob([content], { type: 'text/plain' });
+        } else {
+            bin = new Blob([name], { type: 'text/plain' });
+        }
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(bin);
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    } catch (e) {
+        // fallback text
+        var a2 = document.createElement('a');
+        a2.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(String(content || name));
+        a2.download = name;
+        a2.click();
+    }
+}
+
+function downloadListingFile(listingId, index) {
+    var l = null;
+    if (window._currentListing && window._currentListing.id === listingId) l = window._currentListing;
+    if (!l && _adminCache && _adminCache.listings) {
+        l = (_adminCache.listings || []).find(function(x){ return x.id === listingId; });
+    }
+    if (!l) { tg.showAlert('Нет данных файла'); return; }
+    downloadFromMeta(l.files_meta, index);
+}
+
+function downloadOrderFile(orderId, index) {
+    var o = window._currentOrder;
+    if (!o || o.id !== orderId) {
+        var items = window._ordersCache || [];
+        o = items.find(function(x){ return x.id === orderId; });
+    }
+    if (!o) { tg.showAlert('Нет данных'); return; }
+    downloadFromMeta(o.files_meta, index);
+}
+
+async function editRejectedListing(id) {
+    try {
+        var l = await apiGet('/api/listings/' + id);
+        window._editingListingId = id;
+        resetListingCreate();
+        // prefill
+        document.getElementById('listing-title').value = l.title || '';
+        document.getElementById('listing-desc').value = l.description || '';
+        selectedListingType = l.listing_type || 'own';
+        document.querySelectorAll('#listing-step-1 .type-toggle-btn').forEach(function(el) {
+            el.classList.toggle('selected', el.dataset.type === selectedListingType);
+        });
+        document.getElementById('fields-partner').style.display = selectedListingType === 'partner' ? 'block' : 'none';
+        document.getElementById('fields-own').style.display = selectedListingType === 'own' ? 'block' : 'none';
+        if (selectedListingType === 'partner') {
+            document.getElementById('listing-contract').value = l.contract_number || '';
+            document.getElementById('listing-analytics').checked = !!l.analytics_consent;
+        } else {
+            document.getElementById('listing-product-type').value = l.product_type || '';
+            document.getElementById('listing-tgstat').value = l.tgstat_url || '';
+            document.getElementById('listing-bot').value = l.bot_username || '';
+            document.getElementById('listing-price').value = l.price || '';
+        }
+        listingPickedFiles = parseFilesMeta(l.files_meta).map(function(f) {
+            return typeof f === 'object' ? f : { name: f, content: '' };
+        });
+        selectedHasPrivateFiles = !!l.has_private_files;
+        if (selectedHasPrivateFiles !== null) {
+            try {
+                document.getElementById('dm-yes').classList.toggle('selected', !!selectedHasPrivateFiles);
+                document.getElementById('dm-no').classList.toggle('selected', !selectedHasPrivateFiles);
+            } catch (e) {}
+        }
+        document.getElementById('listing-create-title').textContent = 'Редактирование';
+        showPage('listing-create');
+        renderListingFilesList();
+    } catch (e) {
+        tg.showAlert(e.message);
+    }
+}
+
 async function createListing() {
     var btn = document.getElementById('listing-create-btn');
     if (selectedHasPrivateFiles === null) { tg.showAlert('Укажите, есть ли файлы для ЛС'); return; }
-    var fileInput = document.getElementById('listing-files');
-    var files = fileInput && fileInput.files ? Array.prototype.slice.call(fileInput.files) : [];
-    var names = files.map(function(f){ return f.name; });
-    var hasGuide = names.some(function(n){ return n.toLowerCase() === 'guide.txt'; });
-    if (!hasGuide) {
+    var names = listingPickedFiles.map(function(f){ return (f.name || '').toLowerCase(); });
+    if (!names.some(function(n){ return n === 'guide.txt'; })) {
         tg.showAlert('Обязателен файл guide.txt');
         return;
     }
-    // meta only (имена); содержимое для мини-апп храним как список имён
-    listingFilesMeta = names;
-
     var body = {
         title: document.getElementById('listing-title').value.trim(),
         description: document.getElementById('listing-desc').value.trim(),
         listing_type: selectedListingType,
         has_private_files: selectedHasPrivateFiles,
-        files_meta: listingFilesMeta
+        files_meta: listingPickedFiles.map(function(f){ return { name: f.name, content: f.content || '', size: f.size || 0 }; })
     };
     if (selectedListingType === 'partner') {
         body.contract_number = document.getElementById('listing-contract').value.trim();
@@ -2169,9 +2340,21 @@ async function createListing() {
 
     btn.disabled = true; btn.textContent = 'Отправка...';
     try {
-        await apiPost('/api/listings', body);
-        tg.showAlert('Объявление отправлено на модерацию');
+        if (window._editingListingId) {
+            body.resubmit = true;
+            await apiFetch('/api/listings/' + window._editingListingId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            window._editingListingId = null;
+            tg.showAlert('Отправлено на модерацию');
+        } else {
+            await apiPost('/api/listings', body);
+            tg.showAlert('Объявление отправлено на модерацию');
+        }
         resetListingCreate();
+        listingPickedFiles = [];
         showPage('my-listings');
         loadMyListings();
     } catch (e) { tg.showAlert(e.message); }
@@ -2482,6 +2665,7 @@ function openAdminSection(section) {
         staff: 'Управление сотрудниками',
         analytics: 'Аналитика'
     };
+    window._adminSection = section;
     document.getElementById('admin-section-title').textContent = titles[section] || section;
     showPage('admin-section');
     if (section === 'workcenter') loadWorkCenter();
@@ -2728,6 +2912,16 @@ function openAdminListingDetail(id) {
             '<b>Цена:</b> ' + l.price + '$<br>';
     }
     html += '<b>Создано:</b> ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
+    var files = parseFilesMeta(l.files_meta);
+    if (files.length) {
+        html += '<div class="section-title" style="font-size:15px;margin:12px 0 8px;">Файлы</div>';
+        files.forEach(function(f, i) {
+            html += '<div class="file-row"><span class="fname">' + String(f.name || f).replace(/</g,'&lt;') + '</span>' +
+                '<button type="button" class="fdl" onclick="downloadListingFile(' + l.id + ',' + i + ')">⬇</button></div>';
+        });
+    } else {
+        html += '<div class="info-block">Файлы не прикреплены</div>';
+    }
     html += '<div class="btn-stack">';
     if (l.listing_type === 'partner') {
         html += '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', true)">Одобрить (указать цену)</button>';
