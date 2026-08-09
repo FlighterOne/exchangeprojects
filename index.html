@@ -272,6 +272,30 @@
         .listing-card .ltitle {
             font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3;
         }
+        .news-meta-row {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 10px; margin-top: 8px; width: 100%;
+        }
+        .news-date {
+            font-size: 12px; color: var(--hint); font-weight: 400;
+        }
+        .news-views {
+            font-size: 13px; color: var(--hint); flex-shrink: 0;
+            margin-left: auto;
+        }
+        .news-body {
+            font-size: 15px; line-height: 1.55; color: var(--text);
+            word-break: break-word;
+        }
+        .news-body a { color: var(--link); text-decoration: underline; }
+        .news-body b, .news-body strong { font-weight: 700; }
+        .news-body i, .news-body em { font-style: italic; }
+        .news-body blockquote {
+            margin: 8px 0; padding: 8px 12px;
+            border-left: 3px solid var(--button);
+            color: var(--hint); background: var(--secondary-bg);
+            border-radius: 0 8px 8px 0;
+        }
         .listing-card .ldesc {
             font-size: 13px; font-weight: 400; color: var(--hint); line-height: 1.45;
             margin-top: 8px;
@@ -1769,11 +1793,13 @@ async function loadNewsPinned() {
                 feed.innerHTML = news.map(function(n) {
                     var body = String(n.body || '').replace(/</g,'&lt;');
                     if (body.length > 140) body = body.slice(0, 140) + '…';
+                    var dateLabel = n.date_label || 'Недавно';
                     return '<div class="listing-card" data-nid="' + n.id + '">' +
                         '<div class="ltitle-row"><div class="ltitle">' + String(n.title || '').replace(/</g,'&lt;') + '</div></div>' +
                         '<div class="ldesc">' + body + '</div>' +
-                        '<div class="meta" style="margin-top:8px;">' +
-                        '<div class="subtitle" style="margin:0;">Недавно · 👁 ' + (n.views_count || 0) + '</div>' +
+                        '<div class="news-meta-row">' +
+                        '<span class="news-date">' + String(dateLabel).replace(/</g,'&lt;') + '</span>' +
+                        '<span class="news-views">👁 ' + (n.views_count || 0) + '</span>' +
                         '</div></div>';
                 }).join('');
                 feed.querySelectorAll('.listing-card[data-nid]').forEach(function(el) {
@@ -1788,6 +1814,44 @@ async function loadNewsPinned() {
     }
 }
 
+function sanitizeNewsHtml(html) {
+    if (!html) return '';
+    var tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    var allowed = {B:1,STRONG:1,I:1,EM:1,U:1,S:1,A:1,BR:1,CODE:1,PRE:1,BLOCKQUOTE:1,SPAN:1};
+    var walk = function(node) {
+        var children = Array.prototype.slice.call(node.childNodes);
+        children.forEach(function(ch) {
+            if (ch.nodeType === 1) {
+                if (!allowed[ch.tagName]) {
+                    while (ch.firstChild) node.insertBefore(ch.firstChild, ch);
+                    node.removeChild(ch);
+                } else {
+                    if (ch.tagName === 'A') {
+                        var href = ch.getAttribute('href') || '';
+                        if (!/^https?:\/\//i.test(href) && !/^tg:\/\//i.test(href)) {
+                            ch.removeAttribute('href');
+                        } else {
+                            ch.setAttribute('target', '_blank');
+                            ch.setAttribute('rel', 'noopener noreferrer');
+                        }
+                        Array.prototype.slice.call(ch.attributes).forEach(function(attr) {
+                            if (['href','target','rel'].indexOf(attr.name) < 0) ch.removeAttribute(attr.name);
+                        });
+                    } else {
+                        Array.prototype.slice.call(ch.attributes).forEach(function(attr) {
+                            ch.removeAttribute(attr.name);
+                        });
+                    }
+                    walk(ch);
+                }
+            }
+        });
+    };
+    walk(tmp);
+    return tmp.innerHTML;
+}
+
 async function openNewsDetail(id) {
     var box = document.getElementById('news-detail-content');
     if (!box) return;
@@ -1795,10 +1859,19 @@ async function openNewsDetail(id) {
     showPage('news-detail');
     try {
         var n = await apiGet('/api/news/' + id);
+        var dateLabel = n.date_label || 'Недавно';
         var html = '';
-        html += '<div class="section-title" style="font-size:18px;margin-top:4px;">' + String(n.title || '').replace(/</g,'&lt;') + '</div>';
-        html += '<div class="subtitle" style="margin-bottom:12px;">Недавно · 👁 ' + (n.views_count || 0) + '</div>';
-        html += '<div class="info-block" style="white-space:pre-line;">' + String(n.body || '').replace(/</g,'&lt;') + '</div>';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:4px;margin-bottom:8px;">';
+        html += '<div class="section-title" style="font-size:18px;margin:0;flex:1;">' + String(n.title || '').replace(/</g,'&lt;') + '</div>';
+        html += '<div class="news-views" style="padding-top:4px;">👁 ' + (n.views_count || 0) + '</div>';
+        html += '</div>';
+        html += '<div class="news-date" style="margin-bottom:12px;">' + String(dateLabel).replace(/</g,'&lt;') + '</div>';
+        var bodyHtml = n.body_html || n.body || '';
+        if (n.body_html) {
+            html += '<div class="news-body">' + sanitizeNewsHtml(bodyHtml) + '</div>';
+        } else {
+            html += '<div class="news-body" style="white-space:pre-line;">' + String(n.body || '').replace(/</g,'&lt;') + '</div>';
+        }
         if (userData && userData.role >= 4) {
             html += '<button class="btn" style="margin-top:16px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteNewsItem(' + n.id + ')">Удалить</button>';
         }
