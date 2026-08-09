@@ -309,6 +309,23 @@
         .star-btn.selected {
             border-color: var(--button); background: rgba(46,166,255,0.12); color: var(--button);
         }
+        .inline-options {
+            margin-top: 8px;
+            border: 1.5px solid rgba(128,128,128,0.25);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--secondary-bg);
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .inline-options .sheet-option {
+            border-bottom: 1px solid rgba(128,128,128,0.12);
+        }
+        .inline-options .sheet-option:last-child { border-bottom: none; }
+        .inline-options .sheet-option.selected {
+            color: var(--button); font-weight: 600;
+            background: rgba(46,166,255,0.08);
+        }
         .sheet-select {
             width: 100%; text-align: left; padding: 12px 14px;
             border: 1.5px solid rgba(128,128,128,0.3); border-radius: 12px;
@@ -807,11 +824,7 @@
             <span class="di">🛡</span> Панель
         </button>
     </div>
-
-<div class="bottom-sheet-overlay" id="product-type-overlay" onclick="closeProductTypeSheet()"></div>
-<div class="bottom-sheet" id="product-type-sheet">
-    <div class="sheet-title">Вид товара</div>
-    <div id="product-type-options"></div>
+<div id="product-type-options"></div>
 </div>
 
 </div>
@@ -1002,8 +1015,9 @@
         </div>
         <div class="form-group">
             <label class="form-label">Вид товара</label>
-            <button type="button" class="sheet-select" id="ex-product-type-btn" onclick="openProductTypeSheet()">Любой вид</button>
+            <button type="button" class="sheet-select" id="ex-product-type-btn" onclick="toggleProductTypeList()">Любой вид ▾</button>
             <input type="hidden" id="ex-product-type" value="">
+            <div id="ex-product-type-list" class="inline-options" style="display:none;"></div>
         </div>
         <div class="form-group">
             <label class="form-label">Рейтинг продавца от</label>
@@ -2089,36 +2103,39 @@ function setExRating(n) {
     });
 }
 
-function openProductTypeSheet() {
-    var sheet = document.getElementById('product-type-sheet');
-    var overlay = document.getElementById('product-type-overlay');
-    var box = document.getElementById('product-type-options');
-    if (!sheet || !box) return;
-    var html = '<button type="button" class="sheet-option" data-v="">Любой вид</button>';
+function renderProductTypeList() {
+    var box = document.getElementById('ex-product-type-list');
+    if (!box) return;
+    var cur = document.getElementById('ex-product-type').value || '';
+    var html = '<button type="button" class="sheet-option' + (!cur ? ' selected' : '') + '" data-v="">Любой вид</button>';
     exchangeProductTypes.forEach(function(pt) {
-        html += '<button type="button" class="sheet-option" data-v="' + String(pt).replace(/"/g,'&quot;').replace(/</g,'&lt;') + '">' + String(pt).replace(/</g,'&lt;') + '</button>';
+        var sel = (cur === pt) ? ' selected' : '';
+        html += '<button type="button" class="sheet-option' + sel + '" data-v="' + String(pt).replace(/"/g,'&quot;').replace(/</g,'&lt;') + '">' + String(pt).replace(/</g,'&lt;') + '</button>';
     });
     if (!exchangeProductTypes.length) {
-        html += '<div class="info-block" style="margin-top:8px;">Пока нет зарегистрированных видов в объявлениях</div>';
+        html += '<div class="info-block" style="margin:8px;">Пока нет зарегистрированных видов в объявлениях</div>';
     }
     box.innerHTML = html;
     box.querySelectorAll('.sheet-option').forEach(function(btn) {
         btn.onclick = function() {
             var v = btn.getAttribute('data-v') || '';
             document.getElementById('ex-product-type').value = v;
-            document.getElementById('ex-product-type-btn').textContent = v || 'Любой вид';
-            closeProductTypeSheet();
+            document.getElementById('ex-product-type-btn').textContent = (v || 'Любой вид') + ' ▾';
+            box.style.display = 'none';
+            renderProductTypeList();
         };
     });
-    overlay.classList.add('open');
-    sheet.classList.add('open');
 }
 
-function closeProductTypeSheet() {
-    var sheet = document.getElementById('product-type-sheet');
-    var overlay = document.getElementById('product-type-overlay');
-    if (sheet) sheet.classList.remove('open');
-    if (overlay) overlay.classList.remove('open');
+function toggleProductTypeList() {
+    var box = document.getElementById('ex-product-type-list');
+    if (!box) return;
+    if (box.style.display === 'none' || !box.style.display) {
+        renderProductTypeList();
+        box.style.display = 'block';
+    } else {
+        box.style.display = 'none';
+    }
 }
 
 function initExchangePage() {
@@ -2138,6 +2155,7 @@ function initExchangePage() {
     // подгрузить виды товаров
     apiGet('/api/exchange/product-types').then(function(data) {
         exchangeProductTypes = data.types || [];
+        renderProductTypeList();
     }).catch(function(){ exchangeProductTypes = []; });
 }
 
