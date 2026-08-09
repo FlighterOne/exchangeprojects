@@ -356,9 +356,20 @@
         }
         .back-link {
             display: inline-flex; align-items: center; gap: 4px;
-            background: none; border: none; color: var(--link);
-            font-size: 15px; font-weight: 500; cursor: pointer;
-            padding: 0; margin-bottom: 14px;
+            background: var(--secondary-bg);
+            border: 1px solid rgba(128,128,128,0.28);
+            color: var(--text);
+            font-size: 14px; font-weight: 500; cursor: pointer;
+            padding: 8px 14px; margin-bottom: 14px;
+            border-radius: 10px;
+            width: auto;
+        }
+        .back-link:active { opacity: 0.85; }
+        .btn-back {
+            margin-bottom: 12px !important;
+            width: auto !important;
+            padding: 8px 14px !important;
+            font-size: 14px !important;
         }
         .method-list { gap: 8px; }
         .method-item {
@@ -669,7 +680,7 @@
 
     <!-- LISTING DETAIL -->
     <div id="page-listing-detail" class="page">
-        <button class="btn btn-secondary" id="listing-detail-back" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="backFromListing()">← Назад</button>
+        <button class="btn btn-secondary btn-back" id="listing-detail-back" onclick="backFromListing()">← Назад</button>
         <div id="listing-detail-content"></div>
     </div>
 
@@ -732,7 +743,7 @@
 
     <!-- EDIT LISTING -->
     <div id="page-listing-edit" class="page">
-        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('home')">← Назад</button>
+        <button class="btn btn-secondary btn-back" onclick="showPage('home')">← Назад</button>
         <div class="section-title">Редактировать</div>
         <input type="hidden" id="edit-listing-id">
         <div class="form-group">
@@ -903,7 +914,7 @@
 
     <!-- REQUESTS -->
     <div id="page-requests" class="page">
-        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('balance')">← Назад</button>
+        <button class="btn btn-secondary btn-back" onclick="showPage('balance')">← Назад</button>
         <div class="section-title">Мои транзакции</div>
         <div id="requests-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
@@ -1446,7 +1457,7 @@ function listingStatusBadge(status) {
         pending: ['На модерации', 'badge-moderation'],
         active: ['Активно', 'badge-completed'],
         unpublished: ['Снято', 'badge-muted'],
-        rejected: ['Отклонено', 'badge-cancelled'],
+        rejected: ['Отклонено модерацией', 'badge-cancelled'],
         sold: ['Завершён', 'badge-muted'],
         completed: ['Завершён', 'badge-muted'],
         refund_moderation: ['Возврат', 'badge-moderation'],
@@ -1706,7 +1717,7 @@ async function openListing(id) {
             } else if (['unpublished','rejected','sold','completed','closed'].indexOf(l.status) >= 0) {
                 html += '<div class="btn-stack" style="margin-top:10px;">';
                 html += '<button class="btn" onclick="republishListing(' + l.id + ')">Опубликовать</button>';
-                html += '<button class="btn btn-secondary" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
+                html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
                 html += '</div>';
             } else if (l.status === 'pending') {
                 html += '<div class="info-block" style="margin-top:8px;">На модерации</div>';
@@ -2172,8 +2183,8 @@ function renderMyListings() {
     if (!box) return;
     var items = _myListingsCache || [];
     var cMod = items.filter(function(l){ return l.status === 'pending'; }).length;
-    var cAct = items.filter(function(l){ return l.status === 'active' || l.status === 'unpublished'; }).length;
-    var cDone = items.filter(function(l){ return ['sold','completed','rejected','deleted','refund_moderation'].indexOf(l.status) >= 0; }).length;
+    var cAct = items.filter(function(l){ return l.status === 'active'; }).length;
+    var cDone = items.filter(function(l){ return l.status !== 'active' && l.status !== 'pending'; }).length;
     var elM = document.getElementById('my-cnt-mod');
     var elA = document.getElementById('my-cnt-active');
     var elD = document.getElementById('my-cnt-done');
@@ -2184,11 +2195,9 @@ function renderMyListings() {
     if (_myListingsTab === 'moderation') {
         filtered = items.filter(function(l){ return l.status === 'pending'; });
     } else if (_myListingsTab === 'active') {
-        filtered = items.filter(function(l){ return l.status === 'active' || l.status === 'unpublished'; });
+        filtered = items.filter(function(l){ return l.status === 'active'; });
     } else {
-        filtered = items.filter(function(l){
-            return ['sold','completed','rejected','deleted','refund_moderation'].indexOf(l.status) >= 0;
-        });
+        filtered = items.filter(function(l){ return l.status !== 'active' && l.status !== 'pending'; });
     }
     if (!filtered.length) {
         box.innerHTML = '<div class="empty"><div class="icon">📋</div>Нет объявлений в этом разделе</div>';
@@ -2198,7 +2207,7 @@ function renderMyListings() {
         pending: ['На модерации', 'badge-moderation'],
         active: ['Активно', 'badge-completed'],
         unpublished: ['Снято', 'badge-muted'],
-        rejected: ['Отклонено', 'badge-cancelled'],
+        rejected: ['Отклонено модерацией', 'badge-cancelled'],
         sold: ['Завершён', 'badge-muted'],
         completed: ['Завершён', 'badge-muted'],
         refund_moderation: ['Возврат', 'badge-moderation'],
