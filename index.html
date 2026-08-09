@@ -1889,9 +1889,9 @@ async function openListing(id) {
                 html += '</div>';
             } else if (l.status === 'pending') {
                 html += '<div class="info-block" style="margin-top:8px;">На модерации</div>';
-            } else if (l.status === 'refund_moderation') {
-                html += '<div class="info-block" style="margin-top:8px;">На модерации: возврат средств по сделке</div>';
                 html += '<button class="btn" style="margin-top:10px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить</button>';
+            } else if (l.status === 'refund_moderation') {
+                html += '<div class="info-block" style="margin-top:8px;">На модерации: возврат средств по сделке. Удаление недоступно до решения модерации.</div>';
             }
         }
         box.innerHTML = html;
