@@ -669,7 +669,7 @@
 
     <!-- LISTING DETAIL -->
     <div id="page-listing-detail" class="page">
-        <button class="btn btn-secondary" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="showPage('home')">← Назад</button>
+        <button class="btn btn-secondary" id="listing-detail-back" style="margin-bottom:12px;width:auto;padding:8px 14px;font-size:14px;" onclick="backFromListing()">← Назад</button>
         <div id="listing-detail-content"></div>
     </div>
 
@@ -929,8 +929,8 @@
         <button class="back-link" onclick="showPage('settings')">← Назад</button>
         <div class="section-title">Язык</div>
         <div class="btn-stack" id="lang-list">
-            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('ru')"><img class="flag-img" src="https://flagcdn.com/w40/ru.png" alt="" width="22" height="16"> Русский <span class="lang-tag">original</span></button>
-            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('en')"><img class="flag-img" src="https://flagcdn.com/w40/gb.png" alt="" width="22" height="16"> English <span class="lang-tag">original</span></button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('ru')"><img class="flag-img" src="https://flagcdn.com/w40/ru.png" alt="" width="22" height="16"> Русский <span class="lang-tag lang-orig-tag">оригинал</span></button>
+            <button class="btn btn-secondary lang-btn" onclick="pickLanguage('en')"><img class="flag-img" src="https://flagcdn.com/w40/gb.png" alt="" width="22" height="16"> English <span class="lang-tag lang-orig-tag">оригинал</span></button>
             <button class="btn btn-secondary lang-btn" onclick="pickLanguage('de')"><img class="flag-img" src="https://flagcdn.com/w40/de.png" alt="" width="22" height="16"> Deutsch</button>
             <button class="btn btn-secondary lang-btn" onclick="pickLanguage('fr')"><img class="flag-img" src="https://flagcdn.com/w40/fr.png" alt="" width="22" height="16"> Français</button>
             <button class="btn btn-secondary lang-btn" onclick="pickLanguage('es')"><img class="flag-img" src="https://flagcdn.com/w40/es.png" alt="" width="22" height="16"> Español</button>
@@ -1645,6 +1645,23 @@ function openBanUser(uid) {
 }
 
 async function openListing(id) {
+    // запомнить откуда открыли
+    try {
+        if (document.getElementById('page-my-listings') && document.getElementById('page-my-listings').classList.contains('active')) {
+            window._listingBack = 'my-listings';
+        } else if (document.getElementById('page-favorites') && document.getElementById('page-favorites').classList.contains('active')) {
+            window._listingBack = 'favorites';
+        } else if (document.getElementById('page-profile') && document.getElementById('page-profile').classList.contains('active')) {
+            window._listingBack = 'profile';
+        } else if (document.getElementById('page-user-profile') && document.getElementById('page-user-profile').classList.contains('active')) {
+            window._listingBack = 'user-profile';
+        } else if (document.getElementById('page-home') && document.getElementById('page-home').classList.contains('active')) {
+            window._listingBack = 'home';
+        } else if (!window._listingBack) {
+            window._listingBack = 'home';
+        }
+    } catch (e) { window._listingBack = 'home'; }
+
     var box = document.getElementById('listing-detail-content');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     showPage('listing-detail');
@@ -1660,41 +1677,54 @@ async function openListing(id) {
         html += '<div class="section-title" style="font-size:18px;margin-top:4px;">' + (l.title || '').replace(/</g,'&lt;') + '</div>';
         html += '<div class="info-block" style="white-space:pre-line;margin-bottom:14px;">' + (l.description || '').replace(/</g,'&lt;') + '</div>';
 
-        // price left + profile right
         html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">';
         html += '<div style="font-size:22px;font-weight:700;color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>';
-        html += '<span class="seller-link" style="text-align:right;" onclick="openUserProfile(' + l.seller_id + ')">' + sellerLabel.replace(/</g,'&lt;') + '</span>';
+        if (!isOwner) {
+            html += '<span class="seller-link" style="text-align:right;" onclick="openUserProfile(' + l.seller_id + ')">' + sellerLabel.replace(/</g,'&lt;') + '</span>';
+        } else {
+            html += '<span style="text-align:right;color:var(--hint);font-size:13px;">Ваше объявление</span>';
+        }
         html += '</div>';
 
-        html += '<button class="btn btn-secondary" style="margin-bottom:12px;" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' +
-            (isFav ? '★ В избранном' : '☆ В избранное') + '</button>';
+        if (!isOwner) {
+            html += '<button class="btn btn-secondary" style="margin-bottom:12px;" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' +
+                (isFav ? '★ В избранном' : '☆ В избранное') + '</button>';
 
-        if (l.seller_username) {
-            html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="openExternal(\'https://t.me/' +
-                String(l.seller_username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Написать</button>';
+            if (l.seller_username) {
+                html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="openExternal(\'https://t.me/' +
+                    String(l.seller_username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Написать</button>';
+            } else {
+                html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="tg.showAlert(\'У продавца нет username в Telegram\')">Написать</button>';
+            }
+            if (canBuy) {
+                html += '<button class="btn" onclick="startBuyListing(' + l.id + ')">Купить</button>';
+            }
         } else {
-            html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="tg.showAlert(\'У продавца нет username в Telegram\')">Написать</button>';
-        }
-
-        if (canBuy) {
-            html += '<button class="btn" onclick="startBuyListing(' + l.id + ')">Купить</button>';
-        }
-
-        // owner actions
-        if (isOwner) {
+            // владелец
             if (l.status === 'active') {
-                html += '<button class="btn btn-secondary" style="margin-top:10px;" onclick="unpublishListing(' + l.id + ')">Снять с публикации</button>';
-            } else if (l.status === 'unpublished' || l.status === 'rejected') {
+                html += '<button class="btn" style="margin-top:8px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="unpublishListing(' + l.id + ')">Снять с публикации</button>';
+            } else if (['unpublished','rejected','sold','completed','closed'].indexOf(l.status) >= 0) {
                 html += '<div class="btn-stack" style="margin-top:10px;">';
                 html += '<button class="btn" onclick="republishListing(' + l.id + ')">Опубликовать</button>';
                 html += '<button class="btn btn-secondary" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
                 html += '</div>';
+            } else if (l.status === 'pending') {
+                html += '<div class="info-block" style="margin-top:8px;">На модерации</div>';
             }
         }
         box.innerHTML = html;
     } catch (e) {
         box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
     }
+}
+
+function backFromListing() {
+    var page = window._listingBack || 'home';
+    showPage(page);
+    if (page === 'my-listings') loadMyListings();
+    if (page === 'home') loadListings();
+    if (page === 'favorites') loadFavorites();
+    if (page === 'profile') loadOwnProfileListings();
 }
 
 async function unpublishListing(id) {
@@ -2730,9 +2760,30 @@ async function adminSetStaffBalance(uid) {
 }
 
 
+function originalTagLabel() {
+    var code = localStorage.getItem('xcod_lang') || 'ru';
+    var map = {
+        ru: 'оригинал',
+        en: 'original',
+        de: 'Original',
+        fr: 'original',
+        es: 'original',
+        zh: '原版'
+    };
+    return map[code] || 'оригинал';
+}
+function refreshOriginalTags() {
+    var label = originalTagLabel();
+    document.querySelectorAll('.lang-orig-tag').forEach(function(el) {
+        el.textContent = label;
+    });
+}
 function pickLanguage(code) {
+    localStorage.setItem('xcod_lang', code);
+    refreshOriginalTags();
     tg.showAlert('Пока в разработке');
 }
+
 
 function applyThemeFromStorage() {
     var theme = localStorage.getItem('xcod_theme') || 'auto';
