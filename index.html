@@ -1841,7 +1841,16 @@ async function openListing(id) {
         var canBuy = userData && !isOwner && l.status === 'active';
 
         var html = '';
-        html += '<div class="section-title" style="font-size:18px;margin-top:4px;">' + (l.title || '').replace(/</g,'&lt;') + '</div>';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:4px;margin-bottom:8px;">';
+        html += '<div class="section-title" style="font-size:18px;margin:0;flex:1;">' + (l.title || '').replace(/</g,'&lt;') + '</div>';
+        if (isOwner) {
+            var vc = (l.views_count != null ? l.views_count : 0);
+            var fc = (l.favorites_count != null ? l.favorites_count : 0);
+            html += '<div style="display:flex;gap:12px;align-items:center;flex-shrink:0;font-size:13px;color:var(--hint);padding-top:4px;">' +
+                '<span title="Просмотры">👁 ' + vc + '</span>' +
+                '<span title="В избранном">★ ' + fc + '</span></div>';
+        }
+        html += '</div>';
         html += '<div class="info-block" style="white-space:pre-line;margin-bottom:14px;">' + (l.description || '').replace(/</g,'&lt;') + '</div>';
         // инфо о товаре (для покупателя без договора)
         html += listingExtraInfoHtml(l, { hideContract: !isOwner });
@@ -2011,7 +2020,7 @@ function formatRemain(deadline) {
         var left = Math.max(0, end - Date.now());
         var m = Math.floor(left / 60000);
         var s = Math.floor((left % 60000) / 1000);
-        return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        return m + 'мин ' + s + 'сек';
     } catch (e) { return ''; }
 }
 
@@ -2168,9 +2177,16 @@ async function orderBuyerConfirm(id) {
     } catch (e) { tg.showAlert(e.message); }
 }
 async function orderBuyerReject(id) {
-    if (!confirm('Отправить на модерацию (возврат средств внутри процесса)?')) return;
+    var comment = prompt('Что не подошло? Опишите причину возврата:');
+    if (comment === null) return;
+    comment = (comment || '').trim();
+    if (comment.length < 3) {
+        tg.showAlert('Укажите комментарий подробнее');
+        return;
+    }
+    if (!confirm('Отправить на модерацию возврата?')) return;
     try {
-        await apiPost('/api/orders/' + id + '/buyer-reject', {});
+        await apiPost('/api/orders/' + id + '/buyer-reject', { comment: comment });
         tg.showAlert('Отправлено на модерацию');
         await refreshOrdersAndDetail(id);
     } catch (e) { tg.showAlert(e.message); }
@@ -2589,30 +2605,57 @@ async function loadRequests() {
     try {
         var data = await apiGet('/api/requests');
         var reqs = data.requests || [];
-        if (!reqs.length) { box.innerHTML = '<div class="empty"><div class="icon">📭</div>Нет заявок</div>'; return; }
+        var txData = { transactions: [] };
+        try { txData = await apiGet('/api/transactions'); } catch (e) {}
+        var txs = txData.transactions || [];
+
         var statusMap = {
             pending: ['Ожидает', 'badge-pending'], processing: ['В обработке', 'badge-processing'],
             completed: ['Выполнено', 'badge-completed'], cancelled: ['Отменена', 'badge-cancelled']
         };
-        var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
-        box.innerHTML = reqs.map(function(r) {
-            var st = statusMap[r.status] || [r.status, 'badge-pending'];
-            var typeEmoji = r.type === 'deposit' ? '💰' : '💳';
-            var typeName = r.type === 'deposit' ? 'Пополнение' : (r.type === 'refund' ? 'Возврат (сделка)' : 'Вывод');
-            var actions = '';
-            if (r.status === 'pending' && r.type === 'deposit') {
-                actions = '<div class="actions">' +
-                    '<button class="btn btn-success" onclick="confirmRequest(' + r.id + ')">✅ Я оплатил</button>' +
-                    '<button class="btn btn-danger" onclick="cancelRequest(' + r.id + ')">❌ Отменить</button></div>';
-            }
-            var extra = '';
-            if (r.recipient) extra += '<br>Получатель: ' + r.recipient;
-            if (r.comment) extra += '<br>' + r.comment;
-            return '<div class="list-item"><div class="top"><div class="title">' + typeEmoji + ' ' + typeName +
-                ' #' + r.id + '</div><span class="badge ' + st[1] + '">' + st[0] +
-                '</span></div><div class="subtitle">' + r.amount + '$ · ' + (methodMap[r.method]||r.method) +
-                extra + '</div>' + actions + '</div>';
-        }).join('');
+        var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars', order: 'Сделка' };
+        var typeLabel = {
+            deposit: 'Пополнение', withdraw: 'Вывод', refund: 'Возврат (сделка)',
+            income: 'Поступление', purchase_hold: 'Покупка (холд)', purchase_release: 'Продажа',
+            purchase_refund: 'Возврат покупки'
+        };
+
+        var html = '';
+        if (reqs.length) {
+            html += '<div class="section-title" style="font-size:15px;">Заявки</div>';
+            html += reqs.map(function(r) {
+                var st = statusMap[r.status] || [r.status, 'badge-pending'];
+                var typeName = typeLabel[r.type] || r.type;
+                var actions = '';
+                if (r.status === 'pending' && r.type === 'deposit') {
+                    actions = '<div class="actions">' +
+                        '<button class="btn btn-success" onclick="confirmRequest(' + r.id + ')">✅ Я оплатил</button>' +
+                        '<button class="btn btn-danger" onclick="cancelRequest(' + r.id + ')">❌ Отменить</button></div>';
+                }
+                var extra = '';
+                if (r.recipient && r.type !== 'refund') extra += '<br>Получатель: ' + String(r.recipient).replace(/</g,'&lt;');
+                if (r.comment) extra += '<br>' + String(r.comment).replace(/</g,'&lt;');
+                return '<div class="list-item"><div class="top"><div class="title">' + typeName +
+                    ' #' + r.id + '</div><span class="badge ' + st[1] + '">' + st[0] +
+                    '</span></div><div class="subtitle">' + r.amount + '$ · ' + (methodMap[r.method]||r.method||'') +
+                    extra + '</div>' + actions + '</div>';
+            }).join('');
+        }
+        if (txs.length) {
+            html += '<div class="section-title" style="font-size:15px;margin-top:16px;">Операции</div>';
+            html += txs.map(function(tx) {
+                var typeName = typeLabel[tx.type] || tx.type;
+                var sign = '';
+                if (['purchase_hold','withdraw'].indexOf(tx.type) >= 0) sign = '−';
+                else if (['income','purchase_release','purchase_refund','deposit'].indexOf(tx.type) >= 0) sign = '+';
+                return '<div class="list-item"><div class="top"><div class="title">' + typeName +
+                    '</div><span style="font-weight:700;">' + sign + Number(tx.amount).toLocaleString('ru-RU') + ' $</span></div>' +
+                    '<div class="subtitle">' + String(tx.description || '').replace(/</g,'&lt;') +
+                    '<br>' + String(tx.created_at || '').slice(0, 19).replace('T', ' ') + '</div></div>';
+            }).join('');
+        }
+        if (!html) html = '<div class="empty"><div class="icon">📭</div>Нет операций</div>';
+        box.innerHTML = html;
     } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
 }
 
@@ -3079,28 +3122,64 @@ async function loadAdminRequests() {
     }
 }
 
-function openAdminTxDetail(id) {
+async function openAdminTxDetail(id) {
     var r = (_adminCache.transactions || []).find(function(x){ return x.id === id; });
     if (!r) { tg.showAlert('Заявка не найдена'); return; }
-    var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
+    var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars', order: 'Сделка' };
     var typeName = r.type === 'deposit' ? 'Пополнение' : (r.type === 'refund' ? 'Возврат (сделка)' : 'Вывод');
     document.getElementById('admin-detail-title').textContent = typeName + ' #' + id;
-    var html = '<div class="info-block">' +
-        '<b>Тип:</b> ' + typeName + '<br>' +
-        '<b>User ID:</b> ' + r.user_id + '<br>' +
-        '<b>Сумма:</b> ' + r.amount + '$<br>' +
-        '<b>Метод:</b> ' + (methodMap[r.method] || r.method || '—') + '<br>' +
-        (r.recipient ? '<b>Реквизиты:</b> ' + r.recipient + '<br>' : '') +
-        (r.recipient_name ? '<b>Имя:</b> ' + r.recipient_name + '<br>' : '') +
-        (r.comment ? '<b>Комментарий:</b> ' + r.comment + '<br>' : '') +
-        '<b>Статус:</b> ' + r.status + '<br>' +
-        '<b>Создано:</b> ' + (r.created_at || '').slice(0, 16).replace('T', ' ') +
-        '</div>' +
-        '<div class="btn-stack">' +
+    document.getElementById('admin-detail-content').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    showPage('admin-detail');
+
+    var html = '';
+    if (r.type === 'refund') {
+        try {
+            var det = await apiGet('/api/admin/refund-detail/' + id);
+            var l = det.listing || {};
+            var o = det.order || {};
+            var req = det.request || r;
+            html += '<div class="info-block">';
+            html += '<b>Тип:</b> Возврат (сделка)<br>';
+            html += '<b>Сумма:</b> ' + (req.amount || r.amount) + '$<br>';
+            html += '<b>Покупатель ID:</b> <span class="seller-link" onclick="openUserProfile(' + (req.user_id || r.user_id) + ')">' + (req.user_id || r.user_id) + '</span><br>';
+            if (o.seller_id) html += '<b>Продавец ID:</b> <span class="seller-link" onclick="openUserProfile(' + o.seller_id + ')">' + o.seller_id + '</span><br>';
+            html += '<b>Сделка:</b> #' + (o.id || req.recipient || '—') + '<br>';
+            html += '<b>Комментарий покупателя:</b><br>' + String(req.comment || o.reject_comment || '—').replace(/</g,'&lt;');
+            html += '</div>';
+            if (l.id) {
+                html += '<div class="section-title" style="font-size:16px;">Объявление #' + l.id + '</div>';
+                html += '<div class="info-block">';
+                html += '<b>Название:</b> ' + String(l.title || '').replace(/</g,'&lt;') + '<br><br>';
+                html += '<b>Описание:</b><br>' + String(l.description || '').replace(/</g,'&lt;') + '<br><br>';
+                html += listingExtraInfoHtml(l, { hideContract: false });
+                html += '<b>Цена:</b> ' + (l.price != null ? l.price : '—') + '$<br>';
+                if (l.seller_username) {
+                    html += '<b>Продавец:</b> <span class="seller-link" onclick="openUserProfile(' + l.seller_id + ')">@' + String(l.seller_username).replace(/</g,'&lt;') + '</span><br>';
+                }
+                html += '</div>';
+                var files = parseFilesMeta(l.files_meta);
+                if (files.length) html += listingFilesBlockHtml(files, 'download-listing', l.id);
+            }
+        } catch (e) {
+            html += '<div class="empty">' + e.message + '</div>';
+        }
+    } else {
+        html += '<div class="info-block">' +
+            '<b>Тип:</b> ' + typeName + '<br>' +
+            '<b>User ID:</b> <span class="seller-link" onclick="openUserProfile(' + r.user_id + ')">' + r.user_id + '</span><br>' +
+            '<b>Сумма:</b> ' + r.amount + '$<br>' +
+            '<b>Метод:</b> ' + (methodMap[r.method] || r.method || '—') + '<br>' +
+            (r.recipient ? '<b>Реквизиты:</b> ' + String(r.recipient).replace(/</g,'&lt;') + '<br>' : '') +
+            (r.recipient_name ? '<b>Имя:</b> ' + String(r.recipient_name).replace(/</g,'&lt;') + '<br>' : '') +
+            (r.comment ? '<b>Комментарий:</b> ' + String(r.comment).replace(/</g,'&lt;') + '<br>' : '') +
+            '<b>Статус:</b> ' + r.status + '<br>' +
+            '<b>Создано:</b> ' + (r.created_at || '').slice(0, 16).replace('T', ' ') +
+            '</div>';
+    }
+    html += '<div class="btn-stack">' +
         '<button class="btn btn-success" onclick="adminApprove(' + r.id + ')">Одобрить</button>' +
         '<button class="btn btn-danger" onclick="adminReject(' + r.id + ')">Отклонить</button></div>';
     document.getElementById('admin-detail-content').innerHTML = html;
-    showPage('admin-detail');
 }
 
 async function adminApprove(id) {
