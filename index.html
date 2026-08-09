@@ -733,7 +733,7 @@
     <!-- HOME -->
     <div id="page-home" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-            <div class="section-title" style="margin-bottom:0;">Объявления</div>
+            <div class="section-title" style="margin-bottom:0;">Лента объявлений</div>
             <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showPage('listing-create')">+ Создать</button>
         </div>
         <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
@@ -866,16 +866,12 @@
         <div class="section-title">Новости</div>
         <div id="news-pinned"><div class="loading"><div class="spinner"></div></div></div>
         <div class="section-title" style="font-size:16px;margin-top:8px;">Лента новостей</div>
-        <div class="news-card">
-            <div class="date">Сегодня</div>
-            <div class="title">Добро пожаловать в X-Cod Exchange</div>
-            <div class="text">Платформа для безопасной покупки и продажи Telegram-ботов запущена. Следите за обновлениями!</div>
-        </div>
-        <div class="news-card">
-            <div class="date">Недавно</div>
-            <div class="title">Mini App доступен</div>
-            <div class="text">Теперь вы можете управлять балансом и заявками прямо из мини-приложения.</div>
-        </div>
+        <div id="news-feed"></div>
+    </div>
+
+    <div id="page-news-detail" class="page">
+        <button class="back-link" onclick="showPage('news');loadNewsPinned();">← Назад</button>
+        <div id="news-detail-content"></div>
     </div>
 
     <!-- EXCHANGE -->
@@ -1729,35 +1725,97 @@ async function loadOwnProfileListings() {
 
 async function loadNewsPinned() {
     var box = document.getElementById('news-pinned');
-    if (!box) return;
-    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    var feed = document.getElementById('news-feed');
+    if (box) box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     try {
         var data = await apiGet('/api/listings/pinned');
         var items = data.listings || [];
-        if (!items.length) {
-            box.innerHTML = '';
-            return;
+        if (box) {
+            if (!items.length) box.innerHTML = '';
+            else {
+                box.innerHTML = items.map(function(l) {
+                    var desc = (l.description || '').replace(/</g, '&lt;');
+                    if (desc.length > 220) desc = desc.slice(0, 220) + '…';
+                    var priceNum = Number(l.price).toLocaleString('ru-RU');
+                    return '<div class="listing-card" data-id="' + l.id + '">' +
+                        '<div class="ltitle-row">' +
+                        '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
+                        '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
+                        '</div>' +
+                        '<div class="ldesc">' + desc + '</div>' +
+                        '<div class="meta">' +
+                        '<div class="price">' + priceNum + ' <small>$</small></div>' +
+                        '</div></div>';
+                }).join('');
+                box.querySelectorAll('.listing-card[data-id]').forEach(function(el) {
+                    el.onclick = function() {
+                        window._listingBack = 'news';
+                        openListing(parseInt(el.getAttribute('data-id'), 10));
+                    };
+                });
+            }
         }
-        box.innerHTML = items.map(function(l) {
-            var seller = formatSeller(l);
-            var desc = (l.description || '').replace(/</g, '&lt;');
-            if (desc.length > 220) desc = desc.slice(0, 220) + '…';
-            var isFav = !!l.is_favorite;
-            var priceNum = Number(l.price).toLocaleString('ru-RU');
-            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
-                '<div class="ltitle-row">' +
-                '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
-                '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
-                '</div>' +
-                '<div class="ldesc">' + desc + '</div>' +
-                '<div class="meta">' +
-                '<div class="price">' + priceNum + ' <small>$</small></div>' +
-                '<button class="fav-btn' + (isFav ? ' active' : '') + '" onclick="event.stopPropagation();toggleFavorite(' + l.id + ', ' + (isFav ? 'true' : 'false') + ')">' + (isFav ? '★' : '☆') + '</button>' +
-                '</div></div>';
-        }).join('');
     } catch (e) {
-        box.innerHTML = '<div class="empty" style="padding:12px;">' + e.message + '</div>';
+        if (box) box.innerHTML = '<div class="empty" style="padding:12px;">' + e.message + '</div>';
     }
+    if (feed) {
+        feed.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+        try {
+            var nd = await apiGet('/api/news');
+            var news = nd.news || [];
+            if (!news.length) {
+                feed.innerHTML = '<div class="empty"><div class="icon">📰</div>Пока нет новостей</div>';
+            } else {
+                feed.innerHTML = news.map(function(n) {
+                    var body = String(n.body || '').replace(/</g,'&lt;');
+                    if (body.length > 140) body = body.slice(0, 140) + '…';
+                    return '<div class="listing-card" data-nid="' + n.id + '">' +
+                        '<div class="ltitle-row"><div class="ltitle">' + String(n.title || '').replace(/</g,'&lt;') + '</div></div>' +
+                        '<div class="ldesc">' + body + '</div>' +
+                        '<div class="meta" style="margin-top:8px;">' +
+                        '<div class="subtitle" style="margin:0;">Недавно · 👁 ' + (n.views_count || 0) + '</div>' +
+                        '</div></div>';
+                }).join('');
+                feed.querySelectorAll('.listing-card[data-nid]').forEach(function(el) {
+                    el.onclick = function() {
+                        openNewsDetail(parseInt(el.getAttribute('data-nid'), 10));
+                    };
+                });
+            }
+        } catch (e) {
+            feed.innerHTML = '<div class="empty">' + e.message + '</div>';
+        }
+    }
+}
+
+async function openNewsDetail(id) {
+    var box = document.getElementById('news-detail-content');
+    if (!box) return;
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    showPage('news-detail');
+    try {
+        var n = await apiGet('/api/news/' + id);
+        var html = '';
+        html += '<div class="section-title" style="font-size:18px;margin-top:4px;">' + String(n.title || '').replace(/</g,'&lt;') + '</div>';
+        html += '<div class="subtitle" style="margin-bottom:12px;">Недавно · 👁 ' + (n.views_count || 0) + '</div>';
+        html += '<div class="info-block" style="white-space:pre-line;">' + String(n.body || '').replace(/</g,'&lt;') + '</div>';
+        if (userData && userData.role >= 4) {
+            html += '<button class="btn" style="margin-top:16px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteNewsItem(' + n.id + ')">Удалить</button>';
+        }
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<div class="empty">' + e.message + '</div>';
+    }
+}
+
+async function deleteNewsItem(id) {
+    if (!confirm('Удалить новость?')) return;
+    try {
+        await apiFetch('/api/news/' + id, { method: 'DELETE' });
+        tg.showAlert('Новость удалена');
+        showPage('news');
+        loadNewsPinned();
+    } catch (e) { tg.showAlert(e.message); }
 }
 
 async function loadListings() {
@@ -1767,7 +1825,8 @@ async function loadListings() {
         var data = await apiGet('/api/listings');
         var items = data.listings || [];
         if (!items.length) {
-            box.innerHTML = '<div class="empty"><div class="icon">📭</div>Пока нет объявлений</div>';
+            var dbg = data.debug ? (' (active: ' + data.debug.active_total + ', в ленте: ' + data.debug.feed + ')') : '';
+            box.innerHTML = '<div class="empty"><div class="icon">📭</div>Пока нет объявлений' + (data.debug && data.debug.active_total > 2 ? '<div style="font-size:12px;margin-top:8px;color:var(--hint)">Проверьте, что объявления одобрены модерацией (status: active)</div>' : '') + '</div>';
             return;
         }
         box.innerHTML = items.map(function(l) {
@@ -1863,6 +1922,8 @@ async function openListing(id) {
             window._listingBack = 'profile';
         } else if (document.getElementById('page-user-profile') && document.getElementById('page-user-profile').classList.contains('active')) {
             window._listingBack = 'user-profile';
+        } else if (document.getElementById('page-news') && document.getElementById('page-news').classList.contains('active')) {
+            window._listingBack = 'news';
         } else if (document.getElementById('page-home') && document.getElementById('page-home').classList.contains('active')) {
             window._listingBack = 'home';
         } else if (!window._listingBack) {
@@ -1946,7 +2007,7 @@ async function openListing(id) {
             }
         }
         // админ и выше могут удалить чужое объявление
-        if (!isOwner && userData && userData.role >= 5 && l.status !== 'deleted') {
+        if (!isOwner && userData && userData.role >= 4 && l.status !== 'deleted') {
             html += '<button class="btn" style="margin-top:14px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить объявление</button>';
         }
         box.innerHTML = html;
@@ -1960,6 +2021,7 @@ function backFromListing() {
     showPage(page);
     if (page === 'my-listings') loadMyListings();
     if (page === 'home') loadListings();
+    if (page === 'news') loadNewsPinned();
     if (page === 'favorites') loadFavorites();
     if (page === 'profile') loadOwnProfileListings();
 }
