@@ -3872,15 +3872,81 @@ async function openMyShifts() {
 }
 
 function formatShiftCountdown(ms) {
-    if (ms <= 0) return 'Смена началась';
+    if (ms <= 0) return '00:00:00';
     var sec = Math.floor(ms / 1000);
     var d = Math.floor(sec / 86400); sec %= 86400;
     var h = Math.floor(sec / 3600); sec %= 3600;
     var m = Math.floor(sec / 60); sec %= 60;
-    var parts = [];
-    if (d > 0) parts.push(d + 'д');
-    parts.push(String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0'));
-    return 'До начала: ' + parts.join(' ');
+    var hms = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+    if (d > 0) return d + 'д ' + hms;
+    return hms;
+}
+
+function getShiftEvents(type) {
+    if (type === 'night') {
+        return [
+            { t: '20:45', title: 'На месте' },
+            { t: '20:50', title: 'Созвон' },
+            { t: '21:00', title: 'Планерка' },
+            { t: '21:15', title: 'Работа' },
+            { t: '00:00', title: 'Планерка' },
+            { t: '00:15', title: 'Работа' },
+            { t: '03:00', title: 'Перерыв' },
+            { t: '03:30', title: 'Работа' },
+            { t: '06:00', title: 'Отчёт' },
+            { t: '08:30', title: 'Итоги' },
+            { t: '08:50', title: 'Передача' },
+            { t: '09:00', title: 'Конец' }
+        ];
+    }
+    return [
+        { t: '08:45', title: 'На месте' },
+        { t: '08:50', title: 'Созвон' },
+        { t: '09:00', title: 'Планерка' },
+        { t: '09:15', title: 'Работа' },
+        { t: '12:00', title: 'Планерка' },
+        { t: '12:15', title: 'Работа' },
+        { t: '15:00', title: 'Обед' },
+        { t: '15:30', title: 'Работа' },
+        { t: '18:00', title: 'Отчёт' },
+        { t: '20:30', title: 'Итоги' },
+        { t: '20:50', title: 'Передача' },
+        { t: '21:00', title: 'Конец' }
+    ];
+}
+
+function nextShiftEventTs(startIso, endIso, type) {
+    var now = Date.now();
+    var startTs = Date.parse(startIso);
+    var endTs = Date.parse(endIso || '');
+    if (isNaN(startTs)) return null;
+    if (now < startTs) return { ts: startTs, label: 'До начала', title: '' };
+    if (!isNaN(endTs) && now >= endTs) return { ts: endTs, label: 'Завершена', title: '', done: true };
+    // events relative to shift date
+    var events = getShiftEvents(type || 'day');
+    var base = new Date(startTs);
+    // day shift start 09:00 same calendar day; events from 08:45 same day
+    var y = base.getFullYear(), m = base.getMonth(), d = base.getDate();
+    if ((type || 'day') === 'day') {
+        // start is 09:00
+    } else {
+        // night start 21:00; after midnight events are next day
+    }
+    for (var i = 0; i < events.length; i++) {
+        var parts = events[i].t.split(':');
+        var hh = +parts[0], mm = +parts[1];
+        var ev = new Date(y, m, d, hh, mm, 0, 0);
+        if ((type || 'day') === 'night' && hh < 12) {
+            // after midnight = next day
+            ev = new Date(y, m, d + 1, hh, mm, 0, 0);
+        }
+        // for day shift, morning events before 9 still same day
+        if (ev.getTime() > now) {
+            return { ts: ev.getTime(), label: 'До: ' + events[i].title, title: events[i].title };
+        }
+    }
+    if (!isNaN(endTs)) return { ts: endTs, label: 'До конца', title: '' };
+    return null;
 }
 
 function startShiftTimers(root) {
@@ -3888,9 +3954,13 @@ function startShiftTimers(root) {
     function tick() {
         (root || document).querySelectorAll('.shift-timer[data-start]').forEach(function(el) {
             var start = el.getAttribute('data-start');
-            var ts = Date.parse(start);
-            if (isNaN(ts)) { el.textContent = ''; return; }
-            el.textContent = formatShiftCountdown(ts - Date.now());
+            var end = el.getAttribute('data-end');
+            var type = el.getAttribute('data-type') || 'day';
+            var info = nextShiftEventTs(start, end, type);
+            if (!info) { el.textContent = ''; return; }
+            if (info.done) { el.textContent = 'Завершена'; return; }
+            var left = info.ts - Date.now();
+            el.textContent = (info.label ? info.label + ' ' : '') + formatShiftCountdown(left);
         });
     }
     tick();
@@ -3909,27 +3979,61 @@ async function cancelShift(date, type) {
 async function openShiftSchedule(type, date) {
     var box = document.getElementById('admin-content');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    document.getElementById('admin-section-title').textContent = 'Расписание смены';
+    document.getElementById('admin-section-title').textContent = 'Смена';
     try {
         var data = await apiGet('/api/shifts/schedule?shift_type=' + encodeURIComponent(type));
-        var label = type === 'day' ? 'Дневная 09:00–21:00' : 'Ночная 21:00–09:00';
-        var html = '<button class="back-link" onclick="openShiftSignup()">← Назад</button>';
-        html += '<div class="section-title" style="font-size:16px;margin:10px 0 6px;">' + (date || '') + ' · ' + label + '</div>';
-        html += '<div class="info-block">' + (data.arrive_note || '') + ' · МСК</div>';
-        (data.schedule || []).forEach(function(item) {
-            html += '<div class="schedule-item">';
-            html += '<div class="stime">' + (item.time || '') + '</div>';
-            html += '<div class="stitle">' + (item.title || '') + '</div>';
-            if (item.text) html += '<div class="stext">' + item.text + '</div>';
-            html += '</div>';
-        });
+        var my = await apiGet('/api/shifts/my').catch(function(){ return { shifts: [] }; });
+        var mine = (my.shifts || []).find(function(s){ return s.shift_date === date && s.shift_type === type; });
+        var label = type === 'day' ? '09:00–21:00' : '21:00–09:00';
+        var html = '<button class="back-link" onclick="openMyShifts()">← Назад</button>';
+        if (mine && !mine.finished && !mine.in_progress) {
+            html += '<button class="btn btn-danger" style="margin:10px 0;" onclick="cancelShift(\'' + date + '\',\'' + type + '\')">Отменить запись</button>';
+        }
+        html += '<div class="listing-card">';
+        html += '<div class="ltitle-row"><div class="ltitle">' + (date || '') + '</div>';
+        if (mine && mine.start) {
+            html += '<div class="shift-timer" data-start="' + String(mine.start).replace(/"/g,'') + '" data-end="' + String(mine.end || '').replace(/"/g,'') + '" data-type="' + type + '" style="font-size:12px;">—</div>';
+        }
+        html += '</div>';
+        html += '<div class="ldesc">' + label + ' МСК · ' + (type === 'day' ? 'День' : 'Ночь') + '</div>';
+        html += '</div>';
+        html += '<div class="form-label" style="margin-top:12px;">Расписание</div>';
+        var compact = getShiftEvents(type);
+        // show ranges more compactly from API if available but short titles
+        if (data.schedule && data.schedule.length) {
+            data.schedule.forEach(function(item) {
+                var title = item.title || '';
+                // shorten
+                title = title.replace('Созвон в общей группе', 'Созвон')
+                    .replace('Планерка новой смены', 'Планерка')
+                    .replace('Работа по направлению', 'Работа')
+                    .replace('Работа по направлениям', 'Работа')
+                    .replace('Перекус / обед / отдых', 'Обед')
+                    .replace('Промежуточный отчёт', 'Отчёт')
+                    .replace('Итоги дня', 'Итоги')
+                    .replace('Итоги смены', 'Итоги')
+                    .replace('Передача смены', 'Передача')
+                    .replace('На рабочем месте', 'На месте');
+                html += '<div class="schedule-item" style="padding:8px 0;">';
+                html += '<div class="stime">' + (item.time || '') + '</div>';
+                html += '<div class="stitle" style="font-size:13px;">' + title + '</div>';
+                html += '</div>';
+            });
+        } else {
+            compact.forEach(function(item) {
+                html += '<div class="schedule-item" style="padding:8px 0;">';
+                html += '<div class="stime">' + item.t + '</div>';
+                html += '<div class="stitle" style="font-size:13px;">' + item.title + '</div>';
+                html += '</div>';
+            });
+        }
         box.innerHTML = html;
+        startShiftTimers(box);
     } catch (e) {
-        box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
+        box.innerHTML = '<button class="back-link" onclick="openMyShifts()">← Назад</button>' +
             '<div class="empty">' + e.message + '</div>';
     }
 }
-
 
 async function openShiftControl(shiftDate, shiftType) {
     var box = document.getElementById('admin-content');
