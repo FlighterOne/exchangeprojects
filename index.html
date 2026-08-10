@@ -3868,20 +3868,14 @@ async function openMyShifts() {
                     var dt = new Date(+p[0], +p[1]-1, +p[2]);
                     wd = wdNames[dt.getDay()];
                 } catch (e) {}
-                var badge = s.in_progress ? 'Идёт' : (s.finished ? 'Завершена' : 'Запланирована');
-                var timerHtml = '';
-                if (!s.finished && s.start) {
-                    timerHtml = '<div class="shift-timer" data-start="' + String(s.start).replace(/"/g,'') + '">—</div>';
-                }
+                var timerAttr = '';
+                if (s.start) timerAttr += ' data-start="' + String(s.start).replace(/"/g,'') + '"';
+                if (s.end) timerAttr += ' data-end="' + String(s.end).replace(/"/g,'') + '"';
+                timerAttr += ' data-type="' + (s.shift_type || 'day') + '"';
                 html += '<div class="listing-card" style="cursor:pointer;" onclick="openShiftSchedule(\'' + s.shift_type + '\',\'' + s.shift_date + '\')">';
                 html += '<div class="ltitle-row"><div class="ltitle">' + (s.shift_date || '') + ' · ' + wd + '</div>';
-                html += '<span class="shift-check">✓</span></div>';
+                html += '<div class="shift-timer"' + timerAttr + ' style="font-size:12px;white-space:nowrap;">—</div></div>';
                 html += '<div class="ldesc">' + (s.label || timeLabel) + ' МСК</div>';
-                html += '<div class="subtitle" style="margin-top:6px;">' + badge + '</div>';
-                html += timerHtml;
-                if (!s.finished && !s.in_progress) {
-                    html += '<button class="btn btn-danger" style="margin-top:10px;" onclick="event.stopPropagation();cancelShift(\'' + s.shift_date + '\',\'' + s.shift_type + '\')">Отменить запись</button>';
-                }
                 html += '</div>';
             });
         }
@@ -4008,9 +4002,6 @@ async function openShiftSchedule(type, date) {
         var mine = (my.shifts || []).find(function(s){ return s.shift_date === date && s.shift_type === type; });
         var label = type === 'day' ? '09:00–21:00' : '21:00–09:00';
         var html = '<button class="back-link" onclick="openMyShifts()">← Назад</button>';
-        if (mine && !mine.finished && !mine.in_progress) {
-            html += '<button class="btn btn-danger" style="margin:10px 0;" onclick="cancelShift(\'' + date + '\',\'' + type + '\')">Отменить запись</button>';
-        }
         html += '<div class="listing-card">';
         html += '<div class="ltitle-row"><div class="ltitle">' + (date || '') + '</div>';
         if (mine && mine.start) {
@@ -4062,40 +4053,44 @@ async function openShiftControl(shiftDate, shiftType) {
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     document.getElementById('admin-section-title').textContent = 'Контроль сотрудников';
     try {
-        var q = '';
-        if (shiftDate && shiftType) q = '?shift_date=' + encodeURIComponent(shiftDate) + '&shift_type=' + encodeURIComponent(shiftType);
-        var data = await apiGet('/api/shifts/control' + q);
+        var data = await apiGet('/api/shifts/control');
         var html = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
         if (!data.ok) {
             html += '<div class="info-block" style="margin-top:12px;">' + (data.message || 'Нет доступа') + '</div>';
-            if (data.my_shifts && data.my_shifts.length) {
-                html += '<div class="form-label" style="margin-top:12px;">Ваши смены</div>';
-                data.my_shifts.forEach(function(s) {
-                    html += '<div class="list-item" style="cursor:pointer;" onclick="openShiftControl(\'' + s.shift_date + '\',\'' + s.shift_type + '\')">' +
-                        '<div class="title">' + s.shift_date + ' · ' + (s.shift_type === 'day' ? 'Дневная' : 'Ночная') + '</div>' +
-                        '<div class="subtitle">' + (s.in_progress ? 'Идёт сейчас' : 'Запланирована') + '</div></div>';
-                });
-            }
             box.innerHTML = html;
             return;
         }
+        // кнопка закрыть сверху
+        var closeDisabled = !data.can_close;
+        html += '<button class="btn" style="margin:10px 0;' +
+            (closeDisabled
+                ? 'opacity:0.45;pointer-events:none;background:var(--secondary-bg);color:var(--hint);'
+                : 'background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);') +
+            '" onclick="shiftControlClose(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">' +
+            (closeDisabled ? 'Закрыть смену (отметьте всех)' : 'Закрыть смену') + '</button>';
+
         html += '<div class="section-title" style="font-size:16px;margin:10px 0 6px;">' + data.shift_date + ' · ' + data.label + '</div>';
+        html += '<div class="subtitle">Текущая смена</div>';
         if (!data.prev_shift.closed) {
-            html += '<div class="info-block">Ожидайте: админ предыдущей смены должен <b>закрыть</b> её, затем появится отметка присутствия.</div>';
+            html += '<div class="info-block">Ожидайте закрытия предыдущей смены</div>';
         }
         if (data.session && data.session.status === 'closed') {
-            html += '<div class="info-block">Смена закрыта.</div>';
+            html += '<div class="info-block">Смена закрыта</div>';
         } else if (data.can_open && (!data.session || data.session.status !== 'open')) {
-            html += '<button class="btn" style="margin:10px 0;" onclick="shiftControlOpen(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Открыть смену / начать отметку</button>';
+            html += '<button class="btn" style="margin:10px 0;" onclick="shiftControlOpen(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Открыть смену</button>';
         }
         html += '<div class="form-label" style="margin-top:12px;">Сотрудники на смене</div>';
         var canAtt = data.can_attendance && data.prev_shift.closed;
         var canCred = data.can_credit;
+        if (!(data.staff || []).length) {
+            html += '<div class="empty" style="padding:16px;">Никого нет на смене</div>';
+        }
         (data.staff || []).forEach(function(s) {
             html += '<div class="list-item">';
             html += '<div class="top"><div class="title">' + String(s.name || s.user_id).replace(/</g,'&lt;') + '</div>';
             html += '<span class="badge badge-gray">' + (s.role_name || '') + '</span></div>';
-            html += '<div class="subtitle">ID ' + s.user_id + (s.present ? ' · на месте ✓' : ' · не отмечен') +
+            html += '<div class="subtitle">ID ' + s.user_id +
+                (s.marked_at ? (s.present ? ' · на месте ✓' : ' · отсутствует') : ' · не отмечен') +
                 (s.credit && s.credit !== 'pending' ? ' · зачёт: ' + s.credit + (s.credit_amount ? (' ' + s.credit_amount + '$') : '') : '') + '</div>';
             if (canAtt) {
                 html += '<div class="actions" style="display:flex;gap:8px;margin-top:8px;">' +
@@ -4111,20 +4106,6 @@ async function openShiftControl(shiftDate, shiftType) {
             }
             html += '</div>';
         });
-        if (!(data.staff || []).length) {
-            html += '<div class="empty">Никто не записан на эту смену</div>';
-        }
-        if (canCred && !(data.session && data.session.status === 'closed')) {
-            html += '<button class="btn" style="margin-top:14px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="shiftControlClose(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Закрыть смену</button>';
-        }
-        if (data.my_shifts && data.my_shifts.length > 1) {
-            html += '<div class="form-label" style="margin-top:16px;">Другие ваши смены</div>';
-            data.my_shifts.forEach(function(s) {
-                if (s.shift_date === data.shift_date && s.shift_type === data.shift_type) return;
-                html += '<div class="list-item" style="cursor:pointer;" onclick="openShiftControl(\'' + s.shift_date + '\',\'' + s.shift_type + '\')">' +
-                    '<div class="title">' + s.shift_date + ' · ' + (s.shift_type === 'day' ? 'Дневная' : 'Ночная') + '</div></div>';
-            });
-        }
         box.innerHTML = html;
     } catch (e) {
         box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button><div class="empty">' + e.message + '</div>';
