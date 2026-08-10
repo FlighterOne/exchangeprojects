@@ -153,6 +153,52 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
         .section-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+        .cal-wrap { margin: 8px 0 14px; }
+        .cal-month {
+            text-align: center; font-weight: 700; font-size: 15px; margin-bottom: 10px;
+            color: #fff;
+        }
+        .cal-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+        }
+        .cal-dow {
+            text-align: center; font-size: 11px; color: var(--hint); padding: 4px 0;
+        }
+        .cal-day {
+            aspect-ratio: 1; border-radius: 10px; border: none;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            background: transparent; color: var(--hint);
+        }
+        .cal-day.avail {
+            background: rgba(255,255,255,0.92); color: #111;
+        }
+        .cal-day.avail.selected {
+            outline: 2px solid var(--button); outline-offset: 1px;
+        }
+        .cal-day.today-shift {
+            background: rgba(255,59,48,0.9); color: #fff;
+        }
+        .cal-day.muted, .cal-day:disabled {
+            color: #666; background: rgba(128,128,128,0.15); cursor: default;
+        }
+        .cal-day.has-signup::after {
+            content: '✓'; position: absolute; font-size: 9px; color: #34c759;
+        }
+        .cal-day { position: relative; }
+        .shift-time-pick { margin-top: 12px; }
+        .shift-time-btn {
+            width: 100%; margin-bottom: 8px; padding: 12px 14px;
+            border-radius: 12px; border: 1.5px solid rgba(128,128,128,0.3);
+            background: var(--secondary-bg); color: var(--text);
+            font-size: 14px; font-weight: 600; text-align: left; cursor: pointer;
+        }
+        .shift-time-btn.signed {
+            border-color: #34c759; color: #34c759;
+        }
+        .shift-timer {
+            font-size: 13px; color: var(--button); font-weight: 600; margin-top: 4px;
+        }
         .shift-day {
             background: var(--secondary-bg); border-radius: 14px; padding: 12px; margin-bottom: 10px;
         }
@@ -3619,39 +3665,155 @@ async function openShiftSignup() {
     document.getElementById('admin-section-title').textContent = 'Запись на смену';
     try {
         var data = await apiGet('/api/shifts/calendar');
-        var html = '';
-        html += '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
-        html += '<div class="info-block" style="margin:10px 0;">Смены на <b>7 дней вперёд</b> (сегодня недоступно).<br>' +
-            'Дневная: <b>09:00–21:00 МСК</b>, ночная: <b>21:00–09:00 МСК</b>.<br>' +
-            'К <b>08:45</b> / <b>20:45</b> сотрудник уже на рабочем месте.<br>' +
-            'Запись: <b>' + (data.active_signups || 0) + ' / ' + (data.max_signups || 5) + '</b></div>';
-        (data.days || []).forEach(function(day) {
-            html += '<div class="shift-day">';
-            html += '<div class="shift-day-title">' + day.label + ' · ' + day.weekday + '</div>';
-            (day.slots || []).forEach(function(s) {
-                html += '<div class="shift-slot">';
-                html += '<div style="flex:1;min-width:0;cursor:pointer;" onclick="openShiftSchedule(\'' + s.shift_type + '\',\'' + s.shift_date + '\')">';
-                html += '<div style="font-weight:600;font-size:14px;">' + s.label + '</div>';
-                if (s.signed) html += '<div class="subtitle" style="margin:0;">Вы записаны</div>';
-                else if (s.in_progress) html += '<div class="subtitle" style="margin:0;">Идёт сейчас</div>';
-                else if (s.finished) html += '<div class="subtitle" style="margin:0;">Завершена</div>';
-                html += '</div>';
-                if (s.signed) {
-                    html += '<span class="shift-check">✓</span>';
-                } else if (s.can_signup) {
-                    html += '<button class="btn" style="width:auto;padding:8px 12px;font-size:13px;" onclick="event.stopPropagation();signupShift(\'' + s.shift_date + '\',\'' + s.shift_type + '\')">Запись</button>';
-                } else {
-                    html += '<span style="color:var(--hint);font-size:12px;">—</span>';
-                }
-                html += '</div>';
-            });
-            html += '</div>';
-        });
-        box.innerHTML = html;
+        window._shiftCal = data;
+        window._shiftCalSelected = null;
+        renderShiftCalendar();
     } catch (e) {
         box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
             '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
     }
+}
+
+function renderShiftCalendar() {
+    var data = window._shiftCal || {};
+    var box = document.getElementById('admin-content');
+    var days = data.days || [];
+    var byDate = {};
+    days.forEach(function(d) { byDate[d.date] = d; });
+
+    // построить сетку от сегодня до +7
+    var todayStr = null;
+    try {
+        // первая доступная в API — завтра; сегодня = первая дата минус 1 день
+        if (days.length) {
+            var p = days[0].date.split('-');
+            var dt = new Date(Date.UTC(+p[0], +p[1]-1, +p[2]));
+            dt.setUTCDate(dt.getUTCDate() - 1);
+            todayStr = dt.toISOString().slice(0, 10);
+        }
+    } catch (e) {}
+
+    var html = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
+    html += '<div class="cal-wrap">';
+
+    // месяц по первой/последней дате
+    var monthLabel = '';
+    if (days.length) {
+        var mNames = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+        var a = days[0].date.split('-');
+        monthLabel = mNames[+a[1]-1] + ' ' + a[0];
+    }
+    html += '<div class="cal-month">' + monthLabel + '</div>';
+    html += '<div class="cal-grid">';
+    ['пн','вт','ср','чт','пт','сб','вс'].forEach(function(w) {
+        html += '<div class="cal-dow">' + w + '</div>';
+    });
+
+    // заполнить пустые ячейки до первого дня недели
+    function parseYMD(s) {
+        var p = s.split('-');
+        return new Date(+p[0], +p[1]-1, +p[2]);
+    }
+    var cells = [];
+    if (todayStr) {
+        // показать сегодня + 7 доступных
+        var start = parseYMD(todayStr);
+        // выровнять на понедельник
+        var dow = (start.getDay() + 6) % 7; // 0=пн
+        for (var i = 0; i < dow; i++) cells.push(null);
+        for (var i = 0; i <= 7; i++) {
+            var d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+            var y = d.getFullYear();
+            var m = String(d.getMonth()+1).padStart(2,'0');
+            var dd = String(d.getDate()).padStart(2,'0');
+            cells.push(y + '-' + m + '-' + dd);
+        }
+    } else {
+        days.forEach(function(d){ cells.push(d.date); });
+    }
+
+    var selected = window._shiftCalSelected;
+    cells.forEach(function(dateStr) {
+        if (!dateStr) {
+            html += '<div></div>';
+            return;
+        }
+        var dayNum = +dateStr.slice(8, 10);
+        var info = byDate[dateStr];
+        var isToday = dateStr === todayStr;
+        var isAvail = !!info;
+        var hasSignup = info && info.slots && info.slots.some(function(s){ return s.signed; });
+        var cls = 'cal-day';
+        if (isToday) cls += ' today-shift';
+        else if (isAvail) cls += ' avail';
+        else cls += ' muted';
+        if (selected === dateStr) cls += ' selected';
+        if (hasSignup) cls += ' has-signup';
+        if (isAvail || isToday) {
+            html += '<button type="button" class="' + cls + '" data-date="' + dateStr + '">' + dayNum + '</button>';
+        } else {
+            html += '<button type="button" class="' + cls + '" disabled>' + dayNum + '</button>';
+        }
+    });
+    html += '</div></div>';
+    html += '<div id="shift-time-pick" class="shift-time-pick"></div>';
+    box.innerHTML = html;
+
+    box.querySelectorAll('.cal-day.avail, .cal-day.today-shift').forEach(function(btn) {
+        btn.onclick = function() {
+            var dateStr = btn.getAttribute('data-date');
+            if (!dateStr) return;
+            if (dateStr === todayStr) {
+                tg.showAlert('Нельзя записаться на сегодня');
+                return;
+            }
+            var info = byDate[dateStr];
+            if (!info) {
+                tg.showAlert('Дата недоступна');
+                return;
+            }
+            var allSigned = info.slots && info.slots.length && info.slots.every(function(s){ return s.signed; });
+            if (allSigned && window._shiftCalSelected === dateStr) {
+                tg.showAlert('Вы уже записаны');
+                return;
+            }
+            window._shiftCalSelected = dateStr;
+            renderShiftCalendar();
+            renderShiftTimePick(dateStr, info);
+        };
+    });
+    if (selected && byDate[selected]) {
+        renderShiftTimePick(selected, byDate[selected]);
+    }
+}
+
+function renderShiftTimePick(dateStr, info) {
+    var box = document.getElementById('shift-time-pick');
+    if (!box) return;
+    var wd = info.weekday || '';
+    var html = '<div class="form-label">' + info.label + ' · ' + wd + '</div>';
+    (info.slots || []).forEach(function(s) {
+        var cls = 'shift-time-btn' + (s.signed ? ' signed' : '');
+        var extra = s.signed ? ' · записаны ✓' : (s.can_signup ? '' : (s.in_progress ? ' · идёт' : ' · недоступно'));
+        html += '<button type="button" class="' + cls + '" data-date="' + s.shift_date + '" data-type="' + s.shift_type + '" data-signed="' + (s.signed ? '1' : '0') + '" data-can="' + (s.can_signup ? '1' : '0') + '">' +
+            s.label + extra + '</button>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll('.shift-time-btn').forEach(function(btn) {
+        btn.onclick = function() {
+            var signed = btn.getAttribute('data-signed') === '1';
+            var can = btn.getAttribute('data-can') === '1';
+            if (signed) {
+                tg.showAlert('Вы уже записаны');
+                return;
+            }
+            if (!can) {
+                tg.showAlert('Смена недоступна для записи');
+                return;
+            }
+            signupShift(btn.getAttribute('data-date'), btn.getAttribute('data-type'));
+        };
+    });
 }
 
 async function signupShift(date, type) {
@@ -3672,27 +3834,67 @@ async function openMyShifts() {
         var data = await apiGet('/api/shifts/my');
         var items = data.shifts || [];
         var html = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
-        html += '<div class="info-block" style="margin:10px 0;">К <b>08:45</b> (день) / <b>20:45</b> (ночь) сотрудник уже на рабочем месте. Время — МСК.</div>';
         if (!items.length) {
             html += '<div class="empty"><div class="icon">📅</div>Нет записанных смен</div>';
         } else {
+            var wdNames = ['вс','пн','вт','ср','чт','пт','сб'];
             items.forEach(function(s) {
+                var timeLabel = s.shift_type === 'day' ? '09:00–21:00' : '21:00–09:00';
+                var wd = '';
+                try {
+                    var p = (s.shift_date || '').split('-');
+                    var dt = new Date(+p[0], +p[1]-1, +p[2]);
+                    wd = wdNames[dt.getDay()];
+                } catch (e) {}
                 var badge = s.in_progress ? 'Идёт' : (s.finished ? 'Завершена' : 'Запланирована');
-                html += '<div class="list-item" style="cursor:pointer;" onclick="openShiftSchedule(\'' + s.shift_type + '\',\'' + s.shift_date + '\')">';
-                html += '<div class="top"><div class="title">' + (s.shift_date || '') + ' · ' + (s.label || '') + '</div>';
+                var timerHtml = '';
+                if (!s.finished && s.start) {
+                    timerHtml = '<div class="shift-timer" data-start="' + String(s.start).replace(/"/g,'') + '">—</div>';
+                }
+                html += '<div class="listing-card" style="cursor:pointer;" onclick="openShiftSchedule(\'' + s.shift_type + '\',\'' + s.shift_date + '\')">';
+                html += '<div class="ltitle-row"><div class="ltitle">' + (s.shift_date || '') + ' · ' + wd + '</div>';
                 html += '<span class="shift-check">✓</span></div>';
-                html += '<div class="subtitle">' + badge + '</div>';
+                html += '<div class="ldesc">' + (s.label || timeLabel) + ' МСК</div>';
+                html += '<div class="subtitle" style="margin-top:6px;">' + badge + '</div>';
+                html += timerHtml;
                 if (!s.finished && !s.in_progress) {
-                    html += '<div class="actions"><button class="btn btn-danger" style="margin-top:8px;" onclick="event.stopPropagation();cancelShift(\'' + s.shift_date + '\',\'' + s.shift_type + '\')">Отменить запись</button></div>';
+                    html += '<button class="btn btn-danger" style="margin-top:10px;" onclick="event.stopPropagation();cancelShift(\'' + s.shift_date + '\',\'' + s.shift_type + '\')">Отменить запись</button>';
                 }
                 html += '</div>';
             });
         }
         box.innerHTML = html;
+        startShiftTimers(box);
     } catch (e) {
         box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
             '<div class="empty">' + e.message + '</div>';
     }
+}
+
+function formatShiftCountdown(ms) {
+    if (ms <= 0) return 'Смена началась';
+    var sec = Math.floor(ms / 1000);
+    var d = Math.floor(sec / 86400); sec %= 86400;
+    var h = Math.floor(sec / 3600); sec %= 3600;
+    var m = Math.floor(sec / 60); sec %= 60;
+    var parts = [];
+    if (d > 0) parts.push(d + 'д');
+    parts.push(String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0'));
+    return 'До начала: ' + parts.join(' ');
+}
+
+function startShiftTimers(root) {
+    if (window._shiftTimerIv) clearInterval(window._shiftTimerIv);
+    function tick() {
+        (root || document).querySelectorAll('.shift-timer[data-start]').forEach(function(el) {
+            var start = el.getAttribute('data-start');
+            var ts = Date.parse(start);
+            if (isNaN(ts)) { el.textContent = ''; return; }
+            el.textContent = formatShiftCountdown(ts - Date.now());
+        });
+    }
+    tick();
+    window._shiftTimerIv = setInterval(tick, 1000);
 }
 
 async function cancelShift(date, type) {
