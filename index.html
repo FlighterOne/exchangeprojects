@@ -153,6 +153,22 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
         .section-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+        .shift-day {
+            background: var(--secondary-bg); border-radius: 14px; padding: 12px; margin-bottom: 10px;
+        }
+        .shift-day-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+        .shift-slot {
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            padding: 10px 0; border-top: 1px solid rgba(128,128,128,0.12);
+        }
+        .shift-slot:first-of-type { border-top: none; }
+        .shift-check { color: #34c759; font-weight: 700; font-size: 16px; }
+        .schedule-item {
+            padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,0.12);
+        }
+        .schedule-item .stime { font-size: 12px; color: var(--hint); margin-bottom: 2px; }
+        .schedule-item .stitle { font-weight: 600; font-size: 14px; }
+        .schedule-item .stext { font-size: 13px; color: var(--hint); margin-top: 2px; }
         .filters-heading {
             font-size: 16px;
             font-weight: 650;
@@ -3571,12 +3587,127 @@ function loadWorkCenter() {
     var box = document.getElementById('admin-content');
     box.innerHTML =
         '<div class="support-grid">' +
-        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">📝</div><div class="support-tile-title">Записаться на смену</div></button>' +
-        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">✅</div><div class="support-tile-title">Отработанные смены</div></button>' +
+        '<button class="support-tile" onclick="openShiftSignup()"><div class="support-tile-icon">📝</div><div class="support-tile-title">Записаться на смену</div></button>' +
+        '<button class="support-tile" onclick="openMyShifts()"><div class="support-tile-icon">✅</div><div class="support-tile-title">Мои смены</div></button>' +
         '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">📜</div><div class="support-tile-title">История моих смен</div></button>' +
         '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">🗂️</div><div class="support-tile-title">История действий</div></button>' +
         '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">🚫</div><div class="support-tile-title">Список блокировок</div></button>' +
         '</div>';
+}
+
+async function openShiftSignup() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    document.getElementById('admin-section-title').textContent = 'Запись на смену';
+    try {
+        var data = await apiGet('/api/shifts/calendar');
+        var html = '';
+        html += '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
+        html += '<div class="info-block" style="margin:10px 0;">Смены на <b>7 дней вперёд</b> (сегодня недоступно).<br>' +
+            'Дневная: <b>09:00–21:00 МСК</b>, ночная: <b>21:00–09:00 МСК</b>.<br>' +
+            'К <b>08:45</b> / <b>20:45</b> сотрудник уже на рабочем месте.<br>' +
+            'Запись: <b>' + (data.active_signups || 0) + ' / ' + (data.max_signups || 5) + '</b></div>';
+        (data.days || []).forEach(function(day) {
+            html += '<div class="shift-day">';
+            html += '<div class="shift-day-title">' + day.label + ' · ' + day.weekday + '</div>';
+            (day.slots || []).forEach(function(s) {
+                html += '<div class="shift-slot">';
+                html += '<div style="flex:1;min-width:0;cursor:pointer;" onclick="openShiftSchedule(\'' + s.shift_type + '\',\'' + s.shift_date + '\')">';
+                html += '<div style="font-weight:600;font-size:14px;">' + s.label + '</div>';
+                if (s.signed) html += '<div class="subtitle" style="margin:0;">Вы записаны</div>';
+                else if (s.in_progress) html += '<div class="subtitle" style="margin:0;">Идёт сейчас</div>';
+                else if (s.finished) html += '<div class="subtitle" style="margin:0;">Завершена</div>';
+                html += '</div>';
+                if (s.signed) {
+                    html += '<span class="shift-check">✓</span>';
+                } else if (s.can_signup) {
+                    html += '<button class="btn" style="width:auto;padding:8px 12px;font-size:13px;" onclick="event.stopPropagation();signupShift(\'' + s.shift_date + '\',\'' + s.shift_type + '\')">Запись</button>';
+                } else {
+                    html += '<span style="color:var(--hint);font-size:12px;">—</span>';
+                }
+                html += '</div>';
+            });
+            html += '</div>';
+        });
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
+            '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+    }
+}
+
+async function signupShift(date, type) {
+    try {
+        await apiPost('/api/shifts/signup', { shift_date: date, shift_type: type });
+        tg.showAlert('Вы записаны на смену');
+        openShiftSignup();
+    } catch (e) {
+        tg.showAlert(e.message);
+    }
+}
+
+async function openMyShifts() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    document.getElementById('admin-section-title').textContent = 'Мои смены';
+    try {
+        var data = await apiGet('/api/shifts/my');
+        var items = data.shifts || [];
+        var html = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
+        html += '<div class="info-block" style="margin:10px 0;">К <b>08:45</b> (день) / <b>20:45</b> (ночь) сотрудник уже на рабочем месте. Время — МСК.</div>';
+        if (!items.length) {
+            html += '<div class="empty"><div class="icon">📅</div>Нет записанных смен</div>';
+        } else {
+            items.forEach(function(s) {
+                var badge = s.in_progress ? 'Идёт' : (s.finished ? 'Завершена' : 'Запланирована');
+                html += '<div class="list-item" style="cursor:pointer;" onclick="openShiftSchedule(\'' + s.shift_type + '\',\'' + s.shift_date + '\')">';
+                html += '<div class="top"><div class="title">' + (s.shift_date || '') + ' · ' + (s.label || '') + '</div>';
+                html += '<span class="shift-check">✓</span></div>';
+                html += '<div class="subtitle">' + badge + '</div>';
+                if (!s.finished && !s.in_progress) {
+                    html += '<div class="actions"><button class="btn btn-danger" style="margin-top:8px;" onclick="event.stopPropagation();cancelShift(\'' + s.shift_date + '\',\'' + s.shift_type + '\')">Отменить запись</button></div>';
+                }
+                html += '</div>';
+            });
+        }
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
+            '<div class="empty">' + e.message + '</div>';
+    }
+}
+
+async function cancelShift(date, type) {
+    if (!confirm('Отменить запись на смену?')) return;
+    try {
+        await apiPost('/api/shifts/cancel', { shift_date: date, shift_type: type });
+        tg.showAlert('Запись отменена');
+        openMyShifts();
+    } catch (e) { tg.showAlert(e.message); }
+}
+
+async function openShiftSchedule(type, date) {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    document.getElementById('admin-section-title').textContent = 'Расписание смены';
+    try {
+        var data = await apiGet('/api/shifts/schedule?shift_type=' + encodeURIComponent(type));
+        var label = type === 'day' ? 'Дневная 09:00–21:00' : 'Ночная 21:00–09:00';
+        var html = '<button class="back-link" onclick="openShiftSignup()">← Назад</button>';
+        html += '<div class="section-title" style="font-size:16px;margin:10px 0 6px;">' + (date || '') + ' · ' + label + '</div>';
+        html += '<div class="info-block">' + (data.arrive_note || '') + ' · МСК</div>';
+        (data.schedule || []).forEach(function(item) {
+            html += '<div class="schedule-item">';
+            html += '<div class="stime">' + (item.time || '') + '</div>';
+            html += '<div class="stitle">' + (item.title || '') + '</div>';
+            if (item.text) html += '<div class="stext">' + item.text + '</div>';
+            html += '</div>';
+        });
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
+            '<div class="empty">' + e.message + '</div>';
+    }
 }
 
 function loadCareerTracker() {
