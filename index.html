@@ -1895,7 +1895,9 @@ async function renderUserProfile() {
         }
         box.innerHTML = html;
     } catch (e) {
-        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+        var m = e.message || '';
+        box.innerHTML = (m.indexOf('не на смене') >= 0)
+            ? adminNotOnShiftHtml(m) : ('<div class="empty"><div class="icon">❌</div>' + m + '</div>');
     }
 }
 
@@ -3446,8 +3448,21 @@ function openAdminSection(section) {
         loadAdminJobs();
     }
     else if (section === 'complaints') {
-        document.getElementById('admin-content').innerHTML =
-            '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
+        if (!(userData && userData.role >= 6)) {
+            // проверка через listings duty endpoint
+            var box = document.getElementById('admin-content');
+            box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            apiGet('/api/admin/listings').then(function() {
+                box.innerHTML = '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
+            }).catch(function(e) {
+                var m = (e && e.message) || '';
+                box.innerHTML = (m.indexOf('не на смене') >= 0) ? adminNotOnShiftHtml(m)
+                    : '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
+            });
+        } else {
+            document.getElementById('admin-content').innerHTML =
+                '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
+        }
     }
     else if (section === 'staff') loadAdminStaff();
     else if (section === 'analytics') loadAnalyticsMenu();
@@ -3869,6 +3884,11 @@ function requestPromotion() {
 }
 
 
+function adminNotOnShiftHtml(msg) {
+    return '<div class="empty"><div class="icon">🚫</div><div style="font-weight:600;margin-bottom:6px;">Нет доступа</div>' +
+        (msg || 'Вы не на смене, нет доступа к разделу') + '</div>';
+}
+
 async function loadAdminListings() {
     var box = document.getElementById('admin-content');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -3890,7 +3910,9 @@ async function loadAdminListings() {
                 '<br>' + (l.description || '').replace(/</g, '&lt;').slice(0, 80) + '…</div></div>';
         }).join('');
     } catch (e) {
-        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+        var m = e.message || '';
+        box.innerHTML = (m.indexOf('не на смене') >= 0 || m.indexOf('not_on_shift') >= 0)
+            ? adminNotOnShiftHtml(m) : ('<div class="empty"><div class="icon">❌</div>' + m + '</div>');
     }
 }
 
