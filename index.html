@@ -3663,6 +3663,131 @@ async function downloadAnalyticsPdf(kind) {
 }
 
 
+
+var selectedEmployment = null;
+function selectEmployment(el) {
+    if (!el) return;
+    var list = document.getElementById('job-employment-list');
+    if (list) list.querySelectorAll('.method-item').forEach(function(i){ i.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedEmployment = el.getAttribute('data-emp') || null;
+}
+
+async function submitJobApplication() {
+    var fio = (document.getElementById('job-fio') || {}).value || '';
+    var age = parseInt((document.getElementById('job-age') || {}).value || '0', 10);
+    var username = (document.getElementById('job-username') || {}).value || '';
+    var phone = (document.getElementById('job-phone') || {}).value || '';
+    var email = (document.getElementById('job-email') || {}).value || '';
+    if (!fio.trim()) { tg.showAlert('Укажите ФИО'); return; }
+    if (!age || age < 16) { tg.showAlert('Возраст от 16 лет'); return; }
+    if (!selectedEmployment) { tg.showAlert('Выберите занятость'); return; }
+    if (!username.trim()) { tg.showAlert('Укажите username'); return; }
+    if (!phone.trim()) { tg.showAlert('Укажите телефон'); return; }
+    if (!email.trim()) { tg.showAlert('Укажите почту'); return; }
+    try {
+        await apiPost('/api/job-applications', {
+            full_name: fio.trim(),
+            age: age,
+            employment: selectedEmployment,
+            username: username.trim(),
+            phone: phone.trim(),
+            email: email.trim()
+        });
+        tg.showAlert('Анкета отправлена');
+        showPage('collaborate');
+    } catch (e) {
+        tg.showAlert(e.message || 'Ошибка отправки');
+    }
+}
+
+async function openBlocksMenu() {
+    var box = document.getElementById('admin-content');
+    document.getElementById('admin-section-title').textContent = 'Блокировки';
+    box.innerHTML =
+        '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
+        '<div class="form-group" style="margin-top:12px;">' +
+        '<label class="form-label">Поиск участника по ID</label>' +
+        '<div style="display:flex;gap:8px;">' +
+        '<input class="form-input" type="number" id="block-search-id" placeholder="Telegram ID" style="flex:1;">' +
+        '<button type="button" class="btn" style="width:auto;padding:10px 14px;" onclick="searchBlockUser()">Найти</button>' +
+        '</div></div>' +
+        '<div id="block-search-result"></div>';
+}
+
+async function searchBlockUser() {
+    var id = parseInt((document.getElementById('block-search-id') || {}).value || '0', 10);
+    var box = document.getElementById('block-search-result');
+    if (!id) { tg.showAlert('Введите ID'); return; }
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/users/' + id + '/profile');
+        var u = data.user || data;
+        var name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || (u.username ? '@' + u.username : ('ID ' + id));
+        var roleName = u.role_name || '';
+        window._blockFoundName = name;
+        box.innerHTML =
+            '<div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openBlockUserActions(' + id + ')">' +
+            '<div class="top"><div class="title">' + String(name).replace(/</g,'&lt;') + '</div>' +
+            (roleName ? '<span class="badge badge-gray">' + String(roleName).replace(/</g,'&lt;') + '</span>' : '') +
+            '</div><div class="subtitle">ID ' + id + (u.username ? (' · @' + String(u.username).replace(/</g,'&lt;')) : '') + '</div></div>';
+    } catch (e) {
+        box.innerHTML = '<div class="empty">' + (e.message || 'Пользователь не найден') + '</div>';
+    }
+}
+
+function openBlockUserActions(userId, name) {
+    if (name == null) name = window._blockFoundName || userId;
+    var box = document.getElementById('admin-content');
+    document.getElementById('admin-section-title').textContent = 'Блокировки';
+    window._blockTargetId = userId;
+    window._blockAction = null;
+    box.innerHTML =
+        '<button type="button" class="back-link" onclick="openBlocksMenu()">← Назад</button>' +
+        '<div class="list-item" style="margin-top:12px;"><div class="title">' + String(name || userId).replace(/</g,'&lt;') + '</div>' +
+        '<div class="subtitle">ID ' + userId + '</div></div>' +
+        '<div style="display:flex;gap:8px;margin:12px 0;">' +
+        '<button type="button" class="btn btn-secondary" id="block-act-publish" style="flex:1;padding:10px;font-size:12px;" onclick="pickBlockAction(\'publish\')">Запрет на публикацию объявлений</button>' +
+        '<button type="button" class="btn btn-secondary" id="block-act-ban" style="flex:1;padding:10px;font-size:12px;" onclick="pickBlockAction(\'ban\')">Блокировка</button>' +
+        '</div>' +
+        '<div class="form-group"><label class="form-label">Срок ограничения (дни)</label>' +
+        '<input class="form-input" type="number" id="block-days" min="1" placeholder="7"></div>' +
+        '<div class="form-group"><label class="form-label">Комментарий (причина)</label>' +
+        '<input class="form-input" type="text" id="block-reason" placeholder="Причина"></div>' +
+        '<button type="button" class="btn" onclick="submitBlockAction()">Применить</button>';
+}
+
+function pickBlockAction(act) {
+    window._blockAction = act;
+    var a = document.getElementById('block-act-publish');
+    var b = document.getElementById('block-act-ban');
+    if (a) a.className = 'btn' + (act === 'publish' ? '' : ' btn-secondary');
+    if (b) b.className = 'btn' + (act === 'ban' ? '' : ' btn-secondary');
+    if (a) a.style.flex = '1';
+    if (b) b.style.flex = '1';
+}
+
+async function submitBlockAction() {
+    var userId = window._blockTargetId;
+    var act = window._blockAction;
+    var days = parseInt((document.getElementById('block-days') || {}).value || '0', 10);
+    var reason = ((document.getElementById('block-reason') || {}).value || '').trim();
+    if (!act) { tg.showAlert('Выберите тип ограничения'); return; }
+    if (!days || days < 1) { tg.showAlert('Укажите срок в днях'); return; }
+    try {
+        if (act === 'publish') {
+            await apiPost('/api/admin/user/restrict-publish', { user_id: userId, days: days, reason: reason });
+            tg.showAlert('Запрет на публикацию применён');
+        } else {
+            await apiPost('/api/admin/user/ban', { user_id: userId, days: days, reason: reason });
+            tg.showAlert('Блокировка применена');
+        }
+        openBlocksMenu();
+    } catch (e) {
+        tg.showAlert(e.message || 'Ошибка');
+    }
+}
+
 function loadWorkCenter() {
     var box = document.getElementById('admin-content');
     var html = '<div class="support-grid">' +
@@ -4153,9 +4278,13 @@ async function openShiftControl(shiftDate, shiftType) {
             return;
         }
 
-        var timeLabel = data.shift_type === 'day' ? 'с 09:00 до 21:00' : 'с 21:00 до 09:00';
-        // рамка текущей смены
-        html += '<div class="listing-card" style="margin-top:12px;">';
+                var timeLabel = data.shift_type === 'day' ? 'с 09:00 до 21:00' : 'с 21:00 до 09:00';
+        html += '<div style="display:flex;gap:8px;margin:12px 0;">';
+        html += '<button type="button" class="btn" style="flex:1;" onclick="shiftControlOpen(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Открыть</button>';
+        html += '<button type="button" class="btn btn-danger" style="flex:1;" onclick="shiftControlClose(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Закрыть</button>';
+        html += '</div>';
+
+        html += '<div class="listing-card">';
         html += '<div style="font-size:12px;color:var(--hint);margin-bottom:4px;">Текущая смена</div>';
         html += '<div class="ltitle" style="font-size:16px;">' + (data.shift_date || '') + '</div>';
         html += '<div class="ldesc">' + timeLabel + ' МСК</div>';
@@ -4168,13 +4297,7 @@ async function openShiftControl(shiftDate, shiftType) {
         }
         html += '</div>';
 
-        // Открыть / Закрыть на одной линии
-        html += '<div style="display:flex;gap:8px;margin:12px 0;">';
-        html += '<button type="button" class="btn" style="flex:1;" onclick="shiftControlOpen(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Открыть</button>';
-        html += '<button type="button" class="btn btn-danger" style="flex:1;" onclick="shiftControlClose(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Закрыть</button>';
-        html += '</div>';
-
-        html += '<div class="form-label">Сотрудники</div>';
+html += '<div class="form-label">Сотрудники</div>';
         if (!(data.staff || []).length) {
             html += '<div class="empty" style="padding:12px;">Никого нет на смене</div>';
         }
