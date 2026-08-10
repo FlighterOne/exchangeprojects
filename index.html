@@ -153,6 +153,12 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
         .section-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+        .filters-heading {
+            font-size: 16px;
+            font-weight: 650;
+            color: #ffffff;
+            margin: 4px 0 12px;
+        }
 
         .card { background: var(--secondary-bg); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
         .card-title { font-size: 12px; color: var(--hint); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -308,6 +314,29 @@
         }
         .star-btn.selected {
             border-color: var(--button); background: rgba(46,166,255,0.12); color: var(--button);
+        }
+        .ptype-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .ptype-wrap .form-input {
+            flex: 1;
+            margin: 0;
+            padding-right: 40px;
+        }
+        .ptype-wrap .ptype-arrow {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: var(--hint);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 6px;
+            line-height: 1;
         }
         .inline-options {
             margin-top: 8px;
@@ -1004,7 +1033,7 @@
             <div class="form-label" style="margin-bottom:6px;">История поиска</div>
             <div class="search-history" id="exchange-history"></div>
         </div>
-                <div class="form-label" style="margin-bottom:8px;">Фильтры</div>
+                <div class="filters-heading">Фильтры</div>
         <div class="form-group">
             <label class="form-label">Тип</label>
             <div class="type-toggle" style="display:flex;gap:8px;">
@@ -1015,8 +1044,10 @@
         </div>
         <div class="form-group">
             <label class="form-label">Вид товара</label>
-            <button type="button" class="sheet-select" id="ex-product-type-btn" onclick="toggleProductTypeList()">Любой вид ▾</button>
-            <input type="hidden" id="ex-product-type" value="">
+            <div class="ptype-wrap">
+                <input class="form-input" type="text" id="ex-product-type" placeholder="Любой вид" autocomplete="off">
+                <button type="button" class="ptype-arrow" id="ex-product-type-btn" onclick="toggleProductTypeList()" aria-label="Список">▾</button>
+            </div>
             <div id="ex-product-type-list" class="inline-options" style="display:none;"></div>
         </div>
         <div class="form-group">
@@ -1038,7 +1069,7 @@
             </div>
         </div>
         <div class="range-block">
-            <div class="form-label">Пользователей в месяц</div>
+            <div class="form-label">Пользователей / мес</div>
             <div class="range-row">
                 <input class="form-input" type="number" id="ex-users-from" placeholder="от" min="0">
                 <input class="form-input" type="number" id="ex-users-to" placeholder="до" min="0">
@@ -2103,39 +2134,68 @@ function setExRating(n) {
     });
 }
 
-function renderProductTypeList() {
+function getFilteredProductTypes(query) {
+    var q = (query || '').trim().toLowerCase();
+    var list = exchangeProductTypes || [];
+    if (!q) return list.slice();
+    return list.filter(function(pt) {
+        return String(pt).toLowerCase().indexOf(q) >= 0;
+    });
+}
+
+function renderProductTypeList(filterText) {
     var box = document.getElementById('ex-product-type-list');
-    if (!box) return;
-    var cur = document.getElementById('ex-product-type').value || '';
+    var input = document.getElementById('ex-product-type');
+    if (!box || !input) return;
+    var cur = (input.value || '').trim();
+    var q = (filterText !== undefined && filterText !== null) ? filterText : cur;
+    var items = getFilteredProductTypes(q);
     var html = '<button type="button" class="sheet-option' + (!cur ? ' selected' : '') + '" data-v="">Любой вид</button>';
-    exchangeProductTypes.forEach(function(pt) {
+    items.forEach(function(pt) {
         var sel = (cur === pt) ? ' selected' : '';
         html += '<button type="button" class="sheet-option' + sel + '" data-v="' + String(pt).replace(/"/g,'&quot;').replace(/</g,'&lt;') + '">' + String(pt).replace(/</g,'&lt;') + '</button>';
     });
-    if (!exchangeProductTypes.length) {
-        html += '<div class="info-block" style="margin:8px;">Пока нет зарегистрированных видов в объявлениях</div>';
+    if (!items.length && q) {
+        html += '<div class="info-block" style="margin:8px;">Нет подсказок — можно оставить свой текст</div>';
+    } else if (!exchangeProductTypes.length) {
+        html += '<div class="info-block" style="margin:8px;">Пока нет видов в объявлениях — введите свой</div>';
     }
     box.innerHTML = html;
     box.querySelectorAll('.sheet-option').forEach(function(btn) {
         btn.onclick = function() {
             var v = btn.getAttribute('data-v') || '';
-            document.getElementById('ex-product-type').value = v;
-            document.getElementById('ex-product-type-btn').textContent = (v || 'Любой вид') + ' ▾';
+            input.value = v;
             box.style.display = 'none';
-            renderProductTypeList();
         };
     });
 }
 
 function toggleProductTypeList() {
     var box = document.getElementById('ex-product-type-list');
+    var input = document.getElementById('ex-product-type');
     if (!box) return;
     if (box.style.display === 'none' || !box.style.display) {
-        renderProductTypeList();
+        renderProductTypeList(input ? input.value : '');
         box.style.display = 'block';
     } else {
         box.style.display = 'none';
     }
+}
+
+function bindProductTypeInput() {
+    var input = document.getElementById('ex-product-type');
+    if (!input || input._ptypeBound) return;
+    input._ptypeBound = true;
+    input.addEventListener('input', function() {
+        renderProductTypeList(input.value);
+        var box = document.getElementById('ex-product-type-list');
+        if (box) box.style.display = 'block';
+    });
+    input.addEventListener('focus', function() {
+        renderProductTypeList(input.value);
+        var box = document.getElementById('ex-product-type-list');
+        if (box) box.style.display = 'block';
+    });
 }
 
 function initExchangePage() {
@@ -2152,6 +2212,7 @@ function initExchangePage() {
     }
     var all = document.getElementById('ex-type-all');
     if (all) setExType(all);
+    bindProductTypeInput();
     // подгрузить виды товаров
     apiGet('/api/exchange/product-types').then(function(data) {
         exchangeProductTypes = data.types || [];
