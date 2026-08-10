@@ -1686,6 +1686,7 @@ async function init() {
             try {
                 await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
                 userData = await apiGet('/api/user');
+                if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
                 ok = true;
             } catch (e) {
                 await new Promise(function(r){ setTimeout(r, 800); });
@@ -1876,6 +1877,131 @@ function backFromUserProfile() {
     }
     showPage(b);
 }
+
+function showBannedScreen(info) {
+    document.querySelectorAll('.page').forEach(function(pg){ pg.classList.remove('active'); });
+    var old = document.getElementById('ban-screen');
+    if (old) old.remove();
+    var until = (info && info.until) ? info.until : null;
+    var reason = (info && info.reason) ? info.reason : '';
+    var el = document.createElement('div');
+    el.id = 'ban-screen';
+    el.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;';
+    el.innerHTML = '<div style="font-size:48px;margin-bottom:12px;">🚫</div>' +
+        '<div style="font-size:20px;font-weight:700;margin-bottom:8px;">Аккаунт заблокирован</div>' +
+        (reason ? ('<div style="color:var(--hint);margin-bottom:12px;">' + String(reason).replace(/</g,'&lt;') + '</div>') : '') +
+        '<div class="shift-timer-box" style="text-align:center;"><div class="shift-timer-label">До окончания блокировки</div><div class="shift-timer-value" id="ban-timer-value">—</div></div>';
+    document.body.appendChild(el);
+    function tickBan() {
+        var v = document.getElementById('ban-timer-value');
+        if (!v || !until) return;
+        var ts = Date.parse(until);
+        if (isNaN(ts)) { v.textContent = '—'; return; }
+        var left = ts - Date.now();
+        v.textContent = left <= 0 ? '00:00:00' : (typeof formatShiftCountdown === 'function' ? formatShiftCountdown(left) : Math.ceil(left/1000) + 'с');
+    }
+    tickBan();
+    setInterval(tickBan, 1000);
+}
+
+async function openActionHistory() {
+    var box = document.getElementById('admin-content');
+    document.getElementById('admin-section-title').textContent = 'История действий';
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/moderation-actions');
+        var items = data.actions || [];
+        var html = '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
+        if (!items.length) html += '<div class="empty"><div class="icon">🗂️</div>Пока нет действий</div>';
+        items.forEach(function(a) {
+            var actorLabel = a.actor_username ? ('@' + a.actor_username) : (a.actor_name || a.actor_id);
+            var targetLabel = a.target_username ? ('@' + a.target_username) : (a.target_name || a.target_id);
+            html += '<div class="list-item">';
+            html += '<div class="subtitle">#' + a.id + ' · ' + String(a.created_at || '').slice(0, 19).replace('T',' ') + '</div>';
+            html += '<div class="title" style="margin-top:4px;"><span class="seller-link" onclick="openUserProfile(' + a.actor_id + ')">' + String(actorLabel).replace(/</g,'&lt;') + '</span>';
+            html += ' <span style="color:var(--hint);font-weight:500;">· ' + String(a.actor_role_name || '').replace(/</g,'&lt;') + '</span></div>';
+            html += '<div class="subtitle" style="margin-top:4px;">' + String(a.action_label || a.action_type).replace(/</g,'&lt;');
+            if (a.days) html += ' · ' + a.days + ' дн.';
+            if (a.reason) html += '<br>' + String(a.reason).replace(/</g,'&lt;');
+            html += '</div>';
+            html += '<div class="subtitle" style="margin-top:6px;">Нарушитель: <span class="seller-link" onclick="openUserProfile(' + a.target_id + ')">' + String(targetLabel).replace(/</g,'&lt;') + '</span> · ID ' + a.target_id + '</div>';
+            html += '</div>';
+        });
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button><div class="empty">' + e.message + '</div>';
+    }
+}
+
+function openProfileModHistoryMenu(uid) {
+    var box = document.getElementById('user-profile-content');
+    var html = '<button type="button" class="back-link" onclick="openUserProfile(' + uid + ')">← Назад</button>';
+    html += '<div class="section-title" style="font-size:16px;margin:10px 0;">История пользователя</div>';
+    html += '<div class="btn-stack">';
+    html += '<button type="button" class="btn btn-secondary" onclick="openModUserHistory(' + uid + ',\'transactions\')">История транзакций</button>';
+    html += '<button type="button" class="btn btn-secondary" onclick="openModUserHistory(' + uid + ',\'listings\')">История объявлений</button>';
+    html += '<button type="button" class="btn btn-secondary" onclick="openModUserHistory(' + uid + ',\'requests\')">История обращений</button>';
+    html += '<button type="button" class="btn btn-secondary" onclick="openModUserHistory(' + uid + ',\'orders\')">История заказов</button>';
+    html += '</div>';
+    box.innerHTML = html;
+}
+
+async function openModUserHistory(uid, kind) {
+    var box = document.getElementById('user-profile-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    var titles = { transactions: 'Транзакции', listings: 'Объявления', requests: 'Обращения', orders: 'Заказы' };
+    try {
+        var data = await apiGet('/api/admin/users/' + uid + '/history/' + kind);
+        var items = data.items || [];
+        var html = '<button type="button" class="back-link" onclick="openProfileModHistoryMenu(' + uid + ')">← Назад</button>';
+        html += '<div class="section-title" style="font-size:16px;margin:10px 0;">' + (titles[kind] || kind) + '</div>';
+        if (!items.length) html += '<div class="empty">Пусто</div>';
+        items.forEach(function(it) {
+            if (kind === 'transactions') {
+                html += '<div class="list-item"><div class="top"><div class="title">' + String(it.type || '').replace(/</g,'&lt;') + '</div><span style="font-weight:700;">' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div><div class="subtitle">' + String(it.description||'').replace(/</g,'&lt;') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div></div>';
+            } else if (kind === 'listings') {
+                html += '<div class="list-item"><div class="top"><div class="title">' + String(it.title||'').replace(/</g,'&lt;') + ' #' + it.id + '</div><span>' + Number(it.price||0).toLocaleString('ru-RU') + ' $</span></div><div class="subtitle">' + String(it.status||'') + ' · ' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div></div>';
+            } else if (kind === 'requests') {
+                html += '<div class="list-item"><div class="top"><div class="title">' + String(it.type||'') + ' #' + it.id + '</div><span>' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div><div class="subtitle">' + String(it.status||'') + ' · ' + String(it.method||'') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div></div>';
+            } else {
+                html += '<div class="list-item"><div class="top"><div class="title">#' + it.id + '</div><span>' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div><div class="subtitle">' + String(it.status||'') + ' · listing #' + (it.listing_id||'') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div></div>';
+            }
+        });
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<button type="button" class="back-link" onclick="openProfileModHistoryMenu(' + uid + ')">← Назад</button><div class="empty">' + e.message + '</div>';
+    }
+}
+
+function openProfileRestrictForm(uid, mode) {
+    var box = document.getElementById('user-profile-content');
+    var title = mode === 'ban' ? 'Блокировка' : 'Ограничить публикацию';
+    var html = '<button type="button" class="back-link" onclick="openUserProfile(' + uid + ')">← Назад</button>';
+    html += '<div class="section-title" style="font-size:16px;margin:10px 0;">' + title + '</div>';
+    html += '<div class="form-group"><label class="form-label">Срок (дни)</label><input class="form-input" type="number" id="mod-days" min="1" placeholder="7"></div>';
+    html += '<div class="form-group"><label class="form-label">Причина / комментарий</label><textarea class="form-input" id="mod-reason" rows="5" placeholder="Опишите причину" style="min-height:120px;resize:vertical;"></textarea></div>';
+    html += '<button type="button" class="btn" onclick="submitProfileRestrict(' + uid + ',\'' + mode + '\')">Применить</button>';
+    box.innerHTML = html;
+}
+
+async function submitProfileRestrict(uid, mode) {
+    var days = parseInt((document.getElementById('mod-days') || {}).value || '0', 10);
+    var reason = ((document.getElementById('mod-reason') || {}).value || '').trim();
+    if (!days || days < 1) { tg.showAlert('Укажите срок в днях'); return; }
+    try {
+        if (mode === 'ban') {
+            await apiPost('/api/admin/user/ban', { user_id: uid, days: days, reason: reason });
+            tg.showAlert('Пользователь заблокирован');
+        } else {
+            await apiPost('/api/admin/user/restrict-publish', { user_id: uid, days: days, reason: reason });
+            tg.showAlert('Публикация ограничена');
+        }
+        openUserProfile(uid);
+    } catch (e) {
+        tg.showAlert(e.message || 'Ошибка');
+    }
+}
+
 async function openUserProfile(uid, backPage) {
     if (backPage) _profileBack = backPage;
     else if (document.getElementById('page-admin-detail') && document.getElementById('page-admin-detail').classList.contains('active')) {
@@ -1924,8 +2050,23 @@ async function renderUserProfile() {
             '<div class="title">ID <span style="font-weight:600;color:var(--hint);">' + p.user_id + '</span></div>' +
             (p.role_name ? '<span class="badge badge-processing">' + String(p.role_name).replace(/</g,'&lt;') + '</span>' : '') +
             '</div></div>';
+        var myRole = Number((userData && userData.role) || 0);
+        var theirRole = Number(p.role || 0);
+        var myId = userData && userData.user_id;
+        var isSelf = myId != null && Number(p.user_id) === Number(myId);
+        if (myRole >= 4 && !isSelf && theirRole < myRole) {
+            html += '<div class="btn-stack" style="margin:12px 0 8px;">';
+            html += '<button type="button" class="btn btn-secondary" onclick="openProfileModHistoryMenu(' + p.user_id + ')">История пользователя</button>';
+            html += '<div style="display:flex;gap:8px;">';
+            html += '<button type="button" class="btn btn-secondary" style="flex:1;font-size:12px;" onclick="openProfileRestrictForm(' + p.user_id + ',\'publish\')">Ограничить публикацию</button>';
+            if (myRole >= 5) {
+                html += '<button type="button" class="btn btn-danger" style="flex:1;font-size:12px;" onclick="openProfileRestrictForm(' + p.user_id + ',\'ban\')">Блокировать</button>';
+            }
+            html += '</div></div>';
+        }
         html += '<div class="rating-row">' +
             '<div class="rating-chip"><div class="rl">Рейтинг продавца</div><div class="rv">★ ' + Number(p.rating_seller).toFixed(2) + '</div></div>' +
+
             '<div class="rating-chip"><div class="rl">Рейтинг покупателя</div><div class="rv">★ ' + Number(p.rating_buyer).toFixed(2) + '</div></div>';
         if (p.rating_staff != null) {
             html += '<div class="rating-chip"><div class="rl">Рейтинг сотрудника</div><div class="rv">★ ' + Number(p.rating_staff).toFixed(2) + '</div></div>';
@@ -3797,8 +3938,7 @@ function loadWorkCenter() {
     if (userData && userData.role >= 5) {
         html += '<button class="support-tile" onclick="openShiftControl()"><div class="support-tile-icon">👥</div><div class="support-tile-title">Контроль сотрудников</div></button>';
     }
-    html += '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">🗂️</div><div class="support-tile-title">История действий</div></button>' +
-        '<button class="support-tile" onclick="tg.showAlert(\'Пока в разработке\')"><div class="support-tile-icon">🚫</div><div class="support-tile-title">Список блокировок</div></button>' +
+    html += '<button class="support-tile" onclick="openActionHistory()"><div class="support-tile-icon">🗂️</div><div class="support-tile-title">История действий</div></button>' +
         '</div>';
     box.innerHTML = html;
 }
