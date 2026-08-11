@@ -747,6 +747,21 @@
             vertical-align: middle;
         }
 
+        .profile-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .profile-top-bar .back-link { margin-bottom: 0; }
+        .profile-edit-btn {
+            width: 40px; height: 40px; border-radius: 12px;
+            border: 1.5px solid rgba(128,128,128,0.35);
+            background: var(--secondary-bg); color: var(--text);
+            font-size: 18px; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; flex-shrink: 0;
+        }
         .rating-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 14px; }
         .rating-chip {
             background: var(--secondary-bg); border-radius: 12px; padding: 10px 14px;
@@ -1503,7 +1518,10 @@
     </div>
 
     <div id="page-user-profile" class="page">
-        <button class="back-link" id="user-profile-back" onclick="showPage('home')">← Назад</button>
+        <div class="profile-top-bar">
+            <button class="back-link" id="user-profile-back" onclick="showPage('home')">← Назад</button>
+            <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
+        </div>
         <div id="user-profile-content"></div>
     </div>
 
@@ -1630,7 +1648,13 @@ function apiFetch(path, options) {
             try { data = text ? JSON.parse(text) : {}; } catch (e) {
                 throw new Error('Не JSON (HTTP ' + res.status + ')');
             }
-            if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+            if (!res.ok) {
+                var err = new Error(data.error || ('HTTP ' + res.status));
+                err.code = data.code || '';
+                err.until = data.until || null;
+                err.payload = data;
+                throw err;
+            }
             return data;
         });
     }).catch(function(e) {
@@ -1844,7 +1868,9 @@ function listingStatusBadge(status) {
         sold: ['Завершён', 'badge-muted'],
         completed: ['Завершён', 'badge-muted'],
         refund_moderation: ['Возврат средств', 'badge-moderation'],
-        deleted: ['Удалено', 'badge-muted']
+        deleted: ['Удалено', 'badge-muted'],
+        blocked: ['Заблокировано', 'badge-cancelled'],
+        closed: ['Завершён', 'badge-muted']
     };
     return map[status] || [status || '—', 'badge-muted'];
 }
@@ -1935,7 +1961,7 @@ async function openActionHistory() {
 
 function openProfileModHistoryMenu(uid) {
     var box = document.getElementById('user-profile-content');
-    var html = '<button type="button" class="back-link" onclick="openUserProfile(' + uid + ')">← Назад</button>';
+    var html = '<button type="button" class="back-link" onclick="openProfileModMenu()">← Назад</button>';
     html += '<div class="section-title" style="font-size:16px;margin:10px 0;">История пользователя</div>';
     html += '<div class="btn-stack">';
     html += '<button type="button" class="btn btn-secondary" onclick="openModUserHistory(' + uid + ',\'transactions\')">История транзакций</button>';
@@ -1976,7 +2002,7 @@ async function openModUserHistory(uid, kind) {
 function openProfileRestrictForm(uid, mode) {
     var box = document.getElementById('user-profile-content');
     var title = mode === 'ban' ? 'Блокировка' : 'Ограничить публикацию';
-    var html = '<button type="button" class="back-link" onclick="openUserProfile(' + uid + ')">← Назад</button>';
+    var html = '<button type="button" class="back-link" onclick="openProfileModMenu()">← Назад</button>';
     html += '<div class="section-title" style="font-size:16px;margin:10px 0;">' + title + '</div>';
     html += '<div class="form-group"><label class="form-label">Срок (дни)</label><input class="form-input" type="number" id="mod-days" min="1" placeholder="7"></div>';
     html += '<div class="form-group"><label class="form-label">Причина / комментарий</label><textarea class="form-input" id="mod-reason" rows="5" placeholder="Опишите причину" style="min-height:120px;resize:vertical;"></textarea></div>';
@@ -2002,6 +2028,105 @@ async function submitProfileRestrict(uid, mode) {
     }
 }
 
+
+function updateProfileModPencil(uid) {
+    var btn = document.getElementById('user-profile-mod-btn');
+    if (!btn) return;
+    var myRole = Number((userData && userData.role) || 0);
+    var myId = userData && userData.user_id;
+    var isSelf = myId != null && Number(uid) === Number(myId);
+    // видна модерам+, на любом чужом профиле (проверка роли цели — при открытии меню)
+    if (myRole >= 4 && !isSelf) {
+        btn.style.display = 'flex';
+        window._profileModTarget = Number(uid);
+    } else {
+        btn.style.display = 'none';
+        window._profileModTarget = null;
+    }
+}
+
+async function openProfileModMenu() {
+    var uid = window._profileModTarget || window._profileUid;
+    if (!uid) return;
+    var myRole = Number((userData && userData.role) || 0);
+    if (myRole < 4) return;
+    // смена: владелец (6+) без проверки, остальные должны быть на смене
+    if (myRole < 6) {
+        try {
+            var duty = await apiGet('/api/admin/duty-status');
+            if (!(duty && duty.on_duty)) {
+                tg.showAlert('Вы не на смене, нет доступа к разделу');
+                return;
+            }
+        } catch (e) {
+            tg.showAlert(e.message || 'Вы не на смене, нет доступа к разделу');
+            return;
+        }
+    }
+    var box = document.getElementById('user-profile-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var p = await apiGet('/api/users/' + uid + '/profile?status=active');
+        var theirRole = Number(p.role || 0);
+        if (theirRole >= myRole) {
+            tg.showAlert('Нельзя модерировать пользователя с равной или высшей ролью');
+            renderUserProfile();
+            return;
+        }
+        var rawName = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
+        var displayName = rawName || (p.username ? ('@' + p.username) : ('ID ' + p.user_id));
+        var photo = p.photo_url || '';
+        var initial = displayName.replace('@','').charAt(0).toUpperCase() || '?';
+        var html = '';
+        html += '<div class="profile-header" style="padding-top:8px;">';
+        html += '<div class="profile-avatar-wrap" style="margin:0 auto 10px;">';
+        if (photo) html += '<img class="profile-avatar-img" src="' + String(photo).replace(/"/g,'') + '" alt="" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+        else html += '<div class="profile-avatar-fallback" style="display:flex;">' + initial + '</div>';
+        html += '</div>';
+        if (p.username) {
+            html += '<div class="profile-username" style="font-size:16px;font-weight:600;" onclick="openTgUser(\'' + String(p.username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">@' + String(p.username).replace(/</g,'&lt;') + '</div>';
+        } else {
+            html += '<div class="profile-name">' + String(displayName).replace(/</g,'&lt;') + '</div>';
+        }
+        html += '<div class="subtitle" style="margin-top:6px;">ID ' + p.user_id;
+        if (p.role_name) html += ' · ' + String(p.role_name).replace(/</g,'&lt;');
+        html += '</div></div>';
+
+        html += '<div class="btn-stack" style="margin-top:16px;">';
+        html += '<button type="button" class="btn btn-secondary" onclick="openProfileModHistoryMenu(' + p.user_id + ')">История действий</button>';
+        if (myRole >= 4) {
+            html += '<div style="display:flex;gap:8px;">';
+            html += '<button type="button" class="btn btn-secondary" style="flex:1;font-size:13px;" onclick="openProfileRestrictForm(' + p.user_id + ',\'publish\')">Ограничить публикацию</button>';
+            if (myRole >= 5) {
+                html += '<button type="button" class="btn btn-danger" style="flex:1;font-size:13px;" onclick="openProfileRestrictForm(' + p.user_id + ',\'ban\')">Заблокировать</button>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<div class="empty">' + e.message + '</div>';
+    }
+}
+
+function formatPublishBlockAlert(until) {
+    var base = 'Модерация площадки ограничила публикацию объявлений для вас';
+    if (!until) return base;
+    var ts = Date.parse(until);
+    if (isNaN(ts)) return base + ' до ' + String(until);
+    var left = ts - Date.now();
+    if (left <= 0) return base;
+    var totalSec = Math.floor(left / 1000);
+    var d = Math.floor(totalSec / 86400);
+    var h = Math.floor((totalSec % 86400) / 3600);
+    var m = Math.floor((totalSec % 3600) / 60);
+    var s = totalSec % 60;
+    var parts = [];
+    if (d) parts.push(d + 'д');
+    parts.push((h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s);
+    return base + ' на ' + parts.join(' ');
+}
+
 async function openUserProfile(uid, backPage) {
     if (backPage) _profileBack = backPage;
     else if (document.getElementById('page-admin-detail') && document.getElementById('page-admin-detail').classList.contains('active')) {
@@ -2014,6 +2139,7 @@ async function openUserProfile(uid, backPage) {
     else if (document.getElementById('page-my-listings') && document.getElementById('page-my-listings').classList.contains('active')) _profileBack = 'my-listings';
     else if (document.getElementById('page-admin') && document.getElementById('page-admin').classList.contains('active')) _profileBack = 'admin';
     document.getElementById('user-profile-back').setAttribute('onclick', "backFromUserProfile()");
+    updateProfileModPencil(uid);
     var box = document.getElementById('user-profile-content');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     showPage('user-profile');
@@ -2050,20 +2176,6 @@ async function renderUserProfile() {
             '<div class="title">ID <span style="font-weight:600;color:var(--hint);">' + p.user_id + '</span></div>' +
             (p.role_name ? '<span class="badge badge-processing">' + String(p.role_name).replace(/</g,'&lt;') + '</span>' : '') +
             '</div></div>';
-        var myRole = Number((userData && userData.role) || 0);
-        var theirRole = Number(p.role || 0);
-        var myId = userData && userData.user_id;
-        var isSelf = myId != null && Number(p.user_id) === Number(myId);
-        if (myRole >= 4 && !isSelf && theirRole < myRole) {
-            html += '<div class="btn-stack" style="margin:12px 0 8px;">';
-            html += '<button type="button" class="btn btn-secondary" onclick="openProfileModHistoryMenu(' + p.user_id + ')">История пользователя</button>';
-            html += '<div style="display:flex;gap:8px;">';
-            html += '<button type="button" class="btn btn-secondary" style="flex:1;font-size:12px;" onclick="openProfileRestrictForm(' + p.user_id + ',\'publish\')">Ограничить публикацию</button>';
-            if (myRole >= 5) {
-                html += '<button type="button" class="btn btn-danger" style="flex:1;font-size:12px;" onclick="openProfileRestrictForm(' + p.user_id + ',\'ban\')">Блокировать</button>';
-            }
-            html += '</div></div>';
-        }
         html += '<div class="rating-row">' +
             '<div class="rating-chip"><div class="rl">Рейтинг продавца</div><div class="rv">★ ' + Number(p.rating_seller).toFixed(2) + '</div></div>' +
 
@@ -2684,6 +2796,10 @@ async function openListing(id) {
             } else if (l.status === 'rejected') {
                 html += '<div class="btn-stack" style="margin-top:10px;">';
                 html += '<button class="btn" onclick="editRejectedListing(' + l.id + ')">Редактировать</button>';
+                html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
+                html += '</div>';
+            } else if (l.status === 'blocked') {
+                html += '<div class="btn-stack" style="margin-top:10px;">';
                 html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
                 html += '</div>';
             } else if (['unpublished','sold','completed','closed'].indexOf(l.status) >= 0) {
@@ -3307,8 +3423,13 @@ async function createListing() {
         listingPickedFiles = [];
         showPage('my-listings');
         loadMyListings();
-    } catch (e) { tg.showAlert(e.message); }
-    finally { btn.disabled = false; btn.textContent = 'Отправить на модерацию'; }
+    } catch (e) {
+        if (e && (e.code === 'publish_blocked' || (e.message && e.message.indexOf('ограничила публикацию') >= 0))) {
+            tg.showAlert(formatPublishBlockAlert(e.until));
+        } else {
+            tg.showAlert(e.message || 'Ошибка');
+        }
+    } finally { btn.disabled = false; btn.textContent = 'Отправить на модерацию'; }
 }
 
 async function saveListing() {
@@ -3370,6 +3491,49 @@ function selectMethod(el, type) {
     }
 }
 
+
+var _starsPollTimer = null;
+function openBotForStarsPay() {
+    var uname = (window.BOT_USERNAME || 'xcodexchange_bot').replace('@','');
+    try {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink) {
+            Telegram.WebApp.openTelegramLink('https://t.me/' + uname);
+            return;
+        }
+    } catch (e) {}
+    location.href = 'https://t.me/' + uname;
+}
+function startStarsPaymentPoll(requestId) {
+    if (_starsPollTimer) clearInterval(_starsPollTimer);
+    var tries = 0;
+    function tick() {
+        tries++;
+        apiGet('/api/requests/' + requestId).then(function(data) {
+            var r = data.request || data;
+            var box = document.getElementById('stars-pay-status');
+            if (!box) return;
+            if (r.status === 'completed') {
+                box.innerHTML = '<div class="title" style="color:var(--button);">Оплата прошла</div><div class="subtitle">+' + (r.amount || '') + '$ зачислено на баланс</div>';
+                if (_starsPollTimer) clearInterval(_starsPollTimer);
+                _starsPollTimer = null;
+                try { loadBalance(); } catch (e) {}
+            } else if (r.status === 'cancelled' || r.status === 'rejected') {
+                box.innerHTML = '<div class="title" style="color:var(--destructive);">Оплата не прошла</div><div class="subtitle">Заявка: ' + r.status + '</div>';
+                if (_starsPollTimer) clearInterval(_starsPollTimer);
+                _starsPollTimer = null;
+            } else if (tries > 90) {
+                box.innerHTML = '<div class="subtitle">Всё ещё ожидаем оплату. Статус смотрите в «Мои транзакции».</div>';
+                if (_starsPollTimer) clearInterval(_starsPollTimer);
+                _starsPollTimer = null;
+            } else {
+                box.innerHTML = '<div class="subtitle">Ожидание оплаты...</div>';
+            }
+        }).catch(function(){});
+    }
+    tick();
+    _starsPollTimer = setInterval(tick, 3000);
+}
+
 async function startDeposit() {
     var amount = parseFloat(document.getElementById('deposit-amount').value);
     var comment = document.getElementById('deposit-comment').value.trim();
@@ -3379,8 +3543,20 @@ async function startDeposit() {
     try {
         var result = await apiPost('/api/deposit', { amount: amount, method: selectedDepositMethod, comment: comment });
         if (selectedDepositMethod === 'stars') {
-            tg.showAlert('Заявка #' + result.request_id + ' создана. Оплатите Stars через бота.');
-            showPage('requests'); return;
+            var starsAmt = result.stars_amount || (Math.floor(amount) * 100);
+            var htmlS = '<div class="payment-card">' +
+                '<div class="row"><span class="label">Заявка</span><span class="value">#' + result.request_id + '</span></div>' +
+                '<div class="row"><span class="label">Сумма</span><span class="value">' + amount + ' $</span></div>' +
+                '<div class="row"><span class="label">К оплате</span><span class="value">' + starsAmt + ' ⭐</span></div>' +
+                '</div>' +
+                '<div class="info-block" style="margin-top:12px;">Перейдите в бота и оплатите счёт Telegram Stars. После оплаты сумма зачислится автоматически.</div>' +
+                '<div id="stars-pay-status" class="list-item" style="margin-top:12px;"><div class="subtitle">Ожидание оплаты...</div></div>' +
+                '<button class="btn btn-secondary" style="margin-top:12px;" onclick="openBotForStarsPay()">Открыть бота</button>' +
+                '<button class="btn" style="margin-top:8px;" onclick="showPage(\'balance\');loadBalance();">К балансу</button>';
+            document.getElementById('deposit-result-content').innerHTML = htmlS;
+            showPage('deposit-result');
+            startStarsPaymentPoll(result.request_id);
+            return;
         }
         var html = '<div class="payment-card">' +
             '<div class="row"><span class="label">Заявка</span><span class="value">#' + result.request_id + '</span></div>' +
@@ -3459,10 +3635,12 @@ async function loadRequests() {
                 var st = statusMap[r.status] || [r.status, 'badge-pending'];
                 var typeName = typeLabel[r.type] || r.type;
                 var actions = '';
-                if (r.status === 'pending' && r.type === 'deposit') {
+                if ((r.status === 'pending' || r.status === 'processing') && r.type === 'deposit' && r.method !== 'stars') {
                     actions = '<div class="actions">' +
                         '<button class="btn btn-success" onclick="confirmRequest(' + r.id + ')">✅ Я оплатил</button>' +
                         '<button class="btn btn-danger" onclick="cancelRequest(' + r.id + ')">❌ Отменить</button></div>';
+                } else if ((r.status === 'pending' || r.status === 'processing') && r.type === 'deposit' && r.method === 'stars') {
+                    actions = '<div class="subtitle" style="margin-top:6px;">Оплата в боте · Stars</div>';
                 }
                 var extra = '';
                 if (r.recipient && r.type !== 'refund') extra += '<br>Получатель: ' + String(r.recipient).replace(/</g,'&lt;');
@@ -4695,9 +4873,11 @@ async function loadAdminRequests() {
         var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
         box.innerHTML = reqs.map(function(r) {
             var typeName = r.type === 'deposit' ? 'Пополнение' : (r.type === 'refund' ? 'Возврат (сделка)' : 'Вывод');
+            var uname = r.username ? ('@' + r.username) : ('ID ' + r.user_id);
+            var userLink = '<span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + r.user_id + ')">' + String(uname).replace(/</g,'&lt;') + '</span>';
             return '<div class="list-item" style="cursor:pointer;" onclick="openAdminTxDetail(' + r.id + ')">' +
                 '<div class="top"><div class="title">' + typeName + ' #' + r.id + '</div></div>' +
-                '<div class="subtitle">User: ' + r.user_id + ' · ' + r.amount + '$ · ' +
+                '<div class="subtitle">' + userLink + ' · ' + r.amount + '$ · ' +
                 (methodMap[r.method] || r.method || '') + '</div></div>';
         }).join('');
     } catch (e) {
@@ -4724,7 +4904,7 @@ async function openAdminTxDetail(id) {
             html += '<div class="info-block">';
             html += '<b>Тип:</b> Возврат (сделка)<br>';
             html += '<b>Сумма:</b> ' + (req.amount || r.amount) + '$<br>';
-            html += '<b>Покупатель ID:</b> <span class="seller-link" onclick="openUserProfile(' + (req.user_id || r.user_id) + ')">' + (req.user_id || r.user_id) + '</span><br>';
+            html += '<b>Покупатель:</b> <span class="seller-link" onclick="openUserProfile(' + (req.user_id || r.user_id) + ')">' + (req.username || r.username ? ('@' + String(req.username || r.username).replace(/</g,'&lt;')) : ('ID ' + (req.user_id || r.user_id))) + '</span><br>';
             if (o.seller_id) html += '<b>Продавец ID:</b> <span class="seller-link" onclick="openUserProfile(' + o.seller_id + ')">' + o.seller_id + '</span><br>';
             html += '<b>Сделка:</b> #' + (o.id || req.recipient || '—') + '<br>';
             html += '<b>Комментарий покупателя:</b><br>' + String(req.comment || o.reject_comment || '—').replace(/</g,'&lt;');
@@ -4749,7 +4929,7 @@ async function openAdminTxDetail(id) {
     } else {
         html += '<div class="info-block">' +
             '<b>Тип:</b> ' + typeName + '<br>' +
-            '<b>User ID:</b> <span class="seller-link" onclick="openUserProfile(' + r.user_id + ')">' + r.user_id + '</span><br>' +
+            '<b>Пользователь:</b> <span class="seller-link" onclick="openUserProfile(' + r.user_id + ')">' + (r.username ? ('@' + String(r.username).replace(/</g,'&lt;')) : ('ID ' + r.user_id)) + '</span><br>' +
             '<b>Сумма:</b> ' + r.amount + '$<br>' +
             '<b>Метод:</b> ' + (methodMap[r.method] || r.method || '—') + '<br>' +
             (r.recipient ? '<b>Реквизиты:</b> ' + String(r.recipient).replace(/</g,'&lt;') + '<br>' : '') +
@@ -4810,10 +4990,10 @@ function openAdminJobDetail(id) {
         '<b>ФИО:</b> ' + (a.full_name || '').replace(/</g, '&lt;') + '<br>' +
         '<b>Возраст:</b> ' + a.age + '<br>' +
         '<b>Занятость:</b> ' + (a.employment_label || a.employment) + '<br>' +
-        '<b>Username:</b> @' + (a.username || '—') + '<br>' +
+        '<b>Username:</b> <span class="seller-link" onclick="openUserProfile(' + a.user_id + ')">@' + String(a.username || a.user_id).replace(/</g,'&lt;') + '</span><br>' +
         '<b>Телефон:</b> ' + (a.phone || '—') + '<br>' +
         '<b>Почта:</b> ' + (a.email || '—') + '<br>' +
-        '<b>TG ID:</b> ' + a.user_id + '<br>' +
+        '<b>TG ID:</b> <span class="seller-link" onclick="openUserProfile(' + a.user_id + ')">' + a.user_id + '</span><br>' +
         '<b>Создано:</b> ' + (a.created_at || '').slice(0, 16).replace('T', ' ') +
         '</div>' +
         '<div class="btn-stack">' +
