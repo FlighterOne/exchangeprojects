@@ -1498,7 +1498,7 @@
 
     <!-- ADMIN SECTION LIST -->
     <div id="page-admin-section" class="page">
-        <button class="back-link" onclick="showPage('admin')">← Панель</button>
+        <button class="back-link" id="admin-section-back" onclick="showPage('admin')">← Назад</button>
         <div class="section-title" id="admin-section-title">—</div>
         <div id="admin-content"></div>
     </div>
@@ -1930,6 +1930,25 @@ function showBannedScreen(info) {
     setInterval(tickBan, 1000);
 }
 
+
+function setAdminSectionBack(fn) {
+    var btn = document.getElementById('admin-section-back');
+    if (!btn) return;
+    btn.onclick = function() {
+        if (typeof fn === 'function') fn();
+        else showPage('admin');
+    };
+}
+
+function setProfileBack(fn) {
+    var btn = document.getElementById('user-profile-back');
+    if (!btn) return;
+    btn.onclick = function() {
+        if (typeof fn === 'function') fn();
+        else backFromUserProfile();
+    };
+}
+
 async function openActionHistory() {
     var box = document.getElementById('admin-content');
     document.getElementById('admin-section-title').textContent = 'История действий';
@@ -1938,7 +1957,8 @@ async function openActionHistory() {
         var data = await apiGet('/api/admin/moderation-actions');
         var items = data.actions || [];
         window._modActionsCache = items;
-        var html = '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
+        setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+    var html = ''
         if (!items.length) html += '<div class="empty"><div class="icon">🗂️</div>Пока нет действий</div>';
         items.forEach(function(a) {
             var actorLabel = a.actor_username ? ('@' + a.actor_username) : (a.actor_name || a.actor_id);
@@ -1956,7 +1976,8 @@ async function openActionHistory() {
         });
         box.innerHTML = html;
     } catch (e) {
-        box.innerHTML = '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button><div class="empty">' + e.message + '</div>';
+        setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+        box.innerHTML = '<div class="empty">' + e.message + '</div>';
     }
 }
 
@@ -1969,7 +1990,8 @@ function openActionHistoryDetail(actionId) {
     var actorLabel = a.actor_username ? ('@' + a.actor_username) : (a.actor_name || a.actor_id);
     var targetLabel = a.target_username ? ('@' + a.target_username) : (a.target_name || a.target_id);
     var canLift = a.action_type === 'restrict_publish' || a.action_type === 'ban';
-    var html = '<button type="button" class="back-link" onclick="openActionHistory()">← Назад</button>';
+    setAdminSectionBack(function(){ openActionHistory(); });
+    var html = ''
     html += '<div class="info-block" style="margin-top:12px;">';
     html += '<b>Тип:</b> ' + String(a.action_label || a.action_type).replace(/</g,'&lt;') + '<br>';
     html += '<b>Дата:</b> ' + String(a.created_at || '').slice(0, 19).replace('T',' ') + '<br>';
@@ -2000,8 +2022,10 @@ async function liftPunishment(userId, actionType, actionId) {
 }
 
 function openProfileModHistoryMenu(uid) {
+    setProfileBack(function(){ openProfileModMenu(); });
     var box = document.getElementById('user-profile-content');
-    var html = '<button type="button" class="back-link" onclick="openProfileModMenu()">← Назад</button>';
+    setAdminSectionBack(function(){ openProfileModMenu(); });
+    var html = ''
     html += '<div class="section-title" style="font-size:16px;margin:10px 0;">История пользователя</div>';
     html += '<div class="btn-stack">';
     html += '<button type="button" class="btn btn-secondary" onclick="openModUserHistory(' + uid + ',\'transactions\')">История транзакций</button>';
@@ -2013,6 +2037,7 @@ function openProfileModHistoryMenu(uid) {
 }
 
 async function openModUserHistory(uid, kind) {
+    setProfileBack(function(){ openProfileModHistoryMenu(uid); });
     var box = document.getElementById('user-profile-content');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     var titles = { transactions: 'Транзакции', listings: 'Объявления', requests: 'Обращения', orders: 'Заказы' };
@@ -2020,7 +2045,8 @@ async function openModUserHistory(uid, kind) {
         var data = await apiGet('/api/admin/users/' + uid + '/history/' + kind);
         var items = data.items || [];
         window._modUserHistCache = { uid: uid, kind: kind, items: items };
-        var html = '<button type="button" class="back-link" onclick="openProfileModHistoryMenu(' + uid + ')">← Назад</button>';
+        setAdminSectionBack(function(){ openProfileModHistoryMenu(' + uid + '); });
+    var html = ''
         html += '<div class="section-title" style="font-size:16px;margin:10px 0;">' + (titles[kind] || kind) + '</div>';
         if (!items.length) html += '<div class="empty">Пусто</div>';
         items.forEach(function(it, idx) {
@@ -2042,18 +2068,21 @@ async function openModUserHistory(uid, kind) {
         });
         box.innerHTML = html;
     } catch (e) {
-        box.innerHTML = '<button type="button" class="back-link" onclick="openProfileModHistoryMenu(' + uid + ')">← Назад</button><div class="empty">' + e.message + '</div>';
+        setProfileBack(function(){ openProfileModHistoryMenu(uid); });
+        box.innerHTML = '<div class="empty">' + e.message + '</div>';
     }
 }
 
 function openModUserHistoryDetail(idx) {
     var cache = window._modUserHistCache || {};
+    setProfileBack(function(){ openModUserHistory(cache.uid, cache.kind); });
     var it = (cache.items || [])[idx];
     if (!it) return;
     var uid = cache.uid;
     var kind = cache.kind;
     var box = document.getElementById('user-profile-content');
-    var html = '<button type="button" class="back-link" onclick="openModUserHistory(' + uid + ',\'' + kind + '\')">← Назад</button>';
+    setAdminSectionBack(function(){ openModUserHistory(' + uid + ','' + kind + ''); });
+    var html = ''
     html += '<div class="section-title" style="font-size:16px;margin:10px 0;">Подробности</div>';
     html += '<div class="info-block">';
     Object.keys(it).forEach(function(k) {
@@ -2072,9 +2101,10 @@ function openModUserHistoryDetail(idx) {
 }
 
 function openProfileRestrictForm(uid, mode) {
+    setProfileBack(function(){ openProfileModMenu(); });
     var box = document.getElementById('user-profile-content');
     var title = mode === 'ban' ? 'Блокировка' : 'Ограничить публикацию';
-    var html = '<button type="button" class="back-link" onclick="openProfileModMenu()">← Назад</button>';
+    var html = '';
     html += '<div class="section-title" style="font-size:16px;margin:10px 0;">' + title + '</div>';
     html += '<div class="form-group"><label class="form-label">Срок (дни)</label><input class="form-input" type="number" id="mod-days" min="1" placeholder="7"></div>';
     html += '<div class="form-group"><label class="form-label">Причина / комментарий</label><textarea class="form-input" id="mod-reason" rows="5" placeholder="Опишите причину" style="min-height:120px;resize:vertical;"></textarea></div>';
@@ -2119,6 +2149,7 @@ function updateProfileModPencil(uid) {
 
 async function openProfileModMenu() {
     var uid = window._profileModTarget || window._profileUid;
+    setProfileBack(function(){ openUserProfile(uid); });
     if (!uid) return;
     var myRole = Number((userData && userData.role) || 0);
     if (myRole < 4) return;
@@ -2212,6 +2243,7 @@ async function openUserProfile(uid, backPage) {
     else if (document.getElementById('page-admin') && document.getElementById('page-admin').classList.contains('active')) _profileBack = 'admin';
     document.getElementById('user-profile-back').setAttribute('onclick', "backFromUserProfile()");
     updateProfileModPencil(uid);
+    setProfileBack(function(){ backFromUserProfile(); });
     var box = document.getElementById('user-profile-content');
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     showPage('user-profile');
@@ -3874,6 +3906,7 @@ var _adminCache = { listings: [], transactions: [], jobs: [], staff: [] };
 
 function openAdminSection(section) {
     _adminSection = section;
+    setAdminSectionBack(function(){ showPage('admin'); });
     var titles = {
         workcenter: 'Рабочий центр',
         career: 'Трекер должностного роста',
@@ -4087,8 +4120,8 @@ async function submitJobApplication() {
 async function openBlocksMenu() {
     var box = document.getElementById('admin-content');
     document.getElementById('admin-section-title').textContent = 'Блокировки';
-    box.innerHTML =
-        '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
+    box.setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+        innerHTML = '' +
         '<div class="form-group" style="margin-top:12px;">' +
         '<label class="form-label">Поиск участника по ID</label>' +
         '<div style="display:flex;gap:8px;">' +
@@ -4125,8 +4158,8 @@ function openBlockUserActions(userId, name) {
     document.getElementById('admin-section-title').textContent = 'Блокировки';
     window._blockTargetId = userId;
     window._blockAction = null;
-    box.innerHTML =
-        '<button type="button" class="back-link" onclick="openBlocksMenu()">← Назад</button>' +
+    box.setAdminSectionBack(function(){ openBlocksMenu(); });
+    innerHTML = '' +
         '<div class="list-item" style="margin-top:12px;"><div class="title">' + String(name || userId).replace(/</g,'&lt;') + '</div>' +
         '<div class="subtitle">ID ' + userId + '</div></div>' +
         '<div style="display:flex;gap:8px;margin:12px 0;">' +
@@ -4193,7 +4226,8 @@ async function openShiftHistory() {
     try {
         var data = await apiGet('/api/shifts/history');
         var items = data.shifts || [];
-        var html = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
+        setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+        var html = '';
         if (!items.length) {
             html += '<div class="empty"><div class="icon">📜</div>Нет отработанных смен</div>';
         } else {
@@ -4219,7 +4253,8 @@ async function openShiftHistory() {
         }
         box.innerHTML = html;
     } catch (e) {
-        box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
+        setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+        box.innerHTML = '' +
             '<div class="empty">' + e.message + '</div>';
     }
 }
@@ -4234,7 +4269,8 @@ async function openShiftSignup() {
         window._shiftCalSelected = null;
         renderShiftCalendar();
     } catch (e) {
-        box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
+        setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+        box.innerHTML = '' +
             '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
     }
 }
@@ -4256,8 +4292,9 @@ function renderShiftCalendar() {
     var todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
     var selected = window._shiftCalSelected;
 
-    var html = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
-    html += '<div class="cal-wrap">';
+    setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+        var html = '';
+        html += '<div class="cal-wrap">';
     html += '<div class="cal-month" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">';
     html += '<button type="button" class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:13px;" onclick="shiftCalNav(-1)">‹</button>';
     html += '<span>' + mNames[month] + ' ' + year + '</span>';
@@ -4381,7 +4418,8 @@ async function openMyShifts() {
     try {
         var data = await apiGet('/api/shifts/my');
         var items = data.shifts || [];
-        var html = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
+        setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+        var html = '';
         if (!items.length) {
             html += '<div class="empty"><div class="icon">📅</div>Нет записанных смен</div>';
         } else {
@@ -4408,7 +4446,8 @@ async function openMyShifts() {
         box.innerHTML = html;
         startShiftTimers(box);
     } catch (e) {
-        box.innerHTML = '<button class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
+        setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+        box.innerHTML = '' +
             '<div class="empty">' + e.message + '</div>';
     }
 }
@@ -4572,12 +4611,10 @@ async function openShiftSchedule(type, date) {
         var timeStarted = !isNaN(startTs) && Date.now() >= startTs;
 
         var html = '';
-        html += '<div class="shift-bottom-actions" style="margin-top:0;margin-bottom:12px;">';
-        html += '<button type="button" class="back-link" onclick="openMyShifts()">← Назад</button>';
+        setAdminSectionBack(function(){ openMyShifts(); });
         if (mine && !mine.finished && !mine.in_progress) {
-            html += '<button type="button" class="btn btn-danger" onclick="cancelShift(\'' + date + '\',\'' + type + '\')">Отменить</button>';
+            html += '<div style="margin-bottom:12px;"><button type="button" class="btn btn-danger" onclick="cancelShift(\'' + date + '\',\'' + type + '\')">Отменить</button></div>';
         }
-        html += '</div>';
 
         html += '<div class="listing-card">';
         html += '<div class="ltitle-row"><div class="ltitle">' + (date || '') + '</div>';
@@ -4640,8 +4677,8 @@ async function openShiftSchedule(type, date) {
         box.innerHTML = html;
         startShiftTimers(box);
     } catch (e) {
-        box.innerHTML = '<button type="button" class="back-link" onclick="openMyShifts()">← Назад</button>' +
-            '<div class="empty">' + e.message + '</div>';
+        setAdminSectionBack(function(){ openMyShifts(); });
+        box.innerHTML = '<div class="empty">' + e.message + '</div>';
     }
 }
 
@@ -4652,8 +4689,6 @@ async function openShiftControl(shiftDate, shiftType) {
     try {
         var data = await apiGet('/api/shifts/control');
         var html = '';
-        html += '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
-
         if (!data.ok) {
             html += '<div class="info-block" style="margin-top:12px;">' + (data.message || 'Нет доступа') + '</div>';
             box.innerHTML = html;
@@ -4715,8 +4750,8 @@ html += '<div class="form-label">Сотрудники</div>';
 
         box.innerHTML = html;
     } catch (e) {
-        box.innerHTML = '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>' +
-            '<div class="empty">' + e.message + '</div>';
+        setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+        box.innerHTML = '<div class="empty">' + e.message + '</div>';
     }
 }
 
