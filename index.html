@@ -436,6 +436,11 @@
             color: var(--button); font-weight: 600;
             background: rgba(46,166,255,0.08);
         }
+        .sheet-select.selected {
+            border-color: var(--button) !important;
+            box-shadow: 0 0 0 1px var(--button);
+            color: var(--button);
+        }
         .sheet-select {
             width: 100%; text-align: left; padding: 12px 14px;
             border: 1.5px solid rgba(128,128,128,0.3); border-radius: 12px;
@@ -1909,22 +1914,71 @@ function showBannedScreen(info) {
     var old = document.getElementById('ban-screen');
     if (old) old.remove();
     var until = (info && info.until) ? info.until : null;
-    var reason = (info && info.reason) ? info.reason : '';
+    var daysText = '';
+    if (until) {
+        var ts = Date.parse(until);
+        if (!isNaN(ts)) {
+            var d = Math.max(0, Math.ceil((ts - Date.now()) / 86400000));
+            daysText = d + ' дн.';
+        }
+    }
     var el = document.createElement('div');
     el.id = 'ban-screen';
     el.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;';
-    el.innerHTML = '<div style="font-size:48px;margin-bottom:12px;">🚫</div>' +
-        '<div style="font-size:20px;font-weight:700;margin-bottom:8px;">Аккаунт заблокирован</div>' +
-        (reason ? ('<div style="color:var(--hint);margin-bottom:12px;">' + String(reason).replace(/</g,'&lt;') + '</div>') : '') +
-        '<div class="shift-timer-box" style="text-align:center;"><div class="shift-timer-label">До окончания блокировки</div><div class="shift-timer-value" id="ban-timer-value">—</div></div>';
+    el.innerHTML =
+        '<button type="button" id="ban-support-btn" style="position:absolute;top:14px;right:14px;z-index:2;border:1.5px solid rgba(128,128,128,0.4);background:var(--secondary-bg);color:var(--text);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;">Поддержка</button>' +
+        '<div id="ban-main-view" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;">' +
+        '<div style="font-size:56px;margin-bottom:16px;line-height:1;">❌</div>' +
+        '<div style="font-size:18px;font-weight:700;margin-bottom:8px;max-width:320px;line-height:1.35;">Администрация сервиса заблокировала вам аккаунт' +
+        (daysText ? (' на ' + daysText) : '') + '</div>' +
+        '<div style="font-size:13px;color:var(--hint);margin-top:16px;">До разблокировки</div>' +
+        '<div id="ban-timer-value" style="font-size:22px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;">—</div>' +
+        '</div>' +
+        '<div id="ban-support-view" style="display:none;position:absolute;inset:0;padding:16px;text-align:left;overflow:auto;background:var(--bg);">' +
+        '<button type="button" class="back-link" id="ban-support-back" style="margin-bottom:8px;">← Назад</button>' +
+        '<div class="section-title" style="margin-bottom:12px;">Поддержка</div>' +
+        '<div class="support-grid">' +
+        '<button type="button" class="support-tile" id="ban-sup-tg"><div class="support-tile-icon">✈️</div><div class="support-tile-title">Написать в Telegram</div><div class="support-tile-sub">@xcodmanager</div></button>' +
+        '<button type="button" class="support-tile" id="ban-sup-mail"><div class="support-tile-icon">✉️</div><div class="support-tile-title">Написать на почту</div><div class="support-tile-sub">xcodsupport@gmail.com</div></button>' +
+        '<button type="button" class="support-tile" id="ban-sup-faq"><div class="support-tile-icon">❓</div><div class="support-tile-title">FAQ</div><div class="support-tile-sub">xcodinfo.ru/faq</div></button>' +
+        '</div>' +
+        '<div style="font-size:12px;color:var(--hint);margin-top:16px;text-align:center;">Остальные разделы недоступны на время блокировки</div>' +
+        '</div>';
     document.body.appendChild(el);
+
+    function showBanMain() {
+        document.getElementById('ban-main-view').style.display = 'flex';
+        document.getElementById('ban-support-view').style.display = 'none';
+        document.getElementById('ban-support-btn').style.display = '';
+    }
+    function showBanSupport() {
+        document.getElementById('ban-main-view').style.display = 'none';
+        document.getElementById('ban-support-view').style.display = 'block';
+        document.getElementById('ban-support-btn').style.display = 'none';
+    }
+    document.getElementById('ban-support-btn').onclick = showBanSupport;
+    document.getElementById('ban-support-back').onclick = showBanMain;
+    document.getElementById('ban-sup-tg').onclick = function() {
+        if (typeof openLink === 'function') openLink('https://t.me/xcodmanager');
+        else location.href = 'https://t.me/xcodmanager';
+    };
+    document.getElementById('ban-sup-mail').onclick = function() {
+        if (typeof openEmail === 'function') openEmail('xcodsupport@gmail.com');
+        else location.href = 'mailto:xcodsupport@gmail.com';
+    };
+    document.getElementById('ban-sup-faq').onclick = function() {
+        if (typeof openLink === 'function') openLink('https://xcodinfo.ru/faq');
+        else location.href = 'https://xcodinfo.ru/faq';
+    };
+
     function tickBan() {
         var v = document.getElementById('ban-timer-value');
-        if (!v || !until) return;
+        if (!v || !until) { if (v) v.textContent = '—'; return; }
         var ts = Date.parse(until);
         if (isNaN(ts)) { v.textContent = '—'; return; }
         var left = ts - Date.now();
-        v.textContent = left <= 0 ? '00:00:00' : (typeof formatShiftCountdown === 'function' ? formatShiftCountdown(left) : Math.ceil(left/1000) + 'с');
+        if (left <= 0) { v.textContent = '00:00:00'; return; }
+        v.textContent = typeof formatShiftCountdown === 'function' ? formatShiftCountdown(left) : Math.ceil(left / 1000) + 'с';
     }
     tickBan();
     setInterval(tickBan, 1000);
@@ -2032,6 +2086,7 @@ function openProfileModHistoryMenu(uid) {
     html += '<button type="button" class="btn btn-secondary" onclick="openModUserHistory(' + uid + ',\'listings\')">История объявлений</button>';
     html += '<button type="button" class="btn btn-secondary" onclick="openModUserHistory(' + uid + ',\'requests\')">История обращений</button>';
     html += '<button type="button" class="btn btn-secondary" onclick="openModUserHistory(' + uid + ',\'orders\')">История заказов</button>';
+    html += '<button type="button" class="btn btn-secondary" onclick="openModUserBanHistory(' + uid + ')">История блокировок</button>';
     html += '</div>';
     box.innerHTML = html;
 }
@@ -2097,6 +2152,49 @@ function openModUserHistoryDetail(idx) {
     if (kind === 'orders' && it.id && typeof openOrderDetail === 'function') {
         html += '<button type="button" class="btn btn-secondary" style="margin-top:10px;" onclick="openOrderDetail(' + it.id + ')">Открыть заказ</button>';
     }
+    box.innerHTML = html;
+}
+
+
+async function openModUserBanHistory(uid) {
+    setProfileBack(function(){ openProfileModHistoryMenu(uid); });
+    var box = document.getElementById('user-profile-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/users/' + uid + '/ban-history');
+        var items = data.actions || [];
+        window._modBanHistCache = items;
+        var html = '<div class="section-title" style="font-size:16px;margin:10px 0;">История блокировок</div>';
+        if (!items.length) html += '<div class="empty">Пусто</div>';
+        items.forEach(function(a, idx) {
+            html += '<div class="list-item" style="cursor:pointer;" onclick="openModUserBanHistoryDetail(' + idx + ')">';
+            html += '<div class="title">' + String(a.action_label || a.action_type).replace(/</g,'&lt;') + '</div>';
+            html += '<div class="subtitle">' + String(a.created_at || '').slice(0,19).replace('T',' ');
+            if (a.days) html += ' · ' + a.days + ' дн.';
+            html += '<br>' + String(a.actor_name || a.actor_id).replace(/</g,'&lt;') + '</div>';
+            html += '</div>';
+        });
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<div class="empty">' + e.message + '</div>';
+    }
+}
+
+function openModUserBanHistoryDetail(idx) {
+    var items = window._modBanHistCache || [];
+    var a = items[idx];
+    if (!a) return;
+    setProfileBack(function(){ openModUserBanHistory(a.target_id); });
+    var box = document.getElementById('user-profile-content');
+    var html = '<div class="section-title" style="font-size:16px;margin:10px 0;">Детали</div>';
+    html += '<div class="info-block">';
+    html += '<b>Тип:</b> ' + String(a.action_label || a.action_type).replace(/</g,'&lt;') + '<br>';
+    html += '<b>Дата:</b> ' + String(a.created_at || '').slice(0,19).replace('T',' ') + '<br>';
+    if (a.days) html += '<b>Срок:</b> ' + a.days + ' дн.<br>';
+    if (a.reason) html += '<b>Причина:</b> ' + String(a.reason).replace(/</g,'&lt;') + '<br>';
+    html += '<b>Модератор:</b> <span class="seller-link" onclick="openUserProfile(' + a.actor_id + ')">' + String(a.actor_name || a.actor_id).replace(/</g,'&lt;') + '</span><br>';
+    html += '<b>ID нарушителя:</b> ' + a.target_id;
+    html += '</div>';
     box.innerHTML = html;
 }
 
@@ -2258,6 +2356,10 @@ async function renderUserProfile() {
     var box = document.getElementById('user-profile-content');
     try {
         var p = await apiGet('/api/users/' + uid + '/profile?status=' + status);
+        if (p && p.banned_profile) {
+            box.innerHTML = '<div class="empty" style="padding:40px 16px;"><div style="font-size:40px;margin-bottom:12px;">❌</div><div style="font-size:16px;font-weight:600;line-height:1.4;">Пользователь заблокирован за нарушение правил сообщества</div></div>';
+            return;
+        }
         var rawName = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
         var badNames = {staff:1, 'сотрудник':1, 'новый пользователь':1};
         if (rawName && badNames[rawName.toLowerCase()]) rawName = '';
@@ -4741,8 +4843,15 @@ html += '<div class="form-label">Сотрудники</div>';
                 html += '</div>';
             } else {
                 html += '<div style="display:flex;gap:8px;margin-top:8px;">';
-                html += '<button type="button" class="btn btn-secondary" style="flex:1;padding:8px;font-size:12px;" onclick="event.stopPropagation();shiftCredit(\'' + data.shift_date + '\',\'' + data.shift_type + '\',' + s.user_id + ',\'none\')">Не засчитывать</button>';
-                html += '<button type="button" class="sheet-select" style="flex:1;padding:8px;font-size:12px;" onclick="event.stopPropagation();openCreditSheet(\'' + data.shift_date + '\',\'' + data.shift_type + '\',' + s.user_id + ', this)">Засчитать ▾</button>';
+                var creditLabel = 'Засчитать ▾';
+                if (s.credit === 'full') creditLabel = 'Засчитано 12ч';
+                else if (s.credit === 'partial_8') creditLabel = 'Засчитано 8ч';
+                else if (s.credit === 'partial_6') creditLabel = 'Засчитано 6ч';
+                else if (s.credit === 'none') creditLabel = 'Не засчитано';
+                var noneSel = (s.credit === 'none') ? ' selected' : '';
+                var creditSel = (s.credit && s.credit !== 'pending' && s.credit !== 'none') ? ' selected' : '';
+                html += '<button type="button" class="sheet-select' + noneSel + '" style="flex:1;padding:8px;font-size:12px;" onclick="event.stopPropagation();shiftCredit(\'' + data.shift_date + '\',\'' + data.shift_type + '\',' + s.user_id + ',\'none\')">Не засчитывать</button>';
+                html += '<button type="button" class="sheet-select' + creditSel + '" style="flex:1;padding:8px;font-size:12px;" onclick="event.stopPropagation();openCreditSheet(\'' + data.shift_date + '\',\'' + data.shift_type + '\',' + s.user_id + ', this)">' + creditLabel + '</button>';
                 html += '</div>';
             }
             html += '</div>';
