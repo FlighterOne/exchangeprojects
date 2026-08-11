@@ -2435,6 +2435,22 @@ function formatPublishBlockAlert(until) {
 }
 
 
+
+document.addEventListener('click', function(e) {
+    var el = e.target;
+    if (!el) return;
+    if (el.closest) el = el.closest('.seller-link');
+    else {
+        while (el && !(el.classList && el.classList.contains('seller-link'))) el = el.parentNode;
+    }
+    if (!el) return;
+    var uid = el.getAttribute('data-uid');
+    if (!uid) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openUserProfile(uid);
+}, true);
+
 function goProfile(uid, ev) {
     try {
         if (ev) {
@@ -2466,28 +2482,55 @@ function bindProfileLinks(root) {
     }
 }
 
+
+function updateProfileModPencil(uid) {
+    var btn = document.getElementById('user-profile-mod-btn');
+    if (!btn) return;
+    try {
+        var myRole = Number((userData && userData.role) || 0);
+        var myId = Number((userData && userData.user_id) || 0);
+        uid = parseInt(uid, 10);
+        // карандаш только модер+ и не на себя
+        if (myRole >= 4 && uid && uid !== myId) {
+            btn.style.display = '';
+            window._profileModTarget = uid;
+        } else {
+            btn.style.display = 'none';
+            window._profileModTarget = null;
+        }
+    } catch (e) {
+        btn.style.display = 'none';
+    }
+}
+
 async function openUserProfile(uid, backPage) {
-    uid = parseInt(uid, 10);
-    if (!uid) { try { tg.showAlert('Пользователь не найден'); } catch(e) {} return; }
-    if (backPage) _profileBack = backPage;
-    else if (document.getElementById('page-admin-detail') && document.getElementById('page-admin-detail').classList.contains('active')) {
-        _profileBack = 'admin-detail';
-    } else if (document.getElementById('page-admin-section') && document.getElementById('page-admin-section').classList.contains('active')) {
-        _profileBack = 'admin-section:' + (window._adminSection || 'listings');
-    } else if (document.getElementById('page-home') && document.getElementById('page-home').classList.contains('active')) _profileBack = 'home';
-    else if (document.getElementById('page-listing-detail') && document.getElementById('page-listing-detail').classList.contains('active')) _profileBack = 'listing-detail';
-    else if (document.getElementById('page-favorites') && document.getElementById('page-favorites').classList.contains('active')) _profileBack = 'favorites';
-    else if (document.getElementById('page-my-listings') && document.getElementById('page-my-listings').classList.contains('active')) _profileBack = 'my-listings';
-    else if (document.getElementById('page-admin') && document.getElementById('page-admin').classList.contains('active')) _profileBack = 'admin';
-    document.getElementById('user-profile-back').setAttribute('onclick', "backFromUserProfile()");
-    updateProfileModPencil(uid);
-    setProfileBack(function(){ backFromUserProfile(); });
-    var box = document.getElementById('user-profile-content');
-    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    showPage('user-profile');
-    window._profileUid = uid;
-    window._profileStatus = 'active';
-    await renderUserProfile();
+    try {
+        uid = parseInt(uid, 10);
+        if (!uid) { try { tg.showAlert('Пользователь не найден'); } catch (e) {} return; }
+        if (backPage) _profileBack = backPage;
+        else if (document.getElementById('page-admin-detail') && document.getElementById('page-admin-detail').classList.contains('active')) {
+            _profileBack = 'admin-detail';
+        } else if (document.getElementById('page-admin-section') && document.getElementById('page-admin-section').classList.contains('active')) {
+            _profileBack = 'admin-section:' + (window._adminSection || 'listings');
+        } else if (document.getElementById('page-home') && document.getElementById('page-home').classList.contains('active')) _profileBack = 'home';
+        else if (document.getElementById('page-listing-detail') && document.getElementById('page-listing-detail').classList.contains('active')) _profileBack = 'listing-detail';
+        else if (document.getElementById('page-favorites') && document.getElementById('page-favorites').classList.contains('active')) _profileBack = 'favorites';
+        else if (document.getElementById('page-my-listings') && document.getElementById('page-my-listings').classList.contains('active')) _profileBack = 'my-listings';
+        else if (document.getElementById('page-admin') && document.getElementById('page-admin').classList.contains('active')) _profileBack = 'admin';
+        var backBtn = document.getElementById('user-profile-back');
+        if (backBtn) backBtn.setAttribute('onclick', 'backFromUserProfile()');
+        if (typeof updateProfileModPencil === 'function') updateProfileModPencil(uid);
+        if (typeof setProfileBack === 'function') setProfileBack(function(){ backFromUserProfile(); });
+        window._profileUid = uid;
+        window._profileStatus = 'active';
+        var box = document.getElementById('user-profile-content');
+        if (box) box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+        showPage('user-profile');
+        await renderUserProfile();
+    } catch (e) {
+        console.error('openUserProfile', e);
+        try { tg.showAlert('Не удалось открыть профиль'); } catch (e2) {}
+    }
 }
 
 async function renderUserProfile() {
@@ -3108,7 +3151,7 @@ async function openListing(id) {
         html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">';
         html += '<div style="font-size:22px;font-weight:700;color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>';
         if (!isOwner) {
-            html += '<span class="seller-link" style="text-align:right;" onclick="openUserProfile(' + l.seller_id + ')">' + sellerLabel.replace(/</g,'&lt;') + '</span>';
+            html += '<span class="seller-link" style="text-align:right;" data-uid="' + l.seller_id + '" onclick="return goProfile(' + l.seller_id + ', event)">' + sellerLabel.replace(/</g,'&lt;') + '</span>';
         } else {
             html += '<span style="text-align:right;color:var(--hint);font-size:13px;">Ваше объявление</span>';
         }
