@@ -1937,25 +1937,65 @@ async function openActionHistory() {
     try {
         var data = await apiGet('/api/admin/moderation-actions');
         var items = data.actions || [];
+        window._modActionsCache = items;
         var html = '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button>';
         if (!items.length) html += '<div class="empty"><div class="icon">🗂️</div>Пока нет действий</div>';
         items.forEach(function(a) {
             var actorLabel = a.actor_username ? ('@' + a.actor_username) : (a.actor_name || a.actor_id);
             var targetLabel = a.target_username ? ('@' + a.target_username) : (a.target_name || a.target_id);
-            html += '<div class="list-item">';
+            html += '<div class="list-item" style="cursor:pointer;" onclick="openActionHistoryDetail(' + a.id + ')">';
             html += '<div class="subtitle">#' + a.id + ' · ' + String(a.created_at || '').slice(0, 19).replace('T',' ') + '</div>';
-            html += '<div class="title" style="margin-top:4px;"><span class="seller-link" onclick="openUserProfile(' + a.actor_id + ')">' + String(actorLabel).replace(/</g,'&lt;') + '</span>';
+            html += '<div class="title" style="margin-top:4px;"><span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + a.actor_id + ')">' + String(actorLabel).replace(/</g,'&lt;') + '</span>';
             html += ' <span style="color:var(--hint);font-weight:500;">· ' + String(a.actor_role_name || '').replace(/</g,'&lt;') + '</span></div>';
             html += '<div class="subtitle" style="margin-top:4px;">' + String(a.action_label || a.action_type).replace(/</g,'&lt;');
             if (a.days) html += ' · ' + a.days + ' дн.';
             if (a.reason) html += '<br>' + String(a.reason).replace(/</g,'&lt;');
             html += '</div>';
-            html += '<div class="subtitle" style="margin-top:6px;">Нарушитель: <span class="seller-link" onclick="openUserProfile(' + a.target_id + ')">' + String(targetLabel).replace(/</g,'&lt;') + '</span> · ID ' + a.target_id + '</div>';
+            html += '<div class="subtitle" style="margin-top:6px;">Нарушитель: <span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + a.target_id + ')">' + String(targetLabel).replace(/</g,'&lt;') + '</span> · ID ' + a.target_id + '</div>';
             html += '</div>';
         });
         box.innerHTML = html;
     } catch (e) {
         box.innerHTML = '<button type="button" class="back-link" onclick="openAdminSection(\'workcenter\')">← Назад</button><div class="empty">' + e.message + '</div>';
+    }
+}
+
+function openActionHistoryDetail(actionId) {
+    var items = window._modActionsCache || [];
+    var a = items.find(function(x){ return x.id === actionId; });
+    if (!a) { tg.showAlert('Запись не найдена'); return; }
+    var box = document.getElementById('admin-content');
+    document.getElementById('admin-section-title').textContent = 'Действие #' + a.id;
+    var actorLabel = a.actor_username ? ('@' + a.actor_username) : (a.actor_name || a.actor_id);
+    var targetLabel = a.target_username ? ('@' + a.target_username) : (a.target_name || a.target_id);
+    var canLift = a.action_type === 'restrict_publish' || a.action_type === 'ban';
+    var html = '<button type="button" class="back-link" onclick="openActionHistory()">← Назад</button>';
+    html += '<div class="info-block" style="margin-top:12px;">';
+    html += '<b>Тип:</b> ' + String(a.action_label || a.action_type).replace(/</g,'&lt;') + '<br>';
+    html += '<b>Дата:</b> ' + String(a.created_at || '').slice(0, 19).replace('T',' ') + '<br>';
+    if (a.days) html += '<b>Срок:</b> ' + a.days + ' дн.<br>';
+    if (a.reason) html += '<b>Причина:</b> ' + String(a.reason).replace(/</g,'&lt;') + '<br>';
+    html += '<b>Модератор:</b> <span class="seller-link" onclick="openUserProfile(' + a.actor_id + ')">' + String(actorLabel).replace(/</g,'&lt;') + '</span> · ' + String(a.actor_role_name || '').replace(/</g,'&lt;') + '<br>';
+    html += '<b>Нарушитель:</b> <span class="seller-link" onclick="openUserProfile(' + a.target_id + ')">' + String(targetLabel).replace(/</g,'&lt;') + '</span> · ID ' + a.target_id;
+    html += '</div>';
+    if (canLift) {
+        html += '<button type="button" class="btn" style="margin-top:12px;" onclick="liftPunishment(' + a.target_id + ',\'' + a.action_type + '\',' + a.id + ')">Завершить наказание досрочно</button>';
+    }
+    box.innerHTML = html;
+}
+
+async function liftPunishment(userId, actionType, actionId) {
+    if (!confirm('Снять наказание досрочно?')) return;
+    try {
+        var res = await apiPost('/api/admin/user/lift-punishment', {
+            user_id: userId,
+            type: actionType,
+            action_id: actionId
+        });
+        tg.showAlert(res.message || 'Наказание снято');
+        openActionHistory();
+    } catch (e) {
+        tg.showAlert(e.message || 'Ошибка');
     }
 }
 
@@ -1979,24 +2019,56 @@ async function openModUserHistory(uid, kind) {
     try {
         var data = await apiGet('/api/admin/users/' + uid + '/history/' + kind);
         var items = data.items || [];
+        window._modUserHistCache = { uid: uid, kind: kind, items: items };
         var html = '<button type="button" class="back-link" onclick="openProfileModHistoryMenu(' + uid + ')">← Назад</button>';
         html += '<div class="section-title" style="font-size:16px;margin:10px 0;">' + (titles[kind] || kind) + '</div>';
         if (!items.length) html += '<div class="empty">Пусто</div>';
-        items.forEach(function(it) {
+        items.forEach(function(it, idx) {
+            html += '<div class="list-item" style="cursor:pointer;" onclick="openModUserHistoryDetail(' + idx + ')">';
             if (kind === 'transactions') {
-                html += '<div class="list-item"><div class="top"><div class="title">' + String(it.type || '').replace(/</g,'&lt;') + '</div><span style="font-weight:700;">' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div><div class="subtitle">' + String(it.description||'').replace(/</g,'&lt;') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div></div>';
+                html += '<div class="top"><div class="title">' + String(it.type || '').replace(/</g,'&lt;') + '</div><span style="font-weight:700;">' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div>';
+                html += '<div class="subtitle">' + String(it.description||'').replace(/</g,'&lt;') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div>';
             } else if (kind === 'listings') {
-                html += '<div class="list-item"><div class="top"><div class="title">' + String(it.title||'').replace(/</g,'&lt;') + ' #' + it.id + '</div><span>' + Number(it.price||0).toLocaleString('ru-RU') + ' $</span></div><div class="subtitle">' + String(it.status||'') + ' · ' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div></div>';
+                html += '<div class="top"><div class="title">' + String(it.title||'').replace(/</g,'&lt;') + ' #' + it.id + '</div><span>' + Number(it.price||0).toLocaleString('ru-RU') + ' $</span></div>';
+                html += '<div class="subtitle">' + String(it.status||'') + ' · ' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div>';
             } else if (kind === 'requests') {
-                html += '<div class="list-item"><div class="top"><div class="title">' + String(it.type||'') + ' #' + it.id + '</div><span>' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div><div class="subtitle">' + String(it.status||'') + ' · ' + String(it.method||'') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div></div>';
+                html += '<div class="top"><div class="title">' + String(it.type||'') + ' #' + it.id + '</div><span>' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div>';
+                html += '<div class="subtitle">' + String(it.status||'') + ' · ' + String(it.method||'') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div>';
             } else {
-                html += '<div class="list-item"><div class="top"><div class="title">#' + it.id + '</div><span>' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div><div class="subtitle">' + String(it.status||'') + ' · listing #' + (it.listing_id||'') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div></div>';
+                html += '<div class="top"><div class="title">#' + it.id + '</div><span>' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div>';
+                html += '<div class="subtitle">' + String(it.status||'') + ' · listing #' + (it.listing_id||'') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div>';
             }
+            html += '</div>';
         });
         box.innerHTML = html;
     } catch (e) {
         box.innerHTML = '<button type="button" class="back-link" onclick="openProfileModHistoryMenu(' + uid + ')">← Назад</button><div class="empty">' + e.message + '</div>';
     }
+}
+
+function openModUserHistoryDetail(idx) {
+    var cache = window._modUserHistCache || {};
+    var it = (cache.items || [])[idx];
+    if (!it) return;
+    var uid = cache.uid;
+    var kind = cache.kind;
+    var box = document.getElementById('user-profile-content');
+    var html = '<button type="button" class="back-link" onclick="openModUserHistory(' + uid + ',\'' + kind + '\')">← Назад</button>';
+    html += '<div class="section-title" style="font-size:16px;margin:10px 0;">Подробности</div>';
+    html += '<div class="info-block">';
+    Object.keys(it).forEach(function(k) {
+        var v = it[k];
+        if (v == null || v === '') return;
+        html += '<b>' + String(k).replace(/</g,'&lt;') + ':</b> ' + String(v).replace(/</g,'&lt;') + '<br>';
+    });
+    html += '</div>';
+    if (kind === 'listings' && it.id) {
+        html += '<button type="button" class="btn btn-secondary" style="margin-top:10px;" onclick="openListingDetail(' + it.id + ')">Открыть объявление</button>';
+    }
+    if (kind === 'orders' && it.id && typeof openOrderDetail === 'function') {
+        html += '<button type="button" class="btn btn-secondary" style="margin-top:10px;" onclick="openOrderDetail(' + it.id + ')">Открыть заказ</button>';
+    }
+    box.innerHTML = html;
 }
 
 function openProfileRestrictForm(uid, mode) {
@@ -2187,14 +2259,6 @@ async function renderUserProfile() {
         // moderation actions
         var myRole = (userData && userData.role) || 0;
         var theirRole = p.role || 0;
-        if (myRole >= 4 && theirRole < myRole && p.user_id !== userData.user_id) {
-            html += '<div style="display:flex;gap:8px;margin:12px 0;">';
-            html += '<button class="btn btn-secondary" style="flex:1;" onclick="openRestrictPublish(' + p.user_id + ')">Ограничить публикацию</button>';
-            if (myRole >= 5) {
-                html += '<button class="btn" style="flex:1;background:var(--destructive);" onclick="openBanUser(' + p.user_id + ')">Заблокировать</button>';
-            }
-            html += '</div>';
-        }
         html += '<div class="seg-toggle">' +
             '<button class="' + (status==='active'?'active':'') + '" onclick="window._profileStatus=\'active\';renderUserProfile()">Активные <span class="seg-count">' + (p.count_active != null ? p.count_active : 0) + '</span></button>' +
             '<button class="' + (status==='completed'?'active':'') + '" onclick="window._profileStatus=\'completed\';renderUserProfile()">Завершённые <span class="seg-count">' + (p.count_completed != null ? p.count_completed : 0) + '</span></button>' +
