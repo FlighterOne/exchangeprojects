@@ -774,7 +774,7 @@
         }
         .rating-chip .rl { font-size: 12px; color: var(--hint); }
         .rating-chip .rv { font-size: 20px; font-weight: 700; margin-top: 4px; }
-        .seller-link { color: var(--link); font-weight: 500; cursor: pointer; border: none; background: none; padding: 0; text-decoration: none; }
+        .seller-link { color: #2aabee; font-weight: 600; cursor: pointer; border: none; background: none; padding: 0; text-decoration: none; }
         .seller-link:active { opacity: 0.7; }
         .pie-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; margin: 12px 0; }
         .pie-legend { width: 100%; }
@@ -2129,35 +2129,129 @@ function setProfileBack(fn) {
     };
 }
 
-async function openActionHistory() {
+async function openBlocksPanel(mode) {
+    window._blocksPanelMode = mode || window._blocksPanelMode || 'history';
     var box = document.getElementById('admin-content');
-    document.getElementById('admin-section-title').textContent = 'История действий';
+    document.getElementById('admin-section-title').textContent = 'Блокировки';
     setAdminSectionBack(function(){ openAdminSection('workcenter'); });
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+    var mode = window._blocksPanelMode;
+    var activeLabel = 'Активные ▾';
+    if (mode === 'ban') activeLabel = 'Блокировки ▾';
+    if (mode === 'publish') activeLabel = 'Ограничения ▾';
+
+    var tabs =
+        '<div class="seg-toggle" style="margin:0 0 12px 0;">' +
+        '<button type="button" class="' + (mode === 'history' ? 'active' : '') + '" onclick="openBlocksPanel(\'history\')">История</button>' +
+        '<button type="button" class="' + (mode === 'ban' || mode === 'publish' ? 'active' : '') + '" id="blocks-active-tab" onclick="openBlocksTypeSheet(this)">' + activeLabel + '</button>' +
+        '</div>' +
+        '<div id="blocks-panel-body"></div>';
+    box.innerHTML = tabs;
+    var body = document.getElementById('blocks-panel-body');
+    body.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
     try {
-        var data = await apiGet('/api/admin/moderation-actions');
-        var items = data.actions || [];
-        window._modActionsCache = items;
-        var html = '';
-        if (!items.length) html += '<div class="empty"><div class="icon">🗂️</div>Пока нет действий</div>';
-        items.forEach(function(a) {
-            var actorLabel = a.actor_username ? ('@' + a.actor_username) : (a.actor_name || a.actor_id);
-            var targetLabel = a.target_username ? ('@' + a.target_username) : (a.target_name || a.target_id);
-            html += '<div class="list-item" style="cursor:pointer;" onclick="openActionHistoryDetail(' + a.id + ')">';
-            html += '<div class="subtitle">#' + a.id + ' · ' + String(a.created_at || '').slice(0, 19).replace('T',' ') + '</div>';
-            html += '<div class="title" style="margin-top:4px;"><span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + a.actor_id + ')">' + String(actorLabel).replace(/</g,'&lt;') + '</span>';
-            html += ' <span style="color:var(--hint);font-weight:500;">· ' + String(a.actor_role_name || '').replace(/</g,'&lt;') + '</span></div>';
-            html += '<div class="subtitle" style="margin-top:4px;">' + String(a.action_label || a.action_type).replace(/</g,'&lt;');
-            if (a.days) html += ' · ' + a.days + ' дн.';
-            if (a.reason) html += '<br>' + String(a.reason).replace(/</g,'&lt;');
-            html += '</div>';
-            html += '<div class="subtitle" style="margin-top:6px;">Нарушитель: <span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + a.target_id + ')">' + String(targetLabel).replace(/</g,'&lt;') + '</span> · ID ' + a.target_id + '</div>';
-            html += '</div>';
-        });
-        box.innerHTML = html;
+        if (mode === 'history') {
+            await renderBlocksHistory(body);
+        } else {
+            await renderActiveRestrictions(body, mode);
+        }
     } catch (e) {
-        box.innerHTML = '<div class="empty">' + e.message + '</div>';
+        body.innerHTML = '<div class="empty">' + e.message + '</div>';
     }
+}
+
+function openBlocksTypeSheet(anchor) {
+    var old = document.getElementById('blocks-type-sheet');
+    if (old) old.remove();
+    var sheet = document.createElement('div');
+    sheet.id = 'blocks-type-sheet';
+    sheet.className = 'bottom-sheet-overlay';
+    sheet.innerHTML =
+        '<div class="bottom-sheet" onclick="event.stopPropagation()">' +
+        '<div class="sheet-title">Показать</div>' +
+        '<button type="button" class="sheet-option" data-m="ban">Блокировки аккаунтов</button>' +
+        '<button type="button" class="sheet-option" data-m="publish">Ограничения публикаций</button>' +
+        '<button type="button" class="sheet-option sheet-cancel">Отмена</button>' +
+        '</div>';
+    sheet.onclick = function(){ sheet.remove(); };
+    sheet.querySelector('.bottom-sheet').onclick = function(e){ e.stopPropagation(); };
+    sheet.querySelectorAll('.sheet-option').forEach(function(btn) {
+        btn.onclick = function() {
+            var m = btn.getAttribute('data-m');
+            sheet.remove();
+            if (!m) return;
+            openBlocksPanel(m);
+        };
+    });
+    document.body.appendChild(sheet);
+}
+
+async function renderBlocksHistory(body) {
+    var data = await apiGet('/api/admin/moderation-actions');
+    var items = data.actions || [];
+    window._modActionsCache = items;
+    var html = '';
+    if (!items.length) html = '<div class="empty"><div class="icon">🗂️</div>Пока нет действий</div>';
+    items.forEach(function(a) {
+        var actorLabel = a.actor_username ? ('@' + a.actor_username) : (a.actor_name || a.actor_id);
+        var targetLabel = a.target_username ? ('@' + a.target_username) : (a.target_name || a.target_id);
+        html += '<div class="list-item" style="cursor:pointer;" onclick="openActionHistoryDetail(' + a.id + ')">';
+        html += '<div class="subtitle">#' + a.id + ' · ' + String(a.created_at || '').slice(0, 19).replace('T',' ') + '</div>';
+        html += '<div class="title" style="margin-top:4px;"><span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + a.actor_id + ')">' + String(actorLabel).replace(/</g,'&lt;') + '</span>';
+        html += ' <span style="color:var(--hint);font-weight:500;">· ' + String(a.actor_role_name || '').replace(/</g,'&lt;') + '</span></div>';
+        html += '<div class="subtitle" style="margin-top:4px;">' + String(a.action_label || a.action_type).replace(/</g,'&lt;');
+        if (a.days) html += ' · ' + a.days + ' дн.';
+        if (a.reason) html += '<br>' + String(a.reason).replace(/</g,'&lt;');
+        html += '</div>';
+        html += '<div class="subtitle" style="margin-top:6px;">Нарушитель: <span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + a.target_id + ')">' + String(targetLabel).replace(/</g,'&lt;') + '</span> · ID ' + a.target_id + '</div>';
+        html += '</div>';
+    });
+    body.innerHTML = html;
+}
+
+async function renderActiveRestrictions(body, kind) {
+    var data = await apiGet('/api/admin/active-restrictions?type=' + encodeURIComponent(kind));
+    var items = data.items || [];
+    window._activeRestrictCache = items;
+    var html = '';
+    if (!items.length) html = '<div class="empty">Нет активных записей</div>';
+    items.forEach(function(it, idx) {
+        html += '<div class="list-item" style="cursor:pointer;" onclick="openActiveRestrictionDetail(' + idx + ')">';
+        html += '<div class="title"><span class="seller-link" onclick="event.stopPropagation();openUserProfile(' + it.user_id + ')">' + String(it.display_name || it.user_id).replace(/</g,'&lt;') + '</span></div>';
+        html += '<div class="subtitle">' + String(it.kind_label || '').replace(/</g,'&lt;');
+        if (it.until_at) html += ' · до ' + String(it.until_at).slice(0, 19).replace('T',' ');
+        if (it.reason) html += '<br>' + String(it.reason).replace(/</g,'&lt;');
+        html += '<br>ID ' + it.user_id + '</div>';
+        html += '</div>';
+    });
+    body.innerHTML = html;
+}
+
+function openActiveRestrictionDetail(idx) {
+    var items = window._activeRestrictCache || [];
+    var it = items[idx];
+    if (!it) return;
+    var box = document.getElementById('admin-content');
+    document.getElementById('admin-section-title').textContent = it.kind_label || 'Ограничение';
+    setAdminSectionBack(function(){ openBlocksPanel(it.kind || 'ban'); });
+    var html = '<div class="info-block" style="margin-top:12px;">';
+    html += '<b>Тип:</b> ' + String(it.kind_label || it.kind).replace(/</g,'&lt;') + '<br>';
+    html += '<b>Пользователь:</b> <span class="seller-link" onclick="openUserProfile(' + it.user_id + ')">' + String(it.display_name || it.user_id).replace(/</g,'&lt;') + '</span> · ID ' + it.user_id + '<br>';
+    if (it.until_at) html += '<b>До:</b> ' + String(it.until_at).slice(0, 19).replace('T',' ') + '<br>';
+    if (it.reason) html += '<b>Причина:</b> ' + String(it.reason).replace(/</g,'&lt;') + '<br>';
+    if (it.updated_at) html += '<b>Обновлено:</b> ' + String(it.updated_at).slice(0, 19).replace('T',' ') + '<br>';
+    if (it.moderated_by) html += '<b>Модератор ID:</b> <span class="seller-link" onclick="openUserProfile(' + it.moderated_by + ')">' + it.moderated_by + '</span>';
+    html += '</div>';
+    var actionType = it.kind === 'publish' ? 'restrict_publish' : 'ban';
+    html += '<button type="button" class="btn" style="margin-top:12px;" onclick="liftPunishment(' + it.user_id + ',\'' + actionType + '\',0)">Завершить наказание досрочно</button>';
+    box.innerHTML = html;
+}
+
+async function openActionHistory() {
+    window._blocksPanelMode = 'history';
+    return openBlocksPanel('history');
 }
 
 function openActionHistoryDetail(actionId) {
@@ -2194,7 +2288,7 @@ async function liftPunishment(userId, actionType, actionId) {
             action_id: actionId
         });
         tg.showAlert(res.message || 'Наказание снято');
-        openActionHistory();
+        openBlocksPanel(window._blocksPanelMode || 'history');
     } catch (e) {
         tg.showAlert(e.message || 'Ошибка');
     }
@@ -2262,10 +2356,12 @@ function showBannedScreen(info) {
     el.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;';
     el.innerHTML =
         '<button type="button" id="ban-support-btn" style="position:absolute;top:14px;right:14px;z-index:2;border:1.5px solid rgba(128,128,128,0.4);background:var(--secondary-bg);color:var(--text);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;">' + tBlock('support') + '</button>' +
-        '<div id="ban-main-view" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;flex:1;">' +
+        '<div id="ban-main-view" style="display:flex;flex-direction:column;width:100%;height:100%;position:absolute;inset:0;padding:24px;box-sizing:border-box;">' +
+        '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">' +
         '<div style="font-size:56px;margin-bottom:16px;line-height:1;">❌</div>' +
-        '<div style="font-size:18px;font-weight:700;margin-bottom:8px;max-width:320px;line-height:1.35;">' + title + '</div>' +
-        '<div style="margin-top:auto;padding-bottom:28px;width:100%;">' +
+        '<div style="font-size:18px;font-weight:700;max-width:320px;line-height:1.35;text-align:center;">' + title + '</div>' +
+        '</div>' +
+        '<div style="padding-bottom:12px;width:100%;text-align:center;">' +
         '<div style="font-size:13px;color:var(--hint);">' + tBlock('ban_until_label') + '</div>' +
         '<div id="ban-timer-value" style="font-size:22px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;">—</div>' +
         '</div></div>' +
@@ -4326,7 +4422,7 @@ function loadWorkCenter() {
     if (userData && userData.role >= 5) {
         html += '<button class="support-tile" onclick="openShiftControl()"><div class="support-tile-icon">👥</div><div class="support-tile-title">Контроль сотрудников</div></button>';
     }
-    html += '<button class="support-tile" onclick="openActionHistory()"><div class="support-tile-icon">🗂️</div><div class="support-tile-title">История действий</div></button>' +
+    html += '<button class="support-tile" onclick="openBlocksPanel()"><div class="support-tile-icon">🚫</div><div class="support-tile-title">Блокировки</div></button>' +
         '</div>';
     box.innerHTML = html;
 }
