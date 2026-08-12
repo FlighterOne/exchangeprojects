@@ -1939,8 +1939,18 @@ function renderMain() {
     if (userData.role >= 2) {
         document.getElementById('drawer-admin').style.display = 'flex';
     }
+    // видимость разделов по ролям
+    var txTile = document.querySelector("button[onclick*=\"openAdminSection('transactions')\"]");
+    if (txTile) txTile.style.display = (userData.role >= 4) ? '' : 'none';
+    var listTile = document.querySelector("button[onclick*=\"openAdminSection('listings')\"]");
+    if (listTile) listTile.style.display = (userData.role >= 3) ? '' : 'none';
+    var compTile = document.querySelector("button[onclick*=\"openAdminSection('complaints')\"]");
+    if (compTile) compTile.style.display = (userData.role >= 3) ? '' : 'none';
+    var anTile = document.querySelector("button[onclick*=\"openAdminSection('analytics')\"]");
+    if (anTile) anTile.style.display = (userData.role >= 3) ? '' : 'none';
     if (userData.role >= 5) {
-        document.getElementById('admin-staff-tile').style.display = 'flex';
+        var st = document.getElementById('admin-staff-tile');
+        if (st) st.style.display = 'flex';
         var jt = document.getElementById('admin-jobs-tile');
         if (jt) jt.style.display = 'flex';
     }
@@ -2340,6 +2350,7 @@ function openBlocksTypeSheet(anchor) {
     }
 }
 
+
 async function renderBlocksHistory(body) {
     var data = await apiGet('/api/admin/moderation-actions');
     var items = data.actions || [];
@@ -2432,6 +2443,8 @@ function openActionHistoryDetail(actionId) {
 }
 
 async function liftPunishment(userId, actionType, actionId) {
+    if (!requirePanelAct()) return;
+
     if (!confirm('Снять наказание досрочно?')) return;
     try {
         var res = await apiPost('/api/admin/user/lift-punishment', {
@@ -2616,6 +2629,29 @@ function formatTxType(type) {
     return m[type] || type || '—';
 }
 
+
+function isStaffOnDuty() {
+    return !!(userData && userData.on_duty);
+}
+function canPanelAct() {
+    var r = (userData && userData.role) || 0;
+    if (r >= 5) return true;
+    if (r < 3) return false;
+    return isStaffOnDuty();
+}
+function requirePanelAct() {
+    if (canPanelAct()) return true;
+    try { tg.showAlert('Вы не на смене, нет доступа к разделу'); } catch(e) {}
+    return false;
+}
+function notSelfTarget(uid) {
+    if (userData && Number(userData.user_id) === Number(uid) && (userData.role||0) < 6) {
+        try { tg.showAlert('Вы не можете взаимодействовать с собой в панели'); } catch(e) {}
+        return false;
+    }
+    return true;
+}
+
 function goProfile(uid, ev) {
     try {
         if (ev) {
@@ -2748,6 +2784,8 @@ async function openAdminSupportChat(threadId) {
 }
 
 async function sendAdminSupportMessage() {
+    if (!requirePanelAct()) return;
+
     var threadId = window._adminSupportThreadId;
     if (!threadId) return;
     var input = document.getElementById('admin-support-chat-input');
@@ -2763,6 +2801,10 @@ async function sendAdminSupportMessage() {
 }
 
 async function openProfileModMenu() {
+    if (!notSelfTarget(uid)) return;
+    if ((userData.role||0) < 4) { try { tg.showAlert('Доступ только для модератора и выше'); } catch(e){} return; }
+    if (!requirePanelAct()) return;
+
     var uid = window._profileModTarget || window._profileUid;
     if (!uid) {
         try { tg.showAlert('Пользователь не выбран'); } catch (e) {}
@@ -4676,19 +4718,33 @@ function openAdminSection(section) {
     window._adminSection = section;
     document.getElementById('admin-section-title').textContent = titles[section] || section;
     showPage('admin-section');
+    var role = (userData && userData.role) || 0;
     if (section === 'workcenter') loadWorkCenter();
     else if (section === 'career') loadCareerTracker();
-    else if (section === 'listings') loadAdminListings();
-    else if (section === 'transactions') loadAdminRequests();
+    else if (section === 'listings') {
+        if (role < 3) { tg.showAlert('Доступ только для стажёра и выше'); showPage('admin'); return; }
+        loadAdminListings();
+    }
+    else if (section === 'transactions') {
+        if (role < 4) { tg.showAlert('Доступ только для модератора и выше'); showPage('admin'); return; }
+        loadAdminRequests();
+    }
     else if (section === 'jobs') {
-        if (userData.role < 5) { tg.showAlert('Доступ только для админа и выше'); showPage('admin'); return; }
+        if (role < 5) { tg.showAlert('Доступ только для админа и выше'); showPage('admin'); return; }
         loadAdminJobs();
     }
     else if (section === 'complaints') {
+        if (role < 3) { tg.showAlert('Доступ только для стажёра и выше'); showPage('admin'); return; }
         loadAdminSupportThreads();
     }
-    else if (section === 'staff') loadAdminStaff();
-    else if (section === 'analytics') loadAnalyticsMenu();
+    else if (section === 'staff') {
+        if (role < 5) { tg.showAlert('Доступ только для админа и выше'); showPage('admin'); return; }
+        loadAdminStaff();
+    }
+    else if (section === 'analytics') {
+        if (role < 3) { tg.showAlert('Доступ только для стажёра и выше'); showPage('admin'); return; }
+        loadAnalyticsMenu();
+    }
 }
 
 function loadAnalyticsMenu() {
@@ -5756,6 +5812,8 @@ function openAdminListingDetail(id) {
 }
 
 async function adminApproveListing(id, needPrice) {
+    if (!requirePanelAct()) return;
+
     var price = null;
     if (needPrice) {
         var p = prompt('Укажите цену для партнерского товара ($)');
@@ -5772,6 +5830,8 @@ async function adminApproveListing(id, needPrice) {
 }
 
 async function adminRejectListing(id) {
+    if (!requirePanelAct()) return;
+
     try {
         await apiPost('/api/admin/listings/' + id + '/reject', {});
         tg.showAlert('Объявление #' + id + ' отклонено');
