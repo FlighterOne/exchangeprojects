@@ -2226,24 +2226,19 @@ function openBlocksTypeSheet(anchor) {
     var sheet = document.createElement('div');
     sheet.id = 'blocks-type-sheet';
     sheet.className = 'bottom-sheet-overlay';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:30000;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;';
     sheet.innerHTML =
-        '<div class="bottom-sheet" onclick="event.stopPropagation()">' +
-        '<div class="sheet-title">Показать</div>' +
-        '<button type="button" class="sheet-option" data-m="ban">Блокировки аккаунтов</button>' +
-        '<button type="button" class="sheet-option" data-m="publish">Ограничения публикаций</button>' +
-        '<button type="button" class="sheet-option sheet-cancel">Отмена</button>' +
+        '<div class="bottom-sheet" style="width:100%;max-width:480px;background:var(--bg);border-radius:16px 16px 0 0;padding:12px 16px 28px;box-sizing:border-box;">' +
+        '<div class="sheet-title" style="font-weight:700;text-align:center;margin-bottom:10px;">Показать</div>' +
+        '<button type="button" class="sheet-option" id="blocks-opt-ban" style="display:block;width:100%;padding:14px;margin:6px 0;border:none;border-radius:12px;background:var(--secondary-bg);color:var(--text);font-size:15px;">Блокировки аккаунтов</button>' +
+        '<button type="button" class="sheet-option" id="blocks-opt-pub" style="display:block;width:100%;padding:14px;margin:6px 0;border:none;border-radius:12px;background:var(--secondary-bg);color:var(--text);font-size:15px;">Ограничения публикаций</button>' +
+        '<button type="button" class="sheet-option" id="blocks-opt-cancel" style="display:block;width:100%;padding:14px;margin:6px 0;border:none;border-radius:12px;background:var(--secondary-bg);color:var(--hint);font-size:15px;">Отмена</button>' +
         '</div>';
-    sheet.onclick = function(){ sheet.remove(); };
-    sheet.querySelector('.bottom-sheet').onclick = function(e){ e.stopPropagation(); };
-    sheet.querySelectorAll('.sheet-option').forEach(function(btn) {
-        btn.onclick = function() {
-            var m = btn.getAttribute('data-m');
-            sheet.remove();
-            if (!m) return;
-            openBlocksPanel(m);
-        };
-    });
     document.body.appendChild(sheet);
+    sheet.addEventListener('click', function(e){ if (e.target === sheet) sheet.remove(); });
+    document.getElementById('blocks-opt-ban').onclick = function(e){ e.stopPropagation(); sheet.remove(); openBlocksPanel('ban'); };
+    document.getElementById('blocks-opt-pub').onclick = function(e){ e.stopPropagation(); sheet.remove(); openBlocksPanel('publish'); };
+    document.getElementById('blocks-opt-cancel').onclick = function(e){ e.stopPropagation(); sheet.remove(); };
 }
 
 async function renderBlocksHistory(body) {
@@ -2509,6 +2504,19 @@ document.addEventListener('click', function(e) {
     openUserProfile(uid);
 }, true);
 
+function formatTxType(type) {
+    var m = {
+        salary: 'Зарплата',
+        income: 'Пополнение',
+        deposit: 'Пополнение',
+        withdraw: 'Вывод',
+        expense: 'Списание',
+        purchase: 'Покупка',
+        sale: 'Продажа'
+    };
+    return m[type] || type || '—';
+}
+
 function goProfile(uid, ev) {
     try {
         if (ev) {
@@ -2773,7 +2781,7 @@ async function openModUserHistory(uid, kind) {
         items.forEach(function(it, idx) {
             html += '<div class="list-item" style="cursor:pointer;" onclick="openModUserHistoryDetail(' + idx + ')">';
             if (kind === 'transactions') {
-                html += '<div class="top"><div class="title">' + String(it.type || '').replace(/</g,'&lt;') + '</div><span style="font-weight:700;">' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div>';
+                html += '<div class="top"><div class="title">' + String(formatTxType(it.type)).replace(/</g,'&lt;') + '</div><span style="font-weight:700;">' + Number(it.amount||0).toLocaleString('ru-RU') + ' $</span></div>';
                 html += '<div class="subtitle">' + String(it.description||'').replace(/</g,'&lt;') + '<br>' + String(it.created_at||'').slice(0,19).replace('T',' ') + '</div>';
             } else if (kind === 'listings') {
                 html += '<div class="top"><div class="title">' + String(it.title||'').replace(/</g,'&lt;') + ' #' + it.id + '</div><span>' + Number(it.price||0).toLocaleString('ru-RU') + ' $</span></div>';
@@ -4847,6 +4855,9 @@ function loadWorkCenter() {
         '<button class="support-tile" onclick="openShiftHistory()"><div class="support-tile-icon">📜</div><div class="support-tile-title">История моих смен</div></button>';
     if (userData && userData.role >= 5) {
         html += '<button class="support-tile" onclick="openShiftControl()"><div class="support-tile-icon">👥</div><div class="support-tile-title">Контроль сотрудников</div></button>';
+    }
+    if (userData && userData.role >= 1 && userData.role < 6) {
+        html += '<button class="support-tile" onclick="openResignForm()"><div class="support-tile-icon">🚪</div><div class="support-tile-title">Уволиться</div></button>';
     }
     html += '<button class="support-tile" onclick="openBlocksPanel()"><div class="support-tile-icon">🚫</div><div class="support-tile-title">Блокировки</div></button>' +
         '</div>';
