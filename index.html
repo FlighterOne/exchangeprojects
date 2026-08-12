@@ -2408,7 +2408,9 @@ function openActiveRestrictionDetail(idx) {
     if (it.moderated_by) html += '<b>Модератор ID:</b> <span class="seller-link" data-uid="' + it.moderated_by + '" onclick="return goProfile(' + it.moderated_by + ', event)">' + it.moderated_by + '</span>';
     html += '</div>';
     var actionType = it.kind === 'publish' ? 'restrict_publish' : 'ban';
-    html += '<button type="button" class="btn" style="margin-top:12px;" onclick="liftPunishment(' + it.user_id + ',\'' + actionType + '\',0)">Завершить наказание досрочно</button>';
+    if ((userData.role || 0) >= 4) {
+        html += '<button type=\"button\" class=\"btn\" style=\"margin-top:12px;\" onclick=\"liftPunishment(' + it.user_id + ',\'' + actionType + '\',0)\">Завершить наказание досрочно</button>';
+    }
     box.innerHTML = html;
 }
 
@@ -2426,7 +2428,7 @@ function openActionHistoryDetail(actionId) {
     setAdminSectionBack(function(){ openActionHistory(); });
     var actorLabel = a.actor_username ? ('@' + a.actor_username) : (a.actor_name || a.actor_id);
     var targetLabel = a.target_username ? ('@' + a.target_username) : (a.target_name || a.target_id);
-    var canLift = a.action_type === 'restrict_publish' || a.action_type === 'ban';
+    var canLift = ((userData.role || 0) >= 4) && (a.action_type === 'restrict_publish' || a.action_type === 'ban');
     var html = '';
     html += '<div class="info-block" style="margin-top:12px;">';
     html += '<b>Тип:</b> ' + String(a.action_label || a.action_type).replace(/</g,'&lt;') + '<br>';
@@ -2443,6 +2445,7 @@ function openActionHistoryDetail(actionId) {
 }
 
 async function liftPunishment(userId, actionType, actionId) {
+    if ((userData.role || 0) < 4) { try { tg.showAlert('Снятие наказаний доступно модератору и выше'); } catch(e){} return; }
     if (!requirePanelAct()) return;
 
     if (!confirm('Снять наказание досрочно?')) return;
