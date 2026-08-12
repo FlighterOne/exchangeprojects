@@ -5720,20 +5720,55 @@ async function loadAdminJobs() {
         var data = await apiGet('/api/admin/job-applications');
         var apps = data.applications || [];
         _adminCache.jobs = apps;
-        if (!apps.length) {
-            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на работу</div>';
-            return;
+        var resigns = [];
+        try {
+            var rd = await apiGet('/api/admin/resign-requests');
+            resigns = rd.items || [];
+        } catch (e) {}
+        var html = '';
+        if (resigns.length) {
+            html += '<div class="section-title" style="font-size:15px;margin:8px 0;">Заявки на увольнение</div>';
+            resigns.forEach(function(r) {
+                html += '<div class="list-item">';
+                html += '<div class="top"><div class="title"><span class="seller-link" data-uid="' + r.user_id + '" onclick="return goProfile(' + r.user_id + ', event)">' + String(r.display_name||r.user_id).replace(/</g,'&lt;') + '</span></div>';
+                html += '<span class="badge ' + (r.status==='pending'?'badge-moderation':(r.status==='accepted'?'badge-completed':'badge-muted')) + '">' + String(r.status).replace(/</g,'&lt;') + '</span></div>';
+                html += '<div class="subtitle">' + String(r.reason||'').replace(/</g,'&lt;') + '<br>' + String(r.created_at||'').slice(0,16).replace('T',' ') + ' · ' + String(r.role_name||'') + '</div>';
+                if (r.status === 'pending') {
+                    html += '<div style="display:flex;gap:8px;margin-top:8px;">';
+                    html += '<button type="button" class="btn" style="flex:1;" onclick="processResign(' + r.id + ',\'accepted\')">Принять</button>';
+                    html += '<button type="button" class="btn btn-danger" style="flex:1;" onclick="processResign(' + r.id + ',\'rejected\')">Отклонить</button>';
+                    html += '</div>';
+                }
+                html += '</div>';
+            });
         }
-        box.innerHTML = apps.map(function(a) {
-            return '<div class="list-item" style="cursor:pointer;" onclick="openAdminJobDetail(' + a.id + ')">' +
-                '<div class="top"><div class="title">' + (a.full_name || '').replace(/</g, '&lt;') +
-                ' #' + a.id + '</div></div>' +
-                '<div class="subtitle">Возраст: ' + a.age + ' · ' + (a.employment_label || a.employment) + '</div></div>';
-        }).join('');
+        html += '<div class="section-title" style="font-size:15px;margin:12px 0 8px;">Заявки на работу</div>';
+        if (!apps.length) html += '<div class="empty">Нет заявок на работу</div>';
+        apps.forEach(function(a) {
+            var nick = a.username ? ('@' + a.username) : (a.full_name || ('ID ' + a.user_id));
+            html += '<div class="list-item" style="cursor:pointer;" onclick="openAdminJobDetail(' + a.id + ')">';
+            html += '<div class="top"><div class="title"><span class="seller-link" data-uid="' + a.user_id + '" onclick="return goProfile(' + a.user_id + ', event)">' + String(nick).replace(/</g,'&lt;') + '</span> #' + a.id + '</div></div>';
+            html += '<div class="subtitle">Возраст: ' + a.age + ' · ' + String(a.employment_label || a.employment || '').replace(/</g,'&lt;') + '</div>';
+            html += '</div>';
+        });
+        box.innerHTML = html;
+        bindProfileLinks(box);
     } catch (e) {
-        box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
+        box.innerHTML = '<div class="empty">' + (e.message || 'Ошибка') + '</div>';
     }
 }
+
+async function processResign(rid, status) {
+    if (!confirm(status === 'accepted' ? 'Одобрить увольнение?' : 'Отклонить заявку?')) return;
+    try {
+        await apiPost('/api/admin/resign-requests/' + rid + '/status', { status: status });
+        tg.showAlert(status === 'accepted' ? 'Увольнение оформлено' : 'Заявка отклонена');
+        loadAdminJobs();
+    } catch (e) {
+        tg.showAlert(e.message || 'Ошибка');
+    }
+}
+
 
 function openAdminJobDetail(id) {
     var a = (_adminCache.jobs || []).find(function(x){ return x.id === id; });
