@@ -897,7 +897,43 @@
             text-decoration: none; flex-shrink: 0; margin-left: auto;
         }
 
-    </style>
+    
+        .chat-messages {
+            display: flex; flex-direction: column; gap: 8px;
+            max-height: 55vh; overflow-y: auto;
+            padding: 8px 0 12px; margin-bottom: 8px;
+        }
+        .chat-bubble {
+            max-width: 85%; padding: 10px 12px; border-radius: 14px;
+            font-size: 14px; line-height: 1.35; word-break: break-word;
+        }
+        .chat-bubble.me {
+            align-self: flex-end;
+            background: var(--button); color: var(--button-text, #fff);
+            border-bottom-right-radius: 4px;
+        }
+        .chat-bubble.them {
+            align-self: flex-start;
+            background: var(--secondary-bg); color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-bubble .meta {
+            font-size: 11px; opacity: 0.7; margin-top: 4px;
+        }
+        .chat-hint {
+            font-size: 11px; color: var(--hint); text-align: center; margin: 4px 0 8px;
+        }
+        .chat-input-row {
+            display: flex; gap: 8px; align-items: center;
+        }
+        .chat-input-row .form-input { flex: 1; margin: 0; }
+        .chat-input-row .btn { width: auto; padding: 10px 14px; flex-shrink: 0; }
+        .chat-unread {
+            display: inline-flex; min-width: 18px; height: 18px; padding: 0 5px;
+            border-radius: 9px; background: var(--button); color: #fff;
+            font-size: 11px; font-weight: 700; align-items: center; justify-content: center;
+        }
+</style>
 </head>
 <body>
 
@@ -1355,6 +1391,16 @@
     <div id="page-support" class="page">
         <div class="section-title">Поддержка</div>
         <div class="support-grid">
+            <button class="support-tile" onclick="openSupportChat()">
+                <div class="support-tile-icon">💬</div>
+                <div class="support-tile-title">Написать обращение</div>
+                <div class="support-tile-sub">Чат с менеджером</div>
+            </button>
+            <button class="support-tile" onclick="showPage('collaborate')">
+                <div class="support-tile-icon">🤝</div>
+                <div class="support-tile-title">Сотрудничать</div>
+                <div class="support-tile-sub">Вакансии</div>
+            </button>
             <button class="support-tile" onclick="openLink('https://t.me/xcodmanager')">
                 <div class="support-tile-icon">✈️</div>
                 <div class="support-tile-title">Написать в Telegram</div>
@@ -1365,21 +1411,33 @@
                 <div class="support-tile-title">Написать на почту</div>
                 <div class="support-tile-sub">xcodsupport@gmail.com</div>
             </button>
-            <button class="support-tile" onclick="showPage('collaborate')">
-                <div class="support-tile-icon">🤝</div>
-                <div class="support-tile-title">Сотрудничать</div>
-                <div class="support-tile-sub">Вакансии</div>
-            </button>
-            <button class="support-tile" onclick="openExternal('https://xcodinfo.ru/faq')">
-                <div class="support-tile-icon">❓</div>
-                <div class="support-tile-title">FAQ</div>
-                <div class="support-tile-sub">Частые вопросы</div>
-            </button>
+        </div>
+        <button type="button" class="btn btn-secondary" style="margin-top:14px;" onclick="openExternal('https://xcodinfo.ru/faq')">FAQ</button>
+    </div>
+
+    <div id="page-support-chat" class="page">
+        <button class="back-link" onclick="showPage('support')">← Назад</button>
+        <div class="section-title">Поддержка</div>
+        <div id="support-chat-messages" class="chat-messages"></div>
+        <div class="chat-hint">*менеджер напишет вам в течение 96ч</div>
+        <div class="chat-input-row">
+            <input class="form-input" type="text" id="support-chat-input" placeholder="Сообщение..." maxlength="4000">
+            <button type="button" class="btn" id="support-chat-send" onclick="sendSupportMessage()">Отправить</button>
         </div>
     </div>
 
-    <!-- COLLABORATE -->
-    <div id="page-collaborate" class="page">
+    <div id="page-admin-support-chat" class="page">
+        <button class="back-link" onclick="openAdminSection('complaints')">← Назад</button>
+        <div class="section-title" id="admin-support-chat-title">Чат</div>
+        <div id="admin-support-chat-user" class="subtitle" style="margin-bottom:8px;"></div>
+        <div id="admin-support-chat-messages" class="chat-messages"></div>
+        <div class="chat-input-row">
+            <input class="form-input" type="text" id="admin-support-chat-input" placeholder="Ответ..." maxlength="4000">
+            <button type="button" class="btn" onclick="sendAdminSupportMessage()">Отправить</button>
+        </div>
+    </div>
+
+<div id="page-collaborate" class="page">
         <button class="back-link" onclick="showPage('support')">← Назад</button>
         <div class="section-title">Сотрудничать</div>
         <div class="info-block">
@@ -1488,7 +1546,7 @@
             </button>
             <button class="support-tile" onclick="openAdminSection('complaints')">
                 <div class="support-tile-icon">⚠️</div>
-                <div class="support-tile-title">Модерация жалоб</div>
+                <div class="support-tile-title">Модерация обращений</div>
             </button>
             <button class="support-tile" id="admin-staff-tile" style="display:none;" onclick="openAdminSection('staff')">
                 <div class="support-tile-icon">👥</div>
@@ -2484,6 +2542,119 @@ function bindProfileLinks(root) {
 
 
 
+
+async function openSupportChat() {
+    showPage('support-chat');
+    var box = document.getElementById('support-chat-messages');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/support/thread');
+        window._supportThread = data.thread;
+        renderSupportMessages(data.messages || [], false);
+    } catch (e) {
+        box.innerHTML = '<div class="empty">' + (e.message || 'Ошибка') + '</div>';
+    }
+}
+
+function renderSupportMessages(messages, asStaff) {
+    var box = document.getElementById(asStaff ? 'admin-support-chat-messages' : 'support-chat-messages');
+    if (!box) return;
+    if (!messages.length) {
+        box.innerHTML = '<div class="empty" style="padding:20px;">Нет сообщений. Напишите обращение.</div>';
+        return;
+    }
+    var html = '';
+    messages.forEach(function(m) {
+        var mine = asStaff ? !!m.is_staff : !m.is_staff;
+        html += '<div class="chat-bubble ' + (mine ? 'me' : 'them') + '">';
+        html += '<div>' + String(m.body || '').replace(/</g,'&lt;').replace(/\n/g,'<br>') + '</div>';
+        html += '<div class="meta">' + String(m.created_at || '').slice(0,16).replace('T',' ') + '</div>';
+        html += '</div>';
+    });
+    box.innerHTML = html;
+    box.scrollTop = box.scrollHeight;
+}
+
+async function sendSupportMessage() {
+    var input = document.getElementById('support-chat-input');
+    var text = (input && input.value || '').trim();
+    if (!text) return;
+    var btn = document.getElementById('support-chat-send');
+    if (btn) btn.disabled = true;
+    try {
+        await apiPost('/api/support/messages', { text: text });
+        if (input) input.value = '';
+        await openSupportChat();
+    } catch (e) {
+        tg.showAlert(e.message || 'Ошибка');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+async function loadAdminSupportThreads() {
+    var box = document.getElementById('admin-content');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/support/threads');
+        var items = data.threads || [];
+        var html = '';
+        if (!items.length) html = '<div class="empty"><div class="icon">💬</div>Обращений пока нет</div>';
+        items.forEach(function(th) {
+            var unread = Number(th.unread || th.staff_unread || 0);
+            html += '<div class="list-item" style="cursor:pointer;" onclick="openAdminSupportChat(' + th.id + ')">';
+            html += '<div class="top"><div class="title"><span class="seller-link" data-uid="' + th.user_id + '" onclick="return goProfile(' + th.user_id + ', event)">' + String(th.display_name || th.user_id).replace(/</g,'&lt;') + '</span></div>';
+            if (unread > 0) html += '<span class="chat-unread">' + unread + '</span>';
+            html += '</div>';
+            html += '<div class="subtitle">' + String(th.last_message_preview || '').replace(/</g,'&lt;');
+            html += '<br>' + String(th.last_message_at || '').slice(0,16).replace('T',' ') + ' · ID ' + th.user_id + '</div>';
+            html += '</div>';
+        });
+        box.innerHTML = html;
+        bindProfileLinks(box);
+    } catch (e) {
+        var m = e.message || '';
+        box.innerHTML = (m.indexOf('не на смене') >= 0 && typeof adminNotOnShiftHtml === 'function')
+            ? adminNotOnShiftHtml(m)
+            : '<div class="empty">' + m + '</div>';
+    }
+}
+
+async function openAdminSupportChat(threadId) {
+    window._adminSupportThreadId = threadId;
+    showPage('admin-support-chat');
+    var box = document.getElementById('admin-support-chat-messages');
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/admin/support/threads/' + threadId);
+        var th = data.thread || {};
+        window._adminSupportThread = th;
+        document.getElementById('admin-support-chat-title').textContent = 'Поддержка';
+        var userHtml = '<span class="seller-link" data-uid="' + th.user_id + '" onclick="return goProfile(' + th.user_id + ', event)">' +
+            String(th.display_name || th.user_id).replace(/</g,'&lt;') + '</span> · ID ' + th.user_id;
+        document.getElementById('admin-support-chat-user').innerHTML = userHtml;
+        renderSupportMessages(data.messages || [], true);
+        bindProfileLinks(document.getElementById('admin-support-chat-user'));
+    } catch (e) {
+        box.innerHTML = '<div class="empty">' + (e.message || 'Ошибка') + '</div>';
+    }
+}
+
+async function sendAdminSupportMessage() {
+    var threadId = window._adminSupportThreadId;
+    if (!threadId) return;
+    var input = document.getElementById('admin-support-chat-input');
+    var text = (input && input.value || '').trim();
+    if (!text) return;
+    try {
+        await apiPost('/api/admin/support/threads/' + threadId + '/messages', { text: text });
+        if (input) input.value = '';
+        await openAdminSupportChat(threadId);
+    } catch (e) {
+        tg.showAlert(e.message || 'Ошибка');
+    }
+}
+
 async function openProfileModMenu() {
     var uid = window._profileModTarget || window._profileUid;
     if (!uid) {
@@ -2557,11 +2728,13 @@ async function openProfileModMenu() {
 
         html += '<div class="btn-stack" style="margin-top:16px;">';
         html += '<button type="button" class="btn btn-secondary" onclick="openProfileModHistoryMenu(' + p.user_id + ')">История действий</button>';
-        html += '<button type="button" class="btn btn-secondary" onclick="openProfileRestrictForm(' + p.user_id + ',\'publish\')">Ограничить публикацию</button>';
+        html += '<div style="display:flex;gap:8px;width:100%;">';
+        html += '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="openProfileRestrictForm(' + p.user_id + ',\'publish\')">Ограничить публикацию</button>';
         if (myRole >= 5) {
-            html += '<button type="button" class="btn btn-danger" onclick="openProfileRestrictForm(' + p.user_id + ',\'ban\')">Заблокировать</button>';
+            html += '<button type="button" class="btn btn-danger" style="flex:1;" onclick="openProfileRestrictForm(' + p.user_id + ',\'ban\')">Заблокировать</button>';
         }
         html += '</div>';
+html += '</div>';
         box.innerHTML = html;
     } catch (e) {
         box.innerHTML = '<div class="empty">' + (e.message || 'Ошибка') + '</div>';
@@ -4405,21 +4578,7 @@ function openAdminSection(section) {
         loadAdminJobs();
     }
     else if (section === 'complaints') {
-        if (!(userData && userData.role >= 6)) {
-            // проверка через listings duty endpoint
-            var box = document.getElementById('admin-content');
-            box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-            apiGet('/api/admin/listings').then(function() {
-                box.innerHTML = '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
-            }).catch(function(e) {
-                var m = (e && e.message) || '';
-                box.innerHTML = (m.indexOf('не на смене') >= 0) ? adminNotOnShiftHtml(m)
-                    : '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
-            });
-        } else {
-            document.getElementById('admin-content').innerHTML =
-                '<div class="empty"><div class="icon">⚠️</div>Раздел в разработке</div>';
-        }
+        loadAdminSupportThreads();
     }
     else if (section === 'staff') loadAdminStaff();
     else if (section === 'analytics') loadAnalyticsMenu();
