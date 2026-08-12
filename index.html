@@ -961,6 +961,53 @@
             border-radius: 9px; background: var(--button); color: #fff;
             font-size: 11px; font-weight: 700; align-items: center; justify-content: center;
         }
+
+        .career-track {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 6px 10px; margin-bottom: 4px;
+        }
+        .career-node {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 700; flex-shrink: 0;
+            border: 2px solid rgba(128,128,128,0.35);
+            background: var(--secondary-bg); color: var(--hint);
+            position: relative; z-index: 1;
+        }
+        .career-node.done {
+            background: #2aabee; border-color: #2aabee; color: #fff;
+        }
+        .career-node.done .career-check {
+            position: absolute; right: -3px; bottom: -3px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #34c759; color: #fff; font-size: 10px; line-height: 16px;
+            text-align: center; border: 2px solid var(--bg);
+        }
+        .career-node.current {
+            background: #2aabee; border-color: #2aabee; color: #fff;
+            box-shadow: 0 0 0 4px rgba(42,171,238,0.28);
+        }
+        .career-node.locked { color: var(--hint); }
+        .career-node .lock { color: #ff3b30; font-size: 14px; }
+        .career-line {
+            flex: 1; height: 5px; margin: 0 8px;
+            background: rgba(128,128,128,0.22); border-radius: 3px;
+            overflow: hidden; position: relative;
+        }
+        .career-line > i {
+            display: block; height: 100%; width: 0%;
+            background: #2aabee; border-radius: 3px;
+            transition: width 0.35s ease;
+        }
+        .career-stats {
+            display: flex; gap: 8px; justify-content: center;
+            margin: 6px 0 14px; flex-wrap: wrap;
+        }
+        .career-stat {
+            font-size: 12px; color: var(--text); cursor: pointer;
+            padding: 6px 10px; border-radius: 10px;
+            background: var(--secondary-bg); border: 1px solid rgba(128,128,128,0.2);
+        }
 </style>
 </head>
 <body>
@@ -2257,24 +2304,40 @@ async function openBlocksPanel(mode) {
 }
 
 function openBlocksTypeSheet(anchor) {
-    var old = document.getElementById('blocks-type-sheet');
-    if (old) old.remove();
-    var sheet = document.createElement('div');
-    sheet.id = 'blocks-type-sheet';
-    sheet.className = 'bottom-sheet-overlay';
-    sheet.style.cssText = 'position:fixed;inset:0;z-index:30000;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;';
-    sheet.innerHTML =
-        '<div class="bottom-sheet" style="width:100%;max-width:480px;background:var(--bg);border-radius:16px 16px 0 0;padding:12px 16px 28px;box-sizing:border-box;">' +
-        '<div class="sheet-title" style="font-weight:700;text-align:center;margin-bottom:10px;">Показать</div>' +
-        '<button type="button" class="sheet-option" id="blocks-opt-ban" style="display:block;width:100%;padding:14px;margin:6px 0;border:none;border-radius:12px;background:var(--secondary-bg);color:var(--text);font-size:15px;">Блокировки аккаунтов</button>' +
-        '<button type="button" class="sheet-option" id="blocks-opt-pub" style="display:block;width:100%;padding:14px;margin:6px 0;border:none;border-radius:12px;background:var(--secondary-bg);color:var(--text);font-size:15px;">Ограничения публикаций</button>' +
-        '<button type="button" class="sheet-option" id="blocks-opt-cancel" style="display:block;width:100%;padding:14px;margin:6px 0;border:none;border-radius:12px;background:var(--secondary-bg);color:var(--hint);font-size:15px;">Отмена</button>' +
-        '</div>';
-    document.body.appendChild(sheet);
-    sheet.addEventListener('click', function(e){ if (e.target === sheet) sheet.remove(); });
-    document.getElementById('blocks-opt-ban').onclick = function(e){ e.stopPropagation(); sheet.remove(); openBlocksPanel('ban'); };
-    document.getElementById('blocks-opt-pub').onclick = function(e){ e.stopPropagation(); sheet.remove(); openBlocksPanel('publish'); };
-    document.getElementById('blocks-opt-cancel').onclick = function(e){ e.stopPropagation(); sheet.remove(); };
+    try {
+        var old = document.getElementById('blocks-type-sheet');
+        if (old) old.remove();
+        var sheet = document.createElement('div');
+        sheet.id = 'blocks-type-sheet';
+        sheet.setAttribute('style',
+            'position:fixed;left:0;right:0;top:0;bottom:0;z-index:99999;' +
+            'background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center;'
+        );
+        sheet.innerHTML =
+            '<div style="width:100%;max-width:480px;background:var(--bg,#1c1c1e);' +
+            'border-radius:16px 16px 0 0;padding:14px 16px 28px;box-sizing:border-box;color:var(--text,#fff);">' +
+            '<div style="font-weight:700;text-align:center;margin-bottom:12px;font-size:16px;">Показать</div>' +
+            '<button type="button" id="blocks-opt-ban" style="display:block;width:100%;padding:14px;margin:6px 0;' +
+            'border:none;border-radius:12px;background:var(--secondary-bg,#2c2c2e);color:var(--text,#fff);font-size:15px;cursor:pointer;">Блокировки аккаунтов</button>' +
+            '<button type="button" id="blocks-opt-pub" style="display:block;width:100%;padding:14px;margin:6px 0;' +
+            'border:none;border-radius:12px;background:var(--secondary-bg,#2c2c2e);color:var(--text,#fff);font-size:15px;cursor:pointer;">Ограничения публикаций</button>' +
+            '<button type="button" id="blocks-opt-cancel" style="display:block;width:100%;padding:14px;margin:6px 0;' +
+            'border:none;border-radius:12px;background:var(--secondary-bg,#2c2c2e);color:var(--hint,#8e8e93);font-size:15px;cursor:pointer;">Отмена</button>' +
+            '</div>';
+        document.body.appendChild(sheet);
+        sheet.addEventListener('click', function(ev) {
+            if (ev.target === sheet) sheet.remove();
+        });
+        var ban = document.getElementById('blocks-opt-ban');
+        var pub = document.getElementById('blocks-opt-pub');
+        var cancel = document.getElementById('blocks-opt-cancel');
+        if (ban) ban.onclick = function(ev) { ev.stopPropagation(); sheet.remove(); openBlocksPanel('ban'); };
+        if (pub) pub.onclick = function(ev) { ev.stopPropagation(); sheet.remove(); openBlocksPanel('publish'); };
+        if (cancel) cancel.onclick = function(ev) { ev.stopPropagation(); sheet.remove(); };
+    } catch (err) {
+        console.error('openBlocksTypeSheet', err);
+        try { tg.showAlert('Не удалось открыть меню'); } catch (e) {}
+    }
 }
 
 async function renderBlocksHistory(body) {
@@ -4892,11 +4955,11 @@ function loadWorkCenter() {
     if (userData && userData.role >= 5) {
         html += '<button class="support-tile" onclick="openShiftControl()"><div class="support-tile-icon">👥</div><div class="support-tile-title">Контроль сотрудников</div></button>';
     }
-    if (userData && userData.role >= 1 && userData.role < 6) {
+    html += '<button class="support-tile" onclick="openBlocksPanel()"><div class="support-tile-icon">🚫</div><div class="support-tile-title">Блокировки</div></button>';
+    if (userData && userData.role >= 3 && userData.role < 6) {
         html += '<button class="support-tile" onclick="openResignForm()"><div class="support-tile-icon">🚪</div><div class="support-tile-title">Уволиться</div></button>';
     }
-    html += '<button class="support-tile" onclick="openBlocksPanel()"><div class="support-tile-icon">🚫</div><div class="support-tile-title">Блокировки</div></button>' +
-        '</div>';
+    html += '</div>';
     box.innerHTML = html;
 }
 
@@ -5507,44 +5570,112 @@ async function shiftControlClose(date, type) {
     } catch (e) { tg.showAlert(e.message); }
 }
 
-function loadCareerTracker() {
+async function loadCareerTracker() {
     var box = document.getElementById('admin-content');
-    var role = (userData && userData.role) || 0;
-    var roleName = (userData && userData.role_name) || '—';
-    var html = '<div class="info-block"><b>Ваша роль:</b> ' + roleName + '</div>';
-
-    // Стажер (3) -> Модератор (4)
-    var internDone = role >= 4;
-    html += '<div class="list-item">' +
-        '<div class="top"><div class="title">Стажёр → Модератор</div>' +
-        '<span class="badge ' + (internDone ? 'badge-completed' : 'badge-pending') + '">' +
-        (internDone ? 'Выполнено' : 'В процессе') + '</span></div>' +
-        '<div class="subtitle">Нужно: <b>30 дней</b> и <b>12 смен</b></div></div>';
-
-    // Модератор (4) -> Админ (5)
-    var modDone = role >= 5;
-    html += '<div class="list-item">' +
-        '<div class="top"><div class="title">Модератор → Админ</div>' +
-        '<span class="badge ' + (modDone ? 'badge-completed' : 'badge-pending') + '">' +
-        (modDone ? 'Выполнено' : 'В процессе') + '</span></div>' +
-        '<div class="subtitle">Нужно: <b>360 дней</b>, <b>150 смен</b>, рейтинг <b>выше 4.75</b></div></div>';
-
-    // Placeholder progress (until shifts system is live)
-    html += '<div class="info-block" style="margin-top:8px;">Учёт смен и рейтинга подключится вместе с рабочим центром. Пока показаны условия повышения.</div>';
-
-    // Promotion request button - show when role is intern or moderator (eligible track)
-    // Without real shift data, only show message about conditions; when "met" we'd enable
-    // For now: if role is 3 (intern) or 4 (mod) show disabled-style info; if somehow we mark ready, show button
-    if (role === 3 || role === 4) {
-        html += '<button class="btn" style="margin-top:12px;" onclick="requestPromotion()">Подать заявку на повышение</button>';
-        html += '<div class="field-hint" style="margin-top:8px;">Заявка доступна после выполнения условий. Сейчас функция в подготовке — заявка уйдёт на рассмотрение админам.</div>';
-    } else if (role >= 5) {
-        html += '<div class="info-block">Вы уже на уровне админа или выше.</div>';
-    } else {
-        html += '<div class="info-block">Трекер доступен сотрудникам от роли «Стажёр».</div>';
+    document.getElementById('admin-section-title').textContent = 'Трекер должностного роста';
+    setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var d = await apiGet('/api/career');
+        var stages = d.stages || ['Стажер', 'Модератор', 'Админ'];
+        var stage = Number(d.stage);
+        if (stage < 0) {
+            box.innerHTML = '<div class="empty">Трекер доступен сотрудникам (стажёр и выше)</div>';
+            return;
+        }
+        var progress = Math.max(0, Math.min(1, Number(d.progress) || 0));
+        var html = '';
+        html += '<div class="career-track">';
+        for (var i = 0; i < 3; i++) {
+            var cls = 'career-node';
+            var inner = String(i + 1);
+            if (i < stage) {
+                cls += ' done';
+                inner = (i + 1) + '<span class="career-check">✓</span>';
+            } else if (i === stage) {
+                cls += ' current';
+            } else {
+                cls += ' locked';
+                inner = '<span class="lock">🔒</span>';
+            }
+            html += '<div class="' + cls + '" title="' + stages[i] + '">' + inner + '</div>';
+            if (i < 2) {
+                var fill = 0;
+                if (i < stage) fill = 100;
+                else if (i === stage) fill = Math.round(progress * 100);
+                html += '<div class="career-line"><i style="width:' + fill + '%"></i></div>';
+            }
+        }
+        html += '</div>';
+        html += '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--hint);padding:0 2px 8px;">';
+        html += '<span>' + stages[0] + '</span><span>' + stages[1] + '</span><span>' + stages[2] + '</span></div>';
+        var needS = d.need_shifts || 0;
+        var needD = d.need_days || 0;
+        var doneS = d.shifts_done || 0;
+        var doneD = d.days_in || 0;
+        html += '<div class="career-stats">';
+        html += '<span class="career-stat" onclick="showCareerInfo(\'shifts\',' + doneS + ',' + needS + ')">Смены ' + doneS + (needS ? ('/' + needS) : '') + '</span>';
+        html += '<span class="career-stat" onclick="showCareerInfo(\'days\',' + doneD + ',' + needD + ')">Дней ' + doneD + (needD ? ('/' + needD) : '') + '</span>';
+        if (d.rating_staff != null) html += '<span class="career-stat">Рейтинг ' + Number(d.rating_staff).toFixed(2) + '</span>';
+        html += '</div>';
+        if (d.sanction) {
+            html += '<div class="info-block" style="margin-bottom:10px;color:#ff3b30;">Санкции: −25% к следующим ' + d.sanction.remaining_pays + ' ЗП</div>';
+        }
+        if (d.next_label) {
+            html += '<div class="subtitle" style="margin-bottom:10px;text-align:center;">До «' + d.next_label + '»: ' + Math.round(progress * 100) + '%</div>';
+        }
+        html += '<button type="button" class="btn btn-secondary" onclick="showWeeklyShiftsInfo(' + (d.week_done||0) + ',' + (d.week_req||3) + ')">Смены на неделе: ' + (d.week_done||0) + ' / ' + (d.week_req||3) + '</button>';
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<div class="empty">' + (e.message || 'Ошибка загрузки трекера') + '</div>';
     }
+}
+
+function showCareerInfo(kind, done, need) {
+    var title = kind === 'shifts' ? 'Смены' : 'Дни в системе';
+    var extra = need ? (', ещё ' + Math.max(0, need - done)) : '';
+    try { tg.showAlert(title + ': отработано ' + done + (need ? ('/' + need) : '') + extra); } catch (e) {}
+}
+
+function showWeeklyShiftsInfo(done, req) {
+    var msg = 'Отработано смен на неделе: ' + done + ' из ' + req +
+        '\n\nСанкции за несоблюдение требований работодателя:\nза невыполнение недельного плана по сменам — −25% от следующих 3 ЗП';
+    try { tg.showAlert(msg); } catch (e) {}
+}
+
+async function openResignForm() {
+    var box = document.getElementById('admin-content');
+    if (!box) return;
+    document.getElementById('admin-section-title').textContent = 'Уволиться';
+    setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+    var html = '';
+    html += '<div class="form-group"><label class="form-label">Причина</label>';
+    html += '<textarea class="form-input" id="resign-reason" rows="4" placeholder="Опишите причину увольнения"></textarea></div>';
+    html += '<label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-size:13px;color:var(--text);">';
+    html += '<input type="checkbox" id="resign-confirm" style="margin-top:3px;width:18px;height:18px;">';
+    html += '<span>Я уверен(а), что хочу уволиться</span></label>';
+    html += '<button type="button" class="btn btn-danger" id="resign-submit-btn" onclick="submitResign()">Отправить заявку</button>';
     box.innerHTML = html;
 }
+
+async function submitResign() {
+    var reasonEl = document.getElementById('resign-reason');
+    var conf = document.getElementById('resign-confirm');
+    var btn = document.getElementById('resign-submit-btn');
+    var reason = (reasonEl && reasonEl.value || '').trim();
+    if (!reason) { try { tg.showAlert('Укажите причину'); } catch(e){} return; }
+    if (!conf || !conf.checked) { try { tg.showAlert('Подтвердите увольнение галочкой'); } catch(e){} return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Отправка...'; }
+    try {
+        await apiPost('/api/staff/resign', { reason: reason, confirm: true });
+        try { tg.showAlert('Заявка на увольнение отправлена'); } catch(e){}
+        openAdminSection('workcenter');
+    } catch (e) {
+        try { tg.showAlert(e.message || 'Ошибка'); } catch(e2){}
+        if (btn) { btn.disabled = false; btn.textContent = 'Отправить заявку'; }
+    }
+}
+
 
 function requestPromotion() {
     tg.showAlert('Заявка на повышение: пока в разработке. Условия будут проверяться автоматически по сменам.');
