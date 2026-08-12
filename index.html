@@ -5618,13 +5618,13 @@ async function loadCareerTracker() {
         html += '<span class="career-stat" onclick="showCareerInfo(\'days\',' + doneD + ',' + needD + ')">Дней ' + doneD + (needD ? ('/' + needD) : '') + '</span>';
         if (d.rating_staff != null) html += '<span class="career-stat">Рейтинг ' + Number(d.rating_staff).toFixed(2) + '</span>';
         html += '</div>';
-        if (d.sanction) {
-            html += '<div class="info-block" style="margin-bottom:10px;color:#ff3b30;">Санкции: −25% к следующим ' + d.sanction.remaining_pays + ' ЗП</div>';
-        }
         if (d.next_label) {
             html += '<div class="subtitle" style="margin-bottom:10px;text-align:center;">До «' + d.next_label + '»: ' + Math.round(progress * 100) + '%</div>';
         }
         html += '<button type="button" class="btn btn-secondary" onclick="showWeeklyShiftsInfo(' + (d.week_done||0) + ',' + (d.week_req||3) + ')">Смены на неделе: ' + (d.week_done||0) + ' / ' + (d.week_req||3) + '</button>';
+        if (d.sanction) {
+            html += '<div class="info-block" style="margin-top:10px;color:#ff3b30;">Санкции: −25% к следующим ' + d.sanction.remaining_pays + ' ЗП' + (d.sanction.reason ? (' — ' + String(d.sanction.reason).replace(/</g,'&lt;')) : '') + '</div>';
+        }
         box.innerHTML = html;
     } catch (e) {
         box.innerHTML = '<div class="empty">' + (e.message || 'Ошибка загрузки трекера') + '</div>';
@@ -5997,6 +5997,24 @@ async function loadAdminStaff() {
     }
 }
 
+
+async function adminStaffLeave(uid, kind) {
+    var label = kind === 'vacation' ? 'отпуска' : 'отгула';
+    var daysStr = prompt('Количество дней ' + label + ':', '1');
+    if (daysStr == null) return;
+    var days = parseInt(daysStr, 10);
+    if (!days || days < 1) {
+        try { tg.showAlert('Укажите число дней'); } catch(e){}
+        return;
+    }
+    try {
+        var res = await apiPost('/api/admin/staff/' + uid + '/leave', { days: days, kind: kind });
+        try { tg.showAlert('Назначено ' + days + ' дн. (с ' + (res.start||'') + ' по ' + (res.end||'') + '). Санкции за эти недели не начисляются.'); } catch(e){}
+    } catch (e) {
+        try { tg.showAlert(e.message || 'Ошибка'); } catch(e2){}
+    }
+}
+
 function openStaffDetail(uid) {
     if (userData.role < 5) {
         tg.showAlert('Доступ только для админа и выше');
@@ -6036,7 +6054,11 @@ function openStaffDetail(uid) {
         '<div class="section-title" style="font-size:16px;margin-top:16px;">Изменить баланс</div>' +
         '<div class="form-group"><label class="form-label">Новый баланс ($)</label>' +
         '<input class="form-input" type="number" id="staff-balance-input" value="' + s.balance + '"></div>' +
-        '<button class="btn" onclick="adminSetStaffBalance(' + s.user_id + ')">Сохранить баланс</button>';
+        '<button class="btn" onclick="adminSetStaffBalance(' + s.user_id + ')">Сохранить баланс</button>' +
+        '<div style="display:flex;gap:8px;margin-top:10px;">' +
+        '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'dayoff\')">Отгул</button>' +
+        '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'vacation\')">Отпуск</button>' +
+        '</div>';
     document.getElementById('staff-detail-content').innerHTML = html;
     showPage('admin-staff-detail');
 }
