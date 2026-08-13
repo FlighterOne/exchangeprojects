@@ -1077,7 +1077,7 @@
         <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
     </div>
     <div class="topbar-right">
-        <button class="lang-btn" onclick="showPage('settings-lang')"><img class="flag-img sm" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"></button>
+        <button class="lang-btn" onclick="showPage('settings-lang')" title="Language"><img class="flag-img sm" id="top-lang-flag" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"></button>
         <div class="balance-chip" onclick="showPage('balance')" id="top-balance">0 $</div>
         <div class="user-chip" id="top-avatar" onclick="showPage('profile')"><span id="top-avatar-letter">?</span></div>
     </div>
@@ -2948,6 +2948,12 @@ function t(key) {
 function applyI18n() {
     var lang = getAppLang();
     try { document.documentElement.lang = lang; } catch (e) {}
+
+    // top flag
+    var flags = { ru: 'ru', en: 'gb', de: 'de', fr: 'fr', es: 'es', zh: 'cn' };
+    var flagImg = document.getElementById('top-lang-flag');
+    if (flagImg) flagImg.src = 'https://flagcdn.com/w40/' + (flags[lang] || 'ru') + '.png';
+
     document.querySelectorAll('[data-i18n]').forEach(function(el) {
         var key = el.getAttribute('data-i18n');
         if (!key) return;
@@ -2956,33 +2962,159 @@ function applyI18n() {
         el.textContent = val;
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
-        el.setAttribute('placeholder', tBlock(el.getAttribute('data-i18n-placeholder')));
+        var k = el.getAttribute('data-i18n-placeholder');
+        if (k) el.setAttribute('placeholder', tBlock(k));
     });
-    // drawer header sub
+
     var sub = document.querySelector('.drawer-header .sub');
     if (sub) sub.textContent = tBlock('menu');
-    // settings labels
+
     var sl = document.getElementById('settings-lang-label');
     if (sl) {
         var names = { ru: 'Русский', en: 'English', de: 'Deutsch', fr: 'Français', es: 'Español', zh: '中文' };
-        var flags = { ru: 'ru', en: 'gb', de: 'de', fr: 'fr', es: 'es', zh: 'cn' };
-        var code = getAppLang();
-        sl.innerHTML = '<img class="flag-img sm" src="https://flagcdn.com/w40/' + (flags[code]||'ru') + '.png" alt="" width="18" height="13"> ' + (names[code]||code);
+        sl.innerHTML = '<img class="flag-img sm" src="https://flagcdn.com/w40/' + (flags[lang]||'ru') + '.png" alt="" width="18" height="13"> ' + (names[lang]||lang);
     }
     var st = document.getElementById('settings-theme-label');
     if (st) {
         var th = localStorage.getItem('xcod_theme') || 'auto';
         st.textContent = th === 'light' ? tBlock('theme_light') : (th === 'dark' ? tBlock('theme_dark') : tBlock('theme_auto'));
     }
-    // status segment buttons if present
+
+    // Translate common UI chrome phrases (not listing body content)
+    var PHRASES = {
+        '← Назад': 'back', 'Назад': 'back_short', 'Отменить': 'cancel_btn', 'Отмена': 'cancel_btn',
+        'Далее': 'continue', 'Сохранить': 'save', 'Подтвердить': 'confirm',
+        'Пополнить': 'topup', 'Вывести': 'withdraw', 'Мои транзакции': 'my_tx',
+        'Купить': 'buy', 'Написать': 'write', 'В избранное': 'favorite', 'Из избранного': 'unfavorite',
+        'Редактировать': 'edit', 'Удалить': 'delete', 'Опубликовать': 'publish',
+        'Снять с публикации': 'unpublish', 'Принять': 'accept', 'Отклонить': 'reject',
+        'Загрузить файлы': 'upload_files', 'Загрузить фото': 'upload_photos',
+        'Отправить на модерацию': 'send_mod', 'Отправить': 'confirm',
+        'Панель': 'panel', 'Ваша роль': 'your_role',
+        'Рабочий центр': 'workcenter', 'Трекер должностного роста': 'career',
+        'Модерация объявлений': 'mod_listings', 'Модерация транзакций': 'mod_tx',
+        'Модерация заявок на работу': 'mod_jobs', 'Модерация обращений': 'mod_tickets',
+        'Управление сотрудниками': 'staff_manage', 'Аналитика': 'analytics',
+        'Новое объявление': 'new_listing', 'Название': 'title', 'Описание': 'description',
+        'Фильтры': 'filters', 'Цена': 'price', 'Вид товара': 'product_type',
+        'Вид услуги': 'service_type', 'Рейтинг от': 'rating_from', 'Рейтинг сотрудника от': 'rating_from',
+        'Рейтинг покупателя от': 'rating_from', 'Рейтинг продавца от': 'rating_from',
+        'Заказать': 'order_svc', 'Исполнять': 'execute_svc', 'Все': 'all',
+        'Партнёр X-Cod': 'partner_xcod', 'Свой товар': 'own_product',
+        'Партнер X-Cod': 'partner_xcod',
+        'На модерации': 'on_moderation', 'Активные': 'active_listings', 'Завершённые': 'completed_listings',
+        'Завершён.': 'completed_tab', 'Модерация': 'moderation',
+        'Продажа': 'sale', 'Фриланс': 'freelance', 'Заказчик': 'order', 'Исполнитель': 'execute',
+        'Избранные': 'favorites_title', 'История заказов': 'orders_title', 'Новости': 'news_title',
+        'Мои объявления': 'my_listings', 'Баланс': 'balance_title', 'Поддержка': 'support',
+        'Настройки': 'settings', 'Язык': 'language', 'Тема': 'theme',
+        'Как в Telegram': 'theme_auto', 'Светлая': 'theme_light', 'Тёмная': 'theme_dark',
+        'Написать обращение': 'support_ticket', 'Сотрудничать': 'support_hire',
+        'Написать в Telegram': 'support_tg', 'Написать на почту': 'support_mail',
+        'Главная': 'home', 'Биржа': 'exchange', 'Лента объявлений': 'feed_title',
+        'Поиск': 'search', 'Да': 'yes', 'Нет': 'no',
+        'Открыть': 'open_shift', 'Закрыть': 'close_shift',
+        'Мои смены': 'my_shifts', 'История смен': 'shift_history',
+        'Контроль сотрудников': 'staff_control', 'Уволиться': 'resign',
+        'Блокировки': 'blocks', 'История': 'history',
+        'Скачать отчёт': 'download_report', 'Аналитика расходов': 'analytics_exp',
+        'Аналитика доходов': 'analytics_inc', 'Аналитика объявлений': 'analytics_list',
+        'Записаться на смену': 'sign_up_shift',
+        'Профиль': 'profile', 'Сумма': 'amount', 'Способ': 'method', 'Комментарий': 'comment',
+        'Загрузка данных с сервера…': 'loading', 'Загрузка данных с сервера...': 'loading',
+        'Нет данных': 'no_data', 'Объявлений нет': 'no_listings', 'Пока нет новостей': 'no_news',
+        'Вы не на смене': 'not_on_shift', 'Нет доступа': 'access_denied',
+        'от': 'from', 'до': 'to',
+        '+ Создать': 'create', 'Создать': 'create'
+    };
+
+    function translateText(txt) {
+        if (!txt) return null;
+        var s = txt.trim();
+        if (PHRASES[s]) return tBlock(PHRASES[s]);
+        // prefix patterns
+        if (s.indexOf('Категория:') === 0) return tBlock('category') + ': ' + s.slice(10).trim();
+        return null;
+    }
+
+    function walkChrome(root) {
+        if (!root) return;
+        var nodes = root.querySelectorAll('button, .btn, .form-label, .section-title, .filters-heading, .support-tile-title, .wallet-action-label, .card-title, .back-link, .btn-back, label, .seg-toggle > button, .type-toggle-btn, .sheet-option');
+        nodes.forEach(function(el) {
+            // skip listing body content areas
+            if (el.closest && (el.closest('.listing-desc') || el.closest('.news-body') || el.closest('#listing-detail-desc'))) return;
+            if (el.getAttribute && el.getAttribute('data-i18n')) return; // already handled
+            // preserve count badges inside seg buttons
+            var count = el.querySelector && el.querySelector('.seg-count');
+            var raw = el.childNodes.length === 1 && el.childNodes[0].nodeType === 3 ? el.textContent : null;
+            if (raw) {
+                var tr = translateText(raw);
+                if (tr) el.textContent = tr;
+                return;
+            }
+            // text-only buttons with possible icon spans
+            var text = '';
+            el.childNodes.forEach(function(n) {
+                if (n.nodeType === 3) text += n.textContent;
+            });
+            text = text.trim();
+            if (text) {
+                var tr2 = translateText(text);
+                if (tr2) {
+                    // replace only text nodes
+                    el.childNodes.forEach(function(n) {
+                        if (n.nodeType === 3 && n.textContent.trim()) n.textContent = ' ' + tr2 + ' ';
+                    });
+                }
+            }
+            if (count && !el.contains(count)) el.appendChild(count);
+        });
+        // placeholders
+        root.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(function(inp) {
+            if (inp.closest && inp.closest('#listing-title, #listing-desc, #fl-title, #fl-desc')) return; // user content fields keep placeholder translated via map
+            var ph = inp.getAttribute('placeholder') || '';
+            var mapPh = {
+                'Поиск по бирже...': 'search_ph',
+                'Поиск по ключевым словам...': 'search_ph',
+                'Поиск…': 'search_ph',
+                'Поиск...': 'search_ph',
+                'Любой вид': 'product_type',
+                'от': 'from',
+                'до': 'to'
+            };
+            if (mapPh[ph]) inp.setAttribute('placeholder', tBlock(mapPh[ph]));
+        });
+    }
+
+    walkChrome(document);
+
     try {
         var m = document.getElementById('my-seg-mod');
-        if (m) { var c=m.querySelector('.seg-count'); m.innerHTML = tBlock('moderation') + ' '; if(c) m.appendChild(c); else m.innerHTML += '<span class="seg-count" id="my-cnt-mod">0</span>'; }
+        if (m) {
+            var c = document.getElementById('my-cnt-mod') || m.querySelector('.seg-count');
+            m.textContent = '';
+            m.appendChild(document.createTextNode(tBlock('moderation') + ' '));
+            if (c) m.appendChild(c);
+            else { var s=document.createElement('span'); s.className='seg-count'; s.id='my-cnt-mod'; s.textContent='0'; m.appendChild(s); }
+        }
         var a = document.getElementById('my-seg-active');
-        if (a) { var c2=a.querySelector('.seg-count'); a.innerHTML = tBlock('active') + ' '; if(c2) a.appendChild(c2); else a.innerHTML += '<span class="seg-count" id="my-cnt-active">0</span>'; }
+        if (a) {
+            var c2 = document.getElementById('my-cnt-active') || a.querySelector('.seg-count');
+            a.textContent = '';
+            a.appendChild(document.createTextNode(tBlock('active') + ' '));
+            if (c2) a.appendChild(c2);
+            else { var s2=document.createElement('span'); s2.className='seg-count'; s2.id='my-cnt-active'; s2.textContent='0'; a.appendChild(s2); }
+        }
         var d = document.getElementById('my-seg-done');
-        if (d) { var c3=d.querySelector('.seg-count'); d.innerHTML = tBlock('completed_tab') + ' '; if(c3) d.appendChild(c3); else d.innerHTML += '<span class="seg-count" id="my-cnt-done">0</span>'; }
+        if (d) {
+            var c3 = document.getElementById('my-cnt-done') || d.querySelector('.seg-count');
+            d.textContent = '';
+            d.appendChild(document.createTextNode(tBlock('completed_tab') + ' '));
+            if (c3) d.appendChild(c3);
+            else { var s3=document.createElement('span'); s3.className='seg-count'; s3.id='my-cnt-done'; s3.textContent='0'; d.appendChild(s3); }
+        }
     } catch (e) {}
+
     refreshOriginalTags();
 }
 
