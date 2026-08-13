@@ -3229,7 +3229,9 @@ async function loadNewsPinned() {
                     var desc = (l.description || '').replace(/</g, '&lt;');
                     if (desc.length > 220) desc = desc.slice(0, 220) + '…';
                     var priceNum = Number(l.price).toLocaleString('ru-RU');
+                    var cover = l.cover_photo || (l.photos && l.photos[0] && (l.photos[0].content || l.photos[0].url)) || '';
                     return '<div class="listing-card" data-id="' + l.id + '">' +
+                        (cover ? ('<img class="listing-cover" src="' + cover + '" alt="">') : '') +
                         '<div class="ltitle-row">' +
                         '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
                         '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
@@ -3262,7 +3264,9 @@ async function loadNewsPinned() {
                     var body = String(n.body || '').replace(/</g,'&lt;');
                     if (body.length > 140) body = body.slice(0, 140) + '…';
                     var dateLabel = n.date_label || 'Недавно';
+                    var cover = n.cover_photo || (n.media && n.media[0] && n.media[0].url) || '';
                     return '<div class="listing-card" data-nid="' + n.id + '">' +
+                        (cover ? ('<img class="listing-cover" src="' + cover + '" alt="">') : '') +
                         '<div class="news-meta-row" style="margin-top:0;margin-bottom:8px;">' +
                         '<span class="news-date">' + String(dateLabel).replace(/</g,'&lt;') + '</span>' +
                         '<span class="news-views">👁 ' + (n.views_count || 0) + '</span>' +
@@ -3320,6 +3324,39 @@ function sanitizeNewsHtml(html) {
     return tmp.innerHTML;
 }
 
+async function newsMediaNav(dir) {
+    var media = window._newsMedia || [];
+    if (!media.length) return;
+    var idx = (window._newsMediaIdx || 0) + dir;
+    if (idx < 0) idx = media.length - 1;
+    if (idx >= media.length) idx = 0;
+    window._newsMediaIdx = idx;
+    var el = document.getElementById('news-carousel-media');
+    var dots = document.getElementById('news-carousel-dots');
+    var item = media[idx] || {};
+    var url = item.url || '';
+    var isVid = item.type === 'video';
+    if (el) {
+        var parent = el.parentNode;
+        var next;
+        if (isVid) {
+            next = document.createElement('video');
+            next.controls = true;
+            next.playsInline = true;
+            next.src = url;
+            next.style.cssText = 'width:100%;max-height:280px;border-radius:12px;background:#000;';
+        } else {
+            next = document.createElement('img');
+            next.src = url;
+            next.alt = '';
+            next.style.cssText = 'width:100%;max-height:280px;object-fit:cover;border-radius:12px;display:block;';
+        }
+        next.id = 'news-carousel-media';
+        parent.replaceChild(next, el);
+    }
+    if (dots) dots.textContent = (idx + 1) + ' / ' + media.length;
+}
+
 async function openNewsDetail(id) {
     var box = document.getElementById('news-detail-content');
     if (!box) return;
@@ -3329,6 +3366,25 @@ async function openNewsDetail(id) {
         var n = await apiGet('/api/news/' + id);
         var dateLabel = n.date_label || 'Недавно';
         var html = '';
+        var media = (n.media || []).slice(0, 10);
+        if (media.length) {
+            window._newsMediaIdx = 0;
+            window._newsMedia = media;
+            var m0 = media[0].url || '';
+            var isVid0 = (media[0].type === 'video');
+            html += '<div class="photo-carousel">';
+            if (isVid0) {
+                html += '<video id="news-carousel-media" src="' + m0 + '" controls playsinline style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>';
+            } else {
+                html += '<img id="news-carousel-media" src="' + m0 + '" alt="" style="width:100%;max-height:280px;object-fit:cover;border-radius:12px;display:block;">';
+            }
+            if (media.length > 1) {
+                html += '<button type="button" class="pc-btn pc-prev" onclick="newsMediaNav(-1)">‹</button>';
+                html += '<button type="button" class="pc-btn pc-next" onclick="newsMediaNav(1)">›</button>';
+            }
+            html += '<div class="pc-dots" id="news-carousel-dots">1 / ' + media.length + '</div>';
+            html += '</div>';
+        }
         html += '<div class="news-meta-row" style="margin-top:0;margin-bottom:10px;">';
         html += '<span class="news-date">' + String(dateLabel).replace(/</g,'&lt;') + '</span>';
         html += '<span class="news-views">👁 ' + (n.views_count || 0) + '</span>';
@@ -4259,7 +4315,10 @@ function onListingPhotosPicked(input) {
     var files = input.files ? Array.prototype.slice.call(input.files) : [];
     input.value = '';
     files.forEach(function(file) {
-        if (!file.type || file.type.indexOf('image/') !== 0) return;
+        if (!file.type || file.type.indexOf('image/') !== 0) {
+            try { tg.showAlert('В объявления можно загружать только фото (не видео)'); } catch(e){}
+            return;
+        }
         if (listingPickedPhotos.length >= 5) {
             try { tg.showAlert('Максимум 5 фото'); } catch(e){}
             return;
