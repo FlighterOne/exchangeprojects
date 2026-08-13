@@ -1126,7 +1126,7 @@
     <div id="page-home" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
             <div class="section-title" style="margin-bottom:0;">Лента объявлений</div>
-            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showPage('listing-create')">+ Создать</button>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()">+ Создать</button>
         </div>
         <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
     </div>
@@ -1292,7 +1292,10 @@
 
     <!-- EXCHANGE -->
     <div id="page-exchange" class="page">
-        <div class="section-title">Биржа</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div class="section-title" style="margin:0;">Биржа</div>
+            <button type="button" class="btn" style="width:auto;padding:8px 12px;" onclick="openCreateTypeSheet('sale')">+ Создать</button>
+        </div>
         <div class="search-bar">
             <input class="form-input" type="search" id="exchange-q" placeholder="Поиск по бирже..." enterkeyhint="search">
             <button type="button" class="search-btn" onclick="runExchangeSearch()" title="Найти">🔍</button>
@@ -1355,16 +1358,164 @@
     </div>
 
     <!-- MY LISTINGS -->
+
+    <div id="page-freelance" class="page">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div class="section-title" style="margin:0;">Фриланс</div>
+            <button type="button" class="btn" style="width:auto;padding:8px 12px;" onclick="openCreateTypeSheet('freelance')">+ Создать</button>
+        </div>
+        <div class="search-bar" style="margin-top:12px;">
+            <input class="form-input" type="search" id="fl-q" placeholder="Поиск по ключевым словам..." enterkeyhint="search">
+            <button type="button" class="search-btn" onclick="runFreelanceSearch()" title="Найти">🔍</button>
+        </div>
+        <div class="filters-heading">Фильтры</div>
+        <div class="form-group">
+            <label class="form-label">Вид услуги</label>
+            <div class="type-toggle" style="display:flex;gap:8px;">
+                <button type="button" class="btn btn-secondary type-toggle-btn active" id="fl-kind-all" data-v="" onclick="setFlKind(this)" style="flex:1;">Все</button>
+                <button type="button" class="btn btn-secondary type-toggle-btn" id="fl-kind-order" data-v="order" onclick="setFlKind(this)" style="flex:1;">Заказать</button>
+                <button type="button" class="btn btn-secondary type-toggle-btn" id="fl-kind-execute" data-v="execute" onclick="setFlKind(this)" style="flex:1;">Исполнять</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Вид товара</label>
+            <div class="type-toggle" style="display:flex;gap:8px;">
+                <button type="button" class="btn btn-secondary type-toggle-btn active" data-v="" onclick="setFlProduct(this)" style="flex:1;">Все</button>
+                <button type="button" class="btn btn-secondary type-toggle-btn" data-v="бот" onclick="setFlProduct(this)" style="flex:1;">Бот</button>
+                <button type="button" class="btn btn-secondary type-toggle-btn" data-v="сайт" onclick="setFlProduct(this)" style="flex:1;">Сайт</button>
+            </div>
+        </div>
+        <div class="form-group" id="fl-rating-wrap" style="display:none;">
+            <label class="form-label" id="fl-rating-label">Рейтинг от</label>
+            <div class="star-row">
+                <button type="button" class="star-btn" onclick="setFlRating(1)">★1</button>
+                <button type="button" class="star-btn" onclick="setFlRating(2)">★2</button>
+                <button type="button" class="star-btn" onclick="setFlRating(3)">★3</button>
+                <button type="button" class="star-btn" onclick="setFlRating(4)">★4</button>
+                <button type="button" class="star-btn" onclick="setFlRating(5)">★5</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Цена</label>
+            <div style="display:flex;gap:8px;">
+                <input class="form-input" type="number" id="fl-price-from" placeholder="от" style="flex:1;">
+                <input class="form-input" type="number" id="fl-price-to" placeholder="до" style="flex:1;">
+            </div>
+        </div>
+        <div id="freelance-results" style="margin-top:14px;"></div>
+    </div>
+
+    <div id="page-create-freelance" class="page">
+        <button class="back-link" onclick="cancelFreelanceCreate()">← Назад</button>
+        <div class="section-title" id="fl-create-title">Фриланс объявление</div>
+        <div id="fl-step-1">
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input class="form-input" id="fl-title" placeholder="Название услуги / заказа">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Описание</label>
+                <textarea class="form-input" id="fl-desc" rows="4" placeholder="Описание"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Вид услуги</label>
+                <div class="type-toggle" style="display:flex;gap:8px;">
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-order" onclick="selectFlKind('order')" style="flex:1;">Заказ</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-execute" onclick="selectFlKind('execute')" style="flex:1;">Исполнение</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Кто выполняет</label>
+                <div class="type-toggle" style="display:flex;gap:8px;">
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-partner" onclick="selectFlType('partner')" style="flex:1;">Работник X-Cod</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-own" onclick="selectFlType('own')" style="flex:1;">Самостоятельно</button>
+                </div>
+            </div>
+            <div id="fl-partner-fields" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">Номер договора X-Cod</label>
+                    <input class="form-input" id="fl-contract" placeholder="№ договора">
+                </div>
+                <label style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+                    <input type="checkbox" id="fl-analytics"> Согласие на передачу данных и аналитики
+                </label>
+            </div>
+            <div id="fl-own-fields" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">Портфолио / удостоверение</label>
+                    <input class="form-input" id="fl-portfolio" placeholder="https://...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Вид (бот / сайт / другое)</label>
+                <input class="form-input" id="fl-product-type" placeholder="бот, сайт...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цена ($)</label>
+                <input class="form-input" type="number" id="fl-price" placeholder="100" min="1">
+            </div>
+            <button class="btn" onclick="flCreateNextPhotos()">Далее</button>
+        </div>
+        <div id="fl-step-photos" style="display:none;">
+            <div class="info-block" style="margin-bottom:14px;">От 1 до 5 фото. Первое — титульное. Можно менять порядок перетаскиванием.</div>
+            <div class="file-drop" onclick="document.getElementById('fl-photos').click()">
+                <div class="fd-icon">🖼️</div>
+                <div class="fd-title">Загрузить фото</div>
+                <div class="fd-sub">JPG, PNG · макс. 5</div>
+            </div>
+            <input type="file" id="fl-photos" accept="image/*" multiple style="display:none;" onchange="onFlPhotosPicked(this)">
+            <div id="fl-photos-list" class="photo-grid"></div>
+            <button class="btn" style="margin-top:12px;" onclick="flCreateNextPay()">Далее</button>
+        </div>
+        <div id="fl-step-pay" style="display:none;">
+            <div class="info-block" style="margin-bottom:14px;">Оплата публикации фриланс-объявления</div>
+            <div class="support-grid" style="margin-bottom:14px;">
+                <button type="button" class="support-tile" id="fl-plan-month" onclick="selectFlPlan('month')">
+                    <div class="support-tile-icon">📅</div>
+                    <div class="support-tile-title">1 месяц</div>
+                    <div style="font-size:16px;font-weight:700;margin-top:4px;">2.5$</div>
+                    <div style="font-size:11px;color:var(--accent);margin-top:4px;">популярное</div>
+                </button>
+                <button type="button" class="support-tile" id="fl-plan-week" onclick="selectFlPlan('week')">
+                    <div class="support-tile-icon">🗓️</div>
+                    <div class="support-tile-title">1 неделя</div>
+                    <div style="font-size:16px;font-weight:700;margin-top:4px;">1$</div>
+                </button>
+                <button type="button" class="support-tile" id="fl-plan-quarter" onclick="selectFlPlan('quarter')">
+                    <div class="support-tile-icon">💎</div>
+                    <div class="support-tile-title">3 месяца</div>
+                    <div style="font-size:16px;font-weight:700;margin-top:4px;">6.5$</div>
+                    <div style="font-size:11px;color:var(--success);margin-top:4px;">выгодно</div>
+                </button>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div style="font-size:15px;">Итого: <b id="fl-pay-total">—</b></div>
+                <button type="button" class="btn" style="width:auto;padding:10px 18px;" onclick="submitFreelanceListing()">Оплатить</button>
+            </div>
+        </div>
+    </div>
+
     <div id="page-my-listings" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
             <div class="section-title" style="margin-bottom:0;">Мои объявления</div>
-            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showPage('listing-create')">+ Создать</button>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()">+ Создать</button>
         </div>
         <div class="seg-toggle" id="my-listings-seg" style="grid-template-columns:1fr 1fr 1fr;">
             <button type="button" class="active" id="my-seg-mod" onclick="setMyListingsTab('moderation')">На модерации <span class="seg-count" id="my-cnt-mod">0</span></button>
             <button type="button" id="my-seg-active" onclick="setMyListingsTab('active')">Активные <span class="seg-count" id="my-cnt-active">0</span></button>
             <button type="button" id="my-seg-done" onclick="setMyListingsTab('completed')">Завершённые <span class="seg-count" id="my-cnt-done">0</span></button>
         </div>
+        <div id="my-cat-filters" style="display:flex;gap:8px;margin:10px 0;">
+            <button type="button" class="btn btn-secondary type-toggle-btn active" id="my-cat-all" onclick="setMyListingsCat('all')" style="flex:1;">Все</button>
+            <button type="button" class="btn btn-secondary type-toggle-btn" id="my-cat-sale" onclick="setMyListingsCat('sale')" style="flex:1;">Продажа</button>
+            <button type="button" class="btn btn-secondary type-toggle-btn" id="my-cat-fl" onclick="setMyListingsCat('freelance')" style="flex:1;">Фриланс</button>
+        </div>
+        <div id="my-fl-kind" style="display:none;gap:8px;margin-bottom:10px;" class="type-toggle">
+            <button type="button" class="btn btn-secondary type-toggle-btn active" data-v="" onclick="setMyFlKind(this)" style="flex:1;">Все</button>
+            <button type="button" class="btn btn-secondary type-toggle-btn" data-v="order" onclick="setMyFlKind(this)" style="flex:1;">Заказы</button>
+            <button type="button" class="btn btn-secondary type-toggle-btn" data-v="execute" onclick="setMyFlKind(this)" style="flex:1;">Исполнение</button>
+        </div>
+
         <div id="my-listings-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
@@ -3739,6 +3890,220 @@ function listingFilesBlockHtml(files, mode, id) {
     return html;
 }
 
+
+/* ========== FREELANCE ========== */
+var flFilters = { kind: '', product: '', rating: 0, priceFrom: '', priceTo: '' };
+var flCreate = { kind: '', type: '', plan: '' };
+var flPickedPhotos = [];
+
+function setFlKind(btn) {
+    flFilters.kind = btn.getAttribute('data-v') || '';
+    document.querySelectorAll('#page-freelance [id^="fl-kind-"]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    var wrap = document.getElementById('fl-rating-wrap');
+    var lab = document.getElementById('fl-rating-label');
+    if (flFilters.kind === 'order') {
+        // ищем заказчика → рейтинг покупателя
+        if (wrap) wrap.style.display = 'block';
+        if (lab) lab.textContent = 'Рейтинг покупателя от';
+    } else if (flFilters.kind === 'execute') {
+        if (wrap) wrap.style.display = 'block';
+        if (lab) lab.textContent = 'Рейтинг продавца от';
+    } else {
+        if (wrap) wrap.style.display = 'none';
+    }
+}
+function setFlProduct(btn) {
+    flFilters.product = btn.getAttribute('data-v') || '';
+    btn.parentNode.querySelectorAll('.type-toggle-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+}
+function setFlRating(r) {
+    flFilters.rating = r;
+    document.querySelectorAll('#fl-rating-wrap .star-btn').forEach(function(b){
+        b.classList.toggle('active', parseInt(b.textContent.replace(/\D/g,''),10) === r || parseInt(b.getAttribute('data-r')||'0',10)===r);
+    });
+}
+async function runFreelanceSearch() {
+    var box = document.getElementById('freelance-results');
+    if (!box) return;
+    box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        var data = await apiGet('/api/listings?category=freelance');
+        var items = data.listings || data || [];
+        if (!Array.isArray(items)) items = data.listings || [];
+        var q = (document.getElementById('fl-q').value || '').trim().toLowerCase();
+        var pf = parseFloat(document.getElementById('fl-price-from').value);
+        var pt = parseFloat(document.getElementById('fl-price-to').value);
+        items = items.filter(function(l) {
+            if ((l.category || '') !== 'freelance' && l.category) return false;
+            // if API doesn't filter, filter client-side
+            if (l.category && l.category !== 'freelance') return false;
+            if (flFilters.kind && (l.freelance_kind || '') !== flFilters.kind) return false;
+            if (flFilters.product) {
+                var ptxt = ((l.product_type || '') + ' ' + (l.title || '')).toLowerCase();
+                if (ptxt.indexOf(flFilters.product.toLowerCase()) < 0) return false;
+            }
+            if (q) {
+                var blob = ((l.title||'')+' '+(l.description||'')).toLowerCase();
+                if (blob.indexOf(q) < 0) return false;
+            }
+            var price = Number(l.price || 0);
+            if (!isNaN(pf) && document.getElementById('fl-price-from').value !== '' && price < pf) return false;
+            if (!isNaN(pt) && document.getElementById('fl-price-to').value !== '' && price > pt) return false;
+            return true;
+        });
+        // if empty because category not set on old data, show nothing
+        if (!items.length) {
+            box.innerHTML = '<div class="empty">Ничего не найдено</div>';
+            return;
+        }
+        box.innerHTML = items.map(function(l) {
+            var cover = l.cover_photo || (l.photos && l.photos[0] && (l.photos[0].content||l.photos[0].url)) || '';
+            var badge = (l.freelance_kind === 'order') ? 'Фриланс-заказ' : (l.freelance_kind === 'execute' ? 'Фриланс-исполнение' : 'Фриланс');
+            return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                (cover ? '<img class="listing-cover" src="' + cover + '" alt="">' : '') +
+                '<div style="font-size:11px;color:var(--accent);margin-bottom:4px;">' + badge + '</div>' +
+                '<div class="ltitle-row"><div class="ltitle">' + (l.title||'').replace(/</g,'&lt;') + '</div></div>' +
+                '<div class="ldesc">' + String(l.description||'').replace(/</g,'&lt;').slice(0,140) + '</div>' +
+                '<div class="meta"><div class="price">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div></div></div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty">' + e.message + '</div>';
+    }
+}
+
+function openCreateTypeSheet(prefer) {
+    var old = document.getElementById('create-type-sheet');
+    if (old) old.remove();
+    var sheet = document.createElement('div');
+    sheet.id = 'create-type-sheet';
+    sheet.setAttribute('style','position:fixed;left:0;right:0;top:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center;');
+    sheet.onclick = function(e){ if (e.target === sheet) sheet.remove(); };
+    sheet.innerHTML =
+        '<div style="width:100%;max-width:480px;background:var(--bg,#1c1c1e);border-radius:16px 16px 0 0;padding:16px 16px 28px;box-sizing:border-box;">' +
+        '<div style="font-size:16px;font-weight:600;margin-bottom:12px;">Создать объявление</div>' +
+        '<button type="button" class="btn" style="margin-bottom:8px;" onclick="document.getElementById(\'create-type-sheet\').remove();startSaleCreate()">Продажа</button>' +
+        '<button type="button" class="btn btn-secondary" onclick="document.getElementById(\'create-type-sheet\').remove();startFreelanceCreate()">Фриланс</button>' +
+        '</div>';
+    document.body.appendChild(sheet);
+}
+function startSaleCreate() {
+    if (typeof createListing === 'function') createListing();
+    else if (typeof openCreateListing === 'function') openCreateListing();
+    else showPage('listing-create');
+}
+function startFreelanceCreate() {
+    flCreate = { kind: '', type: '', plan: '' };
+    flPickedPhotos = [];
+    ['fl-title','fl-desc','fl-contract','fl-portfolio','fl-product-type','fl-price'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.value='';
+    });
+    var an=document.getElementById('fl-analytics'); if(an) an.checked=false;
+    document.getElementById('fl-step-1').style.display='block';
+    document.getElementById('fl-step-photos').style.display='none';
+    document.getElementById('fl-step-pay').style.display='none';
+    showPage('create-freelance');
+}
+function cancelFreelanceCreate() {
+    showPage('freelance');
+    try { runFreelanceSearch(); } catch(e){}
+}
+function selectFlKind(k) {
+    flCreate.kind = k;
+    document.getElementById('flc-order').classList.toggle('active', k==='order');
+    document.getElementById('flc-execute').classList.toggle('active', k==='execute');
+}
+function selectFlType(tp) {
+    flCreate.type = tp;
+    document.getElementById('flc-partner').classList.toggle('active', tp==='partner');
+    document.getElementById('flc-own').classList.toggle('active', tp==='own');
+    document.getElementById('fl-partner-fields').style.display = tp==='partner' ? 'block' : 'none';
+    document.getElementById('fl-own-fields').style.display = tp==='own' ? 'block' : 'none';
+}
+function flCreateNextPhotos() {
+    if (!document.getElementById('fl-title').value.trim()) { tg.showAlert('Укажите название'); return; }
+    if (!document.getElementById('fl-desc').value.trim()) { tg.showAlert('Укажите описание'); return; }
+    if (!flCreate.kind) { tg.showAlert('Выберите вид услуги'); return; }
+    if (!flCreate.type) { tg.showAlert('Выберите: X-Cod или самостоятельно'); return; }
+    if (flCreate.type==='partner') {
+        if (!document.getElementById('fl-contract').value.trim()) { tg.showAlert('Укажите номер договора'); return; }
+        if (!document.getElementById('fl-analytics').checked) { tg.showAlert('Нужно согласие на аналитику'); return; }
+    } else {
+        if (!document.getElementById('fl-portfolio').value.trim()) { tg.showAlert('Укажите портфолио'); return; }
+    }
+    if (!(parseFloat(document.getElementById('fl-price').value)>0)) { tg.showAlert('Укажите цену'); return; }
+    document.getElementById('fl-step-1').style.display='none';
+    document.getElementById('fl-step-photos').style.display='block';
+}
+function onFlPhotosPicked(input) {
+    var files = input.files ? Array.prototype.slice.call(input.files) : [];
+    input.value='';
+    files.forEach(function(file){
+        if (!file.type || file.type.indexOf('image/')!==0) { try{tg.showAlert('Только фото');}catch(e){} return; }
+        if (flPickedPhotos.length>=5) { try{tg.showAlert('Максимум 5');}catch(e){} return; }
+        var reader=new FileReader();
+        reader.onload=function(){ flPickedPhotos.push({name:file.name, content:reader.result}); renderFlPhotos(); };
+        reader.readAsDataURL(file);
+    });
+}
+function renderFlPhotos() {
+    var box=document.getElementById('fl-photos-list');
+    if (!box) return;
+    box.innerHTML = flPickedPhotos.map(function(ph,idx){
+        return '<div class="photo-thumb"><img src="'+ph.content+'" alt=""><button type="button" class="ph-x" onclick="flPickedPhotos.splice('+idx+',1);renderFlPhotos();">×</button>'+(idx===0?'<span class="ph-cover">титульная</span>':'')+'</div>';
+    }).join('');
+}
+function flCreateNextPay() {
+    if (!flPickedPhotos.length) { tg.showAlert('Загрузите хотя бы 1 фото'); return; }
+    document.getElementById('fl-step-photos').style.display='none';
+    document.getElementById('fl-step-pay').style.display='block';
+    if (!flCreate.plan) selectFlPlan('month');
+}
+function selectFlPlan(plan) {
+    flCreate.plan = plan;
+    var prices={month:2.5, week:1, quarter:6.5};
+    ['month','week','quarter'].forEach(function(p){
+        var el=document.getElementById('fl-plan-'+p);
+        if (el) el.style.outline = (p===plan) ? '2px solid var(--accent)' : 'none';
+    });
+    var tot=document.getElementById('fl-pay-total');
+    if (tot) tot.textContent = (prices[plan]||0) + ' $';
+}
+async function submitFreelanceListing() {
+    if (!flCreate.plan) { tg.showAlert('Выберите срок публикации'); return; }
+    try {
+        var body = {
+            category: 'freelance',
+            freelance_kind: flCreate.kind,
+            listing_type: flCreate.type,
+            title: document.getElementById('fl-title').value.trim(),
+            description: document.getElementById('fl-desc').value.trim(),
+            price: parseFloat(document.getElementById('fl-price').value),
+            product_type: document.getElementById('fl-product-type').value.trim() || 'IT-услуга',
+            publish_plan: flCreate.plan,
+            photos_meta: flPickedPhotos.map(function(f,idx){ return {name:f.name, content:f.content, order:idx}; }),
+            files_meta: []
+        };
+        if (flCreate.type==='partner') {
+            body.contract_number = document.getElementById('fl-contract').value.trim();
+            body.analytics_consent = document.getElementById('fl-analytics').checked;
+        } else {
+            body.portfolio_url = document.getElementById('fl-portfolio').value.trim();
+        }
+        await apiPost('/api/listings', body);
+        tg.showAlert('Объявление отправлено на модерацию');
+        cancelFreelanceCreate();
+        try { if (userData) { var u=await apiGet('/api/me'); Object.assign(userData,u); } } catch(e){}
+    } catch (e) {
+        tg.showAlert(e.message || 'Ошибка');
+    }
+}
+
+/* create sheet from home / my listings */
+function openCreateFromHome() { openCreateTypeSheet(); }
+
+
 function listingPhotoNav(dir) {
     var photos = window._listingPhotos || [];
     if (!photos.length) return;
@@ -3801,6 +4166,13 @@ async function openListing(id) {
             html += '<div class="pc-dots" id="listing-carousel-dots">1 / ' + photos.length + '</div>';
             html += '</div>';
         }
+        var catBadge = '';
+        if ((l.category || '') === 'freelance') {
+            catBadge = (l.freelance_kind === 'order') ? 'Фриланс-заказ' : (l.freelance_kind === 'execute' ? 'Фриланс-исполнение' : 'Фриланс');
+        } else {
+            catBadge = 'Продажа';
+        }
+        html += '<div style="font-size:12px;color:var(--accent);margin-bottom:6px;">' + catBadge + '</div>';
         html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:4px;margin-bottom:8px;">';
         html += '<div class="section-title" style="font-size:18px;margin:0;flex:1;">' + (l.title || '').replace(/</g,'&lt;') + '</div>';
         if (isOwner) {
@@ -3929,6 +4301,18 @@ function startBuyListing(id) {
         tg.showAlert('Недостаточно средств. Баланс: ' + bal + '$');
         return;
     }
+    if ((l.category || '') === 'freelance') {
+        var hours = prompt('Срок выполнения работ (в часах):', '24');
+        if (hours === null) return;
+        hours = parseInt(hours, 10);
+        if (!hours || hours < 1) { tg.showAlert('Укажите срок в часах'); return; }
+        window._buyWorkHours = hours;
+        var msgF = 'Купить услугу за ' + price + '$?\n\nСрок выполнения: ' + hours + ' ч. Таймер запустится после подтверждения.';
+        if (tg && typeof tg.showConfirm === 'function') {
+            tg.showConfirm(msgF, function(ok){ if (ok) confirmBuyListing(id); });
+        } else if (confirm(msgF)) confirmBuyListing(id);
+        return;
+    }
     var msg = 'Точно хотите купить этот товар за ' + price + '$?\n\nПосле оплаты у вас будет 120 минут на проверку файлов от продавца.';
     if (tg && typeof tg.showConfirm === 'function') {
         tg.showConfirm(msg, function(ok) { if (ok) confirmBuyListing(id); });
@@ -3939,7 +4323,12 @@ function startBuyListing(id) {
 
 async function confirmBuyListing(id) {
     try {
-        var res = await apiPost('/api/orders', { listing_id: id });
+        var payload = { listing_id: id };
+        if (window._buyWorkHours) {
+            payload.work_hours = window._buyWorkHours;
+            window._buyWorkHours = null;
+        }
+        var res = await apiPost('/api/orders', payload);
         if (res.balance != null) setBalance(res.balance);
         tg.showAlert('#' + res.order_id + ' создан. Файлы доступны.');
         await loadOrders();
@@ -4827,6 +5216,24 @@ async function cancelRequest(id) {
 
 var _myListingsTab = 'moderation';
 var _myListingsCache = [];
+var _myListingsCat = 'all';
+var _myFlKind = '';
+function setMyListingsCat(cat) {
+    _myListingsCat = cat || 'all';
+    ['all','sale','freelance'].forEach(function(c){
+        var el=document.getElementById('my-cat-'+(c==='freelance'?'fl':c));
+        if (el) el.classList.toggle('active', c===_myListingsCat);
+    });
+    var fk=document.getElementById('my-fl-kind');
+    if (fk) fk.style.display = (_myListingsCat==='freelance') ? 'flex' : 'none';
+    loadMyListings();
+}
+function setMyFlKind(btn) {
+    _myFlKind = btn.getAttribute('data-v') || '';
+    btn.parentNode.querySelectorAll('.type-toggle-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    loadMyListings();
+}
 function setMyListingsTab(tab) {
     _myListingsTab = tab || 'moderation';
     ['mod','active','done'].forEach(function(k) {
@@ -4857,6 +5264,12 @@ function renderMyListings() {
     var box = document.getElementById('my-listings-list');
     if (!box) return;
     var items = _myListingsCache || [];
+    if (_myListingsCat === 'sale') {
+        items = items.filter(function(l){ return (l.category || 'sale') !== 'freelance'; });
+    } else if (_myListingsCat === 'freelance') {
+        items = items.filter(function(l){ return (l.category || '') === 'freelance'; });
+        if (_myFlKind) items = items.filter(function(l){ return (l.freelance_kind || '') === _myFlKind; });
+    }
     var cMod = items.filter(function(l){ return l.status === 'pending' || l.status === 'refund_moderation'; }).length;
     var cAct = items.filter(function(l){ return l.status === 'active'; }).length;
     var cDone = items.filter(function(l){ return l.status !== 'active' && l.status !== 'pending' && l.status !== 'refund_moderation' && l.status !== 'deleted'; }).length;
@@ -6001,6 +6414,11 @@ async function loadAdminListings() {
         }
         box.innerHTML = items.map(function(l) {
             var typeLabel = l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар';
+    if ((l.category || '') === 'freelance') {
+        typeLabel = (l.freelance_kind === 'order') ? 'Фриланс-заказ' : (l.freelance_kind === 'execute' ? 'Фриланс-исполнение' : 'Фриланс');
+    } else {
+        typeLabel = 'Продажа · ' + typeLabel;
+    }
             var nick = l.seller_username ? ('@' + l.seller_username) : ('ID ' + l.seller_id);
             return '<div class="list-item" style="cursor:pointer;" onclick="openAdminListingDetail(' + l.id + ')">' +
                 '<div class="top"><div class="title">' + (l.title || '').replace(/</g, '&lt;') +
