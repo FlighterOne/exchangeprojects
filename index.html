@@ -3264,7 +3264,19 @@ async function loadNewsPinned() {
                     var body = String(n.body || '').replace(/</g,'&lt;');
                     if (body.length > 140) body = body.slice(0, 140) + '…';
                     var dateLabel = n.date_label || 'Недавно';
-                    var cover = n.cover_photo || (n.media && n.media[0] && n.media[0].url) || '';
+                    var cover = '';
+                    if (n.media && n.media.length && n.media[0] && n.media[0].url) {
+                        var u = String(n.media[0].url);
+                        // не брать аватарки/иконки пользователей за обложку
+                        if (u.indexOf('/userpic') < 0 && u.indexOf('avatar') < 0 && u.indexOf('peer_photo') < 0) {
+                            cover = u;
+                        }
+                    } else if (n.cover_photo) {
+                        var u2 = String(n.cover_photo);
+                        if (u2.indexOf('/userpic') < 0 && u2.indexOf('avatar') < 0 && u2.indexOf('peer_photo') < 0) {
+                            cover = u2;
+                        }
+                    }
                     return '<div class="listing-card" data-nid="' + n.id + '">' +
                         (cover ? ('<img class="listing-cover" src="' + cover + '" alt="">') : '') +
                         '<div class="news-meta-row" style="margin-top:0;margin-bottom:8px;">' +
@@ -3366,7 +3378,10 @@ async function openNewsDetail(id) {
         var n = await apiGet('/api/news/' + id);
         var dateLabel = n.date_label || 'Недавно';
         var html = '';
-        var media = (n.media || []).slice(0, 10);
+        var media = (n.media || []).filter(function(m) {
+            var u = String((m && m.url) || '');
+            return u && u.indexOf('/userpic') < 0 && u.indexOf('avatar') < 0 && u.indexOf('peer_photo') < 0;
+        }).slice(0, 10);
         if (media.length) {
             window._newsMediaIdx = 0;
             window._newsMedia = media;
@@ -3807,12 +3822,12 @@ async function openListing(id) {
 
 
         html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">';
-        html += '<div style="font-size:22px;font-weight:700;color:var(--success);">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>';
         if (!isOwner) {
-            html += '<span class="seller-link" style="text-align:right;" data-uid="' + l.seller_id + '" onclick="return goProfile(' + l.seller_id + ', event)">' + sellerLabel.replace(/</g,'&lt;') + '</span>';
+            html += '<span class="seller-link" style="text-align:left;" data-uid="' + l.seller_id + '" onclick="return goProfile(' + l.seller_id + ', event)">' + sellerLabel.replace(/</g,'&lt;') + '</span>';
         } else {
-            html += '<span style="text-align:right;color:var(--hint);font-size:13px;">Ваше объявление</span>';
+            html += '<span style="text-align:left;color:var(--hint);font-size:13px;">Ваше объявление</span>';
         }
+        html += '<div style="font-size:22px;font-weight:700;color:var(--success);text-align:right;">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>';
         html += '</div>';
 
         if (!isOwner) {
