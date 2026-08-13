@@ -1092,36 +1092,36 @@
     </div>
     <div class="drawer-nav">
         <button class="drawer-item active" data-page="home" onclick="navTo('home')">
-            <span class="di">🏠</span> Главная
+            <span class="di">🏠</span> <span data-i18n="home">Главная</span>
         </button>
         <button class="drawer-item" data-page="news" onclick="navTo('news')">
-            <span class="di">📰</span> Новости
+            <span class="di">📰</span> <span data-i18n="news">Новости</span>
         </button>
         <button class="drawer-item" data-page="exchange" onclick="navTo('exchange')">
-            <span class="di">📊</span> Биржа
+            <span class="di">📊</span> <span data-i18n="exchange">Биржа</span>
         </button>
         <button class="drawer-item" data-page="freelance" onclick="navTo('freelance')">
-            <span class="di">🛠️</span> Фриланс
+            <span class="di">🛠️</span> <span data-i18n="freelance">Фриланс</span>
         </button>
         <button class="drawer-item" data-page="balance" onclick="navTo('balance')">
-            <span class="di">💵</span> Баланс
+            <span class="di">💵</span> <span data-i18n="balance">Баланс</span>
         </button>
         <button class="drawer-item" data-page="favorites" onclick="navTo('favorites')">
-            <span class="di">⭐</span> Избранные
+            <span class="di">⭐</span> <span data-i18n="favorites">Избранные</span>
         </button>
         <button class="drawer-item" data-page="my-listings" onclick="navTo('my-listings')">
-            <span class="di">📋</span> Мои объявления
+            <span class="di">📋</span> <span data-i18n="my_listings">Мои объявления</span>
         </button>
         <button class="drawer-item" data-page="orders" onclick="navTo('orders')">
-            <span class="di">📦</span> История заказов
+            <span class="di">📦</span> <span data-i18n="orders">История заказов</span>
         </button>
     </div>
     <div class="drawer-bottom">
         <button class="drawer-item" data-page="settings" onclick="navTo('settings')">
-            <span class="di">⚙️</span> Настройки
+            <span class="di">⚙️</span> <span data-i18n="settings">Настройки</span>
         </button>
         <button class="drawer-item" data-page="support" onclick="navTo('support')">
-            <span class="di">💬</span> Поддержка
+            <span class="di">💬</span> <span data-i18n="support">Поддержка</span>
         </button>
         <button class="drawer-item" data-page="admin" id="drawer-admin" style="display:none;" onclick="navTo('admin')">
             <span class="di">🛡</span> Панель
@@ -1147,8 +1147,8 @@
     <!-- HOME -->
     <div id="page-home" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-            <div class="section-title" style="margin-bottom:0;">Лента объявлений</div>
-            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()">+ Создать</button>
+            <div class="section-title" style="margin-bottom:0;"><span data-i18n="feed_title">Лента объявлений</span></div>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()" data-i18n="create">+ Создать</button>
         </div>
         <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
     </div>
@@ -1315,8 +1315,8 @@
     <!-- EXCHANGE -->
     <div id="page-exchange" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
-            <div class="section-title" style="margin:0;flex:1;min-width:0;">Биржа</div>
-            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startSaleCreate()">+ Создать</button>
+            <div class="section-title" style="margin:0;flex:1;min-width:0;" data-i18n="exchange">Биржа</div>
+            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startSaleCreate()" data-i18n="create">+ Создать</button>
         </div>
         <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
             <input class="form-input" type="search" id="exchange-q" placeholder="Поиск по бирже..." enterkeyhint="search">
@@ -1326,7 +1326,7 @@
             <div class="form-label" style="margin-bottom:6px;">История поиска</div>
             <div class="search-history" id="exchange-history"></div>
         </div>
-                <div class="filters-heading">Фильтры</div>
+                <div class="filters-heading" data-i18n="filters">Фильтры</div>
         <div class="form-group">
             <label class="form-label">Тип</label>
             <div class="type-toggle" style="display:flex;gap:8px;">
@@ -1383,14 +1383,14 @@
 
     <div id="page-freelance" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
-            <div class="section-title" style="margin:0;flex:1;min-width:0;">Фриланс</div>
-            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startFreelanceCreate()">+ Создать</button>
+            <div class="section-title" style="margin:0;flex:1;min-width:0;" data-i18n="freelance">Фриланс</div>
+            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startFreelanceCreate()" data-i18n="create">+ Создать</button>
         </div>
         <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
             <input class="form-input" type="search" id="fl-q" placeholder="Поиск по ключевым словам..." enterkeyhint="search">
             <button type="button" class="search-btn" onclick="runFreelanceSearch()" title="Найти">🔍</button>
         </div>
-        <div class="filters-heading">Фильтры</div>
+        <div class="filters-heading" data-i18n="filters">Фильтры</div>
         <div class="form-group">
             <label class="form-label">Вид услуги</label>
             <div class="type-toggle" style="display:flex;gap:8px;">
@@ -1519,8 +1519,8 @@
 
     <div id="page-my-listings" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-            <div class="section-title" style="margin-bottom:0;">Мои объявления</div>
-            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()">+ Создать</button>
+            <div class="section-title" style="margin-bottom:0;"><span data-i18n="my_listings">Мои объявления</span></div>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()" data-i18n="create">+ Создать</button>
         </div>
         <div class="seg-toggle" id="my-listings-seg" style="grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;box-sizing:border-box;">
             <button type="button" class="active" id="my-seg-mod" onclick="setMyListingsTab('moderation')" style="font-size:12px;padding:8px 4px;min-width:0;overflow:hidden;">Модерация <span class="seg-count" id="my-cnt-mod">0</span></button>
@@ -1651,24 +1651,24 @@
 
     <!-- SETTINGS -->
     <div id="page-settings" class="page">
-        <div class="section-title">Настройки</div>
+        <div class="section-title" data-i18n="settings">Настройки</div>
         <div class="support-grid">
             <button class="support-tile" onclick="showPage('settings-lang')">
                 <div class="support-tile-icon">🌐</div>
-                <div class="support-tile-title">Язык</div>
+                <div class="support-tile-title" data-i18n="language">Язык</div>
                 <div class="support-tile-sub" id="settings-lang-label"><img class="flag-img sm" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"> Русский</div>
             </button>
             <button class="support-tile" onclick="showPage('settings-theme')">
                 <div class="support-tile-icon">🎨</div>
-                <div class="support-tile-title">Тема</div>
+                <div class="support-tile-title" data-i18n="theme">Тема</div>
                 <div class="support-tile-sub" id="settings-theme-label">Как в Telegram</div>
             </button>
         </div>
     </div>
 
     <div id="page-settings-lang" class="page">
-        <button class="back-link" onclick="showPage('settings')">← Назад</button>
-        <div class="section-title">Язык</div>
+        <button class="back-link" onclick="showPage('settings')" data-i18n="back">← Назад</button>
+        <div class="section-title" data-i18n="language">Язык</div>
         <div class="btn-stack" id="lang-list">
             <button class="btn btn-secondary lang-btn" onclick="pickLanguage('ru')"><img class="flag-img" src="https://flagcdn.com/w40/ru.png" alt="" width="22" height="16"> Русский <span class="lang-tag lang-orig-tag">оригинал</span></button>
             <button class="btn btn-secondary lang-btn" onclick="pickLanguage('en')"><img class="flag-img" src="https://flagcdn.com/w40/gb.png" alt="" width="22" height="16"> English <span class="lang-tag lang-orig-tag">оригинал</span></button>
@@ -1680,7 +1680,7 @@
     </div>
 
     <div id="page-settings-theme" class="page">
-        <button class="back-link" onclick="showPage('settings')">← Назад</button>
+        <button class="back-link" onclick="showPage('settings')" data-i18n="back">← Назад</button>
         <div class="section-title">Тема</div>
         <div class="btn-stack">
             <button class="btn btn-secondary theme-btn" id="theme-auto" onclick="setAppTheme('auto')">Как в Telegram</button>
@@ -1691,7 +1691,7 @@
 
     <!-- SUPPORT -->
     <div id="page-support" class="page">
-        <div class="section-title">Поддержка</div>
+        <div class="section-title" data-i18n="support">Поддержка</div>
         <div class="support-grid">
             <button class="support-tile" onclick="openSupportChat()">
                 <div class="support-tile-icon">💬</div>
@@ -2061,7 +2061,8 @@ async function init() {
             if (lab) lab.textContent = 'Загрузка данных с сервера...';
         } catch (e) {}
     }
-    try { applyThemeFromStorage(); } catch (e) {}
+    try { applyThemeFromStorage();
+    try { applyI18n(); } catch (e) {} } catch (e) {}
     setLoad();
 
     try {
@@ -2293,194 +2294,292 @@ function getAppLang() {
     try { return localStorage.getItem('xcod_lang') || 'ru'; } catch (e) { return 'ru'; }
 }
 
+
 var I18N = {
     ru: {
-        support: 'Поддержка',
-        back: '← Назад',
+        support: 'Поддержка', back: '← Назад', menu: 'Меню',
+        home: 'Главная', news: 'Новости', exchange: 'Биржа', freelance: 'Фриланс',
+        balance: 'Баланс', favorites: 'Избранные', my_listings: 'Мои объявления',
+        orders: 'История заказов', settings: 'Настройки', panel: 'Панель',
+        feed_title: 'Лента объявлений', create: '+ Создать', search: 'Поиск',
+        filters: 'Фильтры', language: 'Язык', theme: 'Тема', theme_auto: 'Как в Telegram',
+        theme_light: 'Светлая', theme_dark: 'Тёмная',
         ban_title: 'Доступ к площадке ограничен из‑за нарушений правил сообщества',
-        ban_for: ' на ',
-        ban_days: ' дн.',
-        ban_until_label: 'До разблокировки',
+        ban_for: ' на ', ban_days: ' дн.', ban_until_label: 'До разблокировки',
         ban_support_note: 'Остальные разделы недоступны на время блокировки',
-        support_tg: 'Написать в Telegram',
-        support_mail: 'Написать на почту',
-        support_faq: 'FAQ',
+        support_tg: 'Написать в Telegram', support_mail: 'Написать на почту',
+        support_faq: 'FAQ', support_ticket: 'Написать обращение', support_hire: 'Сотрудничать',
         publish_blocked: 'Модерация площадки ограничила публикацию объявлений для вас',
-        publish_blocked_for: ' на ',
-        publish_blocked_until: ' до ',
-        day_short: 'д',
-        status_blocked: 'Заблокировано',
-        status_pending: 'На модерации',
-        status_active: 'Активно',
-        status_unpublished: 'Снято',
-        status_rejected: 'Отклонено модерацией',
-        status_sold: 'Завершён',
-        status_completed: 'Завершён',
-        status_refund: 'Возврат средств',
-        status_deleted: 'Удалено',
-        restrict_ok: 'Публикация ограничена',
-        ban_ok: 'Пользователь заблокирован',
-        unpublish_ok: 'Снято с публикации',
-        restrict_applied: 'Запрет на публикацию применён',
-        choose_restrict: 'Выберите тип ограничения',
-        in_dev: 'Пока в разработке'
+        publish_blocked_for: ' на ', publish_blocked_until: ' до ', day_short: 'д',
+        status_blocked: 'Заблокировано', status_pending: 'На модерации', status_active: 'Активно',
+        status_unpublished: 'Снято', status_rejected: 'Отклонено модерацией',
+        status_sold: 'Завершён', status_completed: 'Завершён', status_refund: 'Возврат средств',
+        status_deleted: 'Удалено', status_cancelled: 'Отменён', status_buyer_review: 'Проверка покупателем',
+        restrict_ok: 'Публикация ограничена', ban_ok: 'Пользователь заблокирован',
+        unpublish_ok: 'Снято с публикации', restrict_applied: 'Запрет на публикацию применён',
+        choose_restrict: 'Выберите тип ограничения', in_dev: 'Пока в разработке',
+        topup: 'Пополнить', withdraw: 'Вывести', my_tx: 'Мои транзакции',
+        sale: 'Продажа', all: 'Все', order: 'Заказ', execute: 'Исполнение',
+        moderation: 'Модерация', active: 'Активные', completed_tab: 'Завершён.',
+        loading: 'Загрузка данных с сервера…', empty: 'Пусто', no_listings: 'Объявлений нет',
+        no_news: 'Пока нет новостей', save: 'Сохранить', cancel: 'Отмена', next: 'Далее',
+        pay: 'Оплатить', buy: 'Купить', write: 'Написать', profile: 'Профиль',
+        price: 'Цена', from: 'от', to: 'до', type: 'Тип', product_type: 'Вид товара',
+        rating_from: 'Рейтинг от', service_type: 'Вид услуги', order_svc: 'Заказать', execute_svc: 'Исполнять',
+        partner: 'Партнёр', own_product: 'Свой товар', deposit: 'Пополнение', withdrawal: 'Вывод',
+        salary: 'Зарплата', freelance_publish: 'Публикация фриланс', tx_done: 'Выполнено',
+        tx_pending: 'В обработке', tx_rejected: 'Отклонено', lang_changed: 'Язык изменён',
+        original: 'оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
+        insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: 'Транзакции'
     },
     en: {
-        support: 'Support',
-        back: '← Back',
-        ban_title: 'Access to the platform is restricted due to community rules violations',
-        ban_for: ' for ',
-        ban_days: ' days',
-        ban_until_label: 'Until unlock',
+        support: 'Support', back: '← Back', menu: 'Menu',
+        home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
+        balance: 'Balance', favorites: 'Favorites', my_listings: 'My listings',
+        orders: 'Order history', settings: 'Settings', panel: 'Panel',
+        feed_title: 'Listings feed', create: '+ Create', search: 'Search',
+        filters: 'Filters', language: 'Language', theme: 'Theme', theme_auto: 'As in Telegram',
+        theme_light: 'Light', theme_dark: 'Dark',
+        ban_title: 'Access restricted due to community rules violations',
+        ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
         ban_support_note: 'Other sections are unavailable while banned',
-        support_tg: 'Message on Telegram',
-        support_mail: 'Send email',
-        support_faq: 'FAQ',
-        publish_blocked: 'Platform moderation has restricted your ability to publish listings',
-        publish_blocked_for: ' for ',
-        publish_blocked_until: ' until ',
-        day_short: 'd',
-        status_blocked: 'Blocked',
-        status_pending: 'Under review',
-        status_active: 'Active',
-        status_unpublished: 'Unpublished',
-        status_rejected: 'Rejected by moderation',
-        status_sold: 'Completed',
-        status_completed: 'Completed',
-        status_refund: 'Refund review',
-        status_deleted: 'Deleted',
-        restrict_ok: 'Publishing restricted',
-        ban_ok: 'User has been banned',
-        unpublish_ok: 'Listing unpublished',
-        restrict_applied: 'Publish ban applied',
-        choose_restrict: 'Choose restriction type',
-        in_dev: 'Coming soon'
+        support_tg: 'Message on Telegram', support_mail: 'Send email',
+        support_faq: 'FAQ', support_ticket: 'Open a ticket', support_hire: 'Work with us',
+        publish_blocked: 'Publishing listings is restricted for your account',
+        publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
+        status_blocked: 'Blocked', status_pending: 'Under review', status_active: 'Active',
+        status_unpublished: 'Unpublished', status_rejected: 'Rejected',
+        status_sold: 'Completed', status_completed: 'Completed', status_refund: 'Refund review',
+        status_deleted: 'Deleted', status_cancelled: 'Cancelled', status_buyer_review: 'Buyer review',
+        restrict_ok: 'Publishing restricted', ban_ok: 'User banned',
+        unpublish_ok: 'Unpublished', restrict_applied: 'Publish ban applied',
+        choose_restrict: 'Choose restriction', in_dev: 'Coming soon',
+        topup: 'Top up', withdraw: 'Withdraw', my_tx: 'My transactions',
+        sale: 'Sale', all: 'All', order: 'Order', execute: 'Execute',
+        moderation: 'Moderation', active: 'Active', completed_tab: 'Done',
+        loading: 'Loading data from server…', empty: 'Empty', no_listings: 'No listings',
+        no_news: 'No news yet', save: 'Save', cancel: 'Cancel', next: 'Next',
+        pay: 'Pay', buy: 'Buy', write: 'Message', profile: 'Profile',
+        price: 'Price', from: 'from', to: 'to', type: 'Type', product_type: 'Product type',
+        rating_from: 'Rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
+        partner: 'Partner', own_product: 'Own product', deposit: 'Deposit', withdrawal: 'Withdrawal',
+        salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
+        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Language changed',
+        original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
+        insufficient: 'Insufficient funds', listings: 'Listings', transactions: 'Transactions'
     },
     de: {
-        support: 'Support',
-        back: '← Zurück',
-        ban_title: 'Der Zugang zur Plattform ist wegen Verstößen gegen die Community-Regeln eingeschränkt',
-        ban_for: ' für ',
-        ban_days: ' T.',
-        ban_until_label: 'Bis zur Entsperrung',
+        support: 'Support', back: '← Zurück', menu: 'Menü',
+        home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
+        balance: 'Guthaben', favorites: 'Favoriten', my_listings: 'Meine Anzeigen',
+        orders: 'Bestellverlauf', settings: 'Einstellungen', panel: 'Panel',
+        feed_title: 'Anzeigen-Feed', create: '+ Erstellen', search: 'Suche',
+        filters: 'Filter', language: 'Sprache', theme: 'Design', theme_auto: 'Wie in Telegram',
+        theme_light: 'Hell', theme_dark: 'Dunkel',
+        ban_title: 'Zugang wegen Regelverstößen eingeschränkt',
+        ban_for: ' für ', ban_days: ' Tage', ban_until_label: 'Bis zur Entsperrung',
         ban_support_note: 'Andere Bereiche sind während der Sperre nicht verfügbar',
-        support_tg: 'In Telegram schreiben',
-        support_mail: 'E-Mail senden',
-        support_faq: 'FAQ',
-        publish_blocked: 'Die Moderation hat die Veröffentlichung von Anzeigen für Sie eingeschränkt',
-        publish_blocked_for: ' für ',
-        publish_blocked_until: ' bis ',
-        day_short: 'T',
-        status_blocked: 'Gesperrt',
-        status_pending: 'In Prüfung',
-        status_active: 'Aktiv',
-        status_unpublished: 'Zurückgezogen',
-        status_rejected: 'Abgelehnt',
-        status_sold: 'Abgeschlossen',
-        status_completed: 'Abgeschlossen',
-        status_refund: 'Rückerstattung',
-        status_deleted: 'Gelöscht',
-        restrict_ok: 'Veröffentlichung eingeschränkt',
-        ban_ok: 'Benutzer gesperrt',
-        unpublish_ok: 'Anzeige zurückgezogen',
-        restrict_applied: 'Veröffentlichungsverbot aktiv',
-        choose_restrict: 'Art der Einschränkung wählen',
-        in_dev: 'In Entwicklung'
+        support_tg: 'Per Telegram schreiben', support_mail: 'E-Mail senden',
+        support_faq: 'FAQ', support_ticket: 'Anfrage senden', support_hire: 'Mitarbeiten',
+        publish_blocked: 'Veröffentlichung von Anzeigen ist eingeschränkt',
+        publish_blocked_for: ' für ', publish_blocked_until: ' bis ', day_short: 'T',
+        status_blocked: 'Gesperrt', status_pending: 'In Prüfung', status_active: 'Aktiv',
+        status_unpublished: 'Zurückgezogen', status_rejected: 'Abgelehnt',
+        status_sold: 'Abgeschlossen', status_completed: 'Abgeschlossen', status_refund: 'Rückerstattung',
+        status_deleted: 'Gelöscht', status_cancelled: 'Storniert', status_buyer_review: 'Käuferprüfung',
+        restrict_ok: 'Veröffentlichung eingeschränkt', ban_ok: 'Nutzer gesperrt',
+        unpublish_ok: 'Zurückgezogen', restrict_applied: 'Sperre angewendet',
+        choose_restrict: 'Einschränkung wählen', in_dev: 'In Entwicklung',
+        topup: 'Aufladen', withdraw: 'Auszahlen', my_tx: 'Meine Transaktionen',
+        sale: 'Verkauf', all: 'Alle', order: 'Auftrag', execute: 'Ausführung',
+        moderation: 'Moderation', active: 'Aktiv', completed_tab: 'Fertig',
+        loading: 'Daten werden geladen…', empty: 'Leer', no_listings: 'Keine Anzeigen',
+        no_news: 'Noch keine News', save: 'Speichern', cancel: 'Abbrechen', next: 'Weiter',
+        pay: 'Zahlen', buy: 'Kaufen', write: 'Schreiben', profile: 'Profil',
+        price: 'Preis', from: 'von', to: 'bis', type: 'Typ', product_type: 'Produktart',
+        rating_from: 'Bewertung ab', service_type: 'Serviceart', order_svc: 'Bestellen', execute_svc: 'Anbieten',
+        partner: 'Partner', own_product: 'Eigenes Produkt', deposit: 'Einzahlung', withdrawal: 'Auszahlung',
+        salary: 'Gehalt', freelance_publish: 'Freelance-Veröffentlichung', tx_done: 'Erledigt',
+        tx_pending: 'In Bearbeitung', tx_rejected: 'Abgelehnt', lang_changed: 'Sprache geändert',
+        original: 'Original', category: 'Kategorie', buy_confirm: 'Kauf bestätigen',
+        insufficient: 'Unzureichendes Guthaben', listings: 'Anzeigen', transactions: 'Transaktionen'
     },
     fr: {
-        support: 'Assistance',
-        back: '← Retour',
-        ban_title: 'L’accès à la plateforme est limité en raison de violations des règles de la communauté',
-        ban_for: ' pour ',
-        ban_days: ' j',
-        ban_until_label: 'Jusqu’au déblocage',
+        support: 'Assistance', back: '← Retour', menu: 'Menu',
+        home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
+        balance: 'Solde', favorites: 'Favoris', my_listings: 'Mes annonces',
+        orders: 'Historique des commandes', settings: 'Paramètres', panel: 'Panneau',
+        feed_title: 'Fil d\'annonces', create: '+ Créer', search: 'Recherche',
+        filters: 'Filtres', language: 'Langue', theme: 'Thème', theme_auto: 'Comme Telegram',
+        theme_light: 'Clair', theme_dark: 'Sombre',
+        ban_title: 'Accès restreint pour violation des règles',
+        ban_for: ' pendant ', ban_days: ' j', ban_until_label: 'Jusqu\'au déblocage',
         ban_support_note: 'Les autres sections sont indisponibles pendant le ban',
-        support_tg: 'Écrire sur Telegram',
-        support_mail: 'Envoyer un e-mail',
-        support_faq: 'FAQ',
-        publish_blocked: 'La modération a restreint la publication d’annonces pour vous',
-        publish_blocked_for: ' pour ',
-        publish_blocked_until: ' jusqu’au ',
-        day_short: 'j',
-        status_blocked: 'Bloqué',
-        status_pending: 'En modération',
-        status_active: 'Actif',
-        status_unpublished: 'Retiré',
-        status_rejected: 'Rejeté',
-        status_sold: 'Terminé',
-        status_completed: 'Terminé',
-        status_refund: 'Remboursement',
-        status_deleted: 'Supprimé',
-        restrict_ok: 'Publication restreinte',
-        ban_ok: 'Utilisateur bloqué',
-        unpublish_ok: 'Annonce retirée',
-        restrict_applied: 'Interdiction appliquée',
-        choose_restrict: 'Choisissez le type de restriction',
-        in_dev: 'Bientôt disponible'
+        support_tg: 'Écrire sur Telegram', support_mail: 'Envoyer un e-mail',
+        support_faq: 'FAQ', support_ticket: 'Ouvrir un ticket', support_hire: 'Collaborer',
+        publish_blocked: 'La publication d\'annonces est restreinte',
+        publish_blocked_for: ' pendant ', publish_blocked_until: ' jusqu\'au ', day_short: 'j',
+        status_blocked: 'Bloqué', status_pending: 'En modération', status_active: 'Actif',
+        status_unpublished: 'Retiré', status_rejected: 'Refusé',
+        status_sold: 'Terminé', status_completed: 'Terminé', status_refund: 'Remboursement',
+        status_deleted: 'Supprimé', status_cancelled: 'Annulé', status_buyer_review: 'Vérification acheteur',
+        restrict_ok: 'Publication restreinte', ban_ok: 'Utilisateur banni',
+        unpublish_ok: 'Retiré', restrict_applied: 'Restriction appliquée',
+        choose_restrict: 'Choisir la restriction', in_dev: 'En développement',
+        topup: 'Recharger', withdraw: 'Retirer', my_tx: 'Mes transactions',
+        sale: 'Vente', all: 'Tous', order: 'Commande', execute: 'Exécution',
+        moderation: 'Modération', active: 'Actifs', completed_tab: 'Terminés',
+        loading: 'Chargement des données…', empty: 'Vide', no_listings: 'Aucune annonce',
+        no_news: 'Pas encore d\'actualités', save: 'Enregistrer', cancel: 'Annuler', next: 'Suivant',
+        pay: 'Payer', buy: 'Acheter', write: 'Écrire', profile: 'Profil',
+        price: 'Prix', from: 'de', to: 'à', type: 'Type', product_type: 'Type de produit',
+        rating_from: 'Note à partir de', service_type: 'Type de service', order_svc: 'Commander', execute_svc: 'Proposer',
+        partner: 'Partenaire', own_product: 'Produit propre', deposit: 'Dépôt', withdrawal: 'Retrait',
+        salary: 'Salaire', freelance_publish: 'Publication freelance', tx_done: 'Effectué',
+        tx_pending: 'En cours', tx_rejected: 'Refusé', lang_changed: 'Langue modifiée',
+        original: 'original', category: 'Catégorie', buy_confirm: 'Confirmer l\'achat',
+        insufficient: 'Fonds insuffisants', listings: 'Annonces', transactions: 'Transactions'
     },
     es: {
-        support: 'Soporte',
-        back: '← Atrás',
-        ban_title: 'El acceso a la plataforma está restringido por violación de las reglas de la comunidad',
-        ban_for: ' por ',
-        ban_days: ' d',
-        ban_until_label: 'Hasta el desbloqueo',
-        ban_support_note: 'Otras secciones no están disponibles durante el bloqueo',
-        support_tg: 'Escribir en Telegram',
-        support_mail: 'Enviar correo',
-        support_faq: 'FAQ',
-        publish_blocked: 'La moderación ha restringido la publicación de anuncios para usted',
-        publish_blocked_for: ' por ',
-        publish_blocked_until: ' hasta ',
-        day_short: 'd',
-        status_blocked: 'Bloqueado',
-        status_pending: 'En moderación',
-        status_active: 'Activo',
-        status_unpublished: 'Retirado',
-        status_rejected: 'Rechazado',
-        status_sold: 'Completado',
-        status_completed: 'Completado',
-        status_refund: 'Reembolso',
-        status_deleted: 'Eliminado',
-        restrict_ok: 'Publicación restringida',
-        ban_ok: 'Usuario bloqueado',
-        unpublish_ok: 'Anuncio retirado',
-        restrict_applied: 'Prohibición aplicada',
-        choose_restrict: 'Elija el tipo de restricción',
-        in_dev: 'En desarrollo'
+        support: 'Soporte', back: '← Atrás', menu: 'Menú',
+        home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
+        balance: 'Saldo', favorites: 'Favoritos', my_listings: 'Mis anuncios',
+        orders: 'Historial de pedidos', settings: 'Ajustes', panel: 'Panel',
+        feed_title: 'Feed de anuncios', create: '+ Crear', search: 'Buscar',
+        filters: 'Filtros', language: 'Idioma', theme: 'Tema', theme_auto: 'Como en Telegram',
+        theme_light: 'Claro', theme_dark: 'Oscuro',
+        ban_title: 'Acceso restringido por violar las reglas',
+        ban_for: ' por ', ban_days: ' días', ban_until_label: 'Hasta el desbloqueo',
+        ban_support_note: 'Otras secciones no están disponibles durante el ban',
+        support_tg: 'Escribir en Telegram', support_mail: 'Enviar correo',
+        support_faq: 'FAQ', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
+        publish_blocked: 'La publicación de anuncios está restringida',
+        publish_blocked_for: ' por ', publish_blocked_until: ' hasta ', day_short: 'd',
+        status_blocked: 'Bloqueado', status_pending: 'En moderación', status_active: 'Activo',
+        status_unpublished: 'Retirado', status_rejected: 'Rechazado',
+        status_sold: 'Completado', status_completed: 'Completado', status_refund: 'Reembolso',
+        status_deleted: 'Eliminado', status_cancelled: 'Cancelado', status_buyer_review: 'Revisión del comprador',
+        restrict_ok: 'Publicación restringida', ban_ok: 'Usuario bloqueado',
+        unpublish_ok: 'Retirado', restrict_applied: 'Restricción aplicada',
+        choose_restrict: 'Elegir restricción', in_dev: 'En desarrollo',
+        topup: 'Recargar', withdraw: 'Retirar', my_tx: 'Mis transacciones',
+        sale: 'Venta', all: 'Todos', order: 'Pedido', execute: 'Ejecución',
+        moderation: 'Moderación', active: 'Activos', completed_tab: 'Hechos',
+        loading: 'Cargando datos…', empty: 'Vacío', no_listings: 'No hay anuncios',
+        no_news: 'Aún no hay noticias', save: 'Guardar', cancel: 'Cancelar', next: 'Siguiente',
+        pay: 'Pagar', buy: 'Comprar', write: 'Escribir', profile: 'Perfil',
+        price: 'Precio', from: 'desde', to: 'hasta', type: 'Tipo', product_type: 'Tipo de producto',
+        rating_from: 'Valoración desde', service_type: 'Tipo de servicio', order_svc: 'Pedir', execute_svc: 'Ofrecer',
+        partner: 'Socio', own_product: 'Producto propio', deposit: 'Depósito', withdrawal: 'Retiro',
+        salary: 'Salario', freelance_publish: 'Publicación freelance', tx_done: 'Hecho',
+        tx_pending: 'Procesando', tx_rejected: 'Rechazado', lang_changed: 'Idioma cambiado',
+        original: 'original', category: 'Categoría', buy_confirm: 'Confirmar compra',
+        insufficient: 'Fondos insuficientes', listings: 'Anuncios', transactions: 'Transacciones'
     },
     zh: {
-        support: '支持',
-        back: '← 返回',
-        ban_title: '因违反社区规则，您已被限制访问平台',
-        ban_for: '，时长 ',
-        ban_days: ' 天',
-        ban_until_label: '距离解封',
-        ban_support_note: '封禁期间无法进入其他功能',
-        support_tg: 'Telegram 联系',
-        support_mail: '发送邮件',
-        support_faq: '常见问题',
-        publish_blocked: '平台审核已限制您发布广告',
-        publish_blocked_for: '，时长 ',
-        publish_blocked_until: ' 至 ',
-        day_short: '天',
-        status_blocked: '已封禁',
-        status_pending: '审核中',
-        status_active: '在售',
-        status_unpublished: '已下架',
-        status_rejected: '审核未通过',
-        status_sold: '已完成',
-        status_completed: '已完成',
-        status_refund: '退款审核',
-        status_deleted: '已删除',
-        restrict_ok: '发布已受限',
-        ban_ok: '用户已封禁',
-        unpublish_ok: '已下架',
-        restrict_applied: '已禁止发布',
-        choose_restrict: '请选择限制类型',
-        in_dev: '开发中'
+        support: '支持', back: '← 返回', menu: '菜单',
+        home: '主页', news: '新闻', exchange: '交易所', freelance: '自由职业',
+        balance: '余额', favorites: '收藏', my_listings: '我的广告',
+        orders: '订单历史', settings: '设置', panel: '管理面板',
+        feed_title: '广告动态', create: '+ 创建', search: '搜索',
+        filters: '筛选', language: '语言', theme: '主题', theme_auto: '跟随 Telegram',
+        theme_light: '浅色', theme_dark: '深色',
+        ban_title: '因违反社区规则，访问受到限制',
+        ban_for: ' 时长 ', ban_days: ' 天', ban_until_label: '解封倒计时',
+        ban_support_note: '封禁期间其他功能不可用',
+        support_tg: '在 Telegram 联系', support_mail: '发送邮件',
+        support_faq: '常见问题', support_ticket: '提交工单', support_hire: '加入我们',
+        publish_blocked: '您的发布权限已被限制',
+        publish_blocked_for: ' 时长 ', publish_blocked_until: ' 至 ', day_short: '天',
+        status_blocked: '已封锁', status_pending: '审核中', status_active: '上架中',
+        status_unpublished: '已下架', status_rejected: '已拒绝',
+        status_sold: '已完成', status_completed: '已完成', status_refund: '退款审核',
+        status_deleted: '已删除', status_cancelled: '已取消', status_buyer_review: '买家验收',
+        restrict_ok: '发布已限制', ban_ok: '用户已封禁',
+        unpublish_ok: '已下架', restrict_applied: '限制已生效',
+        choose_restrict: '选择限制类型', in_dev: '开发中',
+        topup: '充值', withdraw: '提现', my_tx: '我的交易',
+        sale: '出售', all: '全部', order: '需求', execute: '接单',
+        moderation: '审核', active: '上架', completed_tab: '完成',
+        loading: '正在加载数据…', empty: '空', no_listings: '暂无广告',
+        no_news: '暂无新闻', save: '保存', cancel: '取消', next: '下一步',
+        pay: '支付', buy: '购买', write: '私信', profile: '资料',
+        price: '价格', from: '从', to: '到', type: '类型', product_type: '产品类型',
+        rating_from: '评分不低于', service_type: '服务类型', order_svc: '下单', execute_svc: '接单',
+        partner: '合作伙伴', own_product: '自有产品', deposit: '充值', withdrawal: '提现',
+        salary: '工资', freelance_publish: '自由职业发布', tx_done: '已完成',
+        tx_pending: '处理中', tx_rejected: '已拒绝', lang_changed: '语言已更改',
+        original: '原版', category: '分类', buy_confirm: '确认购买',
+        insufficient: '余额不足', listings: '广告', transactions: '交易'
     }
 };
+
+function t(key) {
+    return tBlock(key);
+}
+
+function applyI18n() {
+    var lang = getAppLang();
+    try { document.documentElement.lang = lang; } catch (e) {}
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n');
+        if (!key) return;
+        var val = tBlock(key);
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+        el.textContent = val;
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+        el.setAttribute('placeholder', tBlock(el.getAttribute('data-i18n-placeholder')));
+    });
+    // drawer header sub
+    var sub = document.querySelector('.drawer-header .sub');
+    if (sub) sub.textContent = tBlock('menu');
+    // settings labels
+    var sl = document.getElementById('settings-lang-label');
+    if (sl) {
+        var names = { ru: 'Русский', en: 'English', de: 'Deutsch', fr: 'Français', es: 'Español', zh: '中文' };
+        var flags = { ru: 'ru', en: 'gb', de: 'de', fr: 'fr', es: 'es', zh: 'cn' };
+        var code = getAppLang();
+        sl.innerHTML = '<img class="flag-img sm" src="https://flagcdn.com/w40/' + (flags[code]||'ru') + '.png" alt="" width="18" height="13"> ' + (names[code]||code);
+    }
+    var st = document.getElementById('settings-theme-label');
+    if (st) {
+        var th = localStorage.getItem('xcod_theme') || 'auto';
+        st.textContent = th === 'light' ? tBlock('theme_light') : (th === 'dark' ? tBlock('theme_dark') : tBlock('theme_auto'));
+    }
+    // status segment buttons if present
+    try {
+        var m = document.getElementById('my-seg-mod');
+        if (m) { var c=m.querySelector('.seg-count'); m.innerHTML = tBlock('moderation') + ' '; if(c) m.appendChild(c); else m.innerHTML += '<span class="seg-count" id="my-cnt-mod">0</span>'; }
+        var a = document.getElementById('my-seg-active');
+        if (a) { var c2=a.querySelector('.seg-count'); a.innerHTML = tBlock('active') + ' '; if(c2) a.appendChild(c2); else a.innerHTML += '<span class="seg-count" id="my-cnt-active">0</span>'; }
+        var d = document.getElementById('my-seg-done');
+        if (d) { var c3=d.querySelector('.seg-count'); d.innerHTML = tBlock('completed_tab') + ' '; if(c3) d.appendChild(c3); else d.innerHTML += '<span class="seg-count" id="my-cnt-done">0</span>'; }
+    } catch (e) {}
+    refreshOriginalTags();
+}
+
+function statusLabel(st) {
+    var map = {
+        pending: 'status_pending', active: 'status_active', unpublished: 'status_unpublished',
+        rejected: 'status_rejected', sold: 'status_sold', completed: 'status_completed',
+        refund_moderation: 'status_refund', deleted: 'status_deleted', blocked: 'status_blocked',
+        cancelled: 'status_cancelled', buyer_review: 'status_buyer_review', done: 'tx_done',
+        processing: 'tx_pending', approved: 'tx_done'
+    };
+    var k = map[st] || null;
+    return k ? tBlock(k) : st;
+}
+
+function txTypeLabel(tp) {
+    var map = {
+        deposit: 'deposit', withdrawal: 'withdrawal', topup: 'deposit', withdraw: 'withdrawal',
+        salary: 'salary', freelance_publish: 'freelance_publish', purchase: 'buy'
+    };
+    var k = map[tp] || null;
+    return k ? tBlock(k) : tp;
+}
+
 
 function tBlock(key) {
     var lang = getAppLang();
@@ -5385,13 +5484,13 @@ function renderMyListings() {
         return;
     }
     var statusMap = {
-        pending: ['На модерации', 'badge-moderation'],
-        active: ['Активно', 'badge-completed'],
-        unpublished: ['Снято', 'badge-muted'],
-        rejected: ['Отклонено модерацией', 'badge-cancelled'],
-        sold: ['Завершён', 'badge-muted'],
-        completed: ['Завершён', 'badge-muted'],
-        refund_moderation: ['Возврат средств', 'badge-moderation'],
+        pending: [statusLabel('pending'), 'badge-moderation'],
+        active: [statusLabel('active'), 'badge-completed'],
+        unpublished: [statusLabel('unpublished'), 'badge-muted'],
+        rejected: [statusLabel('rejected'), 'badge-cancelled'],
+        sold: [statusLabel('completed'), 'badge-muted'],
+        completed: [statusLabel('completed'), 'badge-muted'],
+        refund_moderation: [statusLabel('refund_moderation'), 'badge-moderation'],
         deleted: ['Удалено', 'badge-muted']
     };
     box.innerHTML = filtered.map(function(l) {
@@ -6924,16 +7023,7 @@ async function adminSetStaffBalance(uid) {
 
 
 function originalTagLabel() {
-    var code = localStorage.getItem('xcod_lang') || 'ru';
-    var map = {
-        ru: 'оригинал',
-        en: 'original',
-        de: 'Original',
-        fr: 'original',
-        es: 'original',
-        zh: '原版'
-    };
-    return map[code] || 'оригинал';
+    return tBlock('original');
 }
 function refreshOriginalTags() {
     var label = originalTagLabel();
@@ -6944,8 +7034,15 @@ function refreshOriginalTags() {
 function pickLanguage(code) {
     localStorage.setItem('xcod_lang', code);
     try { document.documentElement.lang = code; } catch (e) {}
-    refreshOriginalTags();
-    tg.showAlert(tBlock('in_dev'));
+    applyI18n();
+    try {
+        var page = document.querySelector('.page.active');
+        if (page && page.id) {
+            var name = page.id.replace(/^page-/, '');
+            if (typeof showPage === 'function') showPage(name);
+        }
+    } catch (e) {}
+    try { tg.showAlert(tBlock('lang_changed')); } catch (e) {}
 }
 
 
