@@ -1081,6 +1081,9 @@
         <button class="drawer-item" data-page="exchange" onclick="navTo('exchange')">
             <span class="di">📊</span> Биржа
         </button>
+        <button class="drawer-item" data-page="freelance" onclick="navTo('freelance')">
+            <span class="di">🛠️</span> Фриланс
+        </button>
         <button class="drawer-item" data-page="balance" onclick="navTo('balance')">
             <span class="di">💵</span> Баланс
         </button>
@@ -2205,6 +2208,7 @@ function showPage(name) {
     if (name === 'favorites') loadFavorites();
     if (name === 'news') loadNewsPinned();
     if (name === 'exchange') initExchangePage();
+    if (name === 'freelance') { try { runFreelanceSearch(); } catch (e) {} }
     if (name === 'orders') loadOrders();
     if (name === 'balance' || name === 'withdraw') refreshBalance();
     if (name === 'requests') loadRequests();
