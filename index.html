@@ -1295,11 +1295,11 @@
 
     <!-- EXCHANGE -->
     <div id="page-exchange" class="page">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-            <div class="section-title" style="margin:0;">Биржа</div>
-            <button type="button" class="btn" style="width:auto;padding:8px 12px;" onclick="openCreateTypeSheet('sale')">+ Создать</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
+            <div class="section-title" style="margin:0;flex:1;min-width:0;">Биржа</div>
+            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="openCreateTypeSheet('sale')">+ Создать</button>
         </div>
-        <div class="search-bar">
+        <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
             <input class="form-input" type="search" id="exchange-q" placeholder="Поиск по бирже..." enterkeyhint="search">
             <button type="button" class="search-btn" onclick="runExchangeSearch()" title="Найти">🔍</button>
         </div>
@@ -1363,11 +1363,11 @@
     <!-- MY LISTINGS -->
 
     <div id="page-freelance" class="page">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-            <div class="section-title" style="margin:0;">Фриланс</div>
-            <button type="button" class="btn" style="width:auto;padding:8px 12px;" onclick="openCreateTypeSheet('freelance')">+ Создать</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
+            <div class="section-title" style="margin:0;flex:1;min-width:0;">Фриланс</div>
+            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="openCreateTypeSheet('freelance')">+ Создать</button>
         </div>
-        <div class="search-bar" style="margin-top:12px;">
+        <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
             <input class="form-input" type="search" id="fl-q" placeholder="Поиск по ключевым словам..." enterkeyhint="search">
             <button type="button" class="search-btn" onclick="runFreelanceSearch()" title="Найти">🔍</button>
         </div>
