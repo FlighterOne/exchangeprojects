@@ -1008,6 +1008,46 @@
             padding: 6px 10px; border-radius: 10px;
             background: var(--secondary-bg); border: 1px solid rgba(128,128,128,0.2);
         }
+
+        .listing-cover {
+            width: 100%; height: 160px; object-fit: cover;
+            border-radius: 12px; display: block; margin-bottom: 10px;
+            background: var(--secondary-bg);
+        }
+        .photo-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .photo-thumb {
+            position: relative; width: 96px; height: 96px;
+            border-radius: 10px; overflow: hidden;
+            background: var(--secondary-bg);
+            cursor: grab; touch-action: none;
+        }
+        .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .photo-thumb .ph-x {
+            position: absolute; top: 4px; right: 4px;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(0,0,0,0.65); color: #fff; border: none;
+            font-size: 14px; line-height: 22px; text-align: center; cursor: pointer;
+        }
+        .photo-thumb .ph-cover {
+            position: absolute; bottom: 4px; right: 4px;
+            font-size: 10px; background: rgba(0,0,0,0.6); color: #fff;
+            padding: 2px 5px; border-radius: 6px;
+        }
+        .photo-carousel { position: relative; margin-bottom: 12px; }
+        .photo-carousel img {
+            width: 100%; max-height: 280px; object-fit: cover;
+            border-radius: 12px; display: block; background: var(--secondary-bg);
+        }
+        .photo-carousel .pc-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 36px; height: 36px; border-radius: 50%; border: none;
+            background: rgba(0,0,0,0.45); color: #fff; font-size: 18px; cursor: pointer;
+        }
+        .photo-carousel .pc-prev { left: 8px; }
+        .photo-carousel .pc-next { right: 8px; }
+        .photo-carousel .pc-dots {
+            text-align: center; margin-top: 6px; font-size: 12px; color: var(--hint);
+        }
 </style>
 </head>
 <body>
@@ -1158,6 +1198,22 @@
                 </div>
             </div>
             <button class="btn" onclick="listingCreateNext()">Далее</button>
+        </div>
+        <div id="listing-step-photos" style="display:none;">
+            <div class="info-block" style="margin-bottom:14px;">
+                Загрузите от <b>1</b> до <b>5</b> фото. Первое фото — титульное. Можно менять порядок перетаскиванием.
+            </div>
+            <div class="form-group">
+                <label class="form-label">Фото объявления</label>
+                <div class="file-drop" onclick="document.getElementById('listing-photos').click()">
+                    <div class="fd-icon">🖼️</div>
+                    <div class="fd-title">Загрузить фото</div>
+                    <div class="fd-sub">JPG, PNG · макс. 5</div>
+                </div>
+                <input type="file" id="listing-photos" accept="image/*" multiple style="display:none;" onchange="onListingPhotosPicked(this)">
+                <div id="listing-photos-list" class="photo-grid"></div>
+            </div>
+            <button class="btn" onclick="listingPhotosNext()">Далее</button>
         </div>
         <div id="listing-step-2" style="display:none;">
             <div class="info-block" style="margin-bottom:14px;">
@@ -3531,7 +3587,9 @@ async function loadListings() {
             var desc = (l.description || '').replace(/</g, '&lt;');
             var isFav = !!l.is_favorite;
             var priceNum = Number(l.price).toLocaleString('ru-RU');
+            var cover = l.cover_photo || (l.photos && l.photos[0] && (l.photos[0].content || l.photos[0].url)) || '';
             return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+                (cover ? ('<img class="listing-cover" src="' + cover + '" alt="">') : '') +
                 '<div class="ltitle-row">' +
                 '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
                 '<div class="lseller">' + sellerLinkHtml(l) + '</div>' +
@@ -3610,6 +3668,20 @@ function listingFilesBlockHtml(files, mode, id) {
     return html;
 }
 
+function listingPhotoNav(dir) {
+    var photos = window._listingPhotos || [];
+    if (!photos.length) return;
+    var idx = (window._listingPhotoIdx || 0) + dir;
+    if (idx < 0) idx = photos.length - 1;
+    if (idx >= photos.length) idx = 0;
+    window._listingPhotoIdx = idx;
+    var img = document.getElementById('listing-carousel-img');
+    var dots = document.getElementById('listing-carousel-dots');
+    var src = photos[idx].content || photos[idx].url || '';
+    if (img) img.src = src;
+    if (dots) dots.textContent = (idx + 1) + ' / ' + photos.length;
+}
+
 async function openListing(id) {
     // запомнить откуда открыли
     try {
@@ -3644,6 +3716,20 @@ async function openListing(id) {
         var canBuy = userData && !isOwner && l.status === 'active';
 
         var html = '';
+        var photos = l.photos || [];
+        if (photos.length) {
+            window._listingPhotoIdx = 0;
+            window._listingPhotos = photos;
+            var p0 = photos[0].content || photos[0].url || '';
+            html += '<div class="photo-carousel">';
+            html += '<img id="listing-carousel-img" src="' + p0 + '" alt="">';
+            if (photos.length > 1) {
+                html += '<button type="button" class="pc-btn pc-prev" onclick="listingPhotoNav(-1)">‹</button>';
+                html += '<button type="button" class="pc-btn pc-next" onclick="listingPhotoNav(1)">›</button>';
+            }
+            html += '<div class="pc-dots" id="listing-carousel-dots">1 / ' + photos.length + '</div>';
+            html += '</div>';
+        }
         html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:4px;margin-bottom:8px;">';
         html += '<div class="section-title" style="font-size:18px;margin:0;flex:1;">' + (l.title || '').replace(/</g,'&lt;') + '</div>';
         if (isOwner) {
@@ -4085,15 +4171,24 @@ function resetListingCreate() {
 }
 
 function cancelListingCreate() {
+    listingPickedPhotos = [];
+
     resetListingCreate();
     showPage('my-listings');
 }
 
 function listingCreateBack() {
     if (listingCreateStep === 2) {
-        listingCreateStep = 1;
-        document.getElementById('listing-step-1').style.display = 'block';
+        listingCreateStep = 'photos';
         document.getElementById('listing-step-2').style.display = 'none';
+        document.getElementById('listing-step-photos').style.display = 'block';
+        document.getElementById('listing-create-title').textContent = 'Фото объявления';
+        return;
+    }
+    if (listingCreateStep === 'photos') {
+        listingCreateStep = 1;
+        document.getElementById('listing-step-photos').style.display = 'none';
+        document.getElementById('listing-step-1').style.display = 'block';
         document.getElementById('listing-create-title').textContent = 'Новое объявление';
         return;
     }
@@ -4114,10 +4209,10 @@ function listingCreateNext() {
         if (!document.getElementById('listing-bot').value.trim()) { tg.showAlert('Укажите username'); return; }
         if (!(parseFloat(document.getElementById('listing-price').value) > 0)) { tg.showAlert('Укажите цену'); return; }
     }
-    listingCreateStep = 2;
+    listingCreateStep = 'photos';
     document.getElementById('listing-step-1').style.display = 'none';
-    document.getElementById('listing-step-2').style.display = 'block';
-    document.getElementById('listing-create-title').textContent = 'Файлы объявления';
+    document.getElementById('listing-step-photos').style.display = 'block';
+    document.getElementById('listing-create-title').textContent = 'Фото объявления';
 }
 
 function selectDmFiles(yes) {
@@ -4155,6 +4250,78 @@ function renderListingFilesList() {
 function removeListingFile(i) {
     listingPickedFiles.splice(i, 1);
     renderListingFilesList();
+}
+
+
+var listingPickedPhotos = [];
+
+function onListingPhotosPicked(input) {
+    var files = input.files ? Array.prototype.slice.call(input.files) : [];
+    input.value = '';
+    files.forEach(function(file) {
+        if (!file.type || file.type.indexOf('image/') !== 0) return;
+        if (listingPickedPhotos.length >= 5) {
+            try { tg.showAlert('Максимум 5 фото'); } catch(e){}
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function() {
+            var content = reader.result;
+            listingPickedPhotos.push({ name: file.name || ('photo_' + (listingPickedPhotos.length + 1) + '.jpg'), content: content });
+            renderListingPhotos();
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function renderListingPhotos() {
+    var box = document.getElementById('listing-photos-list');
+    if (!box) return;
+    if (!listingPickedPhotos.length) { box.innerHTML = ''; return; }
+    var html = '';
+    listingPickedPhotos.forEach(function(ph, idx) {
+        html += '<div class="photo-thumb" draggable="true" data-idx="' + idx + '" ondragstart="photoDragStart(event)" ondragover="photoDragOver(event)" ondrop="photoDrop(event)">';
+        html += '<img src="' + ph.content + '" alt="">';
+        html += '<button type="button" class="ph-x" onclick="removeListingPhoto(' + idx + ')">×</button>';
+        if (idx === 0) html += '<span class="ph-cover">титульная</span>';
+        html += '</div>';
+    });
+    box.innerHTML = html;
+}
+
+var _dragPhotoIdx = null;
+function photoDragStart(e) {
+    _dragPhotoIdx = parseInt(e.currentTarget.getAttribute('data-idx'), 10);
+    try { e.dataTransfer.setData('text/plain', String(_dragPhotoIdx)); } catch (err) {}
+}
+function photoDragOver(e) { e.preventDefault(); }
+function photoDrop(e) {
+    e.preventDefault();
+    var to = parseInt(e.currentTarget.getAttribute('data-idx'), 10);
+    var from = _dragPhotoIdx;
+    if (isNaN(from) || isNaN(to) || from === to) return;
+    var item = listingPickedPhotos.splice(from, 1)[0];
+    listingPickedPhotos.splice(to, 0, item);
+    _dragPhotoIdx = null;
+    renderListingPhotos();
+}
+function removeListingPhoto(idx) {
+    listingPickedPhotos.splice(idx, 1);
+    renderListingPhotos();
+}
+function listingPhotosNext() {
+    if (!listingPickedPhotos.length) {
+        try { tg.showAlert('Загрузите хотя бы 1 фото'); } catch(e){}
+        return;
+    }
+    if (listingPickedPhotos.length > 5) {
+        try { tg.showAlert('Максимум 5 фото'); } catch(e){}
+        return;
+    }
+    listingCreateStep = 2;
+    document.getElementById('listing-step-photos').style.display = 'none';
+    document.getElementById('listing-step-2').style.display = 'block';
+    document.getElementById('listing-create-title').textContent = 'Файлы объявления';
 }
 
 function onListingFilesPicked(input) {
@@ -4287,7 +4454,8 @@ async function createListing() {
         description: document.getElementById('listing-desc').value.trim(),
         listing_type: selectedListingType,
         has_private_files: selectedHasPrivateFiles,
-        files_meta: listingPickedFiles.map(function(f){ return { name: f.name, content: f.content || '', size: f.size || 0 }; })
+        files_meta: listingPickedFiles.map(function(f){ return { name: f.name, content: f.content || '', size: f.size || 0 }; }),
+        photos_meta: listingPickedPhotos.map(function(f, idx){ return { name: f.name, content: f.content || '', order: idx }; })
     };
     if (selectedListingType === 'partner') {
         body.contract_number = document.getElementById('listing-contract').value.trim();
@@ -5778,7 +5946,28 @@ function openAdminListingDetail(id) {
     if (!l) { tg.showAlert('Объявление не найдено'); return; }
     document.getElementById('admin-detail-title').textContent = 'Объявление #' + id;
     var typeLabel = l.listing_type === 'partner' ? 'Партнер X-Cod' : 'Свой товар';
-    var html = '<div class="info-block">' +
+        var photos = l.photos || [];
+    if (!photos.length && l.photos_meta) {
+        try {
+            var pm = typeof l.photos_meta === 'string' ? JSON.parse(l.photos_meta) : l.photos_meta;
+            if (Array.isArray(pm)) photos = pm.map(function(p, idx){ return { content: (p.content&&p.content.indexOf('data:')===0)?p.content:('data:image/jpeg;base64,'+(p.content||'')), order: idx }; });
+        } catch(e){}
+    }
+    var html = '';
+    if (photos.length) {
+        var p0 = photos[0].content || photos[0].url || '';
+        html += '<div class="photo-carousel"><img src="' + p0 + '" alt=""><div class="pc-dots">1 / ' + photos.length + '</div></div>';
+        if (photos.length > 1) {
+            html += '<div class="photo-grid" style="margin-bottom:12px;">';
+            photos.forEach(function(ph){
+                var src = ph.content || ph.url || '';
+                if (src) html += '<div class="photo-thumb"><img src="' + src + '" alt=""></div>';
+            });
+            html += '</div>';
+        }
+    }
+    html += '<div class="info-block">' +
+
         '<b>Название:</b> ' + (l.title || '').replace(/</g, '&lt;') + '<br><br>' +
         '<b>Описание:</b><br>' + (l.description || '').replace(/</g, '&lt;') + '<br><br>' +
         '<b>Тип:</b> ' + typeLabel + '<br>' +
