@@ -1297,7 +1297,7 @@
     <div id="page-exchange" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
             <div class="section-title" style="margin:0;flex:1;min-width:0;">Биржа</div>
-            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="openCreateTypeSheet('sale')">+ Создать</button>
+            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startSaleCreate()">+ Создать</button>
         </div>
         <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
             <input class="form-input" type="search" id="exchange-q" placeholder="Поиск по бирже..." enterkeyhint="search">
@@ -1365,7 +1365,7 @@
     <div id="page-freelance" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
             <div class="section-title" style="margin:0;flex:1;min-width:0;">Фриланс</div>
-            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="openCreateTypeSheet('freelance')">+ Создать</button>
+            <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startFreelanceCreate()">+ Создать</button>
         </div>
         <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
             <input class="form-input" type="search" id="fl-q" placeholder="Поиск по ключевым словам..." enterkeyhint="search">
@@ -1382,20 +1382,20 @@
         </div>
         <div class="form-group">
             <label class="form-label">Вид товара</label>
-            <div class="type-toggle" style="display:flex;gap:8px;">
-                <button type="button" class="btn btn-secondary type-toggle-btn active" data-v="" onclick="setFlProduct(this)" style="flex:1;">Все</button>
-                <button type="button" class="btn btn-secondary type-toggle-btn" data-v="бот" onclick="setFlProduct(this)" style="flex:1;">Бот</button>
-                <button type="button" class="btn btn-secondary type-toggle-btn" data-v="сайт" onclick="setFlProduct(this)" style="flex:1;">Сайт</button>
+            <div class="ptype-wrap">
+                <input class="form-input" type="text" id="fl-product-type" placeholder="Любой вид" autocomplete="off" oninput="filterFlProductSuggestions()">
+                <button type="button" class="ptype-arrow" onclick="toggleFlProductTypeList()" aria-label="Список">▾</button>
             </div>
+            <div id="fl-product-type-list" class="inline-options" style="display:none;"></div>
         </div>
-        <div class="form-group" id="fl-rating-wrap" style="display:none;">
-            <label class="form-label" id="fl-rating-label">Рейтинг от</label>
-            <div class="star-row">
-                <button type="button" class="star-btn" onclick="setFlRating(1)">★1</button>
-                <button type="button" class="star-btn" onclick="setFlRating(2)">★2</button>
-                <button type="button" class="star-btn" onclick="setFlRating(3)">★3</button>
-                <button type="button" class="star-btn" onclick="setFlRating(4)">★4</button>
-                <button type="button" class="star-btn" onclick="setFlRating(5)">★5</button>
+        <div class="form-group">
+            <label class="form-label" id="fl-rating-label">Рейтинг сотрудника от</label>
+            <div class="star-row" id="fl-star-row">
+                <button type="button" class="star-btn" data-r="1" onclick="setFlRating(1)">★1</button>
+                <button type="button" class="star-btn" data-r="2" onclick="setFlRating(2)">★2</button>
+                <button type="button" class="star-btn" data-r="3" onclick="setFlRating(3)">★3</button>
+                <button type="button" class="star-btn" data-r="4" onclick="setFlRating(4)">★4</button>
+                <button type="button" class="star-btn" data-r="5" onclick="setFlRating(5)">★5</button>
             </div>
         </div>
         <div class="form-group">
@@ -1508,15 +1508,13 @@
             <button type="button" id="my-seg-active" onclick="setMyListingsTab('active')">Активные <span class="seg-count" id="my-cnt-active">0</span></button>
             <button type="button" id="my-seg-done" onclick="setMyListingsTab('completed')">Завершённые <span class="seg-count" id="my-cnt-done">0</span></button>
         </div>
-        <div id="my-cat-filters" style="display:flex;gap:8px;margin:10px 0;">
-            <button type="button" class="btn btn-secondary type-toggle-btn active" id="my-cat-all" onclick="setMyListingsCat('all')" style="flex:1;">Все</button>
-            <button type="button" class="btn btn-secondary type-toggle-btn" id="my-cat-sale" onclick="setMyListingsCat('sale')" style="flex:1;">Продажа</button>
-            <button type="button" class="btn btn-secondary type-toggle-btn" id="my-cat-fl" onclick="setMyListingsCat('freelance')" style="flex:1;">Фриланс</button>
-        </div>
-        <div id="my-fl-kind" style="display:none;gap:8px;margin-bottom:10px;" class="type-toggle">
-            <button type="button" class="btn btn-secondary type-toggle-btn active" data-v="" onclick="setMyFlKind(this)" style="flex:1;">Все</button>
-            <button type="button" class="btn btn-secondary type-toggle-btn" data-v="order" onclick="setMyFlKind(this)" style="flex:1;">Заказы</button>
-            <button type="button" class="btn btn-secondary type-toggle-btn" data-v="execute" onclick="setMyFlKind(this)" style="flex:1;">Исполнение</button>
+        <div style="display:flex;flex-direction:column;gap:8px;margin:10px 0;">
+            <button type="button" class="btn btn-secondary" id="my-cat-sheet-btn" onclick="openMyCatSheet()" style="text-align:left;">
+                Категория: <b id="my-cat-sheet-label">Все</b> ▾
+            </button>
+            <button type="button" class="btn btn-secondary" id="my-fl-sheet-btn" onclick="openMyFlKindSheet()" style="text-align:left;display:none;">
+                Фриланс: <b id="my-fl-sheet-label">Все</b> ▾
+            </button>
         </div>
 
         <div id="my-listings-list"><div class="loading"><div class="spinner"></div></div></div>
@@ -3904,29 +3902,58 @@ function setFlKind(btn) {
     flFilters.kind = btn.getAttribute('data-v') || '';
     document.querySelectorAll('#page-freelance [id^="fl-kind-"]').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
-    var wrap = document.getElementById('fl-rating-wrap');
     var lab = document.getElementById('fl-rating-label');
     if (flFilters.kind === 'order') {
-        // ищем заказчика → рейтинг покупателя
-        if (wrap) wrap.style.display = 'block';
         if (lab) lab.textContent = 'Рейтинг покупателя от';
     } else if (flFilters.kind === 'execute') {
-        if (wrap) wrap.style.display = 'block';
-        if (lab) lab.textContent = 'Рейтинг продавца от';
+        if (lab) lab.textContent = 'Рейтинг сотрудника от';
     } else {
-        if (wrap) wrap.style.display = 'none';
+        if (lab) lab.textContent = 'Рейтинг сотрудника от';
     }
 }
-function setFlProduct(btn) {
-    flFilters.product = btn.getAttribute('data-v') || '';
-    btn.parentNode.querySelectorAll('.type-toggle-btn').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-}
 function setFlRating(r) {
-    flFilters.rating = r;
-    document.querySelectorAll('#fl-rating-wrap .star-btn').forEach(function(b){
-        b.classList.toggle('active', parseInt(b.textContent.replace(/\D/g,''),10) === r || parseInt(b.getAttribute('data-r')||'0',10)===r);
+    flFilters.rating = (flFilters.rating === r) ? 0 : r;
+    document.querySelectorAll('#fl-star-row .star-btn').forEach(function(b){
+        var v = parseInt(b.getAttribute('data-r') || '0', 10);
+        b.classList.toggle('active', v && v === flFilters.rating);
     });
+}
+var FL_PRODUCT_SUGGESTIONS = ['бот', 'сайт', 'миниапп', 'тг бот', 'миниапп+сайт', 'парсер', 'CRM', 'другое'];
+function toggleFlProductTypeList() {
+    var list = document.getElementById('fl-product-type-list');
+    if (!list) return;
+    if (list.style.display === 'none' || !list.style.display) {
+        renderFlProductSuggestions('');
+        list.style.display = 'block';
+    } else {
+        list.style.display = 'none';
+    }
+}
+function filterFlProductSuggestions() {
+    var inp = document.getElementById('fl-product-type');
+    var q = (inp && inp.value || '').trim().toLowerCase();
+    flFilters.product = (inp && inp.value || '').trim();
+    renderFlProductSuggestions(q);
+    var list = document.getElementById('fl-product-type-list');
+    if (list) list.style.display = 'block';
+}
+function renderFlProductSuggestions(q) {
+    var list = document.getElementById('fl-product-type-list');
+    if (!list) return;
+    var items = FL_PRODUCT_SUGGESTIONS.filter(function(x) {
+        return !q || x.toLowerCase().indexOf(q) >= 0;
+    });
+    if (!items.length) items = FL_PRODUCT_SUGGESTIONS.slice();
+    list.innerHTML = items.map(function(x) {
+        return '<button type="button" class="inline-opt" onclick="pickFlProduct(\'' + x.replace(/'/g, '') + '\')">' + x + '</button>';
+    }).join('');
+}
+function pickFlProduct(v) {
+    var inp = document.getElementById('fl-product-type');
+    if (inp) inp.value = v;
+    flFilters.product = v;
+    var list = document.getElementById('fl-product-type-list');
+    if (list) list.style.display = 'none';
 }
 async function runFreelanceSearch() {
     var box = document.getElementById('freelance-results');
@@ -3944,9 +3971,15 @@ async function runFreelanceSearch() {
             // if API doesn't filter, filter client-side
             if (l.category && l.category !== 'freelance') return false;
             if (flFilters.kind && (l.freelance_kind || '') !== flFilters.kind) return false;
-            if (flFilters.product) {
-                var ptxt = ((l.product_type || '') + ' ' + (l.title || '')).toLowerCase();
-                if (ptxt.indexOf(flFilters.product.toLowerCase()) < 0) return false;
+            var prodInp = document.getElementById('fl-product-type');
+            var prodQ = (prodInp && prodInp.value || flFilters.product || '').trim().toLowerCase();
+            if (prodQ) {
+                var ptxt = ((l.product_type || '') + ' ' + (l.title || '') + ' ' + (l.description || '')).toLowerCase();
+                if (ptxt.indexOf(prodQ) < 0) return false;
+            }
+            if (flFilters.rating > 0) {
+                var rating = Number(l.seller_rating || l.staff_rating || l.rating || 0);
+                if (rating && rating < flFilters.rating) return false;
             }
             if (q) {
                 var blob = ((l.title||'')+' '+(l.description||'')).toLowerCase();
@@ -5224,19 +5257,56 @@ var _myListingsCat = 'all';
 var _myFlKind = '';
 function setMyListingsCat(cat) {
     _myListingsCat = cat || 'all';
-    ['all','sale','freelance'].forEach(function(c){
-        var el=document.getElementById('my-cat-'+(c==='freelance'?'fl':c));
-        if (el) el.classList.toggle('active', c===_myListingsCat);
-    });
-    var fk=document.getElementById('my-fl-kind');
-    if (fk) fk.style.display = (_myListingsCat==='freelance') ? 'flex' : 'none';
+    var labels = { all: 'Все', sale: 'Продажа', freelance: 'Фриланс' };
+    var lab = document.getElementById('my-cat-sheet-label');
+    if (lab) lab.textContent = labels[_myListingsCat] || 'Все';
+    var fk = document.getElementById('my-fl-sheet-btn');
+    if (fk) fk.style.display = (_myListingsCat === 'freelance') ? 'block' : 'none';
+    if (_myListingsCat !== 'freelance') {
+        _myFlKind = '';
+        var flab = document.getElementById('my-fl-sheet-label');
+        if (flab) flab.textContent = 'Все';
+    }
     loadMyListings();
 }
-function setMyFlKind(btn) {
-    _myFlKind = btn.getAttribute('data-v') || '';
-    btn.parentNode.querySelectorAll('.type-toggle-btn').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
+function setMyFlKindValue(v) {
+    _myFlKind = v || '';
+    var labels = { '': 'Все', order: 'Заказчик', execute: 'Исполнитель' };
+    var lab = document.getElementById('my-fl-sheet-label');
+    if (lab) lab.textContent = labels[_myFlKind] || 'Все';
     loadMyListings();
+}
+function openMyCatSheet() {
+    var old = document.getElementById('my-cat-sheet');
+    if (old) old.remove();
+    var sheet = document.createElement('div');
+    sheet.id = 'my-cat-sheet';
+    sheet.setAttribute('style','position:fixed;left:0;right:0;top:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center;');
+    sheet.onclick = function(e){ if (e.target === sheet) sheet.remove(); };
+    sheet.innerHTML =
+        '<div style="width:100%;max-width:480px;background:var(--bg,#1c1c1e);border-radius:16px 16px 0 0;padding:16px 16px 28px;box-sizing:border-box;">' +
+        '<div style="font-size:16px;font-weight:600;margin-bottom:12px;">Категория</div>' +
+        '<button type="button" class="btn" style="margin-bottom:8px;" onclick="document.getElementById(\'my-cat-sheet\').remove();setMyListingsCat(\'all\')">Все</button>' +
+        '<button type="button" class="btn btn-secondary" style="margin-bottom:8px;" onclick="document.getElementById(\'my-cat-sheet\').remove();setMyListingsCat(\'sale\')">Продажа</button>' +
+        '<button type="button" class="btn btn-secondary" onclick="document.getElementById(\'my-cat-sheet\').remove();setMyListingsCat(\'freelance\')">Фриланс</button>' +
+        '</div>';
+    document.body.appendChild(sheet);
+}
+function openMyFlKindSheet() {
+    var old = document.getElementById('my-fl-kind-sheet');
+    if (old) old.remove();
+    var sheet = document.createElement('div');
+    sheet.id = 'my-fl-kind-sheet';
+    sheet.setAttribute('style','position:fixed;left:0;right:0;top:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center;');
+    sheet.onclick = function(e){ if (e.target === sheet) sheet.remove(); };
+    sheet.innerHTML =
+        '<div style="width:100%;max-width:480px;background:var(--bg,#1c1c1e);border-radius:16px 16px 0 0;padding:16px 16px 28px;box-sizing:border-box;">' +
+        '<div style="font-size:16px;font-weight:600;margin-bottom:12px;">Тип фриланса</div>' +
+        '<button type="button" class="btn" style="margin-bottom:8px;" onclick="document.getElementById(\'my-fl-kind-sheet\').remove();setMyFlKindValue(\'\')">Все</button>' +
+        '<button type="button" class="btn btn-secondary" style="margin-bottom:8px;" onclick="document.getElementById(\'my-fl-kind-sheet\').remove();setMyFlKindValue(\'order\')">Заказчик</button>' +
+        '<button type="button" class="btn btn-secondary" onclick="document.getElementById(\'my-fl-kind-sheet\').remove();setMyFlKindValue(\'execute\')">Исполнитель</button>' +
+        '</div>';
+    document.body.appendChild(sheet);
 }
 function setMyListingsTab(tab) {
     _myListingsTab = tab || 'moderation';
