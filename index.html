@@ -1162,17 +1162,17 @@
     <!-- CREATE LISTING -->
     <div id="page-listing-create" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;">
-            <button class="btn btn-secondary btn-back" id="listing-step-back" onclick="listingCreateBack()" style="margin:0;">← Назад</button>
-            <button class="btn btn-back" onclick="cancelListingCreate()" style="margin:0;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);">Отменить</button>
+            <button class="btn btn-secondary btn-back" id="listing-step-back" onclick="listingCreateBack()" style="margin:0;" data-i18n="back">← Назад</button>
+            <button class="btn btn-back" onclick="cancelListingCreate()" style="margin:0;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" data-i18n="cancel_btn">Отменить</button>
         </div>
-        <div class="section-title" id="listing-create-title">Новое объявление</div>
+        <div class="section-title" id="listing-create-title" data-i18n="new_listing">Новое объявление</div>
         <div id="listing-step-1">
             <div class="form-group">
-                <label class="form-label">Название</label>
+                <label class="form-label" data-i18n="title">Название</label>
                 <input class="form-input" type="text" id="listing-title" placeholder="Название товара">
             </div>
             <div class="form-group">
-                <label class="form-label">Описание</label>
+                <label class="form-label" data-i18n="description">Описание</label>
                 <textarea class="form-input" id="listing-desc" rows="4" style="resize:vertical;min-height:100px;" placeholder="Описание"></textarea>
             </div>
             <div class="form-group">
@@ -1268,7 +1268,7 @@
 
     <!-- FAVORITES -->
     <div id="page-favorites" class="page">
-        <div class="section-title">Избранные</div>
+        <div class="section-title" data-i18n="favorites_title">Избранные</div>
         <div id="favorites-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
@@ -1278,11 +1278,11 @@
         <div class="section-title">Редактировать</div>
         <input type="hidden" id="edit-listing-id">
         <div class="form-group">
-            <label class="form-label">Название</label>
+            <label class="form-label" data-i18n="title">Название</label>
             <input class="form-input" type="text" id="edit-listing-title">
         </div>
         <div class="form-group">
-            <label class="form-label">Описание</label>
+            <label class="form-label" data-i18n="description">Описание</label>
             <textarea class="form-input" id="edit-listing-desc" rows="4" style="resize:vertical;min-height:100px;"></textarea>
         </div>
         <div class="form-group">
@@ -1301,7 +1301,7 @@
 
     <!-- NEWS -->
     <div id="page-news" class="page">
-        <div class="section-title">Новости</div>
+        <div class="section-title" data-i18n="news_title">Новости</div>
         <div id="news-pinned"><div class="loading"><div class="spinner"></div></div></div>
         <div class="section-title" style="font-size:16px;margin-top:8px;">Лента новостей</div>
         <div id="news-feed"></div>
@@ -1432,11 +1432,11 @@
         <div class="section-title" id="fl-create-title">Фриланс объявление</div>
         <div id="fl-step-1">
             <div class="form-group">
-                <label class="form-label">Название</label>
+                <label class="form-label" data-i18n="title">Название</label>
                 <input class="form-input" id="fl-title" placeholder="Название услуги / заказа">
             </div>
             <div class="form-group">
-                <label class="form-label">Описание</label>
+                <label class="form-label" data-i18n="description">Описание</label>
                 <textarea class="form-input" id="fl-desc" rows="4" placeholder="Описание"></textarea>
             </div>
             <div class="form-group">
@@ -1545,7 +1545,7 @@
 
     <!-- ORDERS -->
     <div id="page-orders" class="page">
-        <div class="section-title">История заказов</div>
+        <div class="section-title" data-i18n="orders_title">История заказов</div>
         <div id="orders-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
@@ -1557,11 +1557,11 @@
         <div class="wallet-actions">
             <button class="wallet-action" onclick="showPage('deposit')">
                 <div class="wallet-action-icon plus">+</div>
-                <div class="wallet-action-label">Пополнить</div>
+                <div class="wallet-action-label" data-i18n="topup">Пополнить</div>
             </button>
             <button class="wallet-action" onclick="showPage('withdraw')">
                 <div class="wallet-action-icon minus">−</div>
-                <div class="wallet-action-label">Вывести</div>
+                <div class="wallet-action-label" data-i18n="withdraw">Вывести</div>
             </button>
         </div>
         <button class="btn btn-secondary" style="margin-top:28px;" onclick="showPage('requests')">📜 Мои транзакции</button>
@@ -1645,7 +1645,7 @@
     <!-- REQUESTS -->
     <div id="page-requests" class="page">
         <button class="btn btn-secondary btn-back" onclick="showPage('balance')">← Назад</button>
-        <div class="section-title">Мои транзакции</div>
+        <div class="section-title" data-i18n="my_tx">Мои транзакции</div>
         <div id="requests-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
@@ -1681,7 +1681,7 @@
 
     <div id="page-settings-theme" class="page">
         <button class="back-link" onclick="showPage('settings')" data-i18n="back">← Назад</button>
-        <div class="section-title">Тема</div>
+        <div class="section-title" data-i18n="theme">Тема</div>
         <div class="btn-stack">
             <button class="btn btn-secondary theme-btn" id="theme-auto" onclick="setAppTheme('auto')">Как в Telegram</button>
             <button class="btn btn-secondary theme-btn" id="theme-light" onclick="setAppTheme('light')">Светлая</button>
@@ -1695,26 +1695,26 @@
         <div class="support-grid">
             <button class="support-tile" onclick="openSupportChat()">
                 <div class="support-tile-icon">💬</div>
-                <div class="support-tile-title">Написать обращение</div>
+                <div class="support-tile-title" data-i18n="support_ticket">Написать обращение</div>
                 <div class="support-tile-sub">Чат с менеджером</div>
             </button>
             <button class="support-tile" onclick="showPage('collaborate')">
                 <div class="support-tile-icon">🤝</div>
-                <div class="support-tile-title">Сотрудничать</div>
+                <div class="support-tile-title" data-i18n="support_hire">Сотрудничать</div>
                 <div class="support-tile-sub">Вакансии</div>
             </button>
             <button class="support-tile" onclick="openLink('https://t.me/xcodmanager')">
                 <div class="support-tile-icon">✈️</div>
-                <div class="support-tile-title">Написать в Telegram</div>
+                <div class="support-tile-title" data-i18n="support_tg">Написать в Telegram</div>
                 <div class="support-tile-sub">@xcodmanager</div>
             </button>
             <button class="support-tile" onclick="openEmail('xcodsupport@gmail.com')">
                 <div class="support-tile-icon">✉️</div>
-                <div class="support-tile-title">Написать на почту</div>
+                <div class="support-tile-title" data-i18n="support_mail">Написать на почту</div>
                 <div class="support-tile-sub">xcodsupport@gmail.com</div>
             </button>
         </div>
-        <button type="button" class="btn btn-secondary" style="margin-top:14px;" onclick="openExternal('https://xcodinfo.ru/faq')">FAQ</button>
+        <button type="button" class="btn btn-secondary" style="margin-top:14px;" onclick="openExternal('https://xcodinfo.ru/faq')" data-i18n="support_faq">FAQ</button>
     </div>
 
     <div id="page-support-chat" class="page chat-page">
@@ -1828,43 +1828,43 @@
 
     <!-- ADMIN -->
     <div id="page-admin" class="page">
-        <div class="section-title">Панель</div>
+        <div class="section-title" data-i18n="panel">Панель</div>
         <div class="card" style="margin-bottom:14px;">
-            <div class="card-title">Ваша роль</div>
+            <div class="card-title" data-i18n="your_role">Ваша роль</div>
             <div style="font-size:18px;font-weight:600;" id="admin-role">—</div>
         </div>
         <div class="support-grid" id="admin-tiles">
             <button class="support-tile" onclick="openAdminSection('workcenter')">
                 <div class="support-tile-icon">🗓️</div>
-                <div class="support-tile-title">Рабочий центр</div>
+                <div class="support-tile-title" data-i18n="workcenter">Рабочий центр</div>
             </button>
             <button class="support-tile" onclick="openAdminSection('career')">
                 <div class="support-tile-icon">📈</div>
-                <div class="support-tile-title">Трекер должностного роста</div>
+                <div class="support-tile-title" data-i18n="career">Трекер должностного роста</div>
             </button>
             <button class="support-tile" onclick="openAdminSection('listings')">
                 <div class="support-tile-icon">📄</div>
-                <div class="support-tile-title">Модерация объявлений</div>
+                <div class="support-tile-title" data-i18n="mod_listings">Модерация объявлений</div>
             </button>
             <button class="support-tile" onclick="openAdminSection('transactions')">
                 <div class="support-tile-icon">💳</div>
-                <div class="support-tile-title">Модерация транзакций</div>
+                <div class="support-tile-title" data-i18n="mod_tx">Модерация транзакций</div>
             </button>
             <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
                 <div class="support-tile-icon">💼</div>
-                <div class="support-tile-title">Модерация заявок на работу</div>
+                <div class="support-tile-title" data-i18n="mod_jobs">Модерация заявок на работу</div>
             </button>
             <button class="support-tile" onclick="openAdminSection('complaints')">
                 <div class="support-tile-icon">⚠️</div>
-                <div class="support-tile-title">Модерация обращений</div>
+                <div class="support-tile-title" data-i18n="mod_tickets">Модерация обращений</div>
             </button>
             <button class="support-tile" id="admin-staff-tile" style="display:none;" onclick="openAdminSection('staff')">
                 <div class="support-tile-icon">👥</div>
-                <div class="support-tile-title">Управление сотрудниками</div>
+                <div class="support-tile-title" data-i18n="staff_manage">Управление сотрудниками</div>
             </button>
             <button class="support-tile" onclick="openAdminSection('analytics')">
                 <div class="support-tile-icon">📊</div>
-                <div class="support-tile-title">Аналитика</div>
+                <div class="support-tile-title" data-i18n="analytics">Аналитика</div>
             </button>
         </div>
     </div>
@@ -2058,7 +2058,7 @@ async function init() {
     function setLoad() {
         try {
             var lab = box && box.querySelector('.load-msg');
-            if (lab) lab.textContent = 'Загрузка данных с сервера...';
+            if (lab) lab.textContent = tBlock('loading');
         } catch (e) {}
     }
     try { applyThemeFromStorage();
@@ -2220,6 +2220,7 @@ function showPage(name) {
     document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
     var page = document.getElementById('page-' + name);
     if (page) page.classList.add('active');
+    try { applyI18n(); } catch (e) {}
     if (name === 'home') loadListings();
     if (name === 'profile') loadOwnProfileListings();
     if (name === 'my-listings') loadMyListings();
@@ -2321,7 +2322,7 @@ var I18N = {
         topup: 'Пополнить', withdraw: 'Вывести', my_tx: 'Мои транзакции',
         sale: 'Продажа', all: 'Все', order: 'Заказ', execute: 'Исполнение',
         moderation: 'Модерация', active: 'Активные', completed_tab: 'Завершён.',
-        loading: 'Загрузка данных с сервера…', empty: 'Пусто', no_listings: 'Объявлений нет',
+        loading: tBlock('loading'), empty: 'Пусто', no_listings: 'Объявлений нет',
         no_news: 'Пока нет новостей', save: 'Сохранить', cancel: 'Отмена', next: 'Далее',
         pay: 'Оплатить', buy: 'Купить', write: 'Написать', profile: 'Профиль',
         price: 'Цена', from: 'от', to: 'до', type: 'Тип', product_type: 'Вид товара',
@@ -2331,7 +2332,78 @@ var I18N = {
         tx_pending: 'В обработке', tx_rejected: 'Отклонено', lang_changed: 'Язык изменён',
         original: 'оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
         insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: 'Транзакции'
-    },
+    ,
+        your_role: 'Ваша роль',
+        workcenter: 'Рабочий центр',
+        career: 'Трекер должностного роста',
+        mod_listings: 'Модерация объявлений',
+        mod_tx: 'Модерация транзакций',
+        mod_jobs: 'Модерация заявок на работу',
+        mod_tickets: 'Модерация обращений',
+        staff_manage: 'Управление сотрудниками',
+        analytics: 'Аналитика',
+        new_listing: 'Новое объявление',
+        description: 'Описание',
+        cancel_btn: 'Отменить',
+        upload_files: 'Загрузить файлы',
+        upload_photos: 'Загрузить фото',
+        send_mod: 'Отправить на модерацию',
+        partner_xcod: 'Партнёр X-Cod',
+        contract_no: 'Номер договора',
+        tgstat: 'Ссылка на TGStat',
+        username: 'Юзернейм',
+        users_month: 'Пользователей / мес',
+        earn_month: 'Заработок / мес',
+        cover_photo: 'Титульная',
+        min_photos: 'Минимум 1 фото',
+        max_photos: 'Максимум 5 фото',
+        guide_note: 'Обязательно должен быть файл guide.txt',
+        files_dm: 'Есть файлы, которые отправите в ЛС?',
+        yes: 'Да',
+        no: 'Нет',
+        balance_title: 'Баланс',
+        favorites_title: 'Избранные',
+        orders_title: 'История заказов',
+        news_title: 'Новости',
+        shifts: 'Смены',
+        my_shifts: 'Мои смены',
+        shift_history: 'История смен',
+        staff_control: 'Контроль сотрудников',
+        resign: 'Уволиться',
+        blocks: 'Блокировки',
+        history: 'История',
+        open_shift: 'Открыть',
+        close_shift: 'Закрыть',
+        sign_up_shift: 'Записаться на смену',
+        download_report: 'Скачать отчёт',
+        analytics_exp: 'Аналитика расходов',
+        analytics_inc: 'Аналитика доходов',
+        analytics_list: 'Аналитика объявлений',
+        accept: 'Принять',
+        reject: 'Отклонить',
+        edit: 'Редактировать',
+        delete: 'Удалить',
+        unpublish: 'Снять с публикации',
+        favorite: 'В избранное',
+        unfavorite: 'Из избранного',
+        active_listings: 'Активные',
+        completed_listings: 'Завершённые',
+        on_moderation: 'На модерации',
+        no_data: 'Нет данных',
+        search_ph: 'Поиск…',
+        amount: 'Сумма',
+        method: 'Способ',
+        comment: 'Комментарий',
+        continue: 'Далее',
+        back_short: 'Назад',
+        role_intern: 'Стажёр',
+        role_mod: 'Модератор',
+        role_admin: 'Админ',
+        role_owner: 'Создатель',
+        role_user: 'Пользователь',
+        not_on_shift: tBlock('not_on_shift'),
+        access_denied: tBlock('access_denied')
+},
     en: {
         support: 'Support', back: '← Back', menu: 'Menu',
         home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
@@ -2367,7 +2439,78 @@ var I18N = {
         tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Language changed',
         original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
         insufficient: 'Insufficient funds', listings: 'Listings', transactions: 'Transactions'
-    },
+    ,
+        your_role: 'Your role',
+        workcenter: 'Work center',
+        career: 'Career tracker',
+        mod_listings: 'Listings moderation',
+        mod_tx: 'Transactions moderation',
+        mod_jobs: 'Job applications',
+        mod_tickets: 'Support tickets',
+        staff_manage: 'Staff management',
+        analytics: 'Analytics',
+        new_listing: 'New listing',
+        description: 'Description',
+        cancel_btn: 'Cancel',
+        upload_files: 'Upload files',
+        upload_photos: 'Upload photos',
+        send_mod: 'Submit for review',
+        partner_xcod: 'X-Cod partner',
+        contract_no: 'Contract number',
+        tgstat: 'TGStat link',
+        username: 'Username',
+        users_month: 'Users / mo',
+        earn_month: 'Revenue / mo',
+        cover_photo: 'Cover',
+        min_photos: 'At least 1 photo',
+        max_photos: 'Max 5 photos',
+        guide_note: 'guide.txt file is required',
+        files_dm: 'Files to send via DM?',
+        yes: 'Yes',
+        no: 'No',
+        balance_title: 'Balance',
+        favorites_title: 'Favorites',
+        orders_title: 'Order history',
+        news_title: 'News',
+        shifts: 'Shifts',
+        my_shifts: 'My shifts',
+        shift_history: 'Shift history',
+        staff_control: 'Staff control',
+        resign: 'Resign',
+        blocks: 'Blocks',
+        history: 'History',
+        open_shift: 'Open',
+        close_shift: 'Close',
+        sign_up_shift: 'Sign up for a shift',
+        download_report: 'Download report',
+        analytics_exp: 'Expense analytics',
+        analytics_inc: 'Income analytics',
+        analytics_list: 'Listings analytics',
+        accept: 'Accept',
+        reject: 'Reject',
+        edit: 'Edit',
+        delete: 'Delete',
+        unpublish: 'Unpublish',
+        favorite: 'Favorite',
+        unfavorite: 'Unfavorite',
+        active_listings: 'Active',
+        completed_listings: 'Completed',
+        on_moderation: 'Under review',
+        no_data: 'No data',
+        search_ph: 'Search…',
+        amount: 'Amount',
+        method: 'Method',
+        comment: 'Comment',
+        continue: 'Next',
+        back_short: 'Back',
+        role_intern: 'Intern',
+        role_mod: 'Moderator',
+        role_admin: 'Admin',
+        role_owner: 'Founder',
+        role_user: 'User',
+        not_on_shift: 'You are not on shift',
+        access_denied: 'Access denied'
+},
     de: {
         support: 'Support', back: '← Zurück', menu: 'Menü',
         home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
@@ -2403,7 +2546,78 @@ var I18N = {
         tx_pending: 'In Bearbeitung', tx_rejected: 'Abgelehnt', lang_changed: 'Sprache geändert',
         original: 'Original', category: 'Kategorie', buy_confirm: 'Kauf bestätigen',
         insufficient: 'Unzureichendes Guthaben', listings: 'Anzeigen', transactions: 'Transaktionen'
-    },
+    ,
+        your_role: 'Ihre Rolle',
+        workcenter: 'Arbeitszentrum',
+        career: 'Karriere-Tracker',
+        mod_listings: 'Anzeigen-Moderation',
+        mod_tx: 'Transaktions-Moderation',
+        mod_jobs: 'Stellenbewerbungen',
+        mod_tickets: 'Support-Tickets',
+        staff_manage: 'Mitarbeiterverwaltung',
+        analytics: 'Analytik',
+        new_listing: 'Neue Anzeige',
+        description: 'Beschreibung',
+        cancel_btn: 'Abbrechen',
+        upload_files: 'Dateien hochladen',
+        upload_photos: 'Fotos hochladen',
+        send_mod: 'Zur Prüfung senden',
+        partner_xcod: 'X-Cod Partner',
+        contract_no: 'Vertragsnummer',
+        tgstat: 'TGStat-Link',
+        username: 'Benutzername',
+        users_month: 'Nutzer / Mon',
+        earn_month: 'Umsatz / Mon',
+        cover_photo: 'Titelbild',
+        min_photos: 'Mindestens 1 Foto',
+        max_photos: 'Max. 5 Fotos',
+        guide_note: 'guide.txt ist erforderlich',
+        files_dm: 'Dateien per PN senden?',
+        yes: 'Ja',
+        no: 'Nein',
+        balance_title: 'Guthaben',
+        favorites_title: 'Favoriten',
+        orders_title: 'Bestellverlauf',
+        news_title: 'News',
+        shifts: 'Schichten',
+        my_shifts: 'Meine Schichten',
+        shift_history: 'Schichthistorie',
+        staff_control: 'Mitarbeiterkontrolle',
+        resign: 'Kündigen',
+        blocks: 'Sperren',
+        history: 'Verlauf',
+        open_shift: 'Öffnen',
+        close_shift: 'Schließen',
+        sign_up_shift: 'Für Schicht anmelden',
+        download_report: 'Bericht laden',
+        analytics_exp: 'Ausgabenanalyse',
+        analytics_inc: 'Einnahmenanalyse',
+        analytics_list: 'Anzeigenanalyse',
+        accept: 'Annehmen',
+        reject: 'Ablehnen',
+        edit: 'Bearbeiten',
+        delete: 'Löschen',
+        unpublish: 'Zurückziehen',
+        favorite: 'Favorit',
+        unfavorite: 'Entfernen',
+        active_listings: 'Aktiv',
+        completed_listings: 'Abgeschlossen',
+        on_moderation: 'In Prüfung',
+        no_data: 'Keine Daten',
+        search_ph: 'Suche…',
+        amount: 'Betrag',
+        method: 'Methode',
+        comment: 'Kommentar',
+        continue: 'Weiter',
+        back_short: 'Zurück',
+        role_intern: 'Praktikant',
+        role_mod: 'Moderator',
+        role_admin: 'Admin',
+        role_owner: 'Gründer',
+        role_user: 'Nutzer',
+        not_on_shift: 'Sie sind nicht im Dienst',
+        access_denied: 'Kein Zugriff'
+},
     fr: {
         support: 'Assistance', back: '← Retour', menu: 'Menu',
         home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
@@ -2439,7 +2653,78 @@ var I18N = {
         tx_pending: 'En cours', tx_rejected: 'Refusé', lang_changed: 'Langue modifiée',
         original: 'original', category: 'Catégorie', buy_confirm: 'Confirmer l\'achat',
         insufficient: 'Fonds insuffisants', listings: 'Annonces', transactions: 'Transactions'
-    },
+    ,
+        your_role: 'Votre rôle',
+        workcenter: 'Centre de travail',
+        career: 'Suivi de carrière',
+        mod_listings: 'Modération des annonces',
+        mod_tx: 'Modération des transactions',
+        mod_jobs: 'Candidatures',
+        mod_tickets: 'Tickets support',
+        staff_manage: 'Gestion du personnel',
+        analytics: 'Analytique',
+        new_listing: 'Nouvelle annonce',
+        description: 'Description',
+        cancel_btn: 'Annuler',
+        upload_files: 'Charger des fichiers',
+        upload_photos: 'Charger des photos',
+        send_mod: 'Envoyer en modération',
+        partner_xcod: 'Partenaire X-Cod',
+        contract_no: 'N° de contrat',
+        tgstat: 'Lien TGStat',
+        username: 'Nom d\'utilisateur',
+        users_month: 'Utilisateurs / mois',
+        earn_month: 'Revenu / mois',
+        cover_photo: 'Couverture',
+        min_photos: 'Min. 1 photo',
+        max_photos: 'Max 5 photos',
+        guide_note: 'guide.txt est obligatoire',
+        files_dm: 'Fichiers en message privé ?',
+        yes: 'Oui',
+        no: 'Non',
+        balance_title: 'Solde',
+        favorites_title: 'Favoris',
+        orders_title: 'Historique des commandes',
+        news_title: 'Actualités',
+        shifts: 'Quarts',
+        my_shifts: 'Mes quarts',
+        shift_history: 'Historique des quarts',
+        staff_control: 'Contrôle du personnel',
+        resign: 'Démissionner',
+        blocks: 'Blocages',
+        history: 'Historique',
+        open_shift: 'Ouvrir',
+        close_shift: 'Fermer',
+        sign_up_shift: 'S\'inscrire au quart',
+        download_report: 'Télécharger le rapport',
+        analytics_exp: 'Analyse des dépenses',
+        analytics_inc: 'Analyse des revenus',
+        analytics_list: 'Analyse des annonces',
+        accept: 'Accepter',
+        reject: 'Refuser',
+        edit: 'Modifier',
+        delete: 'Supprimer',
+        unpublish: 'Retirer',
+        favorite: 'Favori',
+        unfavorite: 'Retirer',
+        active_listings: 'Actifs',
+        completed_listings: 'Terminés',
+        on_moderation: 'En modération',
+        no_data: 'Aucune donnée',
+        search_ph: 'Recherche…',
+        amount: 'Montant',
+        method: 'Méthode',
+        comment: 'Commentaire',
+        continue: 'Suivant',
+        back_short: 'Retour',
+        role_intern: 'Stagiaire',
+        role_mod: 'Modérateur',
+        role_admin: 'Admin',
+        role_owner: 'Fondateur',
+        role_user: 'Utilisateur',
+        not_on_shift: 'Vous n\'êtes pas en service',
+        access_denied: 'Accès refusé'
+},
     es: {
         support: 'Soporte', back: '← Atrás', menu: 'Menú',
         home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -2475,7 +2760,78 @@ var I18N = {
         tx_pending: 'Procesando', tx_rejected: 'Rechazado', lang_changed: 'Idioma cambiado',
         original: 'original', category: 'Categoría', buy_confirm: 'Confirmar compra',
         insufficient: 'Fondos insuficientes', listings: 'Anuncios', transactions: 'Transacciones'
-    },
+    ,
+        your_role: 'Tu rol',
+        workcenter: 'Centro de trabajo',
+        career: 'Seguimiento de carrera',
+        mod_listings: 'Moderación de anuncios',
+        mod_tx: 'Moderación de transacciones',
+        mod_jobs: 'Solicitudes de empleo',
+        mod_tickets: 'Tickets de soporte',
+        staff_manage: 'Gestión de personal',
+        analytics: 'Analítica',
+        new_listing: 'Nuevo anuncio',
+        description: 'Descripción',
+        cancel_btn: 'Cancelar',
+        upload_files: 'Subir archivos',
+        upload_photos: 'Subir fotos',
+        send_mod: 'Enviar a moderación',
+        partner_xcod: 'Socio X-Cod',
+        contract_no: 'Nº de contrato',
+        tgstat: 'Enlace TGStat',
+        username: 'Usuario',
+        users_month: 'Usuarios / mes',
+        earn_month: 'Ingresos / mes',
+        cover_photo: 'Portada',
+        min_photos: 'Mín. 1 foto',
+        max_photos: 'Máx. 5 fotos',
+        guide_note: 'Se requiere guide.txt',
+        files_dm: '¿Archivos por mensaje privado?',
+        yes: 'Sí',
+        no: 'No',
+        balance_title: 'Saldo',
+        favorites_title: 'Favoritos',
+        orders_title: 'Historial de pedidos',
+        news_title: 'Noticias',
+        shifts: 'Turnos',
+        my_shifts: 'Mis turnos',
+        shift_history: 'Historial de turnos',
+        staff_control: 'Control de personal',
+        resign: 'Renunciar',
+        blocks: 'Bloqueos',
+        history: 'Historial',
+        open_shift: 'Abrir',
+        close_shift: 'Cerrar',
+        sign_up_shift: 'Apuntarse al turno',
+        download_report: 'Descargar informe',
+        analytics_exp: 'Análisis de gastos',
+        analytics_inc: 'Análisis de ingresos',
+        analytics_list: 'Análisis de anuncios',
+        accept: 'Aceptar',
+        reject: 'Rechazar',
+        edit: 'Editar',
+        delete: 'Eliminar',
+        unpublish: 'Retirar',
+        favorite: 'Favorito',
+        unfavorite: 'Quitar',
+        active_listings: 'Activos',
+        completed_listings: 'Completados',
+        on_moderation: 'En moderación',
+        no_data: 'Sin datos',
+        search_ph: 'Buscar…',
+        amount: 'Importe',
+        method: 'Método',
+        comment: 'Comentario',
+        continue: 'Siguiente',
+        back_short: 'Atrás',
+        role_intern: 'Practicante',
+        role_mod: 'Moderador',
+        role_admin: 'Admin',
+        role_owner: 'Fundador',
+        role_user: 'Usuario',
+        not_on_shift: 'No estás de turno',
+        access_denied: 'Acceso denegado'
+},
     zh: {
         support: '支持', back: '← 返回', menu: '菜单',
         home: '主页', news: '新闻', exchange: '交易所', freelance: '自由职业',
@@ -2511,7 +2867,78 @@ var I18N = {
         tx_pending: '处理中', tx_rejected: '已拒绝', lang_changed: '语言已更改',
         original: '原版', category: '分类', buy_confirm: '确认购买',
         insufficient: '余额不足', listings: '广告', transactions: '交易'
-    }
+    ,
+        your_role: '您的角色',
+        workcenter: '工作中心',
+        career: '晋升进度',
+        mod_listings: '广告审核',
+        mod_tx: '交易审核',
+        mod_jobs: '求职申请',
+        mod_tickets: '工单审核',
+        staff_manage: '员工管理',
+        analytics: '数据分析',
+        new_listing: '新广告',
+        description: '描述',
+        cancel_btn: '取消',
+        upload_files: '上传文件',
+        upload_photos: '上传照片',
+        send_mod: '提交审核',
+        partner_xcod: 'X-Cod 合作',
+        contract_no: '合同编号',
+        tgstat: 'TGStat 链接',
+        username: '用户名',
+        users_month: '用户/月',
+        earn_month: '收入/月',
+        cover_photo: '封面',
+        min_photos: '至少 1 张照片',
+        max_photos: '最多 5 张',
+        guide_note: '必须包含 guide.txt',
+        files_dm: '是否有私信发送的文件？',
+        yes: '是',
+        no: '否',
+        balance_title: '余额',
+        favorites_title: '收藏',
+        orders_title: '订单历史',
+        news_title: '新闻',
+        shifts: '班次',
+        my_shifts: '我的班次',
+        shift_history: '班次历史',
+        staff_control: '员工控制',
+        resign: '辞职',
+        blocks: '封禁',
+        history: '历史',
+        open_shift: '开启',
+        close_shift: '关闭',
+        sign_up_shift: '报名班次',
+        download_report: '下载报告',
+        analytics_exp: '支出分析',
+        analytics_inc: '收入分析',
+        analytics_list: '广告分析',
+        accept: '通过',
+        reject: '拒绝',
+        edit: '编辑',
+        delete: '删除',
+        unpublish: '下架',
+        favorite: '收藏',
+        unfavorite: '取消收藏',
+        active_listings: '上架中',
+        completed_listings: '已完成',
+        on_moderation: '审核中',
+        no_data: '暂无数据',
+        search_ph: '搜索…',
+        amount: '金额',
+        method: '方式',
+        comment: '备注',
+        continue: '下一步',
+        back_short: '返回',
+        role_intern: '实习生',
+        role_mod: '版主',
+        role_admin: '管理员',
+        role_owner: '创始人',
+        role_user: '用户',
+        not_on_shift: '您不在班次中',
+        access_denied: '无权限'
+}
 };
 
 function t(key) {
@@ -2569,6 +2996,16 @@ function statusLabel(st) {
     };
     var k = map[st] || null;
     return k ? tBlock(k) : st;
+}
+
+
+function roleName(role) {
+    var r = parseInt(role, 10) || 0;
+    if (r >= 6) return tBlock('role_owner');
+    if (r >= 5) return tBlock('role_admin');
+    if (r >= 4) return tBlock('role_mod');
+    if (r >= 3) return tBlock('role_intern');
+    return tBlock('role_user');
 }
 
 function txTypeLabel(tp) {
@@ -6341,7 +6778,7 @@ async function openShiftControl(shiftDate, shiftType) {
         var data = await apiGet('/api/shifts/control');
         var html = '';
         if (!data.ok) {
-            html += '<div class="info-block" style="margin-top:12px;">' + (data.message || 'Нет доступа') + '</div>';
+            html += '<div class="info-block" style="margin-top:12px;">' + (data.message || tBlock('access_denied')) + '</div>';
             box.innerHTML = html;
             return;
         }
@@ -7040,6 +7477,10 @@ function pickLanguage(code) {
         if (page && page.id) {
             var name = page.id.replace(/^page-/, '');
             if (typeof showPage === 'function') showPage(name);
+            // re-open dynamic sections
+            if (name === 'admin' && typeof renderAdminPanel === 'function') renderAdminPanel();
+            if (name === 'balance' && typeof loadBalance === 'function') loadBalance();
+            if (name === 'home' && typeof loadFeed === 'function') loadFeed();
         }
     } catch (e) {}
     try { tg.showAlert(tBlock('lang_changed')); } catch (e) {}
