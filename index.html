@@ -420,13 +420,32 @@
             line-height: 1;
         }
         .inline-options {
-            margin-top: 8px;
-            border: 1.5px solid rgba(128,128,128,0.25);
-            border-radius: 12px;
-            overflow: hidden;
-            background: var(--secondary-bg);
-            max-height: 220px;
+            margin-top: 6px;
+            padding: 4px 0;
+            max-height: 200px;
             overflow-y: auto;
+            background: transparent;
+            border: none;
+        }
+        .inline-options .inline-opt {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            border-radius: 0;
+            padding: 8px 4px;
+            margin: 0;
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text);
+            line-height: 1.35;
+            cursor: pointer;
+        }
+        .inline-options .inline-opt:active,
+        .inline-options .inline-opt:hover {
+            color: var(--button);
+            background: transparent;
         }
         .inline-options .sheet-option {
             border-bottom: 1px solid rgba(128,128,128,0.12);
@@ -1503,17 +1522,17 @@
             <div class="section-title" style="margin-bottom:0;">Мои объявления</div>
             <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()">+ Создать</button>
         </div>
-        <div class="seg-toggle" id="my-listings-seg" style="grid-template-columns:1fr 1fr 1fr;">
-            <button type="button" class="active" id="my-seg-mod" onclick="setMyListingsTab('moderation')">На модерации <span class="seg-count" id="my-cnt-mod">0</span></button>
-            <button type="button" id="my-seg-active" onclick="setMyListingsTab('active')">Активные <span class="seg-count" id="my-cnt-active">0</span></button>
-            <button type="button" id="my-seg-done" onclick="setMyListingsTab('completed')">Завершённые <span class="seg-count" id="my-cnt-done">0</span></button>
+        <div class="seg-toggle" id="my-listings-seg" style="grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;box-sizing:border-box;">
+            <button type="button" class="active" id="my-seg-mod" onclick="setMyListingsTab('moderation')" style="font-size:12px;padding:8px 4px;min-width:0;overflow:hidden;">Модерация <span class="seg-count" id="my-cnt-mod">0</span></button>
+            <button type="button" id="my-seg-active" onclick="setMyListingsTab('active')" style="font-size:12px;padding:8px 4px;min-width:0;overflow:hidden;">Активные <span class="seg-count" id="my-cnt-active">0</span></button>
+            <button type="button" id="my-seg-done" onclick="setMyListingsTab('completed')" style="font-size:12px;padding:8px 4px;min-width:0;overflow:hidden;">Завершён. <span class="seg-count" id="my-cnt-done">0</span></button>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin:10px 0;">
-            <button type="button" class="btn btn-secondary" id="my-cat-sheet-btn" onclick="openMyCatSheet()" style="text-align:left;">
-                Категория: <b id="my-cat-sheet-label">Все</b> ▾
+        <div style="display:flex;flex-direction:row;gap:8px;margin:10px 0;align-items:stretch;">
+            <button type="button" class="btn btn-secondary" id="my-cat-sheet-btn" onclick="openMyCatSheet()" style="flex:1;text-align:center;font-weight:400;">
+                <span id="my-cat-sheet-label">Все</span> ▾
             </button>
-            <button type="button" class="btn btn-secondary" id="my-fl-sheet-btn" onclick="openMyFlKindSheet()" style="text-align:left;display:none;">
-                Фриланс: <b id="my-fl-sheet-label">Все</b> ▾
+            <button type="button" class="btn btn-secondary" id="my-fl-sheet-btn" onclick="openMyFlKindSheet()" style="flex:1;text-align:center;font-weight:400;display:none;">
+                <span id="my-fl-sheet-label">Все</span> ▾
             </button>
         </div>
 
