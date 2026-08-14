@@ -38,7 +38,7 @@
             el.innerHTML = '<div class="empty" style="padding:24px;text-align:center;">' +
                 '<div class="spinner" style="margin:0 auto 12px;"></div>' +
                 '<div style="margin-bottom:8px;">Загрузка данных с сервера...</div>' +
-                '<button onclick="location.reload()" style="padding:10px 16px;border:none;border-radius:10px;background:#2ea6ff;color:#fff;font-weight:600;margin-top:12px;">Обновить</button></div>';
+                '<button onclick="location.reload()" style="padding:10px 16px;border:none;border-radius:10px;background:#2ea6ff;color:#fff;font-weight:600;margin-top:12px;" data-i18n="refresh">Обновить</button></div>';
         } catch (e) {}
     }, 10000);
     </script>
@@ -1155,7 +1155,7 @@
 
     <!-- LISTING DETAIL -->
     <div id="page-listing-detail" class="page">
-        <button class="btn btn-secondary btn-back" id="listing-detail-back" onclick="backFromListing()">← Назад</button>
+        <button class="btn btn-secondary btn-back" id="listing-detail-back" onclick="backFromListing()" data-i18n="back">← Назад</button>
         <div id="listing-detail-content"></div>
     </div>
 
@@ -1169,33 +1169,33 @@
         <div id="listing-step-1">
             <div class="form-group">
                 <label class="form-label" data-i18n="title">Название</label>
-                <input class="form-input" type="text" id="listing-title" placeholder="Название товара">
+                <input class="form-input" type="text" id="listing-title" placeholder="Название товара" data-i18n-placeholder="title">
             </div>
             <div class="form-group">
                 <label class="form-label" data-i18n="description">Описание</label>
-                <textarea class="form-input" id="listing-desc" rows="4" style="resize:vertical;min-height:100px;" placeholder="Описание"></textarea>
+                <textarea class="form-input" id="listing-desc" rows="4" style="resize:vertical;min-height:100px;" placeholder="Описание" data-i18n-placeholder="description"></textarea>
             </div>
             <div class="form-group">
-                <label class="form-label">Тип товара</label>
+                <label class="form-label" data-i18n="product_type">Тип товара</label>
                 <div class="type-toggle" style="display:flex;gap:8px;">
-                    <button type="button" class="btn btn-secondary type-toggle-btn" data-type="partner" onclick="selectListingType(this)" style="flex:1;">Партнёр X-Cod</button>
-                    <button type="button" class="btn btn-secondary type-toggle-btn" data-type="own" onclick="selectListingType(this)" style="flex:1;">Свой товар</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" data-type="partner" onclick="selectListingType(this)" style="flex:1;" data-i18n="partner_xcod">Партнёр X-Cod</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" data-type="own" onclick="selectListingType(this)" style="flex:1;" data-i18n="own_product">Свой товар</button>
                 </div>
             </div>
             <div id="fields-partner" style="display:none;">
                 <div class="form-group">
-                    <label class="form-label">Номер договора X-Cod</label>
+                    <label class="form-label" data-i18n="contract_no">Номер договора X-Cod</label>
                     <input class="form-input" type="text" id="listing-contract" placeholder="XC-0000">
                 </div>
                 <label class="check-row">
                     <input type="checkbox" id="listing-analytics">
-                    <span>Согласие на передачу данных и аналитики</span>
+                    <span data-i18n="analytics_consent">Согласие на передачу данных и аналитики</span>
                 </label>
-                <div class="info-block" style="margin-top:12px;">Цена определяется компанией X-Cod по аналитике после модерации.</div>
+                <div class="info-block" style="margin-top:12px;" data-i18n="price_xcod_note">Цена определяется компанией X-Cod по аналитике после модерации.</div>
             </div>
             <div id="fields-own" style="display:none;">
                 <div class="form-group">
-                    <label class="form-label">Кол-во пользователей в месяц</label>
+                    <label class="form-label" data-i18n="users_month">Кол-во пользователей в месяц</label>
                     <input class="form-input" type="number" id="listing-users-month" placeholder="1000" min="0">
                 </div>
                 <div class="form-group">
@@ -1203,11 +1203,11 @@
                     <input class="form-input" type="number" id="listing-earnings-month" placeholder="500" min="0" step="0.01">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Вид товара</label>
+                    <label class="form-label" data-i18n="product_type">Вид товара</label>
                     <input class="form-input" type="text" id="listing-product-type" placeholder="TG бот / Mini App + сайт / другое">
                 </div>
                 <div class="form-group" id="tgstat-group">
-                    <label class="form-label">Ссылка на TGStat</label>
+                    <label class="form-label" data-i18n="tgstat">Ссылка на TGStat</label>
                     <input class="form-input" type="text" id="listing-tgstat" placeholder="https://tgstat.ru/...">
                 </div>
                 <div class="form-group">
@@ -1215,11 +1215,11 @@
                     <input class="form-input" type="text" id="listing-bot" placeholder="@my_bot">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Цена ($)</label>
+                    <label class="form-label" data-i18n="price_usd">Цена ($)</label>
                     <input class="form-input" type="number" id="listing-price" placeholder="100" min="1">
                 </div>
             </div>
-            <button class="btn" onclick="listingCreateNext()">Далее</button>
+            <button class="btn" onclick="listingCreateNext()" data-i18n="continue">Далее</button>
         </div>
         <div id="listing-step-photos" style="display:none;">
             <div class="info-block" style="margin-bottom:14px;">
@@ -1235,7 +1235,7 @@
                 <input type="file" id="listing-photos" accept="image/*" multiple style="display:none;" onchange="onListingPhotosPicked(this)">
                 <div id="listing-photos-list" class="photo-grid"></div>
             </div>
-            <button class="btn" onclick="listingPhotosNext()">Далее</button>
+            <button class="btn" onclick="listingPhotosNext()" data-i18n="continue">Далее</button>
         </div>
         <div id="listing-step-2" style="display:none;">
             <div class="info-block" style="margin-bottom:14px;">
@@ -1258,11 +1258,11 @@
             <div class="form-group">
                 <label class="form-label">Есть ли файлы, которые вы отправите покупателю в ЛС?</label>
                 <div class="type-toggle" style="display:flex;gap:8px;">
-                    <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-yes" onclick="selectDmFiles(true)" style="flex:1;">Да</button>
-                    <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-no" onclick="selectDmFiles(false)" style="flex:1;">Нет</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-yes" onclick="selectDmFiles(true)" style="flex:1;" data-i18n="yes">Да</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-no" onclick="selectDmFiles(false)" style="flex:1;" data-i18n="no">Нет</button>
                 </div>
             </div>
-            <button class="btn" id="listing-create-btn" onclick="createListing()">Отправить на модерацию</button>
+            <button class="btn" id="listing-create-btn" onclick="createListing()" data-i18n="send_mod">Отправить на модерацию</button>
         </div>
     </div>
 
@@ -1274,7 +1274,7 @@
 
     <!-- EDIT LISTING -->
     <div id="page-listing-edit" class="page">
-        <button class="btn btn-secondary btn-back" onclick="showPage('home')">← Назад</button>
+        <button class="btn btn-secondary btn-back" onclick="showPage('home')" data-i18n="back">← Назад</button>
         <div class="section-title">Редактировать</div>
         <input type="hidden" id="edit-listing-id">
         <div class="form-group">
@@ -1286,7 +1286,7 @@
             <textarea class="form-input" id="edit-listing-desc" rows="4" style="resize:vertical;min-height:100px;"></textarea>
         </div>
         <div class="form-group">
-            <label class="form-label">Цена ($)</label>
+            <label class="form-label" data-i18n="price_usd">Цена ($)</label>
             <input class="form-input" type="number" id="edit-listing-price" min="1">
         </div>
         <div class="form-group">
@@ -1294,7 +1294,7 @@
             <input class="form-input" type="text" id="edit-listing-bot">
         </div>
         <div class="btn-stack">
-            <button class="btn" id="listing-save-btn" onclick="saveListing()">Сохранить</button>
+            <button class="btn" id="listing-save-btn" onclick="saveListing()" data-i18n="save">Сохранить</button>
             <button class="btn btn-danger" onclick="deleteListing()">Удалить объявление</button>
         </div>
     </div>
@@ -1308,7 +1308,7 @@
     </div>
 
     <div id="page-news-detail" class="page">
-        <button class="back-link" onclick="showPage('news');loadNewsPinned();">← Назад</button>
+        <button class="back-link" onclick="showPage('news');loadNewsPinned();" data-i18n="back">← Назад</button>
         <div id="news-detail-content"></div>
     </div>
 
@@ -1319,26 +1319,26 @@
             <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startSaleCreate()" data-i18n="create">+ Создать</button>
         </div>
         <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
-            <input class="form-input" type="search" id="exchange-q" placeholder="Поиск по бирже..." enterkeyhint="search">
+            <input class="form-input" type="search" id="exchange-q" placeholder="Поиск по бирже..." data-i18n-placeholder="search_exchange" enterkeyhint="search">
             <button type="button" class="search-btn" onclick="runExchangeSearch()" title="Найти">🔍</button>
         </div>
         <div id="exchange-history-wrap" style="display:none;">
             <div class="form-label" style="margin-bottom:6px;">История поиска</div>
             <div class="search-history" id="exchange-history"></div>
         </div>
-                <div class="filters-heading" data-i18n="filters">Фильтры</div>
+                <div class="filters-heading" data-i18n="filters" data-i18n="filters">Фильтры</div>
         <div class="form-group">
             <label class="form-label">Тип</label>
             <div class="type-toggle" style="display:flex;gap:8px;">
                 <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-all" data-v="" onclick="setExType(this)" style="flex:1;">Все</button>
                 <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-partner" data-v="partner" onclick="setExType(this)" style="flex:1;">Партнёр</button>
-                <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-own" data-v="own" onclick="setExType(this)" style="flex:1;">Свой товар</button>
+                <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-own" data-v="own" onclick="setExType(this)" style="flex:1;" data-i18n="own_product">Свой товар</button>
             </div>
         </div>
         <div class="form-group">
-            <label class="form-label">Вид товара</label>
+            <label class="form-label" data-i18n="product_type">Вид товара</label>
             <div class="ptype-wrap">
-                <input class="form-input" type="text" id="ex-product-type" placeholder="Любой вид" autocomplete="off">
+                <input class="form-input" type="text" id="ex-product-type" placeholder="Любой вид" data-i18n-placeholder="any_type" autocomplete="off">
                 <button type="button" class="ptype-arrow" id="ex-product-type-btn" onclick="toggleProductTypeList()" aria-label="Список">▾</button>
             </div>
             <div id="ex-product-type-list" class="inline-options" style="display:none;"></div>
@@ -1375,7 +1375,7 @@
                 <input class="form-input" type="number" id="ex-earn-to" placeholder="до" min="0">
             </div>
         </div>
-<button class="btn" style="margin-bottom:14px;" onclick="runExchangeSearch()">Найти</button>
+<button class="btn" style="margin-bottom:14px;" onclick="runExchangeSearch()" data-i18n="search_btn">Найти</button>
         <div id="exchange-results"><div class="empty"><div class="icon">🔍</div>Введите запрос или задайте фильтры</div></div>
     </div>
 
@@ -1387,12 +1387,12 @@
             <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startFreelanceCreate()" data-i18n="create">+ Создать</button>
         </div>
         <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
-            <input class="form-input" type="search" id="fl-q" placeholder="Поиск по ключевым словам..." enterkeyhint="search">
+            <input class="form-input" type="search" id="fl-q" placeholder="Поиск по ключевым словам..." data-i18n-placeholder="search_keywords" enterkeyhint="search">
             <button type="button" class="search-btn" onclick="runFreelanceSearch()" title="Найти">🔍</button>
         </div>
-        <div class="filters-heading" data-i18n="filters">Фильтры</div>
+        <div class="filters-heading" data-i18n="filters" data-i18n="filters">Фильтры</div>
         <div class="form-group">
-            <label class="form-label">Вид услуги</label>
+            <label class="form-label" data-i18n="service_type">Вид услуги</label>
             <div class="type-toggle" style="display:flex;gap:8px;">
                 <button type="button" class="btn btn-secondary type-toggle-btn active" id="fl-kind-all" data-v="" onclick="setFlKind(this)" style="flex:1;">Все</button>
                 <button type="button" class="btn btn-secondary type-toggle-btn" id="fl-kind-order" data-v="order" onclick="setFlKind(this)" style="flex:1;">Заказать</button>
@@ -1400,9 +1400,9 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="form-label">Вид товара</label>
+            <label class="form-label" data-i18n="product_type">Вид товара</label>
             <div class="ptype-wrap">
-                <input class="form-input" type="text" id="fl-product-type" placeholder="Любой вид" autocomplete="off" oninput="filterFlProductSuggestions()">
+                <input class="form-input" type="text" id="fl-product-type" placeholder="Любой вид" data-i18n-placeholder="any_type" autocomplete="off" oninput="filterFlProductSuggestions()">
                 <button type="button" class="ptype-arrow" onclick="toggleFlProductTypeList()" aria-label="Список">▾</button>
             </div>
             <div id="fl-product-type-list" class="inline-options" style="display:none;"></div>
@@ -1418,7 +1418,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="form-label">Цена</label>
+            <label class="form-label" data-i18n="price">Цена</label>
             <div style="display:flex;gap:8px;">
                 <input class="form-input" type="number" id="fl-price-from" placeholder="от" style="flex:1;">
                 <input class="form-input" type="number" id="fl-price-to" placeholder="до" style="flex:1;">
@@ -1428,7 +1428,7 @@
     </div>
 
     <div id="page-create-freelance" class="page">
-        <button class="back-link" onclick="cancelFreelanceCreate()">← Назад</button>
+        <button class="back-link" onclick="cancelFreelanceCreate()" data-i18n="back">← Назад</button>
         <div class="section-title" id="fl-create-title">Фриланс объявление</div>
         <div id="fl-step-1">
             <div class="form-group">
@@ -1437,10 +1437,10 @@
             </div>
             <div class="form-group">
                 <label class="form-label" data-i18n="description">Описание</label>
-                <textarea class="form-input" id="fl-desc" rows="4" placeholder="Описание"></textarea>
+                <textarea class="form-input" id="fl-desc" rows="4" placeholder="Описание" data-i18n-placeholder="description"></textarea>
             </div>
             <div class="form-group">
-                <label class="form-label">Вид услуги</label>
+                <label class="form-label" data-i18n="service_type">Вид услуги</label>
                 <div class="type-toggle" style="display:flex;gap:8px;">
                     <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-order" onclick="selectFlKind('order')" style="flex:1;">Заказ</button>
                     <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-execute" onclick="selectFlKind('execute')" style="flex:1;">Исполнение</button>
@@ -1455,7 +1455,7 @@
             </div>
             <div id="fl-partner-fields" style="display:none;">
                 <div class="form-group">
-                    <label class="form-label">Номер договора X-Cod</label>
+                    <label class="form-label" data-i18n="contract_no">Номер договора X-Cod</label>
                     <input class="form-input" id="fl-contract" placeholder="№ договора">
                 </div>
                 <label style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
@@ -1473,10 +1473,10 @@
                 <input class="form-input" id="fl-product-type" placeholder="бот, сайт...">
             </div>
             <div class="form-group">
-                <label class="form-label">Цена ($)</label>
+                <label class="form-label" data-i18n="price_usd">Цена ($)</label>
                 <input class="form-input" type="number" id="fl-price" placeholder="100" min="1">
             </div>
-            <button class="btn" onclick="flCreateNextPhotos()">Далее</button>
+            <button class="btn" onclick="flCreateNextPhotos()" data-i18n="continue">Далее</button>
         </div>
         <div id="fl-step-photos" style="display:none;">
             <div class="info-block" style="margin-bottom:14px;">От 1 до 5 фото. Первое — титульное. Можно менять порядок перетаскиванием.</div>
@@ -1487,7 +1487,7 @@
             </div>
             <input type="file" id="fl-photos" accept="image/*" multiple style="display:none;" onchange="onFlPhotosPicked(this)">
             <div id="fl-photos-list" class="photo-grid"></div>
-            <button class="btn" style="margin-top:12px;" onclick="flCreateNextPay()">Далее</button>
+            <button class="btn" style="margin-top:12px;" onclick="flCreateNextPay()" data-i18n="continue">Далее</button>
         </div>
         <div id="fl-step-pay" style="display:none;">
             <div class="info-block" style="margin-bottom:14px;">Оплата публикации фриланс-объявления</div>
@@ -1569,19 +1569,19 @@
 
     <!-- DEPOSIT -->
     <div id="page-deposit" class="page">
-        <button class="back-link" onclick="showPage('balance')">← Назад</button>
-        <div class="section-title">Пополнение</div>
+        <button class="back-link" onclick="showPage('balance')" data-i18n="back">← Назад</button>
+        <div class="section-title" data-i18n="deposit">Пополнение</div>
 
-        <div class="min-hint">Минимум 1$</div>
+        <div class="min-hint" data-i18n="min_1">Минимум 1$</div>
 
         <div class="form-group">
-            <label class="form-label">Сумма</label>
+            <label class="form-label" data-i18n="amount">Сумма</label>
             <input class="form-input" type="number" id="deposit-amount" placeholder="0.00" min="1" step="0.01" oninput="updateFeeHint('deposit')">
             <div class="field-hint" id="deposit-fee-hint" style="color:var(--hint,#8e8e93);font-size:12px;margin-top:6px;">Комиссия 2.5%. Итого к оплате: 0.00 $</div>
         </div>
 
         <div class="form-group">
-            <label class="form-label">Способ оплаты</label>
+            <label class="form-label" data-i18n="pay_method">Способ оплаты</label>
             <div class="method-list">
                 <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
                     <div class="title">СБП</div>
@@ -1596,11 +1596,11 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label">Комментарий</label>
-            <input class="form-input" type="text" id="deposit-comment" placeholder="Необязательно">
+            <label class="form-label" data-i18n="comment">Комментарий</label>
+            <input class="form-input" type="text" id="deposit-comment" placeholder="Необязательно" data-i18n-placeholder="optional">
         </div>
 
-        <button class="btn" id="deposit-btn" onclick="startDeposit()">Продолжить</button>
+        <button class="btn" id="deposit-btn" onclick="startDeposit()" data-i18n="continue_btn">Продолжить</button>
     </div>
 
     <!-- DEPOSIT RESULT -->
@@ -1612,20 +1612,20 @@
 
     <!-- WITHDRAW -->
     <div id="page-withdraw" class="page">
-        <button class="back-link" onclick="showPage('balance')">← Назад</button>
-        <div class="section-title">Вывод</div>
+        <button class="back-link" onclick="showPage('balance')" data-i18n="back">← Назад</button>
+        <div class="section-title" data-i18n="withdrawal">Вывод</div>
 
-        <div class="min-hint">Минимум 5$</div>
+        <div class="min-hint" data-i18n="min_5">Минимум 5$</div>
 
         <div class="form-group">
-            <label class="form-label">Сумма</label>
+            <label class="form-label" data-i18n="amount">Сумма</label>
             <input class="form-input" type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01" oninput="updateFeeHint('withdraw')">
             <div class="field-hint">Доступно: <span id="withdraw-available">0.00</span> $</div>
             <div class="field-hint" id="withdraw-fee-hint" style="color:var(--hint,#8e8e93);font-size:12px;margin-top:4px;">Комиссия 2.5%. Итого с баланса: 0.00 $</div>
         </div>
 
         <div class="form-group">
-            <label class="form-label">Способ вывода</label>
+            <label class="form-label" data-i18n="withdraw_method">Способ вывода</label>
             <div class="method-list">
                 <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
                     <div class="title">СБП / карта</div>
@@ -1646,7 +1646,7 @@
 
     <!-- REQUESTS -->
     <div id="page-requests" class="page">
-        <button class="btn btn-secondary btn-back" onclick="showPage('balance')">← Назад</button>
+        <button class="btn btn-secondary btn-back" onclick="showPage('balance')" data-i18n="back">← Назад</button>
         <div class="section-title" data-i18n="my_tx">Мои транзакции</div>
         <div id="requests-list"><div class="loading"><div class="spinner"></div></div></div>
     </div>
@@ -1730,22 +1730,22 @@
 
     <div id="page-support-chat" class="page chat-page">
         <div class="chat-header">
-            <button class="back-link" onclick="showPage('support')">← Назад</button>
+            <button class="back-link" onclick="showPage('support')" data-i18n="back">← Назад</button>
             <div class="section-title">Поддержка</div>
         </div>
         <div id="support-chat-messages" class="chat-messages"></div>
         <div class="chat-footer">
             <div class="chat-hint">*менеджер напишет вам в течение 96ч</div>
             <div class="chat-input-row">
-                <input class="form-input" type="text" id="support-chat-input" placeholder="Сообщение..." maxlength="4000">
-                <button type="button" class="btn" id="support-chat-send" onclick="sendSupportMessage()">Отправить</button>
+                <input class="form-input" type="text" id="support-chat-input" placeholder="Сообщение..." data-i18n-placeholder="message_ph" maxlength="4000">
+                <button type="button" class="btn" id="support-chat-send" onclick="sendSupportMessage()" data-i18n="send">Отправить</button>
             </div>
         </div>
     </div>
 
     <div id="page-admin-support-chat" class="page chat-page">
         <div class="chat-header">
-            <button class="back-link" onclick="openAdminSection('complaints')">← Назад</button>
+            <button class="back-link" onclick="openAdminSection('complaints')" data-i18n="back">← Назад</button>
             <div class="section-title" id="admin-support-chat-title">Чат</div>
             <div id="admin-support-chat-user" class="subtitle" style="margin-bottom:4px;"></div>
         </div>
@@ -1753,13 +1753,13 @@
         <div class="chat-footer">
             <div class="chat-input-row">
                 <input class="form-input" type="text" id="admin-support-chat-input" placeholder="Ответ..." maxlength="4000">
-                <button type="button" class="btn" onclick="sendAdminSupportMessage()">Отправить</button>
+                <button type="button" class="btn" onclick="sendAdminSupportMessage()" data-i18n="send">Отправить</button>
             </div>
         </div>
     </div>
 
 <div id="page-collaborate" class="page">
-        <button class="back-link" onclick="showPage('support')">← Назад</button>
+        <button class="back-link" onclick="showPage('support')" data-i18n="back">← Назад</button>
         <div class="section-title">Сотрудничать</div>
         <div class="info-block">
             <b>Модератор</b><br><br>
@@ -1778,7 +1778,7 @@
 
     <!-- JOB APPLICATION FORM -->
     <div id="page-job-form" class="page">
-        <button class="back-link" onclick="showPage('collaborate')">← Назад</button>
+        <button class="back-link" onclick="showPage('collaborate')" data-i18n="back">← Назад</button>
         <div class="section-title">Анкета</div>
         <div class="form-group">
             <label class="form-label">ФИО</label>
@@ -1882,14 +1882,14 @@
 
     <!-- ADMIN SECTION LIST -->
     <div id="page-admin-section" class="page">
-        <button class="back-link" id="admin-section-back" onclick="showPage('admin')">← Назад</button>
+        <button class="back-link" id="admin-section-back" onclick="showPage('admin')" data-i18n="back">← Назад</button>
         <div class="section-title" id="admin-section-title">—</div>
         <div id="admin-content"></div>
     </div>
 
     <!-- ADMIN ITEM DETAIL -->
     <div id="page-admin-detail" class="page">
-        <button class="back-link" id="admin-detail-back" onclick="showPage('admin-section')">← Назад</button>
+        <button class="back-link" id="admin-detail-back" onclick="showPage('admin-section')" data-i18n="back">← Назад</button>
         <div class="section-title" id="admin-detail-title">Детали</div>
         <div id="admin-detail-content"></div>
     </div>
@@ -1903,7 +1903,7 @@
 
     <div id="page-user-profile" class="page">
         <div class="profile-top-bar">
-            <button class="back-link" id="user-profile-back" onclick="showPage('home')">← Назад</button>
+            <button class="back-link" id="user-profile-back" onclick="showPage('home')" data-i18n="back">← Назад</button>
             <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
         </div>
         <div id="user-profile-content"></div>
@@ -1911,7 +1911,7 @@
 
     <!-- ADD STAFF -->
     <div id="page-admin-add-staff" class="page">
-        <button class="back-link" onclick="showPage('admin')">← Назад</button>
+        <button class="back-link" onclick="showPage('admin')" data-i18n="back">← Назад</button>
         <div class="section-title">Добавить сотрудника</div>
         <div class="form-group">
             <label class="form-label">ID пользователя Telegram</label>
@@ -2104,7 +2104,7 @@ async function init() {
         if (!ok) {
             box.innerHTML = '<div class="empty"><div class="spinner"></div>' +
                 '<div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div>' +
-                '<button class="btn" style="margin-top:16px;" onclick="location.reload()">Обновить</button></div>';
+                '<button class="btn" style="margin-top:16px;" onclick="location.reload()" data-i18n="refresh">Обновить</button></div>';
             return;
         }
 
@@ -2114,7 +2114,7 @@ async function init() {
     } catch (e) {
         box.innerHTML = '<div class="empty"><div class="spinner"></div>' +
             '<div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div>' +
-            '<button class="btn" style="margin-top:16px;" onclick="location.reload()">Обновить</button></div>';
+            '<button class="btn" style="margin-top:16px;" onclick="location.reload()" data-i18n="refresh">Обновить</button></div>';
     }
 }
 
@@ -2646,7 +2646,11 @@ var I18N = {
         file_ready_bot: 'Файл готов к скачиванию'
 ,
         fee_hint_stars: 'Telegram Stars — без комиссии. Итого: {total} $'
-},
+,
+        price_xcod_note: 'Цена определяется компанией X-Cod по аналитике после модерации.',
+        wallet_addr: 'Адрес кошелька',
+        card_ph: 'Номер карты, Иванов И.И.',
+        usdt_ph: 'Адрес USDT TRC20'},
     en: {
         support: 'Support', back: '← Back', menu: 'Menu',
         home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
@@ -2984,7 +2988,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — no fee. Total: {total} $'
-},
+,
+        price_xcod_note: 'Price is set by X-Cod based on analytics after review.',
+        wallet_addr: 'Wallet address',
+        card_ph: 'Card number, John Smith',
+        usdt_ph: 'USDT TRC20 address'},
     de: {
         support: 'Support', back: '← Zurück', menu: 'Menü',
         home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
@@ -3145,8 +3153,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'Börse durchsuchen...',
+        search_keywords: 'Nach Stichworten suchen...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -3322,7 +3330,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — keine Gebühr. Gesamt: {total} $'
-},
+,
+        price_xcod_note: 'Der Preis wird von X-Cod anhand der Analyse nach der Prüfung festgelegt.',
+        wallet_addr: 'Wallet-Adresse',
+        card_ph: 'Kartennummer, Max Mustermann',
+        usdt_ph: 'USDT TRC20-Adresse'},
     fr: {
         support: 'Support', back: '← Retour', menu: 'Menu',
         home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
@@ -3483,8 +3495,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'Rechercher sur la bourse...',
+        search_keywords: 'Recherche par mots-clés...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -3660,7 +3672,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — sans frais. Total : {total} $'
-},
+,
+        price_xcod_note: 'Le prix est fixé par X-Cod selon l’analyse après modération.',
+        wallet_addr: 'Adresse du portefeuille',
+        card_ph: 'N° de carte, Jean Dupont',
+        usdt_ph: 'Adresse USDT TRC20'},
     es: {
         support: 'Soporte', back: '← Atrás', menu: 'Menú',
         home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -3821,8 +3837,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'Buscar en la bolsa...',
+        search_keywords: 'Buscar por palabras clave...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -3998,7 +4014,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — sin comisión. Total: {total} $'
-},
+,
+        price_xcod_note: 'El precio lo fija X-Cod según el análisis tras la moderación.',
+        wallet_addr: 'Dirección de la billetera',
+        card_ph: 'Número de tarjeta, Juan Pérez',
+        usdt_ph: 'Dirección USDT TRC20'},
     zh: {
         support: '支持', back: '← 返回', menu: '菜单',
         home: '首页', news: '新闻', exchange: '交易所', freelance: '自由职业',
@@ -4159,8 +4179,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: '搜索交易所...',
+        search_keywords: '按关键词搜索...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -4336,7 +4356,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — 免手续费。合计：{total} $'
-},
+,
+        price_xcod_note: '价格由 X-Cod 根据审核后的分析确定。',
+        wallet_addr: '钱包地址',
+        card_ph: '卡号，姓名',
+        usdt_ph: 'USDT TRC20 地址'},
     uk: {
         support: 'Підтримка', back: '← Назад', menu: 'Меню',
         home: 'Головна', news: 'Новини', exchange: 'Біржа', freelance: 'Фриланс',
@@ -4498,8 +4522,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'Пошук на біржі...',
+        search_keywords: 'Пошук за ключовими словами...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -4675,7 +4699,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — без комісії. Разом: {total} $'
-},
+,
+        price_xcod_note: 'Ціну визначає X-Cod за аналітикою після модерації.',
+        wallet_addr: 'Адреса гаманця',
+        card_ph: 'Номер картки, Іван І.І.',
+        usdt_ph: 'Адреса USDT TRC20'},
     it: {
         support: 'Supporto', back: '← Indietro', menu: 'Menu',
         home: 'Home', news: 'Notizie', exchange: 'Borsa', freelance: 'Freelance',
@@ -4837,8 +4865,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'Cerca nella borsa...',
+        search_keywords: 'Cerca per parole chiave...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -5014,7 +5042,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — nessuna commissione. Totale: {total} $'
-},
+,
+        price_xcod_note: 'Il prezzo è stabilito da X-Cod in base all’analisi dopo la moderazione.',
+        wallet_addr: 'Indirizzo wallet',
+        card_ph: 'Numero carta, Mario Rossi',
+        usdt_ph: 'Indirizzo USDT TRC20'},
     pt: {
         support: 'Suporte', back: '← Voltar', menu: 'Menu',
         home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -5176,8 +5208,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'Pesquisar na bolsa...',
+        search_keywords: 'Pesquisar por palavras-chave...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -5353,7 +5385,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — sem taxa. Total: {total} $'
-},
+,
+        price_xcod_note: 'O preço é definido pela X-Cod com base na análise após moderação.',
+        wallet_addr: 'Endereço da carteira',
+        card_ph: 'Número do cartão, João Silva',
+        usdt_ph: 'Endereço USDT TRC20'},
     'pt-BR': {
         support: 'Suporte', back: '← Voltar', menu: 'Menu',
         home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -5515,8 +5551,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'Pesquisar na bolsa...',
+        search_keywords: 'Pesquisar por palavras-chave...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -5692,7 +5728,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — sem taxa. Total: {total} $'
-},
+,
+        price_xcod_note: 'O preço é definido pela X-Cod com base na análise após moderação.',
+        wallet_addr: 'Endereço da carteira',
+        card_ph: 'Número do cartão, João Silva',
+        usdt_ph: 'Endereço USDT TRC20'},
     tr: {
         support: 'Destek', back: '← Geri', menu: 'Menü',
         home: 'Ana sayfa', news: 'Haberler', exchange: 'Borsa', freelance: 'Freelance',
@@ -5854,8 +5894,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'Borsada ara...',
+        search_keywords: 'Anahtar kelimelerle ara...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -6031,7 +6071,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — komisyonsuz. Toplam: {total} $'
-},
+,
+        price_xcod_note: 'Fiyat, moderasyondan sonra analitiğe göre X-Cod tarafından belirlenir.',
+        wallet_addr: 'Cüzdan adresi',
+        card_ph: 'Kart numarası, Ahmet Yılmaz',
+        usdt_ph: 'USDT TRC20 adresi'},
     id: {
         support: 'Dukungan', back: '← Kembali', menu: 'Menu',
         home: 'Beranda', news: 'Berita', exchange: 'Bursa', freelance: 'Freelance',
@@ -6193,8 +6237,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'Cari di bursa...',
+        search_keywords: 'Cari kata kunci...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -6370,7 +6414,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — tanpa biaya. Total: {total} $'
-},
+,
+        price_xcod_note: 'Harga ditentukan X-Cod berdasarkan analitik setelah moderasi.',
+        wallet_addr: 'Alamat dompet',
+        card_ph: 'Nomor kartu, Budi Santoso',
+        usdt_ph: 'Alamat USDT TRC20'},
     ar: {
         support: 'الدعم', back: '→ رجوع', menu: 'القائمة',
         home: 'الرئيسية', news: 'الأخبار', exchange: 'البورصة', freelance: 'العمل الحر',
@@ -6532,8 +6580,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: 'البحث في البورصة...',
+        search_keywords: 'البحث بالكلمات المفتاحية...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -6709,7 +6757,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — بدون عمولة. الإجمالي: {total} $'
-},
+,
+        price_xcod_note: 'يحدد X-Cod السعر بناءً على التحليل بعد المراجعة.',
+        wallet_addr: 'عنوان المحفظة',
+        card_ph: 'رقم البطاقة، الاسم',
+        usdt_ph: 'عنوان USDT TRC20'},
     ja: {
         support: 'サポート', back: '← 戻る', menu: 'メニュー',
         home: 'ホーム', news: 'ニュース', exchange: '取引所', freelance: 'フリーランス',
@@ -6871,8 +6923,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: '取引所を検索...',
+        search_keywords: 'キーワード検索...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -7048,7 +7100,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — 手数料なし。合計: {total} $'
-},
+,
+        price_xcod_note: '価格は審査後の分析に基づき X-Cod が決定します。',
+        wallet_addr: 'ウォレットアドレス',
+        card_ph: 'カード番号、氏名',
+        usdt_ph: 'USDT TRC20 アドレス'},
     ko: {
         support: '지원', back: '← 뒤로', menu: '메뉴',
         home: '홈', news: '뉴스', exchange: '거래소', freelance: '프리랜스',
@@ -7210,8 +7266,8 @@ var I18N = {
         message_ph: 'Message...',
         manager_eta: '*a manager will reply within 96h',
         faq: 'FAQ',
-        search_exchange: 'Search exchange...',
-        search_keywords: 'Search by keywords...',
+        search_exchange: '거래소 검색...',
+        search_keywords: '키워드 검색...',
         portfolio: 'Portfolio',
         total_pay: 'Total to pay',
         total_balance: 'Total from balance',
@@ -7387,7 +7443,11 @@ var I18N = {
         file_ready_bot: 'File is ready to download'
 ,
         fee_hint_stars: 'Telegram Stars — 수수료 없음. 합계: {total} $'
-}
+,
+        price_xcod_note: '가격은 검토 후 분석에 따라 X-Cod가 정합니다.',
+        wallet_addr: '지갑 주소',
+        card_ph: '카드 번호, 이름',
+        usdt_ph: 'USDT TRC20 주소'}
 
 };
 
@@ -7410,7 +7470,24 @@ function applyI18n() {
         var key = el.getAttribute('data-i18n');
         if (!key) return;
         if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
-        el.textContent = tBlock(key);
+        var val = tBlock(key);
+        // if has element children (span, img, etc) — only update direct text nodes
+        var hasEl = false;
+        for (var i = 0; i < el.childNodes.length; i++) {
+            if (el.childNodes[i].nodeType === 1) { hasEl = true; break; }
+        }
+        if (hasEl) {
+            var done = false;
+            el.childNodes.forEach(function(n) {
+                if (!done && n.nodeType === 3 && n.textContent.trim()) {
+                    n.textContent = val + ' ';
+                    done = true;
+                }
+            });
+            if (!done) el.insertBefore(document.createTextNode(val + ' '), el.firstChild);
+        } else {
+            el.textContent = val;
+        }
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
         var k = el.getAttribute('data-i18n-placeholder');
@@ -7812,7 +7889,26 @@ function applyI18n() {
         "Нет доступа к разделу": 'no_access_section',
         "Нельзя взаимодействовать с собой": 'self_action_denied',
         "Файл готов к скачиванию": 'file_ready_bot'
-    };
+    ,
+        "Тип товара": 'product_type',
+        "Номер договора X-Cod": 'contract_no',
+        "Цена определяется компанией X-Cod по аналитике после модерации.": 'price_xcod_note',
+        "Кол-во пользователей в месяц": 'users_month',
+        "Заработок за месяц (средний за 6 мес)": 'earn_month',
+        "Название товара": 'title',
+        "Адрес кошелька": 'wallet_addr',
+        "Номер карты, Иванов И.И.": 'card_ph',
+        "Адрес USDT TRC20": 'usdt_ph',
+        "Стажер": 'role_intern',
+        "Оригинал": 'original',
+        "Отменен": 'status_cancelled',
+        "Рейтинг продавца от": 'rating_from',
+        "Рейтинг покупателя от": 'rating_from',
+        "Завершенные": 'completed_listings',
+        "Продавец передает данные": 'seller_transfer',
+        "Завершен": 'status_completed',
+        "Доступ к площадке ограничен из-за нарушений правил сообщества": 'ban_title'
+};
 
     function translateText(txt) {
         if (!txt) return null;
@@ -7836,7 +7932,9 @@ function applyI18n() {
         if (el.getAttribute && el.getAttribute('data-i18n')) return;
         // pure text element
         if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3) {
-            var tr = translateText(el.textContent);
+            if (!el.getAttribute('data-i18n-src')) el.setAttribute('data-i18n-src', el.textContent.trim());
+            var src = el.getAttribute('data-i18n-src');
+            var tr = translateText(src);
             if (tr) el.textContent = tr;
             return;
         }
@@ -7844,36 +7942,39 @@ function applyI18n() {
         el.childNodes.forEach(function(n) {
             if (n.nodeType === 3) {
                 var raw = n.textContent;
-                var tr2 = translateText(raw);
-                if (tr2) n.textContent = raw.replace(raw.trim(), tr2);
+                var trimmed = raw.trim();
+                if (!trimmed) return;
+                if (!n._i18nSrc) n._i18nSrc = trimmed;
+                var tr2 = translateText(n._i18nSrc);
+                if (tr2) n.textContent = raw.replace(trimmed, tr2);
             }
         });
     }
 
-    var SEL = 'button, .btn, .form-label, .section-title, .filters-heading, .support-tile-title, .wallet-action-label, .card-title, .back-link, .btn-back, label, .seg-toggle > button, .type-toggle-btn, .sheet-option, .field-hint, .min-hint, .empty-state, .method-item .title, .drawer-item, .nav-item, .tab, .chip, .badge, .status-pill, .status-tag, .wallet-action-label, a.btn, .modal-title, .sheet-title';
+    var SEL = 'button, .btn, .form-label, .section-title, .filters-heading, .support-tile-title, .wallet-action-label, .card-title, .back-link, .btn-back, label, .seg-toggle > button, .type-toggle-btn, .sheet-option, .field-hint, .min-hint, .empty-state, .method-item .title, .drawer-item, .nav-item, .tab, .chip, .badge, .status-pill, .status-tag, a.btn, .modal-title, .sheet-title, .info-block, .check-row span, .drawer-item span, .page h2, .page h3, .hint, .sub, .toggle-label, .sheet-btn, .action-btn, .pill, .tag, .empty, .error-text, .success-text, .fee-hint, [class*="hint"]';
     document.querySelectorAll(SEL).forEach(translateElement);
 
-    // placeholders
+    // placeholders — translate all UI placeholders (including create form fields)
     document.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(function(inp) {
         if (shouldSkip(inp)) return;
-        // skip content fields by id
-        var id = inp.id || '';
-        if (/^(listing-title|listing-desc|fl-title|fl-desc|news-)/.test(id)) return;
+        var key = inp.getAttribute('data-i18n-placeholder');
+        if (key) {
+            inp.setAttribute('placeholder', tBlock(key));
+            return;
+        }
         var ph = (inp.getAttribute('placeholder') || '').trim();
-        var tr = translateText(ph);
+        if (!ph || ph === '0.00' || ph === 'XC-0000') return;
+        // store original RU placeholder once
+        if (!inp.getAttribute('data-ph-ru')) inp.setAttribute('data-ph-ru', ph);
+        var src = inp.getAttribute('data-ph-ru') || ph;
+        var tr = translateText(src);
         if (tr) inp.setAttribute('placeholder', tr);
-        // known placeholders
-        var mapPh = {
-            '0.00': '0.00',
-            'Поиск по бирже...': tBlock('search_exchange'),
-            'Поиск по ключевым словам...': tBlock('search_keywords'),
-            'Поиск…': tBlock('search'),
-            'Поиск...': tBlock('search'),
-            'Любой вид': tBlock('any_type'),
-            'Необязательно': tBlock('optional'),
-            'Сообщение...': tBlock('message_ph')
-        };
-        if (mapPh[ph] && ph !== '0.00') inp.setAttribute('placeholder', mapPh[ph]);
+        else {
+            // try I18N.ru reverse
+            for (var k in (I18N.ru || {})) {
+                if (I18N.ru[k] === src) { inp.setAttribute('placeholder', tBlock(k)); break; }
+            }
+        }
     });
 
     // status segments
@@ -7900,17 +8001,26 @@ function applyI18n() {
 }
 
 function trUi(text) {
-    // translate a single UI string for use in JS templates
     if (text == null) return text;
-    var s = String(text).trim();
-    var pack = I18N[getAppLang()] || I18N.ru;
-    // reverse search in current lang is hard; use ru map via apply phrases
-    // simple: if value exists as key return tBlock
-    for (var k in pack) {
-        if (pack[k] === s) return tBlock(k);
-        if (I18N.ru[k] === s) return tBlock(k);
+    var s = String(text).replace(/\s+/g, ' ').trim();
+    if (!s) return text;
+    // match against Russian source values in I18N.ru
+    if (I18N.ru) {
+        for (var k in I18N.ru) {
+            if (I18N.ru[k] === s) return tBlock(k);
+        }
     }
-    return text;
+    // partial: if string contains known Russian UI token, replace
+    var pack = I18N[getAppLang()] || I18N.en || I18N.ru;
+    if (pack) {
+        for (var k2 in I18N.ru) {
+            var ru = I18N.ru[k2];
+            if (ru && ru.length >= 3 && s.indexOf(ru) !== -1 && pack[k2]) {
+                s = s.split(ru).join(pack[k2]);
+            }
+        }
+    }
+    return s;
 }
 
 
@@ -9984,7 +10094,7 @@ function openOrderDetail(id) {
     var canCancel = (isBuyer || isSeller) && (o.status === 'awaiting_seller' || o.status === 'buyer_review');
 
     var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;">';
-    head += '<button class="btn btn-secondary btn-back" style="margin:0;" onclick="showPage(\'orders\')">← Назад</button>';
+    head += '<button class="btn btn-secondary btn-back" style="margin:0;" onclick="showPage(\'orders\')" data-i18n="back">← Назад</button>';
     if (o.status === 'buyer_review' && o.review_deadline) {
         head += '<div id="order-timer" style="font-weight:700;font-size:15px;">' + formatRemain(o.review_deadline) + '</div>';
     } else {
@@ -10199,6 +10309,7 @@ function cancelListingCreate() {
 }
 
 function listingCreateBack() {
+    try { setTimeout(applyI18n, 0); } catch (e) {}
     if (listingCreateStep === 2) {
         listingCreateStep = 'photos';
         document.getElementById('listing-step-2').style.display = 'none';
@@ -10217,6 +10328,7 @@ function listingCreateBack() {
 }
 
 function listingCreateNext() {
+    try { setTimeout(applyI18n, 0); } catch (e) {}
     var title = document.getElementById('listing-title').value.trim();
     var description = document.getElementById('listing-desc').value.trim();
     if (!title) { tg.showAlert('Укажите название'); return; }
@@ -10243,6 +10355,7 @@ function selectDmFiles(yes) {
 }
 
 function selectListingType(el) {
+    try { setTimeout(applyI18n, 0); } catch (e) {}
     document.querySelectorAll('#listing-step-1 .type-toggle-btn').forEach(function(i){ i.classList.remove('selected'); });
     el.classList.add('selected');
     selectedListingType = el.dataset.type;
@@ -11216,7 +11329,7 @@ async function openBlocksMenu() {
         '<label class="form-label">Поиск участника по ID</label>' +
         '<div style="display:flex;gap:8px;">' +
         '<input class="form-input" type="number" id="block-search-id" placeholder="Telegram ID" style="flex:1;">' +
-        '<button type="button" class="btn" style="width:auto;padding:10px 14px;" onclick="searchBlockUser()">Найти</button>' +
+        '<button type="button" class="btn" style="width:auto;padding:10px 14px;" onclick="searchBlockUser()" data-i18n="search_btn">Найти</button>' +
         '</div></div>' +
         '<div id="block-search-result"></div>';
 }
@@ -11997,7 +12110,7 @@ async function openResignForm() {
     document.getElementById('admin-section-title').textContent = 'Уволиться';
     setAdminSectionBack(function(){ openAdminSection('workcenter'); });
     var html = '';
-    html += '<div class="form-group"><label class="form-label">Причина</label>';
+    html += '<div class="form-group"><label class="form-label" data-i18n="reason">Причина</label>';
     html += '<textarea class="form-input" id="resign-reason" rows="4" placeholder="Опишите причину увольнения"></textarea></div>';
     html += '<label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-size:13px;color:var(--text);">';
     html += '<input type="checkbox" id="resign-confirm" style="margin-top:3px;width:18px;height:18px;">';
