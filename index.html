@@ -1323,12 +1323,12 @@
             <button type="button" class="search-btn" onclick="runExchangeSearch()" title="Найти">🔍</button>
         </div>
         <div id="exchange-history-wrap" style="display:none;">
-            <div class="form-label" style="margin-bottom:6px;">История поиска</div>
+            <div class="form-label" style="margin-bottom:6px;" data-i18n="search_history">История поиска</div>
             <div class="search-history" id="exchange-history"></div>
         </div>
                 <div class="filters-heading" data-i18n="filters" data-i18n="filters">Фильтры</div>
         <div class="form-group">
-            <label class="form-label">Тип</label>
+            <label class="form-label" data-i18n="type">Тип</label>
             <div class="type-toggle" style="display:flex;gap:8px;">
                 <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-all" data-v="" onclick="setExType(this)" style="flex:1;" data-i18n="all">Все</button>
                 <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-partner" data-v="partner" onclick="setExType(this)" style="flex:1;" data-i18n="partner_xcod">Партнёр</button>
@@ -1344,7 +1344,7 @@
             <div id="ex-product-type-list" class="inline-options" style="display:none;"></div>
         </div>
         <div class="form-group">
-            <label class="form-label">Рейтинг продавца от</label>
+            <label class="form-label" data-i18n="rating_seller_from">Рейтинг продавца от</label>
             <div class="star-row" id="ex-star-row">
                 <button type="button" class="star-btn" data-r="1" onclick="setExRating(1)">★1</button>
                 <button type="button" class="star-btn" data-r="2" onclick="setExRating(2)">★2</button>
@@ -1362,21 +1362,21 @@
             </div>
         </div>
         <div class="range-block">
-            <div class="form-label">Пользователей / мес</div>
+            <div class="form-label" data-i18n="users_month">Пользователей / мес</div>
             <div class="range-row">
                 <input class="form-input" type="number" id="ex-users-from" placeholder="от" min="0">
                 <input class="form-input" type="number" id="ex-users-to" placeholder="до" min="0">
             </div>
         </div>
         <div class="range-block">
-            <div class="form-label">Заработок / мес ($)</div>
+            <div class="form-label" data-i18n="earn_month">Заработок / мес ($)</div>
             <div class="range-row">
                 <input class="form-input" type="number" id="ex-earn-from" placeholder="от" min="0">
                 <input class="form-input" type="number" id="ex-earn-to" placeholder="до" min="0">
             </div>
         </div>
 <button class="btn" style="margin-bottom:14px;" onclick="runExchangeSearch()" data-i18n="search_btn">Найти</button>
-        <div id="exchange-results"><div class="empty"><div class="icon">🔍</div>Введите запрос или задайте фильтры</div></div>
+        <div id="exchange-results"><div class="empty"><div class="icon">🔍</div>' + tBlock('enter_query_or_filters') + '</div></div>
     </div>
 
     <!-- MY LISTINGS -->
@@ -1764,7 +1764,7 @@
         <div class="info-block" id="hire-info-block"></div>
         <div class="btn-stack">
             <button class="btn" onclick="showPage('job-form')" data-i18n="application_form">Составить анкету</button>
-            <button class="btn btn-secondary" onclick="openLink('https://t.me/xcodmanager')">Написать менеджеру</button>
+            <button class="btn btn-secondary" onclick="openLink('https://t.me/xcodmanager')" data-i18n="write_manager">Написать менеджеру</button>
         </div>
     </div>
 
@@ -1888,8 +1888,8 @@
 
     <!-- ADMIN STAFF DETAIL -->
     <div id="page-admin-staff-detail" class="page">
-        <button class="back-link" onclick="openAdminSection('staff')">← Сотрудники</button>
-        <div class="section-title">Сотрудник</div>
+        <button class="back-link" onclick="openAdminSection('staff')">← ' + tBlock('staff_label') + '</button>
+        <div class="section-title">' + tBlock('employee') + '</div>
         <div id="staff-detail-content"></div>
     </div>
 
@@ -1912,8 +1912,8 @@
         <div class="form-group">
             <label class="form-label">Роль</label>
             <div class="method-list" id="add-staff-roles">
-                <div class="method-item selected" data-role="1" onclick="selectStaffRole(this)"><div class="title">Партнер</div></div>
-                <div class="method-item" data-role="2" onclick="selectStaffRole(this)"><div class="title">Корпоративный</div></div>
+                <div class="method-item selected" data-role="1" onclick="selectStaffRole(this)"><div class="title">' + tBlock('role_partner') + '</div></div>
+                <div class="method-item" data-role="2" onclick="selectStaffRole(this)"><div class="title">' + tBlock('role_corp') + '</div></div>
                 <div class="method-item" data-role="3" onclick="selectStaffRole(this)"><div class="title">Стажер</div></div>
                 <div class="method-item" data-role="4" onclick="selectStaffRole(this)"><div class="title">Модератор</div></div>
                 <div class="method-item" data-role="5" onclick="selectStaffRole(this)"><div class="title">Админ</div></div>
@@ -2138,9 +2138,9 @@ function renderMain() {
         pun.textContent = '';
         pun.onclick = null;
     }
-    document.getElementById('profile-role').textContent = userData.role_name || '—';
+    document.getElementById('profile-role').textContent = roleName(userData.role) || '—';
     document.getElementById('profile-id').textContent = userData.user_id;
-    document.getElementById('admin-role').textContent = userData.role_name || '—';
+    document.getElementById('admin-role').textContent = roleName(userData.role) || '—';
     var pr = document.getElementById('profile-ratings');
     if (pr) {
         var rh = '<div class="rating-chip"><div class="rl">' + tBlock('seller_rating') + '</div><div class="rv">★ ' +
@@ -2773,7 +2773,24 @@ var I18N = {
         vacation_short: 'Отпуск',
         account_blocks: 'Блокировки аккаунтов',
         publish_restrictions: 'Ограничения публикаций',
-        no_actions: 'Пока нет действий'},
+        no_actions: 'Пока нет действий',
+        your_listing: 'Ваше объявление',
+        search_history: 'История поиска',
+        enter_query_or_filters: 'Введите запрос или задайте фильтры',
+        write_manager: 'Написать менеджеру',
+        current_shift: 'Текущая смена',
+        shift_not_open: 'не открыта',
+        new_balance: 'Новый баланс',
+        orders_load_fail: 'Не удалось загрузить заказы',
+        staff_label: 'Сотрудники',
+        days_in_system: 'Дни в системе',
+        employee: 'Сотрудник',
+        rating_seller_from: 'Рейтинг продавца от',
+        income: 'Поступление',
+        purchase_hold: 'Покупка (холд)',
+        purchase_refund: 'Возврат покупки',
+        customer: 'Заказчик',
+        executor: 'Исполнитель'},
     en: {
         support: 'Support', back: '← Back', menu: 'Menu',
         home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
@@ -3245,7 +3262,24 @@ var I18N = {
         vacation_short: 'Vacation',
         account_blocks: 'Account blocks',
         publish_restrictions: 'Publishing restrictions',
-        no_actions: 'No actions yet'},
+        no_actions: 'No actions yet',
+        your_listing: 'Your listing',
+        search_history: 'Search history',
+        enter_query_or_filters: 'Enter a query or set filters',
+        write_manager: 'Message manager',
+        current_shift: 'Current shift',
+        shift_not_open: 'not opened',
+        new_balance: 'New balance',
+        orders_load_fail: 'Failed to load orders',
+        staff_label: 'Staff',
+        days_in_system: 'Days in system',
+        employee: 'Employee',
+        rating_seller_from: 'Seller rating from',
+        income: 'Incoming',
+        purchase_hold: 'Purchase (hold)',
+        purchase_refund: 'Purchase refund',
+        customer: 'Client',
+        executor: 'Freelancer'},
     de: {
         support: 'Support', back: '← Zurück', menu: 'Menü',
         home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
@@ -3370,7 +3404,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: 'Rückerstattung (Deal)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -3717,7 +3751,24 @@ var I18N = {
         vacation_short: 'Urlaub',
         account_blocks: 'Konto-Sperren',
         publish_restrictions: 'Veröffentlichungsbeschränkungen',
-        no_actions: 'Noch keine Aktionen'},
+        no_actions: 'Noch keine Aktionen',
+        your_listing: 'Ihre Anzeige',
+        search_history: 'Suchverlauf',
+        enter_query_or_filters: 'Anfrage eingeben oder Filter setzen',
+        write_manager: 'Manager schreiben',
+        current_shift: 'Aktuelle Schicht',
+        shift_not_open: 'nicht geöffnet',
+        new_balance: 'Neues Guthaben',
+        orders_load_fail: 'Bestellungen konnten nicht geladen werden',
+        staff_label: 'Mitarbeiter',
+        days_in_system: 'Tage im System',
+        employee: 'Mitarbeiter',
+        rating_seller_from: 'Verkäuferbewertung ab',
+        income: 'Eingang',
+        purchase_hold: 'Kauf (Hold)',
+        purchase_refund: 'Kauf-Rückerstattung',
+        customer: 'Auftraggeber',
+        executor: 'Auftragnehmer'},
     fr: {
         support: 'Support', back: '← Retour', menu: 'Menu',
         home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
@@ -3842,7 +3893,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: 'Remboursement (deal)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -3893,7 +3944,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: 'Statut',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -4189,7 +4240,24 @@ var I18N = {
         vacation_short: 'Congés',
         account_blocks: 'Blocages de compte',
         publish_restrictions: 'Restrictions de publication',
-        no_actions: 'Aucune action pour le moment'},
+        no_actions: 'Aucune action pour le moment',
+        your_listing: 'Votre annonce',
+        search_history: 'Historique de recherche',
+        enter_query_or_filters: 'Entrez une requête ou des filtres',
+        write_manager: 'Écrire au manager',
+        current_shift: 'Quart en cours',
+        shift_not_open: 'non ouverte',
+        new_balance: 'Nouveau solde',
+        orders_load_fail: 'Échec du chargement des commandes',
+        staff_label: 'Personnel',
+        days_in_system: 'Jours dans le système',
+        employee: 'Employé',
+        rating_seller_from: 'Note vendeur à partir de',
+        income: 'Entrée',
+        purchase_hold: 'Achat (hold)',
+        purchase_refund: 'Remboursement d’achat',
+        customer: 'Client',
+        executor: 'Prestataire'},
     es: {
         support: 'Support', back: '← Atrás', menu: 'Menú',
         home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -4314,7 +4382,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: 'Reembolso (trato)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -4365,7 +4433,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: 'Estado',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -4661,7 +4729,24 @@ var I18N = {
         vacation_short: 'Vacaciones',
         account_blocks: 'Bloqueos de cuenta',
         publish_restrictions: 'Restricciones de publicación',
-        no_actions: 'Aún no hay acciones'},
+        no_actions: 'Aún no hay acciones',
+        your_listing: 'Tu anuncio',
+        search_history: 'Historial de búsqueda',
+        enter_query_or_filters: 'Introduce una consulta o filtros',
+        write_manager: 'Escribir al manager',
+        current_shift: 'Turno actual',
+        shift_not_open: 'no abierta',
+        new_balance: 'Nuevo saldo',
+        orders_load_fail: 'No se pudieron cargar los pedidos',
+        staff_label: 'Personal',
+        days_in_system: 'Días en el sistema',
+        employee: 'Empleado',
+        rating_seller_from: 'Valoración del vendedor desde',
+        income: 'Ingreso',
+        purchase_hold: 'Compra (retención)',
+        purchase_refund: 'Reembolso de compra',
+        customer: 'Cliente',
+        executor: 'Freelance'},
     zh: {
         support: 'Support', back: '← 返回', menu: '菜单',
         home: '首页', news: '新闻', exchange: '交易所', freelance: '自由职业',
@@ -4786,7 +4871,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: '退款（交易）',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -4837,7 +4922,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: '状态',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -5133,7 +5218,24 @@ var I18N = {
         vacation_short: '休假',
         account_blocks: '账号封禁',
         publish_restrictions: '发布限制',
-        no_actions: '暂无操作'},
+        no_actions: '暂无操作',
+        your_listing: '您的广告',
+        search_history: '搜索历史',
+        enter_query_or_filters: '输入查询或设置筛选',
+        write_manager: '联系经理',
+        current_shift: '当前班次',
+        shift_not_open: '未开启',
+        new_balance: '新余额',
+        orders_load_fail: '无法加载订单',
+        staff_label: '员工',
+        days_in_system: '系统内天数',
+        employee: '员工',
+        rating_seller_from: '卖家评分起',
+        income: '入账',
+        purchase_hold: '购买（冻结）',
+        purchase_refund: '购买退款',
+        customer: '客户',
+        executor: '接单方'},
     uk: {
         support: 'Support', back: '← Назад', menu: 'Меню',
         home: 'Головна', news: 'Новини', exchange: 'Біржа', freelance: 'Фриланс',
@@ -5162,7 +5264,7 @@ var I18N = {
         loading: 'Завантаження даних із сервера…', empty: 'Empty', no_listings: 'Оголошень немає',
         no_news: 'No news yet', save: 'Save', cancel: 'Скасувати', next: 'Next',
         pay: 'Pay', buy: 'Купити', write: 'Написати', profile: 'Профіль',
-        price: 'Ціна', from: 'від', to: 'до', type: 'Type', product_type: 'Product type',
+        price: 'Ціна', from: 'від', to: 'до', type: 'Тип', product_type: 'Product type',
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Свій товар', deposit: 'Поповнення', withdrawal: 'Виведення',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
@@ -5259,7 +5361,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: 'Повернення (угода)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -5310,7 +5412,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: 'Статус',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -5606,7 +5708,24 @@ var I18N = {
         vacation_short: 'Відпустка',
         account_blocks: 'Блокування акаунтів',
         publish_restrictions: 'Обмеження публікацій',
-        no_actions: 'Поки немає дій'},
+        no_actions: 'Поки немає дій',
+        your_listing: 'Ваше оголошення',
+        search_history: 'Історія пошуку',
+        enter_query_or_filters: 'Введіть запит або задайте фільтри',
+        write_manager: 'Написати менеджеру',
+        current_shift: 'Поточна зміна',
+        shift_not_open: 'не відкрита',
+        new_balance: 'Новий баланс',
+        orders_load_fail: 'Не вдалося завантажити замовлення',
+        staff_label: 'Співробітники',
+        days_in_system: 'Дні в системі',
+        employee: 'Співробітник',
+        rating_seller_from: 'Рейтинг продавця від',
+        income: 'Надходження',
+        purchase_hold: 'Покупка (холд)',
+        purchase_refund: 'Повернення покупки',
+        customer: 'Замовник',
+        executor: 'Виконавець'},
     it: {
         support: 'Support', back: '← Indietro', menu: 'Menu',
         home: 'Home', news: 'Notizie', exchange: 'Borsa', freelance: 'Freelance',
@@ -5635,7 +5754,7 @@ var I18N = {
         loading: 'Caricamento dati…', empty: 'Empty', no_listings: 'Nessun annuncio',
         no_news: 'No news yet', save: 'Save', cancel: 'Annulla', next: 'Next',
         pay: 'Pay', buy: 'Compra', write: 'Scrivi', profile: 'Profilo',
-        price: 'Prezzo', from: 'da', to: 'a', type: 'Type', product_type: 'Product type',
+        price: 'Prezzo', from: 'da', to: 'a', type: 'Tipo', product_type: 'Product type',
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Prodotto proprio', deposit: 'Deposito', withdrawal: 'Prelievo',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
@@ -5732,7 +5851,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: 'Rimborso (affare)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -5783,7 +5902,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: 'Stato',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -6079,7 +6198,24 @@ var I18N = {
         vacation_short: 'Ferie',
         account_blocks: 'Blocchi account',
         publish_restrictions: 'Restrizioni di pubblicazione',
-        no_actions: 'Nessuna azione ancora'},
+        no_actions: 'Nessuna azione ancora',
+        your_listing: 'Il tuo annuncio',
+        search_history: 'Cronologia ricerche',
+        enter_query_or_filters: 'Inserisci una query o dei filtri',
+        write_manager: 'Scrivi al manager',
+        current_shift: 'Turno attuale',
+        shift_not_open: 'non aperta',
+        new_balance: 'Nuovo saldo',
+        orders_load_fail: 'Impossibile caricare gli ordini',
+        staff_label: 'Personale',
+        days_in_system: 'Giorni nel sistema',
+        employee: 'Dipendente',
+        rating_seller_from: 'Valutazione venditore da',
+        income: 'Entrata',
+        purchase_hold: 'Acquisto (hold)',
+        purchase_refund: 'Rimborso acquisto',
+        customer: 'Cliente',
+        executor: 'Esecutore'},
     pt: {
         support: 'Support', back: '← Voltar', menu: 'Menu',
         home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -6108,7 +6244,7 @@ var I18N = {
         loading: 'A carregar dados…', empty: 'Empty', no_listings: 'Sem anúncios',
         no_news: 'No news yet', save: 'Save', cancel: 'Cancelar', next: 'Next',
         pay: 'Pay', buy: 'Comprar', write: 'Escrever', profile: 'Perfil',
-        price: 'Preço', from: 'de', to: 'até', type: 'Type', product_type: 'Product type',
+        price: 'Preço', from: 'de', to: 'até', type: 'Tipo', product_type: 'Product type',
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Produto próprio', deposit: 'Depósito', withdrawal: 'Levantamento',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
@@ -6205,7 +6341,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: 'Reembolso (negócio)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -6256,7 +6392,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: 'Estado',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -6552,7 +6688,24 @@ var I18N = {
         vacation_short: 'Férias',
         account_blocks: 'Bloqueios de conta',
         publish_restrictions: 'Restrições de publicação',
-        no_actions: 'Ainda sem ações'},
+        no_actions: 'Ainda sem ações',
+        your_listing: 'O seu anúncio',
+        search_history: 'Histórico de pesquisa',
+        enter_query_or_filters: 'Introduza uma pesquisa ou filtros',
+        write_manager: 'Escrever ao gestor',
+        current_shift: 'Turno atual',
+        shift_not_open: 'não aberta',
+        new_balance: 'Novo saldo',
+        orders_load_fail: 'Falha ao carregar pedidos',
+        staff_label: 'Equipa',
+        days_in_system: 'Dias no sistema',
+        employee: 'Colaborador',
+        rating_seller_from: 'Classificação do vendedor de',
+        income: 'Entrada',
+        purchase_hold: 'Compra (retenção)',
+        purchase_refund: 'Reembolso de compra',
+        customer: 'Cliente',
+        executor: 'Prestador'},
     'pt-BR': {
         support: 'Support', back: '← Voltar', menu: 'Menu',
         home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -6581,7 +6734,7 @@ var I18N = {
         loading: 'Carregando dados…', empty: 'Empty', no_listings: 'Sem anúncios',
         no_news: 'No news yet', save: 'Save', cancel: 'Cancelar', next: 'Next',
         pay: 'Pay', buy: 'Comprar', write: 'Escrever', profile: 'Perfil',
-        price: 'Preço', from: 'de', to: 'até', type: 'Type', product_type: 'Product type',
+        price: 'Preço', from: 'de', to: 'até', type: 'Tipo', product_type: 'Product type',
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Produto próprio', deposit: 'Depósito', withdrawal: 'Levantamento',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
@@ -6678,7 +6831,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: 'Reembolso (negócio)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -7025,7 +7178,24 @@ var I18N = {
         vacation_short: 'Férias',
         account_blocks: 'Bloqueios de conta',
         publish_restrictions: 'Restrições de publicação',
-        no_actions: 'Ainda sem ações'},
+        no_actions: 'Ainda sem ações',
+        your_listing: 'Seu anúncio',
+        search_history: 'Histórico de busca',
+        enter_query_or_filters: 'Digite uma busca ou filtros',
+        write_manager: 'Falar com o gerente',
+        current_shift: 'Turno atual',
+        shift_not_open: 'não aberta',
+        new_balance: 'Novo saldo',
+        orders_load_fail: 'Falha ao carregar pedidos',
+        staff_label: 'Equipe',
+        days_in_system: 'Dias no sistema',
+        employee: 'Colaborador',
+        rating_seller_from: 'Avaliação do vendedor a partir de',
+        income: 'Entrada',
+        purchase_hold: 'Compra (retenção)',
+        purchase_refund: 'Reembolso de compra',
+        customer: 'Cliente',
+        executor: 'Prestador'},
     tr: {
         support: 'Support', back: '← Geri', menu: 'Menü',
         home: 'Ana sayfa', news: 'Haberler', exchange: 'Borsa', freelance: 'Freelance',
@@ -7054,7 +7224,7 @@ var I18N = {
         loading: 'Veriler yükleniyor…', empty: 'Empty', no_listings: 'İlan yok',
         no_news: 'No news yet', save: 'Save', cancel: 'İptal', next: 'Next',
         pay: 'Pay', buy: 'Satın al', write: 'Yaz', profile: 'Profil',
-        price: 'Fiyat', from: 'min', to: 'max', type: 'Type', product_type: 'Product type',
+        price: 'Fiyat', from: 'min', to: 'max', type: 'Tür', product_type: 'Product type',
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Kendi ürünü', deposit: 'Yatırma', withdrawal: 'Çekme',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
@@ -7151,7 +7321,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: 'İade (anlaşma)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -7202,7 +7372,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: 'Durum',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -7498,7 +7668,24 @@ var I18N = {
         vacation_short: 'Tatil',
         account_blocks: 'Hesap engelleri',
         publish_restrictions: 'Yayın kısıtlamaları',
-        no_actions: 'Henüz işlem yok'},
+        no_actions: 'Henüz işlem yok',
+        your_listing: 'İlanınız',
+        search_history: 'Arama geçmişi',
+        enter_query_or_filters: 'Sorgu girin veya filtre seçin',
+        write_manager: 'Yöneticiye yaz',
+        current_shift: 'Mevcut vardiya',
+        shift_not_open: 'açılmadı',
+        new_balance: 'Yeni bakiye',
+        orders_load_fail: 'Siparişler yüklenemedi',
+        staff_label: 'Personel',
+        days_in_system: 'Sistemdeki günler',
+        employee: 'Çalışan',
+        rating_seller_from: 'Satıcı puanı en az',
+        income: 'Gelir',
+        purchase_hold: 'Satın alma (hold)',
+        purchase_refund: 'Satın alma iadesi',
+        customer: 'Müşteri',
+        executor: 'Yürütücü'},
     id: {
         support: 'Support', back: '← Kembali', menu: 'Menu',
         home: 'Beranda', news: 'Berita', exchange: 'Bursa', freelance: 'Freelance',
@@ -7527,7 +7714,7 @@ var I18N = {
         loading: 'Memuat data…', empty: 'Empty', no_listings: 'Tidak ada iklan',
         no_news: 'No news yet', save: 'Save', cancel: 'Batal', next: 'Next',
         pay: 'Pay', buy: 'Beli', write: 'Tulis', profile: 'Profil',
-        price: 'Harga', from: 'dari', to: 'sampai', type: 'Type', product_type: 'Product type',
+        price: 'Harga', from: 'dari', to: 'sampai', type: 'Jenis', product_type: 'Product type',
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Produk sendiri', deposit: 'Deposit', withdrawal: 'Penarikan',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
@@ -7971,7 +8158,24 @@ var I18N = {
         vacation_short: 'Cuti',
         account_blocks: 'Blokir akun',
         publish_restrictions: 'Pembatasan publikasi',
-        no_actions: 'Belum ada tindakan'},
+        no_actions: 'Belum ada tindakan',
+        your_listing: 'Iklan Anda',
+        search_history: 'Riwayat pencarian',
+        enter_query_or_filters: 'Masukkan kueri atau filter',
+        write_manager: 'Tulis ke manajer',
+        current_shift: 'Shift saat ini',
+        shift_not_open: 'belum dibuka',
+        new_balance: 'Saldo baru',
+        orders_load_fail: 'Gagal memuat pesanan',
+        staff_label: 'Staf',
+        days_in_system: 'Hari di sistem',
+        employee: 'Karyawan',
+        rating_seller_from: 'Rating penjual dari',
+        income: 'Pemasukan',
+        purchase_hold: 'Pembelian (hold)',
+        purchase_refund: 'Refund pembelian',
+        customer: 'Klien',
+        executor: 'Pelaksana'},
     ar: {
         support: 'Support', back: '→ رجوع', menu: 'القائمة',
         home: 'الرئيسية', news: 'الأخبار', exchange: 'البورصة', freelance: 'العمل الحر',
@@ -8000,7 +8204,7 @@ var I18N = {
         loading: 'جاري تحميل البيانات…', empty: 'Empty', no_listings: 'لا توجد إعلانات',
         no_news: 'No news yet', save: 'Save', cancel: 'إلغاء', next: 'Next',
         pay: 'Pay', buy: 'شراء', write: 'مراسلة', profile: 'الملف',
-        price: 'السعر', from: 'من', to: 'إلى', type: 'Type', product_type: 'Product type',
+        price: 'السعر', from: 'من', to: 'إلى', type: 'النوع', product_type: 'Product type',
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'منتج خاص', deposit: 'إيداع', withdrawal: 'سحب',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
@@ -8097,7 +8301,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: 'استرداد (صفقة)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -8148,7 +8352,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: 'الحالة',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -8444,7 +8648,24 @@ var I18N = {
         vacation_short: 'إجازة',
         account_blocks: 'حظر الحسابات',
         publish_restrictions: 'قيود النشر',
-        no_actions: 'لا إجراءات بعد'},
+        no_actions: 'لا إجراءات بعد',
+        your_listing: 'إعلانك',
+        search_history: 'سجل البحث',
+        enter_query_or_filters: 'أدخل استعلاماً أو عوامل تصفية',
+        write_manager: 'مراسلة المدير',
+        current_shift: 'الوردية الحالية',
+        shift_not_open: 'غير مفتوحة',
+        new_balance: 'رصيد جديد',
+        orders_load_fail: 'تعذر تحميل الطلبات',
+        staff_label: 'الموظفون',
+        days_in_system: 'أيام في النظام',
+        employee: 'موظف',
+        rating_seller_from: 'تقييم البائع من',
+        income: 'وارد',
+        purchase_hold: 'شراء (حجز)',
+        purchase_refund: 'استرداد الشراء',
+        customer: 'عميل',
+        executor: 'منفذ'},
     ja: {
         support: 'Support', back: '← 戻る', menu: 'メニュー',
         home: 'ホーム', news: 'ニュース', exchange: '取引所', freelance: 'フリーランス',
@@ -8473,7 +8694,7 @@ var I18N = {
         loading: 'データを読み込み中…', empty: 'Empty', no_listings: '出品がありません',
         no_news: 'No news yet', save: 'Save', cancel: 'キャンセル', next: 'Next',
         pay: 'Pay', buy: '購入', write: 'メッセージ', profile: 'プロフィール',
-        price: '価格', from: 'から', to: 'まで', type: 'Type', product_type: 'Product type',
+        price: '価格', from: 'から', to: 'まで', type: '種類', product_type: 'Product type',
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: '自社商品', deposit: '入金', withdrawal: '出金',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
@@ -8570,7 +8791,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: '返金（取引）',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -8621,7 +8842,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: 'ステータス',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -8917,7 +9138,24 @@ var I18N = {
         vacation_short: '休暇',
         account_blocks: 'アカウントブロック',
         publish_restrictions: '投稿制限',
-        no_actions: 'まだ操作はありません'},
+        no_actions: 'まだ操作はありません',
+        your_listing: 'あなたの出品',
+        search_history: '検索履歴',
+        enter_query_or_filters: '検索語を入力するかフィルターを設定',
+        write_manager: 'マネージャーに連絡',
+        current_shift: '現在のシフト',
+        shift_not_open: '未開始',
+        new_balance: '新しい残高',
+        orders_load_fail: '注文を読み込めません',
+        staff_label: 'スタッフ',
+        days_in_system: 'システム内日数',
+        employee: '従業員',
+        rating_seller_from: '出品者評価（以上）',
+        income: '入金',
+        purchase_hold: '購入（保留）',
+        purchase_refund: '購入返金',
+        customer: '依頼主',
+        executor: '受注者'},
     ko: {
         support: 'Support', back: '← 뒤로', menu: '메뉴',
         home: '홈', news: '뉴스', exchange: '거래소', freelance: '프리랜스',
@@ -8946,7 +9184,7 @@ var I18N = {
         loading: '데이터 로딩 중…', empty: 'Empty', no_listings: '광고 없음',
         no_news: 'No news yet', save: 'Save', cancel: '취소', next: 'Next',
         pay: 'Pay', buy: '구매', write: '메시지', profile: '프로필',
-        price: '가격', from: '부터', to: '까지', type: 'Type', product_type: 'Product type',
+        price: '가격', from: '부터', to: '까지', type: '유형', product_type: 'Product type',
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: '자체 상품', deposit: '입금', withdrawal: '출금',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
@@ -9043,7 +9281,7 @@ var I18N = {
         admin: 'Admin',
         reason: 'Reason:',
         completed_f: 'Completed',
-        refund_deal: 'Refund (deal)',
+        refund_deal: '환불(거래)',
         totals: 'Summary',
         any_type: 'Any type',
         partner_xcod2: 'X-Cod partner',
@@ -9094,7 +9332,7 @@ var I18N = {
         credit_12: 'Credit 12h',
         no_listings_feed: 'No listings',
         details: 'Details',
-        status: 'Status',
+        status: '상태',
         date: 'Date',
         recipient: 'Details',
         copy: 'Copy',
@@ -9390,7 +9628,24 @@ var I18N = {
         vacation_short: '휴가',
         account_blocks: '계정 차단',
         publish_restrictions: '게시 제한',
-        no_actions: '아직 작업 없음'}
+        no_actions: '아직 작업 없음',
+        your_listing: '내 광고',
+        search_history: '검색 기록',
+        enter_query_or_filters: '검색어를 입력하거나 필터를 설정하세요',
+        write_manager: '매니저에게 쓰기',
+        current_shift: '현재 근무',
+        shift_not_open: '열리지 않음',
+        new_balance: '새 잔액',
+        orders_load_fail: '주문을 불러오지 못함',
+        staff_label: '직원',
+        days_in_system: '시스템 일수',
+        employee: '직원',
+        rating_seller_from: '판매자 평점 이상',
+        income: '입금',
+        purchase_hold: '구매(보류)',
+        purchase_refund: '구매 환불',
+        customer: '클라이언트',
+        executor: '수행자'}
 
 };
 
@@ -10208,7 +10463,7 @@ async function renderBlocksHistory(body) {
         html += '<div class="list-item" style="cursor:pointer;" onclick="openActionHistoryDetail(' + a.id + ')">';
         html += '<div class="subtitle">#' + a.id + ' · ' + String(a.created_at || '').slice(0, 19).replace('T',' ') + '</div>';
         html += '<div class="title" style="margin-top:4px;"><span class="seller-link" data-uid="' + a.actor_id + '" onclick="return goProfile(' + a.actor_id + ', event)">' + String(actorLabel).replace(/</g,'&lt;') + '</span>';
-        html += ' <span style="color:var(--hint);font-weight:500;">· ' + String(a.actor_role_name || '').replace(/</g,'&lt;') + '</span></div>';
+        html += ' <span style="color:var(--hint);font-weight:500;">· ' + String(roleName(a.actor_role) || a.actor_role_name || '').replace(/</g,'&lt;') + '</span></div>';
         html += '<div class="subtitle" style="margin-top:4px;">' + String(a.action_label || a.action_type).replace(/</g,'&lt;');
         if (a.days) html += ' · ' + a.days + ' дн.';
         if (a.reason) html += '<br>' + String(a.reason).replace(/</g,'&lt;');
@@ -10720,7 +10975,7 @@ async function openProfileModMenu() {
             html += '<div class="profile-name">' + String(displayName).replace(/</g,'&lt;') + '</div>';
         }
         html += '<div class="subtitle" style="margin-top:6px;">ID ' + p.user_id;
-        if (p.role_name) html += ' · ' + String(p.role_name).replace(/</g,'&lt;');
+        if (p.role != null) html += ' · ' + String(roleName(p.role) || p.role_name || '').replace(/</g,'&lt;');
         html += '</div></div>';
 
         html += '<div class="btn-stack" style="margin-top:16px;">';
@@ -10924,7 +11179,7 @@ async function renderUserProfile() {
 
             '<div class="list-item"><div class="top">' +
             '<div class="title">ID <span style="font-weight:600;color:var(--hint);">' + p.user_id + '</span></div>' +
-            (p.role_name ? '<span class="badge badge-processing">' + String(p.role_name).replace(/</g,'&lt;') + '</span>' : '') +
+            (p.role != null ? '<span class="badge badge-processing">' + String(roleName(p.role) || p.role_name || '').replace(/</g,'&lt;') + '</span>' : '') +
             '</div></div>';
         html += '<div class="rating-row">' +
             '<div class="rating-chip"><div class="rl">' + tBlock('seller_rating') + '</div><div class="rv">★ ' + Number(p.rating_seller).toFixed(2) + '</div></div>' +
@@ -11870,7 +12125,7 @@ async function openListing(id) {
         if (!isOwner) {
             html += '<span class="seller-link" style="text-align:left;" data-uid="' + l.seller_id + '" onclick="return goProfile(' + l.seller_id + ', event)">' + sellerLabel.replace(/</g,'&lt;') + '</span>';
         } else {
-            html += '<span style="text-align:left;color:var(--hint);font-size:13px;">Ваше объявление</span>';
+            html += '<span style="text-align:left;color:var(--hint);font-size:13px;">' + tBlock('your_listing') + '</span>';
         }
         html += '<div style="font-size:22px;font-weight:700;color:var(--success);text-align:right;">' + Number(l.price).toLocaleString('ru-RU') + ' <small>$</small></div>';
         html += '</div>';
@@ -12060,7 +12315,7 @@ async function loadOrders() {
             });
         }, 1000);
     } catch (e) {
-        box.innerHTML = '<div class="empty">Не удалось загрузить заказы</div>';
+        box.innerHTML = '<div class="empty">' + tBlock('orders_load_fail') + '</div>';
     }
 }
 
@@ -12863,9 +13118,9 @@ async function loadRequests() {
         };
         var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars', order: 'Сделка' };
         var typeLabel = {
-            deposit: 'Пополнение', withdraw: 'Вывод', refund: 'Возврат (сделка)',
-            income: 'Поступление', purchase_hold: 'Покупка (холд)', purchase_release: 'Продажа',
-            purchase_refund: 'Возврат покупки'
+            deposit: tBlock('deposit'), withdraw: tBlock('withdrawal'), refund: tBlock('refund_deal'),
+            income: tBlock('income'), purchase_hold: tBlock('purchase_hold'), purchase_release: tBlock('sale'),
+            purchase_refund: tBlock('purchase_refund')
         };
 
         var html = '';
@@ -12932,9 +13187,9 @@ var _myListingsCat = 'all';
 var _myFlKind = '';
 function setMyListingsCat(cat) {
     _myListingsCat = cat || 'all';
-    var labels = { all: 'Все', sale: 'Продажа', freelance: 'Фриланс' };
+    var labels = { all: tBlock('all'), sale: tBlock('sale'), freelance: tBlock('freelance') };
     var lab = document.getElementById('my-cat-sheet-label');
-    if (lab) lab.textContent = labels[_myListingsCat] || 'Все';
+    if (lab) lab.textContent = labels[_myListingsCat] || tBlock('all');
     var fk = document.getElementById('my-fl-sheet-btn');
     if (fk) fk.style.display = (_myListingsCat === 'freelance') ? 'block' : 'none';
     if (_myListingsCat !== 'freelance') {
@@ -12946,9 +13201,9 @@ function setMyListingsCat(cat) {
 }
 function setMyFlKindValue(v) {
     _myFlKind = v || '';
-    var labels = { '': 'Все', order: 'Заказчик', execute: 'Исполнитель' };
+    var labels = { '': tBlock('all'), order: tBlock('customer'), execute: tBlock('executor') };
     var lab = document.getElementById('my-fl-sheet-label');
-    if (lab) lab.textContent = labels[_myFlKind] || 'Все';
+    if (lab) lab.textContent = labels[_myFlKind] || tBlock('all');
     loadMyListings();
 }
 function openMyCatSheet() {
@@ -12960,10 +13215,10 @@ function openMyCatSheet() {
     sheet.onclick = function(e){ if (e.target === sheet) sheet.remove(); };
     sheet.innerHTML =
         '<div style="width:100%;max-width:480px;background:var(--bg,#1c1c1e);border-radius:16px 16px 0 0;padding:16px 16px 28px;box-sizing:border-box;">' +
-        '<div style="font-size:16px;font-weight:600;margin-bottom:12px;">Категория</div>' +
-        '<button type="button" class="btn" style="margin-bottom:8px;" onclick="document.getElementById(\'my-cat-sheet\').remove();setMyListingsCat(\'all\')" data-i18n="all">Все</button>' +
-        '<button type="button" class="btn btn-secondary" style="margin-bottom:8px;" onclick="document.getElementById(\'my-cat-sheet\').remove();setMyListingsCat(\'sale\')" data-i18n="sale">Продажа</button>' +
-        '<button type="button" class="btn btn-secondary" onclick="document.getElementById(\'my-cat-sheet\').remove();setMyListingsCat(\'freelance\')" data-i18n="freelance">Фриланс</button>' +
+        '<div style="font-size:16px;font-weight:600;margin-bottom:12px;">' + tBlock('category') + '</div>' +
+        '<button type="button" class="btn" style="margin-bottom:8px;" onclick="document.getElementById(\'my-cat-sheet\').remove();setMyListingsCat(\'all\')" data-i18n="all">' + tBlock('all') + '</button>' +
+        '<button type="button" class="btn btn-secondary" style="margin-bottom:8px;" onclick="document.getElementById(\'my-cat-sheet\').remove();setMyListingsCat(\'sale\')" data-i18n="sale">' + tBlock('sale') + '</button>' +
+        '<button type="button" class="btn btn-secondary" onclick="document.getElementById(\'my-cat-sheet\').remove();setMyListingsCat(\'freelance\')" data-i18n="freelance">' + tBlock('freelance') + '</button>' +
         '</div>';
     document.body.appendChild(sheet);
 }
@@ -12977,9 +13232,9 @@ function openMyFlKindSheet() {
     sheet.innerHTML =
         '<div style="width:100%;max-width:480px;background:var(--bg,#1c1c1e);border-radius:16px 16px 0 0;padding:16px 16px 28px;box-sizing:border-box;">' +
         '<div style="font-size:16px;font-weight:600;margin-bottom:12px;">Тип фриланса</div>' +
-        '<button type="button" class="btn" style="margin-bottom:8px;" onclick="document.getElementById(\'my-fl-kind-sheet\').remove();setMyFlKindValue(\'\')" data-i18n="all">Все</button>' +
-        '<button type="button" class="btn btn-secondary" style="margin-bottom:8px;" onclick="document.getElementById(\'my-fl-kind-sheet\').remove();setMyFlKindValue(\'order\')" data-i18n="order">Заказчик</button>' +
-        '<button type="button" class="btn btn-secondary" onclick="document.getElementById(\'my-fl-kind-sheet\').remove();setMyFlKindValue(\'execute\')">Исполнитель</button>' +
+        '<button type="button" class="btn" style="margin-bottom:8px;" onclick="document.getElementById(\'my-fl-kind-sheet\').remove();setMyFlKindValue(\'\')" data-i18n="all">' + tBlock('all') + '</button>' +
+        '<button type="button" class="btn btn-secondary" style="margin-bottom:8px;" onclick="document.getElementById(\'my-fl-kind-sheet\').remove();setMyFlKindValue(\'order\')" data-i18n="order">' + tBlock('customer') + '</button>' +
+        '<button type="button" class="btn btn-secondary" onclick="document.getElementById(\'my-fl-kind-sheet\').remove();setMyFlKindValue(\'execute\')">' + tBlock('executor') + '</button>' +
         '</div>';
     document.body.appendChild(sheet);
 }
@@ -13345,7 +13600,7 @@ async function searchBlockUser() {
         var data = await apiGet('/api/users/' + id + '/profile');
         var u = data.user || data;
         var name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || (u.username ? '@' + u.username : ('ID ' + id));
-        var roleName = u.role_name || '';
+        var roleName = roleName(u.role) || "";
         window._blockFoundName = name;
         box.innerHTML =
             '<div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openBlockUserActions(' + id + ')">' +
@@ -13496,7 +13751,24 @@ function renderShiftCalendar() {
     window._calYear = year;
     window._calMonth = month;
 
-    var mNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+    var MONTHS_FULL = {
+        ru: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+        en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+        uk: ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'],
+        de: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+        fr: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+        es: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+        it: ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'],
+        pt: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
+        'pt-BR': ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
+        tr: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
+        id: ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],
+        ar: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
+        zh: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
+        ja: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+        ko: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']
+    };
+    var mNames = MONTHS_FULL[getAppLang()] || MONTHS_FULL.en;
     var todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
     var selected = window._shiftCalSelected;
 
@@ -13910,19 +14182,19 @@ async function openShiftControl(shiftDate, shiftType) {
         html += '</div>';
 
         html += '<div class="listing-card">';
-        html += '<div style="font-size:12px;color:var(--hint);margin-bottom:4px;">Текущая смена</div>';
+        html += '<div style="font-size:12px;color:var(--hint);margin-bottom:4px;">' + tBlock('current_shift') + '</div>';
         html += '<div class="ltitle" style="font-size:16px;">' + (data.shift_date || '') + '</div>';
         html += '<div class="ldesc">' + timeLabel + ' ' + tBlock('msk') + '</div>';
         if (data.session && data.session.status === 'closed') {
-            html += '<div class="subtitle" style="margin-top:6px;">Статус: закрыта</div>';
+            html += '<div class="subtitle" style="margin-top:6px;">' + tBlock('status') + ': ' + tBlock('shift_status_closed') + '</div>';
         } else if (data.session && data.session.status === 'open') {
-            html += '<div class="subtitle" style="margin-top:6px;">Статус: открыта</div>';
+            html += '<div class="subtitle" style="margin-top:6px;">' + tBlock('status') + ': ' + tBlock('shift_status_open') + '</div>';
         } else {
-            html += '<div class="subtitle" style="margin-top:6px;">Статус: не открыта</div>';
+            html += '<div class="subtitle" style="margin-top:6px;">' + tBlock('status') + ': ' + tBlock('shift_not_open') + '</div>';
         }
         html += '</div>';
 
-html += '<div class="form-label">Сотрудники</div>';
+html += '<div class="form-label">' + tBlock('staff_label') + '</div>';
         if (!(data.staff || []).length) {
             html += '<div class="empty" style="padding:12px;">' + tBlock('nobody_on_shift') + '</div>';
         }
@@ -13932,7 +14204,7 @@ html += '<div class="form-label">Сотрудники</div>';
             html += '<div class="list-item">';
             html += '<div class="top">';
             html += '<div class="title"><span class="seller-link" data-uid="' + s.user_id + '" onclick="return goProfile(' + s.user_id + ', event)">' + String(s.name || ('ID ' + s.user_id)).replace(/</g,'&lt;') + '</span></div>';
-            html += '<span class="badge badge-gray">' + String(s.role_name || '—').replace(/</g,'&lt;') + '</span>';
+            html += '<span class="badge badge-gray">' + String(roleName(s.role) || s.role_name || '—').replace(/</g,'&lt;') + '</span>';
             html += '</div>';
             html += '<div class="subtitle">ID ' + s.user_id;
             if (marked) html += s.present ? ' · на смене' : ' · отсутствует';
@@ -14084,7 +14356,7 @@ async function loadCareerTracker() {
         if (d.next_label) {
             html += '<div class="subtitle" style="margin-bottom:10px;text-align:center;">До «' + d.next_label + '»: ' + Math.round(progress * 100) + '%</div>';
         }
-        html += '<button type="button" class="btn btn-secondary" onclick="showWeeklyShiftsInfo(' + (d.week_done||0) + ',' + (d.week_req||3) + ')">Смены на неделе: ' + (d.week_done||0) + ' / ' + (d.week_req||3) + '</button>';
+        html += '<button type="button" class="btn btn-secondary" onclick="showWeeklyShiftsInfo(' + (d.week_done||0) + ',' + (d.week_req||3) + ')">' + tBlock('shifts_week') + ': ' + (d.week_done||0) + ' / ' + (d.week_req||3) + '</button>';
         if (d.sanction) {
             html += '<div class="info-block" style="margin-top:10px;color:#ff3b30;">Санкции: −25% к следующим ' + d.sanction.remaining_pays + ' ЗП' + (d.sanction.reason ? (' — ' + String(d.sanction.reason).replace(/</g,'&lt;')) : '') + '</div>';
         }
@@ -14095,7 +14367,7 @@ async function loadCareerTracker() {
 }
 
 function showCareerInfo(kind, done, need) {
-    var title = kind === 'shifts' ? 'Смены' : 'Дни в системе';
+    var title = kind === 'shifts' ? tBlock('shifts') : tBlock('days_in_system');
     var extra = need ? (', ещё ' + Math.max(0, need - done)) : '';
     try { tg.showAlert(title + ': отработано ' + done + (need ? ('/' + need) : '') + extra); } catch (e) {}
 }
@@ -14392,7 +14664,7 @@ async function loadAdminJobs() {
                 html += '<div class="list-item">';
                 html += '<div class="top"><div class="title"><span class="seller-link" data-uid="' + r.user_id + '" onclick="return goProfile(' + r.user_id + ', event)">' + String(r.display_name||r.user_id).replace(/</g,'&lt;') + '</span></div>';
                 html += '<span class="badge ' + (r.status==='pending'?'badge-moderation':(r.status==='accepted'?'badge-completed':'badge-muted')) + '">' + String(r.status).replace(/</g,'&lt;') + '</span></div>';
-                html += '<div class="subtitle">' + String(r.reason||'').replace(/</g,'&lt;') + '<br>' + String(r.created_at||'').slice(0,16).replace('T',' ') + ' · ' + String(r.role_name||'') + '</div>';
+                html += '<div class="subtitle">' + String(r.reason||'').replace(/</g,'&lt;') + '<br>' + String(r.created_at||'').slice(0,16).replace('T',' ') + ' · ' + String(roleName(r.role) || r.role_name || '') + '</div>';
                 if (r.status === 'pending') {
                     html += '<div style="display:flex;gap:8px;margin-top:8px;">';
                     html += '<button type="button" class="btn" style="flex:1;" onclick="processResign(' + r.id + ',\'accepted\')">Принять</button>';
@@ -14480,7 +14752,7 @@ async function loadAdminStaff() {
             nick = String(nick).replace(/</g, '&lt;');
             return '<div class="list-item" style="cursor:pointer;" onclick="openStaffDetail(' + s.user_id + ')">' +
                 '<div class="top"><div class="title"><span class="seller-link" data-uid="' + s.user_id + '" onclick="return goProfile(' + s.user_id + ', event)">' + nick + '</span></div>' +
-                '<span class="badge badge-processing">' + (s.role_name || '').replace(/</g,'&lt;') + '</span></div>' +
+                '<span class="badge badge-processing">' + (roleName(s.role) || "").replace(/</g,'&lt;') + '</span></div>' +
                 '<div class="subtitle">ID: ' + s.user_id + ' · ' + tBlock('balance_title') + ': ' + s.balance + '$</div></div>';
         }).join('');
         box.innerHTML = html;
@@ -14539,13 +14811,13 @@ function openStaffDetail(uid) {
         '<b>Имя:</b> ' + (s.first_name || '—') + '<br>' +
         '<b>Username:</b> ' + nickHtml + '<br>' +
         '<b>ID:</b> ' + s.user_id + '<br>' +
-        '<b>' + tBlock('privilege') + ':</b> ' + s.role_name + '<br>' +
+        '<b>' + tBlock('privilege') + ':</b> ' + roleName(s.role) + '<br>' +
         '<b>' + tBlock('balance_title') + ':</b> ' + s.balance + '$' +
         '</div>' +
         '<div class="section-title" style="font-size:16px;">Изменить роль</div>' +
         (roleBtns || '<div class="info-block">Нет доступных ролей для назначения</div>') +
         '<div class="section-title" style="font-size:16px;margin-top:16px;">Изменить баланс</div>' +
-        '<div class="form-group"><label class="form-label">Новый баланс ($)</label>' +
+        '<div class="form-group"><label class="form-label">' + tBlock('new_balance') + ' ($)</label>' +
         '<input class="form-input" type="number" id="staff-balance-input" value="' + s.balance + '"></div>' +
         '<button class="btn" onclick="adminSetStaffBalance(' + s.user_id + ')">Сохранить баланс</button>' +
         '<div style="display:flex;gap:8px;margin-top:10px;">' +
