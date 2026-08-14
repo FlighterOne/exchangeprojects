@@ -1707,12 +1707,12 @@
             <button class="support-tile" onclick="openSupportChat()">
                 <div class="support-tile-icon">💬</div>
                 <div class="support-tile-title" data-i18n="support_ticket">Написать обращение</div>
-                <div class="support-tile-sub">Чат с менеджером</div>
+                <div class="support-tile-sub" data-i18n="chat_manager">Чат с менеджером</div>
             </button>
             <button class="support-tile" onclick="showPage('collaborate')">
                 <div class="support-tile-icon">🤝</div>
                 <div class="support-tile-title" data-i18n="support_hire">Сотрудничать</div>
-                <div class="support-tile-sub">Вакансии</div>
+                <div class="support-tile-sub" data-i18n="vacancies">Вакансии</div>
             </button>
             <button class="support-tile" onclick="openLink('https://t.me/xcodmanager')">
                 <div class="support-tile-icon">✈️</div>
@@ -1904,7 +1904,7 @@
     <!-- ADD STAFF -->
     <div id="page-admin-add-staff" class="page">
         <button class="back-link" onclick="showPage('admin')" data-i18n="back">← Назад</button>
-        <div class="section-title">Добавить сотрудника</div>
+        <div class="section-title" data-i18n="add_staff">Добавить сотрудника</div>
         <div class="form-group">
             <label class="form-label">ID пользователя Telegram</label>
             <input class="form-input" type="number" id="add-staff-id" placeholder="Например: 123456789">
@@ -2750,7 +2750,30 @@ var I18N = {
         create_request: 'Создать заявку',
         show: 'Показать',
         download_report_pdf: 'Скачать отчёт (PDF)',
-        leave_no_sanctions: 'Санкции за эти недели не начисляются.'},
+        leave_no_sanctions: 'Санкции за эти недели не начисляются.',
+        msk: 'МСК',
+        chat_manager: 'Чат с менеджером',
+        vacancies: 'Вакансии',
+        shift_full: 'полная',
+        shift_day: 'Дневная',
+        shift_night: 'Ночная',
+        nobody_on_shift: 'Никого нет на смене',
+        restrictions: 'Ограничения',
+        add_staff: 'Добавить сотрудника',
+        dayoff: 'Отгул',
+        no_apps_pending: 'Нет заявок на рассмотрении',
+        no_job_apps: 'Нет заявок на работу',
+        violator_id: 'ID нарушителя',
+        shifts_week_done: 'Отработано смен на неделе',
+        mod_complaints: 'Модерация жалоб',
+        shift_status_open: 'Открыта',
+        shift_status_closed: 'Закрыта',
+        tracker_staff_only: 'Трекер доступен только сотрудникам',
+        block_lifted: tBlock('block_lifted'),
+        vacation_short: 'Отпуск',
+        account_blocks: 'Блокировки аккаунтов',
+        publish_restrictions: 'Ограничения публикаций',
+        no_actions: 'Пока нет действий'},
     en: {
         support: 'Support', back: '← Back', menu: 'Menu',
         home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
@@ -3199,7 +3222,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'Chat with manager',
+        vacancies: 'Vacancies',
+        shift_full: 'full',
+        shift_day: 'Day shift',
+        shift_night: 'Night shift',
+        nobody_on_shift: 'Nobody is on shift',
+        restrictions: 'Restrictions',
+        add_staff: 'Add employee',
+        dayoff: 'Day off',
+        no_apps_pending: 'No applications pending',
+        no_job_apps: 'No job applications',
+        violator_id: 'Violator ID',
+        shifts_week_done: 'Shifts completed this week',
+        mod_complaints: 'Complaints moderation',
+        shift_status_open: 'Open',
+        shift_status_closed: 'Closed',
+        tracker_staff_only: 'Tracker is available to staff only',
+        block_lifted: 'Block lifted early',
+        vacation_short: 'Vacation',
+        account_blocks: 'Account blocks',
+        publish_restrictions: 'Publishing restrictions',
+        no_actions: 'No actions yet'},
     de: {
         support: 'Support', back: '← Zurück', menu: 'Menü',
         home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
@@ -3648,7 +3694,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'Chat mit Manager',
+        vacancies: 'Stellen',
+        shift_full: 'vollständig',
+        shift_day: 'Tagschicht',
+        shift_night: 'Nachtschicht',
+        nobody_on_shift: 'Niemand im Dienst',
+        restrictions: 'Einschränkungen',
+        add_staff: 'Mitarbeiter hinzufügen',
+        dayoff: 'Freier Tag',
+        no_apps_pending: 'Keine Anträge in Prüfung',
+        no_job_apps: 'Keine Stellenbewerbungen',
+        violator_id: 'ID des Verletzers',
+        shifts_week_done: 'Schichten diese Woche',
+        mod_complaints: 'Beschwerde-Moderation',
+        shift_status_open: 'Offen',
+        shift_status_closed: 'Geschlossen',
+        tracker_staff_only: 'Tracker nur für Mitarbeiter',
+        block_lifted: 'Sperre vorzeitig aufgehoben',
+        vacation_short: 'Urlaub',
+        account_blocks: 'Konto-Sperren',
+        publish_restrictions: 'Veröffentlichungsbeschränkungen',
+        no_actions: 'Noch keine Aktionen'},
     fr: {
         support: 'Support', back: '← Retour', menu: 'Menu',
         home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
@@ -4097,7 +4166,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'Chat avec le manager',
+        vacancies: 'Offres',
+        shift_full: 'complète',
+        shift_day: 'Quart de jour',
+        shift_night: 'Quart de nuit',
+        nobody_on_shift: 'Personne en service',
+        restrictions: 'Restrictions',
+        add_staff: 'Ajouter un employé',
+        dayoff: 'Jour de congé',
+        no_apps_pending: 'Aucune demande en cours',
+        no_job_apps: 'Aucune candidature',
+        violator_id: 'ID du contrevenant',
+        shifts_week_done: 'Quarts cette semaine',
+        mod_complaints: 'Modération des plaintes',
+        shift_status_open: 'Ouverte',
+        shift_status_closed: 'Fermée',
+        tracker_staff_only: 'Suivi réservé au personnel',
+        block_lifted: 'Blocage levé plus tôt',
+        vacation_short: 'Congés',
+        account_blocks: 'Blocages de compte',
+        publish_restrictions: 'Restrictions de publication',
+        no_actions: 'Aucune action pour le moment'},
     es: {
         support: 'Support', back: '← Atrás', menu: 'Menú',
         home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -4546,7 +4638,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'Chat con el manager',
+        vacancies: 'Vacantes',
+        shift_full: 'completa',
+        shift_day: 'Turno de día',
+        shift_night: 'Turno de noche',
+        nobody_on_shift: 'Nadie de turno',
+        restrictions: 'Restricciones',
+        add_staff: 'Añadir empleado',
+        dayoff: 'Día libre',
+        no_apps_pending: 'No hay solicitudes pendientes',
+        no_job_apps: 'No hay candidaturas',
+        violator_id: 'ID del infractor',
+        shifts_week_done: 'Turnos esta semana',
+        mod_complaints: 'Moderación de quejas',
+        shift_status_open: 'Abierta',
+        shift_status_closed: 'Cerrada',
+        tracker_staff_only: 'Tracker solo para el personal',
+        block_lifted: 'Bloqueo levantado anticipadamente',
+        vacation_short: 'Vacaciones',
+        account_blocks: 'Bloqueos de cuenta',
+        publish_restrictions: 'Restricciones de publicación',
+        no_actions: 'Aún no hay acciones'},
     zh: {
         support: 'Support', back: '← 返回', menu: '菜单',
         home: '首页', news: '新闻', exchange: '交易所', freelance: '自由职业',
@@ -4995,7 +5110,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: '与经理聊天',
+        vacancies: '职位',
+        shift_full: '全班',
+        shift_day: '白班',
+        shift_night: '夜班',
+        nobody_on_shift: '当前无人值班',
+        restrictions: '限制',
+        add_staff: '添加员工',
+        dayoff: '调休',
+        no_apps_pending: '暂无待审申请',
+        no_job_apps: '暂无求职申请',
+        violator_id: '违规者 ID',
+        shifts_week_done: '本周已完成班次',
+        mod_complaints: '投诉审核',
+        shift_status_open: '已开启',
+        shift_status_closed: '已关闭',
+        tracker_staff_only: '进度仅对员工开放',
+        block_lifted: '已提前解除封禁',
+        vacation_short: '休假',
+        account_blocks: '账号封禁',
+        publish_restrictions: '发布限制',
+        no_actions: '暂无操作'},
     uk: {
         support: 'Support', back: '← Назад', menu: 'Меню',
         home: 'Головна', news: 'Новини', exchange: 'Біржа', freelance: 'Фриланс',
@@ -5445,7 +5583,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'МСК',
+        chat_manager: 'Чат з менеджером',
+        vacancies: 'Вакансії',
+        shift_full: 'повна',
+        shift_day: 'Денна',
+        shift_night: 'Нічна',
+        nobody_on_shift: 'Нікого немає на зміні',
+        restrictions: 'Обмеження',
+        add_staff: 'Додати співробітника',
+        dayoff: 'Відгул',
+        no_apps_pending: 'Немає заявок на розгляді',
+        no_job_apps: 'Немає заявок на роботу',
+        violator_id: 'ID порушника',
+        shifts_week_done: 'Відпрацьовано змін на тижні',
+        mod_complaints: 'Модерація скарг',
+        shift_status_open: 'Відкрита',
+        shift_status_closed: 'Закрита',
+        tracker_staff_only: 'Трекер доступний лише співробітникам',
+        block_lifted: 'Блокування знято достроково',
+        vacation_short: 'Відпустка',
+        account_blocks: 'Блокування акаунтів',
+        publish_restrictions: 'Обмеження публікацій',
+        no_actions: 'Поки немає дій'},
     it: {
         support: 'Support', back: '← Indietro', menu: 'Menu',
         home: 'Home', news: 'Notizie', exchange: 'Borsa', freelance: 'Freelance',
@@ -5895,7 +6056,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'Chat con il manager',
+        vacancies: 'Posizioni',
+        shift_full: 'completa',
+        shift_day: 'Turno diurno',
+        shift_night: 'Turno notturno',
+        nobody_on_shift: 'Nessuno in turno',
+        restrictions: 'Restrizioni',
+        add_staff: 'Aggiungi dipendente',
+        dayoff: 'Giorno libero',
+        no_apps_pending: 'Nessuna richiesta in sospeso',
+        no_job_apps: 'Nessuna candidatura',
+        violator_id: 'ID trasgressore',
+        shifts_week_done: 'Turni questa settimana',
+        mod_complaints: 'Moderazione reclami',
+        shift_status_open: 'Aperta',
+        shift_status_closed: 'Chiusa',
+        tracker_staff_only: 'Tracker solo per lo staff',
+        block_lifted: 'Blocco revocato in anticipo',
+        vacation_short: 'Ferie',
+        account_blocks: 'Blocchi account',
+        publish_restrictions: 'Restrizioni di pubblicazione',
+        no_actions: 'Nessuna azione ancora'},
     pt: {
         support: 'Support', back: '← Voltar', menu: 'Menu',
         home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -6345,7 +6529,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'Chat com o gestor',
+        vacancies: 'Vagas',
+        shift_full: 'completa',
+        shift_day: 'Turno diurno',
+        shift_night: 'Turno noturno',
+        nobody_on_shift: 'Ninguém de turno',
+        restrictions: 'Restrições',
+        add_staff: 'Adicionar colaborador',
+        dayoff: 'Folga',
+        no_apps_pending: 'Sem pedidos pendentes',
+        no_job_apps: 'Sem candidaturas',
+        violator_id: 'ID do infrator',
+        shifts_week_done: 'Turnos esta semana',
+        mod_complaints: 'Moderação de queixas',
+        shift_status_open: 'Aberta',
+        shift_status_closed: 'Fechada',
+        tracker_staff_only: 'Tracker só para a equipa',
+        block_lifted: 'Bloqueio levantado antecipadamente',
+        vacation_short: 'Férias',
+        account_blocks: 'Bloqueios de conta',
+        publish_restrictions: 'Restrições de publicação',
+        no_actions: 'Ainda sem ações'},
     'pt-BR': {
         support: 'Support', back: '← Voltar', menu: 'Menu',
         home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -6795,7 +7002,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'Chat com o gerente',
+        vacancies: 'Vagas',
+        shift_full: 'completa',
+        shift_day: 'Turno diurno',
+        shift_night: 'Turno noturno',
+        nobody_on_shift: 'Ninguém de turno',
+        restrictions: 'Restrições',
+        add_staff: 'Adicionar colaborador',
+        dayoff: 'Folga',
+        no_apps_pending: 'Sem pedidos pendentes',
+        no_job_apps: 'Sem candidaturas',
+        violator_id: 'ID do infrator',
+        shifts_week_done: 'Turnos esta semana',
+        mod_complaints: 'Moderação de reclamações',
+        shift_status_open: 'Aberta',
+        shift_status_closed: 'Fechada',
+        tracker_staff_only: 'Tracker só para a equipe',
+        block_lifted: 'Bloqueio levantado antecipadamente',
+        vacation_short: 'Férias',
+        account_blocks: 'Bloqueios de conta',
+        publish_restrictions: 'Restrições de publicação',
+        no_actions: 'Ainda sem ações'},
     tr: {
         support: 'Support', back: '← Geri', menu: 'Menü',
         home: 'Ana sayfa', news: 'Haberler', exchange: 'Borsa', freelance: 'Freelance',
@@ -7245,7 +7475,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'Yönetici sohbeti',
+        vacancies: 'Açık pozisyonlar',
+        shift_full: 'tam',
+        shift_day: 'Gündüz vardiyası',
+        shift_night: 'Gece vardiyası',
+        nobody_on_shift: 'Vardiyada kimse yok',
+        restrictions: 'Kısıtlamalar',
+        add_staff: 'Çalışan ekle',
+        dayoff: 'İzin',
+        no_apps_pending: 'Bekleyen başvuru yok',
+        no_job_apps: 'İş başvurusu yok',
+        violator_id: 'İhlal eden ID',
+        shifts_week_done: 'Bu hafta vardiyalar',
+        mod_complaints: 'Şikayet moderasyonu',
+        shift_status_open: 'Açık',
+        shift_status_closed: 'Kapalı',
+        tracker_staff_only: 'Takip yalnızca personel için',
+        block_lifted: 'Engel erken kaldırıldı',
+        vacation_short: 'Tatil',
+        account_blocks: 'Hesap engelleri',
+        publish_restrictions: 'Yayın kısıtlamaları',
+        no_actions: 'Henüz işlem yok'},
     id: {
         support: 'Support', back: '← Kembali', menu: 'Menu',
         home: 'Beranda', news: 'Berita', exchange: 'Bursa', freelance: 'Freelance',
@@ -7695,7 +7948,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'Chat dengan manajer',
+        vacancies: 'Lowongan',
+        shift_full: 'penuh',
+        shift_day: 'Shift siang',
+        shift_night: 'Shift malam',
+        nobody_on_shift: 'Tidak ada di shift',
+        restrictions: 'Pembatasan',
+        add_staff: 'Tambah staf',
+        dayoff: 'Cuti harian',
+        no_apps_pending: 'Tidak ada permohonan',
+        no_job_apps: 'Tidak ada lamaran',
+        violator_id: 'ID pelanggar',
+        shifts_week_done: 'Shift minggu ini',
+        mod_complaints: 'Moderasi keluhan',
+        shift_status_open: 'Terbuka',
+        shift_status_closed: 'Tertutup',
+        tracker_staff_only: 'Tracker hanya untuk staf',
+        block_lifted: 'Blokir dicabut lebih awal',
+        vacation_short: 'Cuti',
+        account_blocks: 'Blokir akun',
+        publish_restrictions: 'Pembatasan publikasi',
+        no_actions: 'Belum ada tindakan'},
     ar: {
         support: 'Support', back: '→ رجوع', menu: 'القائمة',
         home: 'الرئيسية', news: 'الأخبار', exchange: 'البورصة', freelance: 'العمل الحر',
@@ -8145,7 +8421,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'محادثة مع المدير',
+        vacancies: 'وظائف',
+        shift_full: 'كاملة',
+        shift_day: 'وردية نهارية',
+        shift_night: 'وردية ليلية',
+        nobody_on_shift: 'لا أحد في الوردية',
+        restrictions: 'قيود',
+        add_staff: 'إضافة موظف',
+        dayoff: 'إجازة',
+        no_apps_pending: 'لا طلبات قيد المراجعة',
+        no_job_apps: 'لا طلبات توظيف',
+        violator_id: 'معرّف المخالف',
+        shifts_week_done: 'ورديات هذا الأسبوع',
+        mod_complaints: 'مراجعة الشكاوى',
+        shift_status_open: 'مفتوحة',
+        shift_status_closed: 'مغلقة',
+        tracker_staff_only: 'المتتبع للموظفين فقط',
+        block_lifted: 'رُفع الحظر مبكراً',
+        vacation_short: 'إجازة',
+        account_blocks: 'حظر الحسابات',
+        publish_restrictions: 'قيود النشر',
+        no_actions: 'لا إجراءات بعد'},
     ja: {
         support: 'Support', back: '← 戻る', menu: 'メニュー',
         home: 'ホーム', news: 'ニュース', exchange: '取引所', freelance: 'フリーランス',
@@ -8595,7 +8894,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'},
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: 'マネージャーとチャット',
+        vacancies: '求人',
+        shift_full: 'フル',
+        shift_day: '日勤',
+        shift_night: '夜勤',
+        nobody_on_shift: 'シフトに誰もいません',
+        restrictions: '制限',
+        add_staff: 'スタッフを追加',
+        dayoff: '休み',
+        no_apps_pending: '審査中の申請はありません',
+        no_job_apps: '求人応募はありません',
+        violator_id: '違反者ID',
+        shifts_week_done: '今週のシフト',
+        mod_complaints: '苦情の審査',
+        shift_status_open: '開始',
+        shift_status_closed: '終了',
+        tracker_staff_only: 'トラッカーはスタッフのみ',
+        block_lifted: 'ブロックを早期解除',
+        vacation_short: '休暇',
+        account_blocks: 'アカウントブロック',
+        publish_restrictions: '投稿制限',
+        no_actions: 'まだ操作はありません'},
     ko: {
         support: 'Support', back: '← 뒤로', menu: '메뉴',
         home: '홈', news: '뉴스', exchange: '거래소', freelance: '프리랜스',
@@ -9045,7 +9367,30 @@ var I18N = {
         create_request: 'Create request',
         show: 'Show',
         download_report_pdf: 'Download report (PDF)',
-        leave_no_sanctions: 'Sanctions will not apply for these weeks.'}
+        leave_no_sanctions: 'Sanctions will not apply for these weeks.',
+        msk: 'MSK',
+        chat_manager: '매니저와 채팅',
+        vacancies: '채용',
+        shift_full: '전체',
+        shift_day: '주간 근무',
+        shift_night: '야간 근무',
+        nobody_on_shift: '근무 중 인원 없음',
+        restrictions: '제한',
+        add_staff: '직원 추가',
+        dayoff: '휴무',
+        no_apps_pending: '검토 중 신청 없음',
+        no_job_apps: '채용 지원 없음',
+        violator_id: '위반자 ID',
+        shifts_week_done: '이번 주 근무',
+        mod_complaints: '신고 검토',
+        shift_status_open: '열림',
+        shift_status_closed: '닫힘',
+        tracker_staff_only: '트래커는 직원 전용',
+        block_lifted: '차단 조기 해제',
+        vacation_short: '휴가',
+        account_blocks: '계정 차단',
+        publish_restrictions: '게시 제한',
+        no_actions: '아직 작업 없음'}
 
 };
 
@@ -9706,6 +10051,51 @@ function txTypeLabel(tp) {
 }
 
 
+
+var MONTHS_I18N = {
+    ru: ['янв.','фев.','мар.','апр.','мая','июн.','июл.','авг.','сент.','окт.','нояб.','дек.'],
+    en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    uk: ['січ.','лют.','бер.','квіт.','трав.','черв.','лип.','серп.','вер.','жовт.','лист.','груд.'],
+    de: ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sep.','Okt.','Nov.','Dez.'],
+    fr: ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'],
+    es: ['ene.','feb.','mar.','abr.','may.','jun.','jul.','ago.','sept.','oct.','nov.','dic.'],
+    it: ['gen.','feb.','mar.','apr.','mag.','giu.','lug.','ago.','set.','ott.','nov.','dic.'],
+    pt: ['jan.','fev.','mar.','abr.','mai.','jun.','jul.','ago.','set.','out.','nov.','dez.'],
+    'pt-BR': ['jan.','fev.','mar.','abr.','mai.','jun.','jul.','ago.','set.','out.','nov.','dez.'],
+    tr: ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'],
+    id: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
+    ar: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
+    zh: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    ja: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    ko: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']
+};
+function localizeMonths(str) {
+    if (!str) return str;
+    var lang = getAppLang();
+    var target = MONTHS_I18N[lang] || MONTHS_I18N.en;
+    var ru = MONTHS_I18N.ru;
+    var out = String(str);
+    for (var i = 0; i < 12; i++) {
+        if (out.indexOf(ru[i]) !== -1) out = out.split(ru[i]).join(target[i]);
+    }
+    // MSK label
+    if (out.indexOf('МСК') !== -1) out = out.split('МСК').join(tBlock('msk'));
+    if (out.indexOf('мин ') !== -1) out = out.replace(/(\d+)мин /g, '$1' + tBlock('minute') + ' ').replace(/(\d+)сек/g, '$1' + tBlock('seconds'));
+    return out;
+}
+function formatDateTimeLocal(iso) {
+    try {
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return localizeMonths(String(iso||''));
+        var lang = getAppLang();
+        var months = MONTHS_I18N[lang] || MONTHS_I18N.en;
+        var day = d.getDate(); day = day < 10 ? '0'+day : ''+day;
+        var h = d.getHours(); h = h < 10 ? '0'+h : ''+h;
+        var mi = d.getMinutes(); mi = mi < 10 ? '0'+mi : ''+mi;
+        return day + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ' ' + h + ':' + mi;
+    } catch (e) { return localizeMonths(String(iso||'')); }
+}
+
 function tBlock(key) {
     var lang = getAppLang();
     var pack = I18N[lang] || I18N.en || I18N.ru;
@@ -9743,13 +10133,13 @@ async function openBlocksPanel(mode) {
     box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
 
     var mode = window._blocksPanelMode;
-    var activeLabel = 'Активные ▾';
-    if (mode === 'ban') activeLabel = 'Блокировки ▾';
-    if (mode === 'publish') activeLabel = 'Ограничения ▾';
+    var activeLabel = tBlock('active_listings') + ' ▾';
+    if (mode === 'ban') activeLabel = tBlock('blocks') + ' ▾';
+    if (mode === 'publish') activeLabel = tBlock('restrictions') + ' ▾';
 
     var tabs =
         '<div class="seg-toggle" style="margin:0 0 12px 0;">' +
-        '<button type="button" class="' + (mode === 'history' ? 'active' : '') + '" onclick="openBlocksPanel(\'history\')">История</button>' +
+        '<button type="button" class="' + (mode === 'history' ? 'active' : '') + '" onclick="openBlocksPanel(\'history\')">' + tBlock('history') + '</button>' +
         '<button type="button" class="' + (mode === 'ban' || mode === 'publish' ? 'active' : '') + '" id="blocks-active-tab" onclick="openBlocksTypeSheet(this)">' + activeLabel + '</button>' +
         '</div>' +
         '<div id="blocks-panel-body"></div>';
@@ -9781,13 +10171,13 @@ function openBlocksTypeSheet(anchor) {
         sheet.innerHTML =
             '<div style="width:100%;max-width:480px;background:var(--bg,#1c1c1e);' +
             'border-radius:16px 16px 0 0;padding:14px 16px 28px;box-sizing:border-box;color:var(--text,#fff);">' +
-            '<div style="font-weight:700;text-align:center;margin-bottom:12px;font-size:16px;">Показать</div>' +
+            '<div style="font-weight:700;text-align:center;margin-bottom:12px;font-size:16px;">' + tBlock('show') + '</div>' +
             '<button type="button" id="blocks-opt-ban" style="display:block;width:100%;padding:14px;margin:6px 0;' +
-            'border:none;border-radius:12px;background:var(--secondary-bg,#2c2c2e);color:var(--text,#fff);font-size:15px;cursor:pointer;">Блокировки аккаунтов</button>' +
+            'border:none;border-radius:12px;background:var(--secondary-bg,#2c2c2e);color:var(--text,#fff);font-size:15px;cursor:pointer;">' + tBlock('account_blocks') + '</button>' +
             '<button type="button" id="blocks-opt-pub" style="display:block;width:100%;padding:14px;margin:6px 0;' +
-            'border:none;border-radius:12px;background:var(--secondary-bg,#2c2c2e);color:var(--text,#fff);font-size:15px;cursor:pointer;">Ограничения публикаций</button>' +
+            'border:none;border-radius:12px;background:var(--secondary-bg,#2c2c2e);color:var(--text,#fff);font-size:15px;cursor:pointer;">' + tBlock('publish_restrictions') + '</button>' +
             '<button type="button" id="blocks-opt-cancel" style="display:block;width:100%;padding:14px;margin:6px 0;' +
-            'border:none;border-radius:12px;background:var(--secondary-bg,#2c2c2e);color:var(--hint,#8e8e93);font-size:15px;cursor:pointer;">Отмена</button>' +
+            'border:none;border-radius:12px;background:var(--secondary-bg,#2c2c2e);color:var(--hint,#8e8e93);font-size:15px;cursor:pointer;">' + tBlock('cancel') + '</button>' +
             '</div>';
         document.body.appendChild(sheet);
         sheet.addEventListener('click', function(ev) {
@@ -9811,7 +10201,7 @@ async function renderBlocksHistory(body) {
     var items = data.actions || [];
     window._modActionsCache = items;
     var html = '';
-    if (!items.length) html = '<div class="empty"><div class="icon">🗂️</div>Пока нет действий</div>';
+    if (!items.length) html = '<div class="empty"><div class="icon">🗂️</div>' + tBlock('no_actions') + '</div>';
     items.forEach(function(a) {
         var actorLabel = a.actor_username ? ('@' + a.actor_username) : (a.actor_name || a.actor_id);
         var targetLabel = a.target_username ? ('@' + a.target_username) : (a.target_name || a.target_id);
@@ -9864,7 +10254,7 @@ function openActiveRestrictionDetail(idx) {
     html += '</div>';
     var actionType = it.kind === 'publish' ? 'restrict_publish' : 'ban';
     if ((userData.role || 0) >= 4) {
-        html += '<button type=\"button\" class=\"btn\" style=\"margin-top:12px;\" onclick=\"liftPunishment(' + it.user_id + ',\'' + actionType + '\',0)\">Завершить наказание досрочно</button>';
+        html += '<button type=\"button\" class=\"btn\" style=\"margin-top:12px;\" onclick=\"liftPunishment(' + it.user_id + ',\'' + actionType + '\',0)\">' + tBlock('end_punish') + '</button>';
     }
     box.innerHTML = html;
 }
@@ -9894,7 +10284,7 @@ function openActionHistoryDetail(actionId) {
     html += '<b>Нарушитель:</b> <span class="seller-link" data-uid="' + a.target_id + '" onclick="return goProfile(' + a.target_id + ', event)">' + String(targetLabel).replace(/</g,'&lt;') + '</span> · ID ' + a.target_id;
     html += '</div>';
     if (canLift) {
-        html += '<button type="button" class="btn" style="margin-top:12px;" onclick="liftPunishment(' + a.target_id + ',\'' + a.action_type + '\',' + a.id + ')">Завершить наказание досрочно</button>';
+        html += '<button type="button" class="btn" style="margin-top:12px;" onclick="liftPunishment(' + a.target_id + ',\'' + a.action_type + '\',' + a.id + ')">' + tBlock('end_punish') + '</button>';
     }
     box.innerHTML = html;
 }
@@ -9954,7 +10344,7 @@ function openModUserBanHistoryDetail(idx) {
     if (a.days) html += '<b>Срок:</b> ' + a.days + ' дн.<br>';
     if (a.reason) html += '<b>Причина:</b> ' + String(a.reason).replace(/</g,'&lt;') + '<br>';
     html += '<b>Модератор:</b> <span class="seller-link" data-uid="' + a.actor_id + '" onclick="return goProfile(' + a.actor_id + ', event)">' + String(a.actor_name || a.actor_id).replace(/</g,'&lt;') + '</span><br>';
-    html += '<b>ID нарушителя:</b> ' + a.target_id;
+    html += '<b>' + tBlock('violator_id') + ':</b> ' + a.target_id;
     html += '</div>';
     box.innerHTML = html;
 }
@@ -10662,7 +11052,7 @@ async function loadNewsPinned() {
                 feed.innerHTML = news.map(function(n) {
                     var body = String(n.body || '').replace(/</g,'&lt;');
                     if (body.length > 140) body = body.slice(0, 140) + '…';
-                    var dateLabel = n.date_label || 'Недавно';
+                    var dateLabel = localizeMonths(n.date_label || tBlock('recent'));
                     var cover = '';
                     if (n.media && n.media.length && n.media[0] && n.media[0].url) {
                         var u = String(n.media[0].url);
@@ -10775,7 +11165,7 @@ async function openNewsDetail(id) {
     showPage('news-detail');
     try {
         var n = await apiGet('/api/news/' + id);
-        var dateLabel = n.date_label || 'Недавно';
+        var dateLabel = localizeMonths(n.date_label || tBlock('recent'));
         var html = '';
         var media = (n.media || []).filter(function(m) {
             var u = String((m && m.url) || '');
@@ -11681,7 +12071,7 @@ function formatRemain(deadline) {
         var left = Math.max(0, end - Date.now());
         var m = Math.floor(left / 60000);
         var s = Math.floor((left % 60000) / 1000);
-        return m + 'мин ' + s + 'сек';
+        return m + tBlock('minute') + ' ' + s + tBlock('seconds');
     } catch (e) { return ''; }
 }
 
@@ -12723,14 +13113,14 @@ function openAdminSection(section) {
     _adminSection = section;
     setAdminSectionBack(function(){ showPage('admin'); });
     var titles = {
-        workcenter: 'Рабочий центр',
-        career: 'Трекер должностного роста',
-        listings: 'Модерация объявлений',
-        transactions: 'Модерация транзакций',
-        jobs: 'Модерация заявок на работу',
-        complaints: 'Модерация жалоб',
-        staff: 'Управление сотрудниками',
-        analytics: 'Аналитика'
+        workcenter: tBlock('workcenter'),
+        career: tBlock('career'),
+        listings: tBlock('mod_listings'),
+        transactions: tBlock('mod_tx'),
+        jobs: tBlock('mod_jobs'),
+        complaints: tBlock('mod_complaints'),
+        staff: tBlock('staff_manage'),
+        analytics: tBlock('analytics')
     };
     window._adminSection = section;
     document.getElementById('admin-section-title').textContent = titles[section] || section;
@@ -12794,7 +13184,7 @@ async function openAnalytics(kind) {
         return;
     }
 
-    var titles = { expenses: 'Аналитика расходов', income: 'Аналитика доходов', listings: 'Аналитика объявлений' };
+    var titles = { expenses: tBlock('analytics_exp'), income: tBlock('analytics_inc'), listings: tBlock('analytics_list') };
     document.getElementById('admin-section-title').textContent = titles[kind] || 'Аналитика';
     var p = defaultPeriod();
     var box = document.getElementById('admin-content');
@@ -13022,15 +13412,15 @@ async function submitBlockAction() {
 function loadWorkCenter() {
     var box = document.getElementById('admin-content');
     var html = '<div class="support-grid">' +
-        '<button class="support-tile" onclick="openShiftSignup()"><div class="support-tile-icon">📝</div><div class="support-tile-title">Записаться на смену</div></button>' +
-        '<button class="support-tile" onclick="openMyShifts()"><div class="support-tile-icon">✅</div><div class="support-tile-title">Мои смены</div></button>' +
-        '<button class="support-tile" onclick="openShiftHistory()"><div class="support-tile-icon">📜</div><div class="support-tile-title">История моих смен</div></button>';
+        '<button class="support-tile" onclick="openShiftSignup()"><div class="support-tile-icon">📝</div><div class="support-tile-title">' + tBlock('sign_up_shift') + '</div></button>' +
+        '<button class="support-tile" onclick="openMyShifts()"><div class="support-tile-icon">✅</div><div class="support-tile-title">' + tBlock('my_shifts') + '</div></button>' +
+        '<button class="support-tile" onclick="openShiftHistory()"><div class="support-tile-icon">📜</div><div class="support-tile-title">' + tBlock('shift_history') + '</div></button>';
     if (userData && userData.role >= 5) {
-        html += '<button class="support-tile" onclick="openShiftControl()"><div class="support-tile-icon">👥</div><div class="support-tile-title">Контроль сотрудников</div></button>';
+        html += '<button class="support-tile" onclick="openShiftControl()"><div class="support-tile-icon">👥</div><div class="support-tile-title">' + tBlock('staff_control') + '</div></button>';
     }
-    html += '<button class="support-tile" onclick="openBlocksPanel()"><div class="support-tile-icon">🚫</div><div class="support-tile-title">Блокировки</div></button>';
+    html += '<button class="support-tile" onclick="openBlocksPanel()"><div class="support-tile-icon">🚫</div><div class="support-tile-title">' + tBlock('blocks') + '</div></button>';
     if (userData && userData.role >= 3 && userData.role < 6) {
-        html += '<button class="support-tile" onclick="openResignForm()"><div class="support-tile-icon">🚪</div><div class="support-tile-title">Уволиться</div></button>';
+        html += '<button class="support-tile" onclick="openResignForm()"><div class="support-tile-icon">🚪</div><div class="support-tile-title">' + tBlock('resign') + '</div></button>';
     }
     html += '</div>';
     box.innerHTML = html;
@@ -13064,7 +13454,7 @@ async function openShiftHistory() {
                 html += '<div class="top"><div class="title">' + (s.shift_date || '') + ' · ' + wd + '</div>';
                 html += '<span style="font-weight:700;color:var(--success);">' + sign + amount.toLocaleString('ru-RU') + ' $</span></div>';
                 html += '<div class="subtitle">' + (s.label || '') + '<br>' + hours + ' ч · ' +
-                    (s.credit === 'full' ? 'полная' : s.credit === 'partial_8' ? '8ч' : s.credit === 'partial_6' ? '6ч' : s.credit === 'none' ? 'не засчитана' : (s.credit || '')) +
+                    (s.credit === 'full' ? tBlock('shift_full') : s.credit === 'partial_8' ? ('8' + tBlock('hours')) : s.credit === 'partial_6' ? '6ч' : s.credit === 'none' ? 'не засчитана' : (s.credit || '')) +
                     '</div>';
                 html += '</div>';
             });
@@ -13257,7 +13647,7 @@ async function openMyShifts() {
                 html += '<div class="listing-card" style="cursor:pointer;" onclick="openShiftSchedule(\'' + s.shift_type + '\',\'' + s.shift_date + '\')">';
                 html += '<div class="ltitle-row"><div class="ltitle">' + (s.shift_date || '') + ' · ' + wd + '</div>';
                 html += '<div class="shift-timer-box shift-timer"' + timerAttr + '><div class="shift-timer-label">—</div><div class="shift-timer-value">—</div></div></div>';
-                html += '<div class="ldesc">' + (s.label || timeLabel) + ' МСК</div>';
+                html += '<div class="ldesc">' + (s.label || timeLabel) + ' ' + tBlock('msk') + '</div>';
                 html += '</div>';
             });
         }
@@ -13422,7 +13812,7 @@ async function openShiftSchedule(type, date) {
         var my = await apiGet('/api/shifts/my').catch(function(){ return { shifts: [] }; });
         var mine = (my.shifts || []).find(function(s){ return s.shift_date === date && s.shift_type === type; });
         var label = type === 'day' ? '09:00–21:00' : '21:00–09:00';
-        var typeLabel = type === 'day' ? 'Дневная' : 'Ночная';
+        var typeLabel = type === 'day' ? tBlock('shift_day') : tBlock('shift_night');
         var sessionOpened = !!(mine && mine.session_opened);
         var finished = !!(mine && mine.finished);
         var startTs = mine && mine.start ? Date.parse(mine.start) : NaN;
@@ -13437,7 +13827,7 @@ async function openShiftSchedule(type, date) {
         html += '<div class="listing-card">';
         html += '<div class="ltitle-row"><div class="ltitle">' + (date || '') + '</div>';
         html += '<div style="font-size:12px;color:var(--hint);">' + typeLabel + '</div></div>';
-        html += '<div class="ldesc">' + label + ' МСК</div>';
+        html += '<div class="ldesc">' + label + ' ' + tBlock('msk') + '</div>';
 
         if (finished || (mine && mine.session_status === 'closed')) {
             html += '<div class="info-block" style="margin-top:10px;">Смена завершена</div>';
@@ -13522,7 +13912,7 @@ async function openShiftControl(shiftDate, shiftType) {
         html += '<div class="listing-card">';
         html += '<div style="font-size:12px;color:var(--hint);margin-bottom:4px;">Текущая смена</div>';
         html += '<div class="ltitle" style="font-size:16px;">' + (data.shift_date || '') + '</div>';
-        html += '<div class="ldesc">' + timeLabel + ' МСК</div>';
+        html += '<div class="ldesc">' + timeLabel + ' ' + tBlock('msk') + '</div>';
         if (data.session && data.session.status === 'closed') {
             html += '<div class="subtitle" style="margin-top:6px;">Статус: закрыта</div>';
         } else if (data.session && data.session.status === 'open') {
@@ -13534,7 +13924,7 @@ async function openShiftControl(shiftDate, shiftType) {
 
 html += '<div class="form-label">Сотрудники</div>';
         if (!(data.staff || []).length) {
-            html += '<div class="empty" style="padding:12px;">Никого нет на смене</div>';
+            html += '<div class="empty" style="padding:12px;">' + tBlock('nobody_on_shift') + '</div>';
         }
 
         (data.staff || []).forEach(function(s) {
@@ -13653,7 +14043,7 @@ async function loadCareerTracker() {
         var stages = d.stages || [tBlock('role_intern'), tBlock('role_mod'), tBlock('role_admin')];
         var stage = Number(d.stage);
         if (stage < 0) {
-            box.innerHTML = '<div class="empty">Трекер доступен сотрудникам (стажёр и выше)</div>';
+            box.innerHTML = '<div class="empty">' + tBlock('tracker_staff_only') + '</div>';
             return;
         }
         var progress = Math.max(0, Math.min(1, Number(d.progress) || 0));
@@ -13711,7 +14101,7 @@ function showCareerInfo(kind, done, need) {
 }
 
 function showWeeklyShiftsInfo(done, req) {
-    var msg = 'Отработано смен на неделе: ' + done + ' из ' + req +
+    var msg = tBlock('shifts_week_done') + ': ' + done + ' ' + tBlock('of') + ' ' + req +
         '\n\nСанкции за несоблюдение требований работодателя:\nза невыполнение недельного плана по сменам — −25% от следующих 3 ЗП';
     try { tg.showAlert(msg); } catch (e) {}
 }
@@ -13890,7 +14280,7 @@ async function loadAdminRequests() {
         var reqs = data.requests || [];
         _adminCache.transactions = reqs;
         if (!reqs.length) {
-            box.innerHTML = '<div class="empty"><div class="icon">✅</div>Нет заявок на рассмотрении</div>';
+            box.innerHTML = '<div class="empty"><div class="icon">✅</div>' + tBlock('no_apps_pending') + '</div>';
             return;
         }
         var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars' };
@@ -14013,7 +14403,7 @@ async function loadAdminJobs() {
             });
         }
         html += '<div class="section-title" style="font-size:15px;margin:12px 0 8px;">Заявки на работу</div>';
-        if (!apps.length) html += '<div class="empty">Нет заявок на работу</div>';
+        if (!apps.length) html += '<div class="empty">' + tBlock('no_job_apps') + '</div>';
         apps.forEach(function(a) {
             var nick = a.username ? ('@' + a.username) : (a.full_name || ('ID ' + a.user_id));
             html += '<div class="list-item" style="cursor:pointer;" onclick="openAdminJobDetail(' + a.id + ')">';
@@ -14091,7 +14481,7 @@ async function loadAdminStaff() {
             return '<div class="list-item" style="cursor:pointer;" onclick="openStaffDetail(' + s.user_id + ')">' +
                 '<div class="top"><div class="title"><span class="seller-link" data-uid="' + s.user_id + '" onclick="return goProfile(' + s.user_id + ', event)">' + nick + '</span></div>' +
                 '<span class="badge badge-processing">' + (s.role_name || '').replace(/</g,'&lt;') + '</span></div>' +
-                '<div class="subtitle">ID: ' + s.user_id + ' · Баланс: ' + s.balance + '$</div></div>';
+                '<div class="subtitle">ID: ' + s.user_id + ' · ' + tBlock('balance_title') + ': ' + s.balance + '$</div></div>';
         }).join('');
         box.innerHTML = html;
         bindProfileLinks(box);
@@ -14149,8 +14539,8 @@ function openStaffDetail(uid) {
         '<b>Имя:</b> ' + (s.first_name || '—') + '<br>' +
         '<b>Username:</b> ' + nickHtml + '<br>' +
         '<b>ID:</b> ' + s.user_id + '<br>' +
-        '<b>Роль:</b> ' + s.role_name + '<br>' +
-        '<b>Баланс:</b> ' + s.balance + '$' +
+        '<b>' + tBlock('privilege') + ':</b> ' + s.role_name + '<br>' +
+        '<b>' + tBlock('balance_title') + ':</b> ' + s.balance + '$' +
         '</div>' +
         '<div class="section-title" style="font-size:16px;">Изменить роль</div>' +
         (roleBtns || '<div class="info-block">Нет доступных ролей для назначения</div>') +
@@ -14159,8 +14549,8 @@ function openStaffDetail(uid) {
         '<input class="form-input" type="number" id="staff-balance-input" value="' + s.balance + '"></div>' +
         '<button class="btn" onclick="adminSetStaffBalance(' + s.user_id + ')">Сохранить баланс</button>' +
         '<div style="display:flex;gap:8px;margin-top:10px;">' +
-        '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'dayoff\')">Отгул</button>' +
-        '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'vacation\')">Отпуск</button>' +
+        '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'dayoff\')">' + tBlock('dayoff') + '</button>' +
+        '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'vacation\')">' + tBlock('vacation_short') + '</button>' +
         '</div>';
     document.getElementById('staff-detail-content').innerHTML = html;
     showPage('admin-staff-detail');
