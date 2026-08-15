@@ -1752,7 +1752,7 @@
         <div id="admin-support-chat-messages" class="chat-messages"></div>
         <div class="chat-footer">
             <div class="chat-input-row">
-                <input class="form-input" type="text" id="admin-support-chat-input" placeholder="Ответ..." maxlength="4000">
+                <input class="form-input" type="text" id="admin-support-chat-input" placeholder="Ответ..." data-i18n-placeholder="reply_ph" maxlength="4000">
                 <button type="button" class="btn" onclick="sendAdminSupportMessage()" data-i18n="send">Отправить</button>
             </div>
         </div>
@@ -1906,20 +1906,20 @@
         <button class="back-link" onclick="showPage('admin')" data-i18n="back">← Назад</button>
         <div class="section-title" data-i18n="add_staff">Добавить сотрудника</div>
         <div class="form-group">
-            <label class="form-label">ID пользователя Telegram</label>
-            <input class="form-input" type="number" id="add-staff-id" placeholder="Например: 123456789">
+            <label class="form-label" data-i18n="tg_user_id">ID пользователя Telegram</label>
+            <input class="form-input" type="number" id="add-staff-id" data-i18n-placeholder="tg_user_id_ph" placeholder="Например: 123456789">
         </div>
         <div class="form-group">
-            <label class="form-label">Роль</label>
+            <label class="form-label" data-i18n="role_label">Роль</label>
             <div class="method-list" id="add-staff-roles">
-                <div class="method-item selected" data-role="1" onclick="selectStaffRole(this)"><div class="title">' + tBlock('role_partner') + '</div></div>
-                <div class="method-item" data-role="2" onclick="selectStaffRole(this)"><div class="title">' + tBlock('role_corp') + '</div></div>
-                <div class="method-item" data-role="3" onclick="selectStaffRole(this)"><div class="title">Стажер</div></div>
-                <div class="method-item" data-role="4" onclick="selectStaffRole(this)"><div class="title">Модератор</div></div>
-                <div class="method-item" data-role="5" onclick="selectStaffRole(this)"><div class="title">Админ</div></div>
+                <div class="method-item selected" data-role="1" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_partner">Партнёр</div></div>
+                <div class="method-item" data-role="2" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_corp">Корпоративный</div></div>
+                <div class="method-item" data-role="3" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_intern">Стажёр</div></div>
+                <div class="method-item" data-role="4" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_mod">Модератор</div></div>
+                <div class="method-item" data-role="5" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_admin">Админ</div></div>
             </div>
         </div>
-        <button class="btn" id="add-staff-btn" onclick="submitAddStaff()">Назначить</button>
+        <button class="btn" id="add-staff-btn" onclick="submitAddStaff()" data-i18n="assign">Назначить</button>
     </div>
 
 </div>
@@ -2225,7 +2225,7 @@ function showPage(name) {
     if (page) page.classList.add('active');
     try { applyI18n(); } catch (e) {}
     if (name === 'collaborate' || name === 'support-hire') { try { renderHireInfo(); } catch (e) {} }
-    if (name === 'job-form') { try { applyI18n(); } catch (e) {} }
+    if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
     if (name === 'deposit' || name === 'withdraw') { try { updateFeeHint(name); } catch (e) {} }
     if (name === 'home') loadListings();
     if (name === 'profile') loadOwnProfileListings();
@@ -2827,7 +2827,11 @@ var I18N = {
         rating: 'Рейтинг',
         until: 'До',
         still_need: 'ещё',
-        completed_count: 'отработано'},
+        completed_count: 'отработано',
+        tg_user_id: 'ID пользователя Telegram',
+        tg_user_id_ph: 'Например: 123456789',
+        role_label: 'Роль',
+        reply_ph: 'Ответ...'},
     en: {
         support: 'Support', back: '← Back', menu: 'Menu',
         home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
@@ -3352,7 +3356,11 @@ var I18N = {
         rating: 'Rating',
         until: 'Until',
         still_need: 'still need',
-        completed_count: 'completed'},
+        completed_count: 'completed',
+        tg_user_id: 'Telegram user ID',
+        tg_user_id_ph: 'Example: 123456789',
+        role_label: 'Role',
+        reply_ph: 'Reply...'},
     de: {
         support: 'Support', back: '← Zurück', menu: 'Menü',
         home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
@@ -3510,7 +3518,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'Nachricht...',
         manager_eta: '*ein Manager antwortet innerhalb von 96 Std.',
         faq: 'FAQ',
         search_exchange: 'Börse durchsuchen...',
@@ -3791,7 +3799,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'Zuweisen',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -3877,7 +3885,11 @@ var I18N = {
         rating: 'Bewertung',
         until: 'Bis',
         still_need: 'noch',
-        completed_count: 'erfüllt'},
+        completed_count: 'erfüllt',
+        tg_user_id: 'Telegram-Benutzer-ID',
+        tg_user_id_ph: 'z. B. 123456789',
+        role_label: 'Rolle',
+        reply_ph: 'Antwort...'},
     fr: {
         support: 'Support', back: '← Retour', menu: 'Menu',
         home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
@@ -4316,7 +4328,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'Attribuer',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -4402,7 +4414,11 @@ var I18N = {
         rating: 'Note',
         until: 'Jusqu’à',
         still_need: 'encore',
-        completed_count: 'effectué'},
+        completed_count: 'effectué',
+        tg_user_id: 'ID utilisateur Telegram',
+        tg_user_id_ph: 'Ex. : 123456789',
+        role_label: 'Rôle',
+        reply_ph: 'Réponse...'},
     es: {
         support: 'Support', back: '← Atrás', menu: 'Menú',
         home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -4560,7 +4576,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'Mensaje...',
         manager_eta: '*un manager responderá en 96 h',
         faq: 'FAQ',
         search_exchange: 'Buscar en la bolsa...',
@@ -4841,7 +4857,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'Asignar',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -4927,7 +4943,11 @@ var I18N = {
         rating: 'Valoración',
         until: 'Hasta',
         still_need: 'faltan',
-        completed_count: 'completado'},
+        completed_count: 'completado',
+        tg_user_id: 'ID de usuario de Telegram',
+        tg_user_id_ph: 'Ej.: 123456789',
+        role_label: 'Rol',
+        reply_ph: 'Respuesta...'},
     zh: {
         support: 'Support', back: '← 返回', menu: '菜单',
         home: '首页', news: '新闻', exchange: '交易所', freelance: '自由职业',
@@ -5085,7 +5105,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: '消息...',
         manager_eta: '*经理将在 96 小时内回复',
         faq: 'FAQ',
         search_exchange: '搜索交易所...',
@@ -5366,7 +5386,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: '任命',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -5452,7 +5472,11 @@ var I18N = {
         rating: '评分',
         until: '距离',
         still_need: '还需',
-        completed_count: '已完成'},
+        completed_count: '已完成',
+        tg_user_id: 'Telegram 用户 ID',
+        tg_user_id_ph: '例如：123456789',
+        role_label: '角色',
+        reply_ph: '回复...'},
     uk: {
         support: 'Support', back: '← Назад', menu: 'Меню',
         home: 'Головна', news: 'Новини', exchange: 'Біржа', freelance: 'Фриланс',
@@ -5611,7 +5635,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'Повідомлення...',
         manager_eta: '*менеджер напише вам протягом 96 год',
         faq: 'FAQ',
         search_exchange: 'Пошук на біржі...',
@@ -5892,7 +5916,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'Призначити',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -5978,7 +6002,11 @@ var I18N = {
         rating: 'Рейтинг',
         until: 'До',
         still_need: 'ще',
-        completed_count: 'відпрацьовано'},
+        completed_count: 'відпрацьовано',
+        tg_user_id: 'ID користувача Telegram',
+        tg_user_id_ph: 'Наприклад: 123456789',
+        role_label: 'Роль',
+        reply_ph: 'Відповідь...'},
     it: {
         support: 'Support', back: '← Indietro', menu: 'Menu',
         home: 'Home', news: 'Notizie', exchange: 'Borsa', freelance: 'Freelance',
@@ -6137,7 +6165,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'Messaggio...',
         manager_eta: '*un manager risponderà entro 96 ore',
         faq: 'FAQ',
         search_exchange: 'Cerca nella borsa...',
@@ -6418,7 +6446,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'Assegna',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -6504,7 +6532,11 @@ var I18N = {
         rating: 'Valutazione',
         until: 'Fino a',
         still_need: 'ancora',
-        completed_count: 'completato'},
+        completed_count: 'completato',
+        tg_user_id: 'ID utente Telegram',
+        tg_user_id_ph: 'Es.: 123456789',
+        role_label: 'Ruolo',
+        reply_ph: 'Risposta...'},
     pt: {
         support: 'Support', back: '← Voltar', menu: 'Menu',
         home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -6663,7 +6695,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'Mensagem...',
         manager_eta: '*um gestor responde em 96 h',
         faq: 'FAQ',
         search_exchange: 'Pesquisar na bolsa...',
@@ -6944,7 +6976,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'Atribuir',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -7030,7 +7062,11 @@ var I18N = {
         rating: 'Classificação',
         until: 'Até',
         still_need: 'faltam',
-        completed_count: 'concluído'},
+        completed_count: 'concluído',
+        tg_user_id: 'ID de utilizador Telegram',
+        tg_user_id_ph: 'Ex.: 123456789',
+        role_label: 'Função',
+        reply_ph: 'Resposta...'},
     'pt-BR': {
         support: 'Support', back: '← Voltar', menu: 'Menu',
         home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -7189,7 +7225,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'Mensagem...',
         manager_eta: '*um gerente responde em 96 h',
         faq: 'FAQ',
         search_exchange: 'Pesquisar na bolsa...',
@@ -7470,7 +7506,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'Atribuir',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -7556,7 +7592,11 @@ var I18N = {
         rating: 'Avaliação',
         until: 'Até',
         still_need: 'faltam',
-        completed_count: 'concluído'},
+        completed_count: 'concluído',
+        tg_user_id: 'ID de usuário do Telegram',
+        tg_user_id_ph: 'Ex.: 123456789',
+        role_label: 'Função',
+        reply_ph: 'Resposta...'},
     tr: {
         support: 'Support', back: '← Geri', menu: 'Menü',
         home: 'Ana sayfa', news: 'Haberler', exchange: 'Borsa', freelance: 'Freelance',
@@ -7715,7 +7755,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'Mesaj...',
         manager_eta: '*yönetici 96 saat içinde yanıtlar',
         faq: 'FAQ',
         search_exchange: 'Borsada ara...',
@@ -7996,7 +8036,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'Ata',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -8082,7 +8122,11 @@ var I18N = {
         rating: 'Puan',
         until: 'Kadar',
         still_need: 'daha',
-        completed_count: 'tamamlandı'},
+        completed_count: 'tamamlandı',
+        tg_user_id: 'Telegram kullanıcı ID',
+        tg_user_id_ph: 'Örn: 123456789',
+        role_label: 'Rol',
+        reply_ph: 'Yanıt...'},
     id: {
         support: 'Support', back: '← Kembali', menu: 'Menu',
         home: 'Beranda', news: 'Berita', exchange: 'Bursa', freelance: 'Freelance',
@@ -8241,7 +8285,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'Pesan...',
         manager_eta: '*manajer membalas dalam 96 jam',
         faq: 'FAQ',
         search_exchange: 'Cari di bursa...',
@@ -8522,7 +8566,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'Tetapkan',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -8608,7 +8652,11 @@ var I18N = {
         rating: 'Rating',
         until: 'Sampai',
         still_need: 'masih',
-        completed_count: 'selesai'},
+        completed_count: 'selesai',
+        tg_user_id: 'ID pengguna Telegram',
+        tg_user_id_ph: 'Contoh: 123456789',
+        role_label: 'Peran',
+        reply_ph: 'Balasan...'},
     ar: {
         support: 'Support', back: '→ رجوع', menu: 'القائمة',
         home: 'الرئيسية', news: 'الأخبار', exchange: 'البورصة', freelance: 'العمل الحر',
@@ -8767,7 +8815,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'رسالة...',
         manager_eta: '*سيرد المدير خلال 96 ساعة',
         faq: 'FAQ',
         search_exchange: 'البحث في البورصة...',
@@ -9048,7 +9096,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: 'تعيين',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -9134,7 +9182,11 @@ var I18N = {
         rating: 'التقييم',
         until: 'حتى',
         still_need: 'متبقي',
-        completed_count: 'مكتمل'},
+        completed_count: 'مكتمل',
+        tg_user_id: 'معرّف مستخدم تيليجرام',
+        tg_user_id_ph: 'مثال: 123456789',
+        role_label: 'الدور',
+        reply_ph: 'رد...'},
     ja: {
         support: 'Support', back: '← 戻る', menu: 'メニュー',
         home: 'ホーム', news: 'ニュース', exchange: '取引所', freelance: 'フリーランス',
@@ -9293,7 +9345,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: 'メッセージ...',
         manager_eta: '*担当者より96時間以内に返信します',
         faq: 'FAQ',
         search_exchange: '取引所を検索...',
@@ -9574,7 +9626,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: '任命',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -9660,7 +9712,11 @@ var I18N = {
         rating: '評価',
         until: 'まで',
         still_need: 'あと',
-        completed_count: '完了'},
+        completed_count: '完了',
+        tg_user_id: 'TelegramユーザーID',
+        tg_user_id_ph: '例: 123456789',
+        role_label: '役割',
+        reply_ph: '返信...'},
     ko: {
         support: 'Support', back: '← 뒤로', menu: '메뉴',
         home: '홈', news: '뉴스', exchange: '거래소', freelance: '프리랜스',
@@ -9819,7 +9875,7 @@ var I18N = {
         files: 'Files',
         photos: 'Photos',
         send: 'Send',
-        message_ph: 'Message...',
+        message_ph: '메시지...',
         manager_eta: '*관리자가 96시간 내 답변합니다',
         faq: 'FAQ',
         search_exchange: '거래소 검색...',
@@ -10100,7 +10156,7 @@ var I18N = {
         err_bad_amount: 'Invalid amount',
         balance_updated: 'Balance updated',
         assigning: 'Assigning…',
-        assign: 'Assign',
+        assign: '지정',
         rating_buyer_from: 'Buyer rating from',
         listing_photos: 'Listing photos',
         listing_files: 'Listing files',
@@ -10186,7 +10242,11 @@ var I18N = {
         rating: '평점',
         until: '까지',
         still_need: '남음',
-        completed_count: '완료'}
+        completed_count: '완료',
+        tg_user_id: '텔레그램 사용자 ID',
+        tg_user_id_ph: '예: 123456789',
+        role_label: '역할',
+        reply_ph: '답장...'}
 
 };
 
