@@ -2305,8 +2305,51 @@ function backFromUserProfile() {
 
 
 function getAppLang() {
-    try { return localStorage.getItem('xcod_lang') || 'ru'; } catch (e) { return 'ru'; }
+    try {
+        var v = localStorage.getItem('xcod_lang') || window._serverLang || 'ru';
+        return v || 'ru';
+    } catch (e) { return 'ru'; }
 }
+function setAppLang(code, syncServer) {
+    code = (code || 'ru').toString();
+    try { localStorage.setItem('xcod_lang', code); } catch (e) {}
+    window._serverLang = code;
+    try { document.documentElement.lang = code; } catch (e) {}
+    try { document.documentElement.dir = (code === 'ar') ? 'rtl' : 'ltr'; } catch (e) {}
+    try { applyI18n(); } catch (e) {}
+    try { updateLangLabels(); } catch (e) {}
+    if (syncServer !== false) {
+        try { apiPost('/api/lang', { lang: code }).catch(function(){}); } catch (e) {}
+    }
+}
+function updateLangLabels() {
+    var code = getAppLang();
+    var names = {
+        ru: 'Русский', en: 'English', uk: 'Українська', de: 'Deutsch', fr: 'Français',
+        es: 'Español', it: 'Italiano', pt: 'Português', 'pt-BR': 'Português (BR)',
+        tr: 'Türkçe', id: 'Indonesia', ar: 'العربية', zh: '中文', ja: '日本語', ko: '한국어'
+    };
+    var flags = { ru: 'ru', en: 'gb', uk: 'ua', de: 'de', fr: 'fr', es: 'es', it: 'it', pt: 'pt', 'pt-BR': 'br', tr: 'tr', id: 'id', ar: 'sa', zh: 'cn', ja: 'jp', ko: 'kr' };
+    var name = names[code] || code;
+    var fl = flags[code] || 'ru';
+    var label = document.getElementById('settings-lang-label');
+    if (label) {
+        label.innerHTML = '<img class="flag-img sm" src="https://flagcdn.com/w40/' + fl + '.png" alt="" width="18" height="13"> ' + name;
+    }
+    var topFlag = document.getElementById('top-lang-flag');
+    if (topFlag) topFlag.src = 'https://flagcdn.com/w40/' + fl + '.png';
+    // highlight selected in list
+    try {
+        document.querySelectorAll('#lang-list .lang-btn').forEach(function(btn) {
+            var c = (btn.getAttribute('onclick') || '').match(/pickLanguage\('([^']+)'\)/);
+            var active = c && c[1] === code;
+            btn.classList.toggle('selected', !!active);
+            if (active) btn.style.borderColor = 'var(--accent, #2aabee)';
+            else btn.style.borderColor = '';
+        });
+    } catch (e) {}
+}
+
 
 
 var I18N = {
@@ -2871,7 +2914,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Own product', deposit: 'Deposit', withdrawal: 'Withdrawal',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
-        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Language changed',
+        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Language updated',
         original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
         insufficient: 'Insufficient funds', listings: 'Listings', transactions: 'Transactions'
     ,
@@ -3929,7 +3972,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Type de service', order_svc: 'Commander', execute_svc: 'Proposer',
         partner: 'Partenaire', own_product: 'Produit propre', deposit: 'Dépôt', withdrawal: 'Retrait',
         salary: 'Salaire', freelance_publish: 'Publication freelance', tx_done: 'Effectué',
-        tx_pending: 'En cours', tx_rejected: 'Refusé', lang_changed: 'Langue modifiée',
+        tx_pending: 'En cours', tx_rejected: 'Refusé', lang_changed: 'Langue mise à jour',
         original: 'original', category: 'Catégorie', buy_confirm: 'Confirmer l\'achat',
         insufficient: 'Fonds insuffisants', listings: 'Annonces', transactions: 'Transactions'
     ,
@@ -4458,7 +4501,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Tipo de servicio', order_svc: 'Pedir', execute_svc: 'Ofrecer',
         partner: 'Socio', own_product: 'Producto propio', deposit: 'Depósito', withdrawal: 'Retiro',
         salary: 'Salario', freelance_publish: 'Publicación freelance', tx_done: 'Hecho',
-        tx_pending: 'Procesando', tx_rejected: 'Rechazado', lang_changed: 'Idioma cambiado',
+        tx_pending: 'Procesando', tx_rejected: 'Rechazado', lang_changed: 'Idioma actualizado',
         original: 'original', category: 'Categoría', buy_confirm: 'Confirmar compra',
         insufficient: 'Fondos insuficientes', listings: 'Anuncios', transactions: 'Transacciones'
     ,
@@ -4987,7 +5030,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: '服务类型', order_svc: '下单', execute_svc: '接单',
         partner: '合作伙伴', own_product: '自有产品', deposit: '充值', withdrawal: '提现',
         salary: '工资', freelance_publish: '自由职业发布', tx_done: '已完成',
-        tx_pending: '处理中', tx_rejected: '已拒绝', lang_changed: '语言已更改',
+        tx_pending: '处理中', tx_rejected: '已拒绝', lang_changed: '语言已更新',
         original: '原版', category: '分类', buy_confirm: '确认购买',
         insufficient: '余额不足', listings: '广告', transactions: '交易'
     ,
@@ -6046,7 +6089,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Prodotto proprio', deposit: 'Deposito', withdrawal: 'Prelievo',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
-        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Lingua cambiata',
+        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Lingua aggiornata',
         original: 'originale', category: 'Category', buy_confirm: 'Confirm purchase',
         insufficient: 'Fondi insufficienti', listings: 'Listings', transactions: 'Transactions'
     ,
@@ -6576,7 +6619,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Produto próprio', deposit: 'Depósito', withdrawal: 'Levantamento',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
-        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Idioma alterado',
+        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Idioma atualizado',
         original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
         insufficient: 'Fundos insuficientes', listings: 'Listings', transactions: 'Transactions'
     ,
@@ -7106,7 +7149,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Produto próprio', deposit: 'Depósito', withdrawal: 'Levantamento',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
-        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Idioma alterado',
+        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Idioma atualizado',
         original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
         insufficient: 'Saldo insuficiente', listings: 'Listings', transactions: 'Transactions'
     ,
@@ -7636,7 +7679,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Kendi ürünü', deposit: 'Yatırma', withdrawal: 'Çekme',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
-        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Dil değiştirildi',
+        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Dil güncellendi',
         original: 'orijinal', category: 'Category', buy_confirm: 'Confirm purchase',
         insufficient: 'Yetersiz bakiye', listings: 'Listings', transactions: 'Transactions'
     ,
@@ -8166,7 +8209,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'Produk sendiri', deposit: 'Deposit', withdrawal: 'Penarikan',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
-        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Bahasa diubah',
+        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Bahasa diperbarui',
         original: 'asli', category: 'Category', buy_confirm: 'Confirm purchase',
         insufficient: 'Saldo tidak cukup', listings: 'Listings', transactions: 'Transactions'
     ,
@@ -8696,7 +8739,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: 'منتج خاص', deposit: 'إيداع', withdrawal: 'سحب',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
-        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'تم تغيير اللغة',
+        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'تم تحديث اللغة',
         original: 'أصلي', category: 'Category', buy_confirm: 'Confirm purchase',
         insufficient: 'رصيد غير كافٍ', listings: 'Listings', transactions: 'Transactions'
     ,
@@ -9226,7 +9269,7 @@ var I18N = {
         rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
         partner: 'Partner', own_product: '自社商品', deposit: '入金', withdrawal: '出金',
         salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
-        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: '言語を変更しました',
+        tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: '言語を更新しました',
         original: 'オリジナル', category: 'Category', buy_confirm: 'Confirm purchase',
         insufficient: '残高不足', listings: 'Listings', transactions: 'Transactions'
     ,
@@ -10271,6 +10314,7 @@ function applyI18n() {
     var flags = { ru: 'ru', en: 'gb', uk: 'ua', de: 'de', fr: 'fr', es: 'es', it: 'it', pt: 'pt', 'pt-BR': 'br', tr: 'tr', id: 'id', ar: 'sa', zh: 'cn', ja: 'jp', ko: 'kr' };
     var flagImg = document.getElementById('top-lang-flag');
     if (flagImg) flagImg.src = 'https://flagcdn.com/w40/' + (flags[lang] || 'ru') + '.png';
+    try { updateLangLabels(); } catch (e) {}
 
     document.querySelectorAll('[data-i18n]').forEach(function(el) {
         var key = el.getAttribute('data-i18n');
@@ -15536,19 +15580,23 @@ function refreshOriginalTags() {
     });
 }
 function pickLanguage(code) {
+    if (!code) return;
     setAppLang(code, true);
     try {
         var page = document.querySelector('.page.active');
         if (page && page.id) {
             var name = page.id.replace(/^page-/, '');
             if (typeof showPage === 'function') showPage(name);
-            // re-open dynamic sections
             if (name === 'admin' && typeof renderAdminPanel === 'function') renderAdminPanel();
             if (name === 'balance' && typeof loadBalance === 'function') loadBalance();
             if (name === 'home' && typeof loadFeed === 'function') loadFeed();
+            if (name === 'settings-lang') showPage('settings-lang');
         }
     } catch (e) {}
-    try { tg.showAlert(tBlock('lang_changed')); } catch (e) {}
+    try {
+        var msg = (typeof tBlock === 'function' ? tBlock('lang_changed') : null) || 'OK';
+        if (window.tg && tg.showAlert) tg.showAlert(msg);
+    } catch (e) {}
 }
 
 
