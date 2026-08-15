@@ -2088,6 +2088,13 @@ async function init() {
                 await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
                 userData = await apiGet('/api/user');
                 if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
+                if (userData && userData.lang) {
+                    try {
+                        window._serverLang = userData.lang;
+                        // server is source of truth when available
+                        localStorage.setItem('xcod_lang', userData.lang);
+                    } catch (e) {}
+                }
                 ok = true;
             } catch (e) {
                 await new Promise(function(r){ setTimeout(r, 800); });
@@ -15529,9 +15536,7 @@ function refreshOriginalTags() {
     });
 }
 function pickLanguage(code) {
-    localStorage.setItem('xcod_lang', code);
-    try { document.documentElement.lang = code; } catch (e) {}
-    applyI18n();
+    setAppLang(code, true);
     try {
         var page = document.querySelector('.page.active');
         if (page && page.id) {
