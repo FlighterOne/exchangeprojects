@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>X-Cod Exchange</title>
+    <title>Clossr Exchange</title>
     <script>
     // Заглушка Telegram до загрузки официального скрипта (не блокирует страницу)
     window.Telegram = window.Telegram || {};
@@ -1087,7 +1087,7 @@
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
     <div class="drawer-header">
-        <div class="title">X-Cod Exchange</div>
+        <div class="title">Clossr Exchange</div>
         <div class="sub">Меню</div>
     </div>
     <div class="drawer-nav">
@@ -1178,20 +1178,20 @@
             <div class="form-group">
                 <label class="form-label" data-i18n="product_type">Тип товара</label>
                 <div class="type-toggle" style="display:flex;gap:8px;">
-                    <button type="button" class="btn btn-secondary type-toggle-btn" data-type="partner" onclick="selectListingType(this)" style="flex:1;" data-i18n="partner_xcod">Партнёр X-Cod</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" data-type="partner" onclick="selectListingType(this)" style="flex:1;" data-i18n="partner_xcod">Партнёр Clossr Media Group</button>
                     <button type="button" class="btn btn-secondary type-toggle-btn" data-type="own" onclick="selectListingType(this)" style="flex:1;" data-i18n="own_product">Свой товар</button>
                 </div>
             </div>
             <div id="fields-partner" style="display:none;">
                 <div class="form-group">
-                    <label class="form-label" data-i18n="contract_no">Номер договора X-Cod</label>
+                    <label class="form-label" data-i18n="contract_no">Номер договора Clossr Media Group</label>
                     <input class="form-input" type="text" id="listing-contract" placeholder="XC-0000">
                 </div>
                 <label class="check-row">
                     <input type="checkbox" id="listing-analytics">
                     <span data-i18n="analytics_consent">Согласие на передачу данных и аналитики</span>
                 </label>
-                <div class="info-block" style="margin-top:12px;" data-i18n="price_xcod_note">Цена определяется компанией X-Cod по аналитике после модерации.</div>
+                <div class="info-block" style="margin-top:12px;" data-i18n="price_xcod_note">Цена определяется компанией Clossr Media Group по аналитике после модерации.</div>
             </div>
             <div id="fields-own" style="display:none;">
                 <div class="form-group">
@@ -1449,13 +1449,13 @@
             <div class="form-group">
                 <label class="form-label">Кто выполняет</label>
                 <div class="type-toggle" style="display:flex;gap:8px;">
-                    <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-partner" onclick="selectFlType('partner')" style="flex:1;">Работник X-Cod</button>
+                    <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-partner" onclick="selectFlType('partner')" style="flex:1;">Работник Clossr Media Group</button>
                     <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-own" onclick="selectFlType('own')" style="flex:1;">Самостоятельно</button>
                 </div>
             </div>
             <div id="fl-partner-fields" style="display:none;">
                 <div class="form-group">
-                    <label class="form-label" data-i18n="contract_no">Номер договора X-Cod</label>
+                    <label class="form-label" data-i18n="contract_no">Номер договора Clossr Media Group</label>
                     <input class="form-input" id="fl-contract" placeholder="№ договора">
                 </div>
                 <label style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
@@ -2404,7 +2404,7 @@ var I18N = {
         upload_files: 'Загрузить файлы',
         upload_photos: 'Загрузить фото',
         send_mod: 'Отправить на модерацию',
-        partner_xcod: 'Партнёр X-Cod',
+        partner_xcod: 'Партнёр Clossr Media Group',
         contract_no: 'Номер договора',
         tgstat: 'Ссылка на TGStat',
         username: 'Юзернейм',
@@ -2480,7 +2480,7 @@ var I18N = {
         refund_deal: 'Возврат (сделка)',
         totals: 'Итоги',
         any_type: 'Любой вид',
-        partner_xcod2: 'Партнер X-Cod',
+        partner_xcod2: 'Партнер Clossr Media Group',
         purchase: 'Покупка',
         not_on_shift_long: 'Вы не на смене, нет доступа к разделу',
         off_shift: 'не на смене',
@@ -2655,10 +2655,10 @@ var I18N = {
         reorder_photos: 'Перетащите фото для смены порядка',
         min_1_photo: 'Минимум 1 фото',
         max_5_photo: 'Максимум 5 фото',
-        xcod_worker: 'Работник X-Cod',
+        xcod_worker: 'Работник Clossr Media Group',
         independent: 'Самостоятельно',
         analytics_consent: 'Согласие на передачу данных и аналитики',
-        price_xcod: 'Цену определяет X-Cod',
+        price_xcod: 'Цену определяет Clossr Media Group',
         work_hours: 'Срок выполнения (часы)',
         buy_deadline_note: 'У вас будет время на проверку',
         '120_min': '120 минут на проверку',
@@ -2691,7 +2691,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — без комиссии. Итого: {total} $'
 ,
-        price_xcod_note: 'Цена определяется компанией X-Cod по аналитике после модерации.',
+        price_xcod_note: 'Цена определяется компанией Clossr Media Group по аналитике после модерации.',
         wallet_addr: 'Адрес кошелька',
         card_ph: 'Номер карты, Иванов И.И.',
         usdt_ph: 'Адрес USDT TRC20',
@@ -2736,7 +2736,7 @@ var I18N = {
         err_title: 'Укажите название',
         err_desc: 'Укажите описание',
         err_service: 'Выберите вид услуги',
-        err_xcod_or_own: 'Выберите: X-Cod или самостоятельно',
+        err_xcod_or_own: 'Выберите: Clossr Media Group или самостоятельно',
         err_contract: 'Укажите номер договора',
         err_analytics: 'Нужно согласие на аналитику',
         err_portfolio: 'Укажите портфолио',
@@ -2933,7 +2933,7 @@ var I18N = {
         upload_files: 'Upload files',
         upload_photos: 'Upload photos',
         send_mod: 'Submit for review',
-        partner_xcod: 'X-Cod partner',
+        partner_xcod: 'Clossr Media Group partner',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -3009,7 +3009,7 @@ var I18N = {
         refund_deal: 'Refund (deal)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -3184,10 +3184,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -3220,7 +3220,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — no fee. Total: {total} $'
 ,
-        price_xcod_note: 'Price is set by X-Cod based on analytics after review.',
+        price_xcod_note: 'Price is set by Clossr Media Group based on analytics after review.',
         wallet_addr: 'Wallet address',
         card_ph: 'Card number, John Smith',
         usdt_ph: 'USDT TRC20 address',
@@ -3265,7 +3265,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -3462,7 +3462,7 @@ var I18N = {
         upload_files: 'Dateien hochladen',
         upload_photos: 'Fotos hochladen',
         send_mod: 'Submit for review',
-        partner_xcod: 'X-Cod Partner',
+        partner_xcod: 'Clossr Media Group Partner',
         contract_no: 'Vertragsnummer',
         tgstat: 'TGStat-Link',
         username: 'Benutzername',
@@ -3538,7 +3538,7 @@ var I18N = {
         refund_deal: 'Rückerstattung (Deal)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -3713,10 +3713,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -3749,7 +3749,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — keine Gebühr. Gesamt: {total} $'
 ,
-        price_xcod_note: 'Der Preis wird von X-Cod anhand der Analyse nach der Prüfung festgelegt.',
+        price_xcod_note: 'Der Preis wird von Clossr Media Group anhand der Analyse nach der Prüfung festgelegt.',
         wallet_addr: 'Wallet-Adresse',
         card_ph: 'Kartennummer, Max Mustermann',
         usdt_ph: 'USDT TRC20-Adresse',
@@ -3794,7 +3794,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -3991,7 +3991,7 @@ var I18N = {
         upload_files: 'Charger des fichiers',
         upload_photos: 'Charger des photos',
         send_mod: 'Submit for review',
-        partner_xcod: 'Partenaire X-Cod',
+        partner_xcod: 'Partenaire Clossr Media Group',
         contract_no: 'N° de contrat',
         tgstat: 'Lien TGStat',
         username: 'Nom d\'utilisateur',
@@ -4067,7 +4067,7 @@ var I18N = {
         refund_deal: 'Remboursement (deal)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -4242,10 +4242,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -4278,7 +4278,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — sans frais. Total : {total} $'
 ,
-        price_xcod_note: 'Le prix est fixé par X-Cod selon l’analyse après modération.',
+        price_xcod_note: 'Le prix est fixé par Clossr Media Group selon l’analyse après modération.',
         wallet_addr: 'Adresse du portefeuille',
         card_ph: 'N° de carte, Jean Dupont',
         usdt_ph: 'Adresse USDT TRC20',
@@ -4323,7 +4323,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -4520,7 +4520,7 @@ var I18N = {
         upload_files: 'Subir archivos',
         upload_photos: 'Subir fotos',
         send_mod: 'Submit for review',
-        partner_xcod: 'Socio X-Cod',
+        partner_xcod: 'Socio Clossr Media Group',
         contract_no: 'Nº de contrato',
         tgstat: 'Enlace TGStat',
         username: 'Usuario',
@@ -4596,7 +4596,7 @@ var I18N = {
         refund_deal: 'Reembolso (trato)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -4771,10 +4771,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -4807,7 +4807,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — sin comisión. Total: {total} $'
 ,
-        price_xcod_note: 'El precio lo fija X-Cod según el análisis tras la moderación.',
+        price_xcod_note: 'El precio lo fija Clossr Media Group según el análisis tras la moderación.',
         wallet_addr: 'Dirección de la billetera',
         card_ph: 'Número de tarjeta, Juan Pérez',
         usdt_ph: 'Dirección USDT TRC20',
@@ -4852,7 +4852,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -5049,7 +5049,7 @@ var I18N = {
         upload_files: '上传文件',
         upload_photos: '上传照片',
         send_mod: 'Submit for review',
-        partner_xcod: 'X-Cod 合作',
+        partner_xcod: 'Clossr Media Group 合作',
         contract_no: '合同编号',
         tgstat: 'TGStat 链接',
         username: '用户名',
@@ -5125,7 +5125,7 @@ var I18N = {
         refund_deal: '退款（交易）',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -5300,10 +5300,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -5336,7 +5336,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — 免手续费。合计：{total} $'
 ,
-        price_xcod_note: '价格由 X-Cod 根据审核后的分析确定。',
+        price_xcod_note: '价格由 Clossr Media Group 根据审核后的分析确定。',
         wallet_addr: '钱包地址',
         card_ph: '卡号，姓名',
         usdt_ph: 'USDT TRC20 地址',
@@ -5381,7 +5381,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -5578,7 +5578,7 @@ var I18N = {
         upload_files: 'Завантажити файли',
         upload_photos: 'Завантажити фото',
         send_mod: 'Submit for review',
-        partner_xcod: 'Партнер X-Cod',
+        partner_xcod: 'Партнер Clossr Media Group',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -5655,7 +5655,7 @@ var I18N = {
         refund_deal: 'Повернення (угода)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -5830,10 +5830,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -5866,7 +5866,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — без комісії. Разом: {total} $'
 ,
-        price_xcod_note: 'Ціну визначає X-Cod за аналітикою після модерації.',
+        price_xcod_note: 'Ціну визначає Clossr Media Group за аналітикою після модерації.',
         wallet_addr: 'Адреса гаманця',
         card_ph: 'Номер картки, Іван І.І.',
         usdt_ph: 'Адреса USDT TRC20',
@@ -5911,7 +5911,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -6108,7 +6108,7 @@ var I18N = {
         upload_files: 'Carica file',
         upload_photos: 'Carica foto',
         send_mod: 'Submit for review',
-        partner_xcod: 'Partner X-Cod',
+        partner_xcod: 'Partner Clossr Media Group',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -6185,7 +6185,7 @@ var I18N = {
         refund_deal: 'Rimborso (affare)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -6360,10 +6360,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -6396,7 +6396,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — nessuna commissione. Totale: {total} $'
 ,
-        price_xcod_note: 'Il prezzo è stabilito da X-Cod in base all’analisi dopo la moderazione.',
+        price_xcod_note: 'Il prezzo è stabilito da Clossr Media Group in base all’analisi dopo la moderazione.',
         wallet_addr: 'Indirizzo wallet',
         card_ph: 'Numero carta, Mario Rossi',
         usdt_ph: 'Indirizzo USDT TRC20',
@@ -6441,7 +6441,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -6638,7 +6638,7 @@ var I18N = {
         upload_files: 'Carregar ficheiros',
         upload_photos: 'Carregar fotos',
         send_mod: 'Submit for review',
-        partner_xcod: 'Parceiro X-Cod',
+        partner_xcod: 'Parceiro Clossr Media Group',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -6715,7 +6715,7 @@ var I18N = {
         refund_deal: 'Reembolso (negócio)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -6890,10 +6890,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -6926,7 +6926,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — sem taxa. Total: {total} $'
 ,
-        price_xcod_note: 'O preço é definido pela X-Cod com base na análise após moderação.',
+        price_xcod_note: 'O preço é definido pela Clossr Media Group com base na análise após moderação.',
         wallet_addr: 'Endereço da carteira',
         card_ph: 'Número do cartão, João Silva',
         usdt_ph: 'Endereço USDT TRC20',
@@ -6971,7 +6971,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -7168,7 +7168,7 @@ var I18N = {
         upload_files: 'Enviar arquivos',
         upload_photos: 'Enviar fotos',
         send_mod: 'Submit for review',
-        partner_xcod: 'Parceiro X-Cod',
+        partner_xcod: 'Parceiro Clossr Media Group',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -7245,7 +7245,7 @@ var I18N = {
         refund_deal: 'Reembolso (negócio)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -7420,10 +7420,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -7456,7 +7456,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — sem taxa. Total: {total} $'
 ,
-        price_xcod_note: 'O preço é definido pela X-Cod com base na análise após moderação.',
+        price_xcod_note: 'O preço é definido pela Clossr Media Group com base na análise após moderação.',
         wallet_addr: 'Endereço da carteira',
         card_ph: 'Número do cartão, João Silva',
         usdt_ph: 'Endereço USDT TRC20',
@@ -7501,7 +7501,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -7698,7 +7698,7 @@ var I18N = {
         upload_files: 'Dosya yükle',
         upload_photos: 'Fotoğraf yükle',
         send_mod: 'Submit for review',
-        partner_xcod: 'X-Cod ortağ',
+        partner_xcod: 'Clossr Media Group ortağ',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -7775,7 +7775,7 @@ var I18N = {
         refund_deal: 'İade (anlaşma)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -7950,10 +7950,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -7986,7 +7986,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — komisyonsuz. Toplam: {total} $'
 ,
-        price_xcod_note: 'Fiyat, moderasyondan sonra analitiğe göre X-Cod tarafından belirlenir.',
+        price_xcod_note: 'Fiyat, moderasyondan sonra analitiğe göre Clossr Media Group tarafından belirlenir.',
         wallet_addr: 'Cüzdan adresi',
         card_ph: 'Kart numarası, Ahmet Yılmaz',
         usdt_ph: 'USDT TRC20 adresi',
@@ -8031,7 +8031,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -8228,7 +8228,7 @@ var I18N = {
         upload_files: 'Unggah file',
         upload_photos: 'Unggah foto',
         send_mod: 'Submit for review',
-        partner_xcod: 'Mitra X-Cod',
+        partner_xcod: 'Mitra Clossr Media Group',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -8305,7 +8305,7 @@ var I18N = {
         refund_deal: 'Refund (deal)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -8480,10 +8480,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -8516,7 +8516,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — tanpa biaya. Total: {total} $'
 ,
-        price_xcod_note: 'Harga ditentukan X-Cod berdasarkan analitik setelah moderasi.',
+        price_xcod_note: 'Harga ditentukan Clossr Media Group berdasarkan analitik setelah moderasi.',
         wallet_addr: 'Alamat dompet',
         card_ph: 'Nomor kartu, Budi Santoso',
         usdt_ph: 'Alamat USDT TRC20',
@@ -8561,7 +8561,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -8758,7 +8758,7 @@ var I18N = {
         upload_files: 'رفع ملفات',
         upload_photos: 'رفع صور',
         send_mod: 'Submit for review',
-        partner_xcod: 'شريك X-Cod',
+        partner_xcod: 'شريك Clossr Media Group',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -8835,7 +8835,7 @@ var I18N = {
         refund_deal: 'استرداد (صفقة)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -9010,10 +9010,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -9046,7 +9046,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — بدون عمولة. الإجمالي: {total} $'
 ,
-        price_xcod_note: 'يحدد X-Cod السعر بناءً على التحليل بعد المراجعة.',
+        price_xcod_note: 'يحدد Clossr Media Group السعر بناءً على التحليل بعد المراجعة.',
         wallet_addr: 'عنوان المحفظة',
         card_ph: 'رقم البطاقة، الاسم',
         usdt_ph: 'عنوان USDT TRC20',
@@ -9091,7 +9091,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -9288,7 +9288,7 @@ var I18N = {
         upload_files: 'ファイルをアップロード',
         upload_photos: '写真をアップロード',
         send_mod: 'Submit for review',
-        partner_xcod: 'X-Codパートナー',
+        partner_xcod: 'Clossr Media Groupパートナー',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -9365,7 +9365,7 @@ var I18N = {
         refund_deal: '返金（取引）',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -9540,10 +9540,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -9576,7 +9576,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — 手数料なし。合計: {total} $'
 ,
-        price_xcod_note: '価格は審査後の分析に基づき X-Cod が決定します。',
+        price_xcod_note: '価格は審査後の分析に基づき Clossr Media Group が決定します。',
         wallet_addr: 'ウォレットアドレス',
         card_ph: 'カード番号、氏名',
         usdt_ph: 'USDT TRC20 アドレス',
@@ -9621,7 +9621,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -9818,7 +9818,7 @@ var I18N = {
         upload_files: '파일 업로드',
         upload_photos: '사진 업로드',
         send_mod: 'Submit for review',
-        partner_xcod: 'X-Cod 파트너',
+        partner_xcod: 'Clossr Media Group 파트너',
         contract_no: 'Contract number',
         tgstat: 'TGStat link',
         username: 'Username',
@@ -9895,7 +9895,7 @@ var I18N = {
         refund_deal: '환불(거래)',
         totals: 'Summary',
         any_type: 'Any type',
-        partner_xcod2: 'X-Cod partner',
+        partner_xcod2: 'Clossr Media Group partner',
         purchase: 'Purchase',
         not_on_shift_long: 'You are not on shift — no access',
         off_shift: 'off shift',
@@ -10070,10 +10070,10 @@ var I18N = {
         reorder_photos: 'Drag photos to reorder',
         min_1_photo: 'At least 1 photo',
         max_5_photo: 'Max 5 photos',
-        xcod_worker: 'X-Cod worker',
+        xcod_worker: 'Clossr Media Group worker',
         independent: 'Independent',
         analytics_consent: 'Consent to data & analytics',
-        price_xcod: 'Price is set by X-Cod',
+        price_xcod: 'Price is set by Clossr Media Group',
         work_hours: 'Deadline (hours)',
         buy_deadline_note: 'You will have time to review',
         '120_min': '120 minutes to review',
@@ -10106,7 +10106,7 @@ var I18N = {
 ,
         fee_hint_stars: 'Telegram Stars — 수수료 없음. 합계: {total} $'
 ,
-        price_xcod_note: '가격은 검토 후 분석에 따라 X-Cod가 정합니다.',
+        price_xcod_note: '가격은 검토 후 분석에 따라 Clossr Media Group가 정합니다.',
         wallet_addr: '지갑 주소',
         card_ph: '카드 번호, 이름',
         usdt_ph: 'USDT TRC20 주소',
@@ -10151,7 +10151,7 @@ var I18N = {
         err_title: 'Enter a title',
         err_desc: 'Enter a description',
         err_service: 'Choose service type',
-        err_xcod_or_own: 'Choose X-Cod or independent',
+        err_xcod_or_own: 'Choose Clossr Media Group or independent',
         err_contract: 'Enter contract number',
         err_analytics: 'Analytics consent required',
         err_portfolio: 'Enter portfolio link',
@@ -10423,8 +10423,8 @@ function applyI18n() {
         "Модерация заявок на работу": 'mod_jobs',
         "Управление сотрудниками": 'staff_manage',
         "Отправить на модерацию": 'send_mod',
-        "Партнёр X-Cod": 'partner_xcod',
-        "Партнер X-Cod": 'partner_xcod2',
+        "Партнёр Clossr Media Group": 'partner_xcod',
+        "Партнер Clossr Media Group": 'partner_xcod2',
         "Свой товар": 'own_product',
         "Максимум 5 фото": 'max_photos',
         "Контроль сотрудников": 'staff_control',
@@ -10696,10 +10696,10 @@ function applyI18n() {
         "Перетащите фото для смены порядка": 'reorder_photos',
         "Минимум 1 фото": 'min_1_photo',
         "Максимум 5 фото": 'max_5_photo',
-        "Работник X-Cod": 'xcod_worker',
+        "Работник Clossr Media Group": 'xcod_worker',
         "Самостоятельно": 'independent',
         "Согласие на передачу данных и аналитики": 'analytics_consent',
-        "Цену определяет X-Cod": 'price_xcod',
+        "Цену определяет Clossr Media Group": 'price_xcod',
         "Срок выполнения (часы)": 'work_hours',
         "У вас будет время на проверку": 'buy_deadline_note',
         "120 минут на проверку": '120_min',
@@ -10741,8 +10741,8 @@ function applyI18n() {
         "Файл готов к скачиванию": 'file_ready_bot'
     ,
         "Тип товара": 'product_type',
-        "Номер договора X-Cod": 'contract_no',
-        "Цена определяется компанией X-Cod по аналитике после модерации.": 'price_xcod_note',
+        "Номер договора Clossr Media Group": 'contract_no',
+        "Цена определяется компанией Clossr Media Group по аналитике после модерации.": 'price_xcod_note',
         "Кол-во пользователей в месяц": 'users_month',
         "Заработок за месяц (средний за 6 мес)": 'earn_month',
         "Название товара": 'title',
@@ -12453,7 +12453,7 @@ function listingExtraInfoHtml(l, opts) {
     var hideContract = !!opts.hideContract;
     var parts = [];
     if (l.listing_type === 'partner') {
-        parts.push('<b>Тип:</b> Партнёр X-Cod');
+        parts.push('<b>Тип:</b> Партнёр Clossr Media Group');
         if (!hideContract && l.contract_number) {
             parts.push('<b>Договор:</b> ' + String(l.contract_number).replace(/</g,'&lt;'));
         }
@@ -13273,42 +13273,86 @@ function cancelListingCreate() {
 
 function listingCreateBack() {
     try { setTimeout(applyI18n, 0); } catch (e) {}
-    if (listingCreateStep === 2) {
+    var step = listingCreateStep;
+    if (step === 'files' || step === 2 || step === '2') {
         listingCreateStep = 'photos';
-        document.getElementById('listing-step-2').style.display = 'none';
+        var s2 = document.getElementById('listing-step-2');
+        if (s2) s2.style.display = 'none';
         document.getElementById('listing-step-photos').style.display = 'block';
+        document.getElementById('listing-step-1').style.display = 'none';
         document.getElementById('listing-create-title').textContent = tBlock('listing_photos');
         return;
     }
-    if (listingCreateStep === 'photos') {
+    if (step === 'photos') {
         listingCreateStep = 1;
         document.getElementById('listing-step-photos').style.display = 'none';
         document.getElementById('listing-step-1').style.display = 'block';
+        var s2 = document.getElementById('listing-step-2');
+        if (s2) s2.style.display = 'none';
         document.getElementById('listing-create-title').textContent = tBlock('new_listing');
         return;
     }
     cancelListingCreate();
 }
 
+
 function listingCreateNext() {
     try { setTimeout(applyI18n, 0); } catch (e) {}
-    var title = document.getElementById('listing-title').value.trim();
-    var description = document.getElementById('listing-desc').value.trim();
-    if (!title) { tg.showAlert(tBlock('err_title')); return; }
-    if (!description) { tg.showAlert(tBlock('err_desc')); return; }
-    if (!selectedListingType) { tg.showAlert(tBlock('err_product_type')); return; }
-    if (selectedListingType === 'partner') {
-        if (!document.getElementById('listing-contract').value.trim()) { tg.showAlert(tBlock('err_contract')); return; }
-        if (!document.getElementById('listing-analytics').checked) { tg.showAlert(tBlock('err_analytics')); return; }
-    } else {
-        if (!document.getElementById('listing-product-type').value.trim()) { tg.showAlert(tBlock('err_product_kind')); return; }
-        if (!document.getElementById('listing-bot').value.trim()) { tg.showAlert(tBlock('err_username')); return; }
-        if (!(parseFloat(document.getElementById('listing-price').value) > 0)) { tg.showAlert(tBlock('err_price')); return; }
+    var step = listingCreateStep;
+
+    // Step 1: form → photos
+    if (step === 1 || step === '1') {
+        var title = document.getElementById('listing-title').value.trim();
+        var description = document.getElementById('listing-desc').value.trim();
+        if (!title) { tg.showAlert(tBlock('err_title')); return; }
+        if (!description) { tg.showAlert(tBlock('err_desc')); return; }
+        if (!selectedListingType) { tg.showAlert(tBlock('err_product_type')); return; }
+        if (selectedListingType === 'partner') {
+            if (!document.getElementById('listing-contract').value.trim()) { tg.showAlert(tBlock('err_contract')); return; }
+            if (!document.getElementById('listing-analytics').checked) { tg.showAlert(tBlock('err_analytics')); return; }
+        } else {
+            if (!document.getElementById('listing-product-type').value.trim()) { tg.showAlert(tBlock('err_product_kind')); return; }
+            if (!document.getElementById('listing-bot').value.trim()) { tg.showAlert(tBlock('err_username')); return; }
+            if (!(parseFloat(document.getElementById('listing-price').value) > 0)) { tg.showAlert(tBlock('err_price')); return; }
+        }
+        listingCreateStep = 'photos';
+        document.getElementById('listing-step-1').style.display = 'none';
+        document.getElementById('listing-step-photos').style.display = 'block';
+        var sp2 = document.getElementById('listing-step-2');
+        if (sp2) sp2.style.display = 'none';
+        document.getElementById('listing-create-title').textContent = tBlock('listing_photos');
+        return;
     }
-    listingCreateStep = 'photos';
-    document.getElementById('listing-step-1').style.display = 'none';
-    document.getElementById('listing-step-photos').style.display = 'block';
-    document.getElementById('listing-create-title').textContent = tBlock('listing_photos');
+
+    // Photos → files
+    if (step === 'photos') {
+        if (!listingPickedPhotos || !listingPickedPhotos.length) {
+            tg.showAlert(tBlock('err_min1_photo') || tBlock('max_photos') || 'Upload at least 1 photo');
+            return;
+        }
+        listingCreateStep = 'files';
+        document.getElementById('listing-step-photos').style.display = 'none';
+        var s2 = document.getElementById('listing-step-2');
+        if (s2) s2.style.display = 'block';
+        document.getElementById('listing-create-title').textContent = tBlock('listing_files');
+        try { renderListingFilesList(); } catch (e) {}
+        return;
+    }
+
+    // Files step uses createListing button — keep next as soft validate
+    if (step === 'files' || step === 2 || step === '2') {
+        if (!listingPickedFiles || !listingPickedFiles.length) {
+            tg.showAlert(tBlock('guide_note') || 'Upload files (guide.txt required)');
+            return;
+        }
+        var names = listingPickedFiles.map(function(f){ return (f.name || '').toLowerCase(); });
+        if (!names.some(function(n){ return n === 'guide.txt'; })) {
+            tg.showAlert(tBlock('guide_note'));
+            return;
+        }
+        createListing();
+        return;
+    }
 }
 
 function selectDmFiles(yes) {
@@ -13543,7 +13587,21 @@ async function editRejectedListing(id) {
 
 async function createListing() {
     var btn = document.getElementById('listing-create-btn');
+    if (!listingPickedPhotos || listingPickedPhotos.length < 1) {
+        tg.showAlert(tBlock('err_min1_photo') || 'Upload at least 1 photo');
+        listingCreateStep = 'photos';
+        try {
+            document.getElementById('listing-step-2').style.display = 'none';
+            document.getElementById('listing-step-photos').style.display = 'block';
+            document.getElementById('listing-create-title').textContent = tBlock('listing_photos');
+        } catch (e) {}
+        return;
+    }
     if (selectedHasPrivateFiles === null) { tg.showAlert(tBlock('err_dm_files')); return; }
+    if (!listingPickedFiles || !listingPickedFiles.length) {
+        tg.showAlert(tBlock('guide_note') || 'Upload files first (guide.txt required)');
+        return;
+    }
     var names = listingPickedFiles.map(function(f){ return (f.name || '').toLowerCase(); });
     if (!names.some(function(n){ return n === 'guide.txt'; })) {
         tg.showAlert(tBlock('guide_note'));
