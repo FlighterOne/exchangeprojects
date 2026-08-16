@@ -2100,6 +2100,13 @@ async function init() {
                         if (typeof setAppTheme === 'function') setAppTheme(userData.theme, true);
                     } catch (e) {}
                 }
+                try {
+                    var th = await apiGet('/api/theme');
+                    if (th && th.theme) {
+                        localStorage.setItem('xcod_theme', th.theme);
+                        if (typeof setAppTheme === 'function') setAppTheme(th.theme, true);
+                    }
+                } catch (e) {}
                 ok = true;
             } catch (e) {
                 await new Promise(function(r){ setTimeout(r, 800); });
@@ -15784,6 +15791,24 @@ function openTelegramOrExternal(url) {
         } catch (e) {}
     }, 400);
 })();
+
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState !== 'visible') return;
+    try {
+        apiGet('/api/theme').then(function(th) {
+            if (th && th.theme && typeof setAppTheme === 'function') {
+                localStorage.setItem('xcod_theme', th.theme);
+                setAppTheme(th.theme, true);
+            }
+        }).catch(function(){});
+        apiGet('/api/lang').then(function(lg) {
+            if (lg && lg.lang && typeof setAppLang === 'function') {
+                setAppLang(lg.lang, false);
+            }
+        }).catch(function(){});
+    } catch (e) {}
+});
+
 </script>
 </body>
 </html>
