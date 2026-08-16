@@ -2091,8 +2091,13 @@ async function init() {
                 if (userData && userData.lang) {
                     try {
                         window._serverLang = userData.lang;
-                        // server is source of truth when available
                         localStorage.setItem('xcod_lang', userData.lang);
+                    } catch (e) {}
+                }
+                if (userData && userData.theme) {
+                    try {
+                        localStorage.setItem('xcod_theme', userData.theme);
+                        if (typeof setAppTheme === 'function') setAppTheme(userData.theme, true);
                     } catch (e) {}
                 }
                 ok = true;
@@ -12623,9 +12628,26 @@ function openCreateTypeSheet(prefer) {
     document.body.appendChild(sheet);
 }
 function startSaleCreate() {
-    if (typeof createListing === 'function') createListing();
-    else if (typeof openCreateListing === 'function') openCreateListing();
-    else showPage('listing-create');
+    try { resetListingCreate(); } catch (e) {}
+    listingCreateStep = 1;
+    listingPickedPhotos = [];
+    listingPickedFiles = [];
+    selectedHasPrivateFiles = null;
+    try {
+        document.getElementById('listing-step-1').style.display = 'block';
+        var ph = document.getElementById('listing-step-photos');
+        if (ph) ph.style.display = 'none';
+        var s2 = document.getElementById('listing-step-2');
+        if (s2) s2.style.display = 'none';
+        var titleEl = document.getElementById('listing-create-title');
+        if (titleEl) titleEl.textContent = tBlock('new_listing');
+        var pl = document.getElementById('listing-photos-list');
+        if (pl) pl.innerHTML = '';
+        var fl = document.getElementById('listing-files-list');
+        if (fl) fl.innerHTML = '';
+    } catch (e) {}
+    showPage('listing-create');
+    try { setTimeout(applyI18n, 0); } catch (e) {}
 }
 function startFreelanceCreate() {
     flCreate = { kind: '', type: '', plan: '' };
@@ -13243,7 +13265,11 @@ function resetListingCreate() {
     try {
         document.getElementById('listing-step-1').style.display = 'block';
         document.getElementById('listing-step-2').style.display = 'none';
+        var _ph = document.getElementById('listing-step-photos');
+        if (_ph) _ph.style.display = 'none';
         document.getElementById('listing-create-title').textContent = tBlock('new_listing');
+        listingPickedPhotos = [];
+        listingPickedFiles = [];
         document.getElementById('listing-title').value = '';
         document.getElementById('listing-desc').value = '';
         document.getElementById('listing-contract').value = '';
@@ -15665,6 +15691,10 @@ function applyThemeFromStorage() {
 
 function setAppTheme(theme, silent) {
     localStorage.setItem('xcod_theme', theme);
+    try {
+        if (!silent) apiPost('/api/theme', { theme: theme }).catch(function(){});
+        else apiPost('/api/theme', { theme: theme }).catch(function(){});
+    } catch (e) {}
     var root = document.documentElement;
     if (theme === 'light') {
         root.setAttribute('data-theme', 'light');
