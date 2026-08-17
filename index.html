@@ -1067,9 +1067,26 @@
         .photo-carousel .pc-dots {
             text-align: center; margin-top: 6px; font-size: 12px; color: var(--hint);
         }
+
+.privacy-overlay{position:fixed;inset:0;z-index:99999;background:var(--bg,#0e0e0e);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
+.privacy-card{max-width:420px;width:100%;background:var(--card,#1c1c1e);border-radius:16px;padding:24px;text-align:center;color:var(--text,#fff);}
+.privacy-card h2{font-size:18px;margin:0 0 12px;font-weight:600;}
+.privacy-card p{font-size:14px;line-height:1.5;opacity:.9;margin:0 0 20px;}
+.privacy-card a{color:#2aabee;text-decoration:underline;}
+.privacy-card .btn{width:100%;}
+
 </style>
 </head>
 <body>
+
+<div id="privacy-overlay" class="privacy-overlay" style="display:none;">
+  <div class="privacy-card">
+    <h2 data-i18n="privacy_title">Политика конфиденциальности</h2>
+    <p id="privacy-text"></p>
+    <button type="button" class="btn" id="privacy-accept-btn" data-i18n="privacy_accept">Принимаю и продолжаю</button>
+  </div>
+</div>
+
 
 <!-- TOP BAR -->
 <div class="topbar">
@@ -2088,6 +2105,9 @@ async function init() {
                 await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
                 userData = await apiGet('/api/user');
                 if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
+                if (userData && !userData.privacy_miniapp) {
+                    showPrivacyOverlay(userData.privacy_policy_url || '');
+                }
                 if (userData && userData.lang) {
                     try {
                         window._serverLang = userData.lang;
@@ -15811,6 +15831,40 @@ document.addEventListener('visibilitychange', function() {
             }
         }).catch(function(){});
     } catch (e) {}
+});
+
+
+function showPrivacyOverlay(policyUrl) {
+  var ov = document.getElementById('privacy-overlay');
+  var tx = document.getElementById('privacy-text');
+  if (!ov || !tx) return;
+  var prefix = (typeof tBlock === 'function' ? tBlock('privacy_continue') : null) || 'Продолжая, вы соглашаетесь с ';
+  var linkLabel = (typeof tBlock === 'function' ? tBlock('privacy_link_label') : null) || 'политикой конфиденциальности и сбора данных Clossr Media Group (for MiniApp\'s)';
+  var url = (policyUrl || '').trim();
+  if (url) {
+    tx.innerHTML = prefix + '<a href="' + url.replace(/"/g, '') + '" target="_blank" rel="noopener">' + linkLabel + '</a>.';
+  } else {
+    tx.innerHTML = prefix + '<u>' + linkLabel + '</u>.';
+  }
+  ov.style.display = 'flex';
+  try { document.body.style.overflow = 'hidden'; } catch(e) {}
+}
+function hidePrivacyOverlay() {
+  var ov = document.getElementById('privacy-overlay');
+  if (ov) ov.style.display = 'none';
+  try { document.body.style.overflow = ''; } catch(e) {}
+}
+async function acceptPrivacyMiniapp() {
+  try {
+    await apiPost('/api/privacy/accept', {});
+  } catch (e) {}
+  if (userData) userData.privacy_miniapp = true;
+  hidePrivacyOverlay();
+  try { if (typeof loadFeed === 'function') loadFeed(); } catch(e) {}
+}
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('privacy-accept-btn');
+  if (btn) btn.addEventListener('click', function() { acceptPrivacyMiniapp(); });
 });
 
 </script>
