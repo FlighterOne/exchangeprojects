@@ -2108,24 +2108,36 @@ async function init() {
                 if (userData && !userData.privacy_miniapp) {
                     showPrivacyOverlay(userData.privacy_policy_url || '');
                 }
-                if (userData && userData.lang) {
-                    try {
-                        window._serverLang = userData.lang;
-                        localStorage.setItem('xcod_lang', userData.lang);
-                    } catch (e) {}
-                }
-                if (userData && userData.theme) {
-                    try {
-                        localStorage.setItem('xcod_theme', userData.theme);
-                        if (typeof setAppTheme === 'function') setAppTheme(userData.theme, true);
-                    } catch (e) {}
-                } else {
-                    try {
-                        var th2 = await apiGet('/api/theme');
-                        if (th2 && th2.theme && typeof setAppTheme === 'function') {
-                            localStorage.setItem('xcod_theme', th2.theme);
-                            setAppTheme(th2.theme, true);
-                        }
+                                // sync lang + theme from bot/server
+                try {
+                    var srvLang = (userData && userData.lang) ? userData.lang : null;
+                    var srvTheme = (userData && userData.theme) ? userData.theme : null;
+                    if (!srvLang || !srvTheme) {
+                        try {
+                            if (!srvLang) {
+                                var lr = await apiGet('/api/lang');
+                                if (lr && lr.lang) srvLang = lr.lang;
+                            }
+                        } catch (e) {}
+                        try {
+                            if (!srvTheme) {
+                                var tr = await apiGet('/api/theme');
+                                if (tr && tr.theme) srvTheme = tr.theme;
+                            }
+                        } catch (e) {}
+                    }
+                    if (srvLang) {
+                        window._serverLang = srvLang;
+                        localStorage.setItem('xcod_lang', srvLang);
+                        if (typeof setAppLang === 'function') setAppLang(srvLang, false);
+                        else if (typeof applyI18n === 'function') applyI18n();
+                    }
+                    if (srvTheme) {
+                        localStorage.setItem('xcod_theme', srvTheme);
+                        if (typeof setAppTheme === 'function') setAppTheme(srvTheme, true);
+                    }
+                } catch (e) {}
+
                     } catch (e) {}
                 }
                 try {
