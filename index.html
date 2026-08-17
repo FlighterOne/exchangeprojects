@@ -2112,41 +2112,29 @@ async function init() {
                 try {
                     var srvLang = (userData && userData.lang) ? userData.lang : null;
                     var srvTheme = (userData && userData.theme) ? userData.theme : null;
-                    if (!srvLang || !srvTheme) {
+                    if (!srvLang) {
                         try {
-                            if (!srvLang) {
-                                var lr = await apiGet('/api/lang');
-                                if (lr && lr.lang) srvLang = lr.lang;
-                            }
-                        } catch (e) {}
+                            var lr = await apiGet('/api/lang');
+                            if (lr && lr.lang) srvLang = lr.lang;
+                        } catch (e1) {}
+                    }
+                    if (!srvTheme) {
                         try {
-                            if (!srvTheme) {
-                                var tr = await apiGet('/api/theme');
-                                if (tr && tr.theme) srvTheme = tr.theme;
-                            }
-                        } catch (e) {}
+                            var tr = await apiGet('/api/theme');
+                            if (tr && tr.theme) srvTheme = tr.theme;
+                        } catch (e2) {}
                     }
                     if (srvLang) {
                         window._serverLang = srvLang;
-                        localStorage.setItem('xcod_lang', srvLang);
+                        try { localStorage.setItem('xcod_lang', srvLang); } catch (e3) {}
                         if (typeof setAppLang === 'function') setAppLang(srvLang, false);
                         else if (typeof applyI18n === 'function') applyI18n();
                     }
                     if (srvTheme) {
-                        localStorage.setItem('xcod_theme', srvTheme);
+                        try { localStorage.setItem('xcod_theme', srvTheme); } catch (e4) {}
                         if (typeof setAppTheme === 'function') setAppTheme(srvTheme, true);
                     }
-                } catch (e) {}
-
-                    } catch (e) {}
-                }
-                try {
-                    var th = await apiGet('/api/theme');
-                    if (th && th.theme) {
-                        localStorage.setItem('xcod_theme', th.theme);
-                        if (typeof setAppTheme === 'function') setAppTheme(th.theme, true);
-                    }
-                } catch (e) {}
+                } catch (eSync) {}
                 ok = true;
             } catch (e) {
                 await new Promise(function(r){ setTimeout(r, 800); });
