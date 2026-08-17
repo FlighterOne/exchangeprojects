@@ -1068,8 +1068,8 @@
             text-align: center; margin-top: 6px; font-size: 12px; color: var(--hint);
         }
 
-.privacy-overlay{position:fixed;inset:0;z-index:99999;background:var(--bg,#0e0e0e);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
-.privacy-card{max-width:420px;width:100%;background:var(--card,#1c1c1e);border-radius:16px;padding:24px;text-align:center;color:var(--text,#fff);}
+.privacy-overlay{position:fixed;inset:0;z-index:99999;background:#0e0e0e;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
+.privacy-card{max-width:420px;width:100%;background:#1c1c1e;border-radius:16px;padding:24px;text-align:center;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.4);}.privacy-card .btn{width:100%;padding:12px 16px;border:none;border-radius:12px;background:#2aabee;color:#fff;font-size:15px;font-weight:600;cursor:pointer;}
 .privacy-card h2{font-size:18px;margin:0 0 12px;font-weight:600;}
 .privacy-card p{font-size:14px;line-height:1.5;opacity:.9;margin:0 0 20px;}
 .privacy-card a{color:#2aabee;text-decoration:underline;}
@@ -2118,6 +2118,14 @@ async function init() {
                     try {
                         localStorage.setItem('xcod_theme', userData.theme);
                         if (typeof setAppTheme === 'function') setAppTheme(userData.theme, true);
+                    } catch (e) {}
+                } else {
+                    try {
+                        var th2 = await apiGet('/api/theme');
+                        if (th2 && th2.theme && typeof setAppTheme === 'function') {
+                            localStorage.setItem('xcod_theme', th2.theme);
+                            setAppTheme(th2.theme, true);
+                        }
                     } catch (e) {}
                 }
                 try {
@@ -15722,10 +15730,7 @@ function applyThemeFromStorage() {
 
 function setAppTheme(theme, silent) {
     localStorage.setItem('xcod_theme', theme);
-    try {
-        if (!silent) apiPost('/api/theme', { theme: theme }).catch(function(){});
-        else apiPost('/api/theme', { theme: theme }).catch(function(){});
-    } catch (e) {}
+    try { if (!silent) apiPost('/api/theme', { theme: theme }).catch(function(){}); } catch (e) {}
     var root = document.documentElement;
     if (theme === 'light') {
         root.setAttribute('data-theme', 'light');
@@ -15837,18 +15842,34 @@ document.addEventListener('visibilitychange', function() {
 function showPrivacyOverlay(policyUrl) {
   var ov = document.getElementById('privacy-overlay');
   var tx = document.getElementById('privacy-text');
-  if (!ov || !tx) return;
-  var prefix = (typeof tBlock === 'function' ? tBlock('privacy_continue') : null) || 'Продолжая, вы соглашаетесь с ';
-  var linkLabel = (typeof tBlock === 'function' ? tBlock('privacy_link_label') : null) || 'политикой конфиденциальности и сбора данных Clossr Media Group (for MiniApp\'s)';
-  var url = (policyUrl || '').trim();
-  if (url) {
-    tx.innerHTML = prefix + '<a href="' + url.replace(/"/g, '') + '" target="_blank" rel="noopener">' + linkLabel + '</a>.';
-  } else {
-    tx.innerHTML = prefix + '<u>' + linkLabel + '</u>.';
+  var btn = document.getElementById('privacy-accept-btn');
+  if (!ov) return;
+  var lang = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru';
+  var isEn = (lang !== 'ru' && lang !== 'uk');
+  var title = isEn ? 'Privacy policy' : 'Политика конфиденциальности';
+  var prefix = isEn ? 'By continuing, you agree to the ' : 'Продолжая, вы соглашаетесь с ';
+  var linkLabel = isEn
+    ? "Clossr Media Group privacy and data collection policy (for MiniApp's)"
+    : "политикой конфиденциальности и сбора данных Clossr Media Group (for MiniApp's)";
+  var accept = isEn ? 'Accept and continue' : 'Принимаю и продолжаю';
+  var h2 = ov.querySelector('h2');
+  if (h2) h2.textContent = title;
+  if (btn) {
+    btn.textContent = accept;
+    btn.onclick = function() { acceptPrivacyMiniapp(); };
+  }
+  var url = (policyUrl || (userData && userData.privacy_policy_url) || '').trim();
+  if (tx) {
+    if (url) {
+      tx.innerHTML = prefix + '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener noreferrer" style="color:#2aabee;text-decoration:underline;">' + linkLabel + '</a>.';
+    } else {
+      tx.innerHTML = prefix + '<span style="text-decoration:underline;">' + linkLabel + '</span>.';
+    }
   }
   ov.style.display = 'flex';
   try { document.body.style.overflow = 'hidden'; } catch(e) {}
 }
+
 function hidePrivacyOverlay() {
   var ov = document.getElementById('privacy-overlay');
   if (ov) ov.style.display = 'none';
