@@ -12023,8 +12023,12 @@ async function loadNewsPinned() {
                 feed.innerHTML = '<div class="empty"><div class="icon">📰</div>Пока нет новостей</div>';
             } else {
                 feed.innerHTML = news.map(function(n) {
-                    var body = String(n.body || '').replace(/</g,'&lt;');
+                    var body = String(n.body_html || n.body || '');
+                    body = body.replace(/<br\s*\/?\s*>/gi, ' ').replace(/<[^>]+>/g, ' ');
+                    body = body.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+                    body = body.replace(/\s+/g, ' ').trim();
                     if (body.length > 140) body = body.slice(0, 140) + '…';
+                    body = body.replace(/</g,'&lt;').replace(/>/g,'&gt;');
                     var dateLabel = localizeMonths(n.date_label || tBlock('recent'));
                     var cover = '';
                     if (n.media && n.media.length && n.media[0] && n.media[0].url) {
