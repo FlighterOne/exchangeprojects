@@ -1072,7 +1072,7 @@
 .privacy-card{max-width:420px;width:100%;background:#1c1c1e;border-radius:16px;padding:24px;text-align:center;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.4);}.privacy-card .btn{width:100%;padding:12px 16px;border:none;border-radius:12px;background:#2aabee;color:#fff;font-size:15px;font-weight:600;cursor:pointer;}
 .privacy-card h2{font-size:18px;margin:0 0 12px;font-weight:600;}
 .privacy-card p{font-size:14px;line-height:1.5;opacity:.9;margin:0 0 20px;}
-.privacy-card a{color:#2aabee;text-decoration:underline;}
+.privacy-card a{color:#2AABEE!important;text-decoration:none!important;font-weight:500;}
 .privacy-card .btn{width:100%;}
 
 </style>
@@ -1081,9 +1081,9 @@
 
 <div id="privacy-overlay" class="privacy-overlay" style="display:none;">
   <div class="privacy-card">
-    <h2 data-i18n="privacy_title">Политика конфиденциальности</h2>
+    <h2 id="privacy-title">Политика конфиденциальности</h2>
     <p id="privacy-text"></p>
-    <button type="button" class="btn" id="privacy-accept-btn" data-i18n="privacy_accept">Принимаю и продолжаю</button>
+    <button type="button" class="btn" id="privacy-accept-btn">Принимаю и продолжаю</button>
   </div>
 </div>
 
@@ -15843,31 +15843,44 @@ function showPrivacyOverlay(policyUrl) {
   var ov = document.getElementById('privacy-overlay');
   var tx = document.getElementById('privacy-text');
   var btn = document.getElementById('privacy-accept-btn');
+  var h2 = document.getElementById('privacy-title') || (ov && ov.querySelector('h2'));
   if (!ov) return;
-  var lang = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru';
+
+  var lang = 'ru';
+  try {
+    if (typeof getAppLang === 'function') lang = getAppLang() || 'ru';
+    else lang = localStorage.getItem('xcod_lang') || 'ru';
+  } catch (e) {}
   var isEn = (lang !== 'ru' && lang !== 'uk');
+
   var title = isEn ? 'Privacy policy' : 'Политика конфиденциальности';
   var prefix = isEn ? 'By continuing, you agree to the ' : 'Продолжая, вы соглашаетесь с ';
   var linkLabel = isEn
     ? "Clossr Media Group privacy and data collection policy (for MiniApp's)"
     : "политикой конфиденциальности и сбора данных Clossr Media Group (for MiniApp's)";
   var accept = isEn ? 'Accept and continue' : 'Принимаю и продолжаю';
-  var h2 = ov.querySelector('h2');
+
   if (h2) h2.textContent = title;
   if (btn) {
     btn.textContent = accept;
-    btn.onclick = function() { acceptPrivacyMiniapp(); };
+    btn.onclick = function () { acceptPrivacyMiniapp(); };
   }
-  var url = (policyUrl || (userData && userData.privacy_policy_url) || '').trim();
+
+  var url = 'https://clossr.site/privacypolicy';
+  try {
+    if (policyUrl && String(policyUrl).trim()) url = String(policyUrl).trim();
+    else if (userData && userData.privacy_policy_url) url = String(userData.privacy_policy_url).trim();
+  } catch (e) {}
+
   if (tx) {
-    if (url) {
-      tx.innerHTML = prefix + '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener noreferrer" style="color:#2aabee;text-decoration:underline;">' + linkLabel + '</a>.';
-    } else {
-      tx.innerHTML = prefix + '<span style="text-decoration:underline;">' + linkLabel + '</span>.';
-    }
+    tx.innerHTML = prefix
+      + '<a href="' + url.replace(/"/g, '') + '" target="_blank" rel="noopener noreferrer" '
+      + 'style="color:#2AABEE;text-decoration:none;font-weight:500;">'
+      + linkLabel + '</a>.';
   }
+
   ov.style.display = 'flex';
-  try { document.body.style.overflow = 'hidden'; } catch(e) {}
+  try { document.body.style.overflow = 'hidden'; } catch (e) {}
 }
 
 function hidePrivacyOverlay() {
