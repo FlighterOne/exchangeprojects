@@ -1071,7 +1071,7 @@
 .privacy-overlay{position:fixed;inset:0;z-index:99999;background:#0e0e0e;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
 .privacy-card{max-width:420px;width:100%;background:#1c1c1e;border-radius:16px;padding:24px;text-align:center;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.4);}.privacy-card .btn{width:100%;padding:12px 16px;border:none;border-radius:12px;background:#2aabee;color:#fff;font-size:15px;font-weight:600;cursor:pointer;}
 .privacy-card h2{font-size:18px;margin:0 0 12px;font-weight:600;}
-.privacy-card p{font-size:14px;line-height:1.5;opacity:.9;margin:0 0 20px;}
+.login-overlay{position:fixed;inset:0;z-index:99998;background:#0e0e0e;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}.login-card{max-width:420px;width:100%;background:#1c1c1e;border-radius:16px;padding:28px 24px;text-align:center;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.4);}.login-card h2{font-size:20px;margin:0 0 8px;font-weight:600;}.login-card .sub{font-size:14px;line-height:1.5;opacity:.85;margin:0 0 20px;}.login-widget-wrap{display:flex;justify-content:center;min-height:48px;margin:12px 0;}.privacy-card p{font-size:14px;line-height:1.5;opacity:.9;margin:0 0 20px;}
 .privacy-card a{color:#2AABEE!important;text-decoration:none!important;font-weight:500;}
 .privacy-card .btn{width:100%;}
 
@@ -1084,6 +1084,17 @@
     <h2 id="privacy-title">Политика конфиденциальности</h2>
     <p id="privacy-text"></p>
     <button type="button" class="btn" id="privacy-accept-btn">Принимаю и продолжаю</button>
+  </div>
+</div>
+
+<div id="login-overlay" class="login-overlay" style="display:none;">
+  <div class="login-card">
+    <h2 id="login-title">Clossr Exchange</h2>
+    <p class="sub" id="login-sub">Войдите через Telegram, чтобы пользоваться площадкой на сайте. Те же аккаунт, баланс и настройки, что и в боте.</p>
+    <div class="login-widget-wrap" id="login-widget-wrap">
+      <div class="spinner" style="margin:12px auto;"></div>
+    </div>
+    <p class="sub" id="login-hint" style="margin-top:16px;font-size:12px;opacity:.6;">Если виджет не загрузился — откройте бота в Telegram и зайдите в мини-приложение.</p>
   </div>
 </div>
 
@@ -2017,17 +2028,190 @@ function withTimeout(promise, ms, msg) {
     });
 }
 
+
+/* ===== Web session (сайт) + Mini App dual mode ===== */
+var WEB_SESSION_KEY = 'clossr_web_session';
+var WEB_SESSION_DAYS = 14;
+var __webSessionToken = null;
+var __isMiniApp = false;
+var __authReady = false;
+
+function isTelegramMiniApp() {
+  try {
+    var id = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) || (typeof tg !== 'undefined' && tg && tg.initData) || '';
+    return !!(id && String(id).length > 10);
+  } catch (e) { return false; }
+}
+
+function loadWebSession() {
+  try {
+    var raw = localStorage.getItem(WEB_SESSION_KEY);
+    if (!raw) return null;
+    var obj = JSON.parse(raw);
+    if (!obj || !obj.token) return null;
+    if (obj.expires_at) {
+      var exp = Date.parse(obj.expires_at);
+      if (exp && Date.now() > exp) {
+        localStorage.removeItem(WEB_SESSION_KEY);
+        return null;
+      }
+    }
+    // refresh local expiry window display (server does sliding)
+    __webSessionToken = obj.token;
+    return obj;
+  } catch (e) { return null; }
+}
+
+function saveWebSession(token, expiresAt, userMeta) {
+  try {
+    var exp = expiresAt;
+    if (!exp) {
+      exp = new Date(Date.now() + WEB_SESSION_DAYS * 86400000).toISOString();
+    }
+    var obj = { token: token, expires_at: exp, saved_at: new Date().toISOString() };
+    if (userMeta) obj.user = userMeta;
+    localStorage.setItem(WEB_SESSION_KEY, JSON.stringify(obj));
+    __webSessionToken = token;
+  } catch (e) {}
+}
+
+function clearWebSession() {
+  try { localStorage.removeItem(WEB_SESSION_KEY); } catch (e) {}
+  __webSessionToken = null;
+}
+
+function getAuthToken() {
+  if (__webSessionToken) return __webSessionToken;
+  var s = loadWebSession();
+  return s ? s.token : null;
+}
+
+function showLoginOverlay() {
+  var ov = document.getElementById('login-overlay');
+  if (ov) ov.style.display = 'flex';
+  try { document.body.style.overflow = 'hidden'; } catch (e) {}
+  loadTelegramLoginWidget();
+}
+
+function hideLoginOverlay() {
+  var ov = document.getElementById('login-overlay');
+  if (ov) ov.style.display = 'none';
+  try { document.body.style.overflow = ''; } catch (e) {}
+}
+
+function loadTelegramLoginWidget() {
+  var wrap = document.getElementById('login-widget-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="spinner" style="margin:12px auto;"></div>';
+  // config from API
+  fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/config', { method: 'GET' })
+    .then(function(r) { return r.json(); })
+    .then(function(cfg) {
+      var bot = (cfg && cfg.bot_username) ? cfg.bot_username : '';
+      if (!bot) {
+        wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Бот не настроен (BOT_USERNAME). Откройте мини-приложение в Telegram.</p>';
+        return;
+      }
+      wrap.innerHTML = '';
+      // Telegram Login Widget
+      window.onTelegramAuth = function(user) {
+        handleTelegramLogin(user);
+      };
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://telegram.org/js/telegram-widget.js?22';
+      s.setAttribute('data-telegram-login', bot);
+      s.setAttribute('data-size', 'large');
+      s.setAttribute('data-radius', '12');
+      s.setAttribute('data-onauth', 'onTelegramAuth(user)');
+      s.setAttribute('data-request-access', 'write');
+      wrap.appendChild(s);
+    })
+    .catch(function() {
+      wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Не удалось загрузить вход. Проверьте API.</p>';
+    });
+}
+
+async function handleTelegramLogin(user) {
+  try {
+    var res = await fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/telegram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(user)
+    });
+    var data = await res.json();
+    if (!res.ok || !data.session_token) {
+      alert((data && data.error) || 'Ошибка входа');
+      return;
+    }
+    saveWebSession(data.session_token, data.expires_at, {
+      id: data.user_id,
+      username: data.username,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      photo_url: data.photo_url
+    });
+    hideLoginOverlay();
+    // privacy if first time
+    if (!data.privacy_miniapp) {
+      try { showPrivacyOverlay(data.privacy_policy_url || ''); } catch (e) {}
+    }
+    // continue boot
+    await continueAfterAuth();
+  } catch (e) {
+    alert('Ошибка входа: ' + (e && e.message ? e.message : e));
+  }
+}
+
+async function continueAfterAuth() {
+  var box = document.getElementById('page-loading');
+  try {
+    if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
+    userData = await apiGet('/api/user');
+    if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
+    if (userData && !userData.privacy_miniapp) {
+      showPrivacyOverlay(userData.privacy_policy_url || '');
+    }
+    // lang/theme sync
+    try {
+      var srvLang = (userData && userData.lang) ? userData.lang : null;
+      var srvTheme = (userData && userData.theme) ? userData.theme : null;
+      if (srvLang && typeof setAppLang === 'function') setAppLang(srvLang, false);
+      if (srvTheme && typeof setAppTheme === 'function') {
+        try { localStorage.setItem('xcod_theme', srvTheme); } catch (e) {}
+        setAppTheme(srvTheme, true);
+      }
+    } catch (e) {}
+    __authReady = true;
+    window.__xcodBootOk = true;
+    if (typeof renderMain === 'function') renderMain();
+    else if (typeof loadFeed === 'function') loadFeed();
+    if (box) box.style.display = 'none';
+  } catch (e) {
+    if (box) box.innerHTML = '<div class="empty"><div style="margin-bottom:8px;">Не удалось загрузить данные</div><button class="btn" style="margin-top:16px;" onclick="location.reload()">Обновить</button></div>';
+  }
+}
+
+
 function apiFetch(path, options) {
     options = options || {};
     var ms = options.timeout || 10000;
     var initData = '';
     try { initData = (getTg() && getTg().initData) || (tg && tg.initData) || ''; } catch (e) {}
+    var sessionTok = '';
+    try { if (!initData) sessionTok = getAuthToken() || ''; } catch (e) {}
 
     var sep = path.indexOf('?') >= 0 ? '&' : '?';
-    var url = API_URL + path + (initData ? (sep + 'initData=' + encodeURIComponent(initData)) : '');
+    var url = API_URL + path;
+    if (initData) url += sep + 'initData=' + encodeURIComponent(initData);
+    else if (sessionTok) url += sep + 'session_token=' + encodeURIComponent(sessionTok);
 
     var headers = { 'Accept': 'application/json' };
     if (initData) headers['X-Telegram-Init-Data'] = initData;
+    if (sessionTok) {
+        headers['Authorization'] = 'Bearer ' + sessionTok;
+        headers['X-Session-Token'] = sessionTok;
+    }
     if (options.headers) {
         for (var k in options.headers) headers[k] = options.headers[k];
     }
@@ -2066,6 +2250,12 @@ async function apiPost(path, body) {
     try {
         if (!payload.initData && tg && tg.initData) payload.initData = tg.initData;
     } catch (e) {}
+    try {
+        if (!payload.initData && !payload.session_token) {
+            var st = getAuthToken();
+            if (st) payload.session_token = st;
+        }
+    } catch (e) {}
     return apiFetch(path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2092,9 +2282,24 @@ async function init() {
         var tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tg;
         try { tgLocal.ready && tgLocal.ready(); tgLocal.expand && tgLocal.expand(); } catch (e) {}
 
-        if (!tgLocal.initData) {
-            // для клиента без тех. деталей
-            box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
+        __isMiniApp = !!(tgLocal && tgLocal.initData && String(tgLocal.initData).length > 10);
+
+        if (!__isMiniApp) {
+            // Сайт (браузер): сессия или экран входа через Telegram
+            var sess = loadWebSession();
+            if (sess && sess.token) {
+                __webSessionToken = sess.token;
+                try {
+                    // продление / проверка сессии
+                    await apiFetch('/api/auth/session', { method: 'GET', timeout: 8000 });
+                    await continueAfterAuth();
+                    return;
+                } catch (eSess) {
+                    clearWebSession();
+                }
+            }
+            if (box) box.style.display = 'none';
+            showLoginOverlay();
             return;
         }
 
