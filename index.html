@@ -2039,8 +2039,53 @@ var __authReady = false;
 function isTelegramMiniApp() {
   try {
     var id = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) || (typeof tg !== 'undefined' && tg && tg.initData) || '';
-    return !!(id && String(id).length > 10);
-  } catch (e) { return false; }
+    if (id && String(id).length > 10) return true;
+  } catch (e) {}
+  return false;
+}
+
+/** Среда Telegram (миниапп), даже если initData ещё не пришёл */
+function isTelegramEnvironment() {
+  try {
+    if (isTelegramMiniApp()) return true;
+    var wa = window.Telegram && Telegram.WebApp;
+    if (wa) {
+      try {
+        if (wa.initDataUnsafe && wa.initDataUnsafe.user && wa.initDataUnsafe.user.id) return true;
+      } catch (e1) {}
+      try {
+        if (wa.platform && String(wa.platform) !== '' && String(wa.platform) !== 'unknown') return true;
+      } catch (e2) {}
+    }
+    var q = String(location.search || '') + String(location.hash || '');
+    if (q.indexOf('tgWebApp') >= 0) return true;
+    // Telegram WebView user agent hints
+    var ua = navigator.userAgent || '';
+    if (/Telegram/i.test(ua)) return true;
+  } catch (e) {}
+  return false;
+}
+
+function waitForTelegramInitData(maxMs) {
+  maxMs = maxMs || 2500;
+  return new Promise(function(resolve) {
+    var start = Date.now();
+    (function tick() {
+      try {
+        var id = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) || '';
+        if (id && String(id).length > 10) {
+          try { if (typeof tg !== 'undefined') tg = Telegram.WebApp; } catch (e) {}
+          resolve(id);
+          return;
+        }
+      } catch (e) {}
+      if (Date.now() - start >= maxMs) {
+        resolve('');
+        return;
+      }
+      setTimeout(tick, 100);
+    })();
+  });
 }
 
 function loadWebSession() {
@@ -2282,15 +2327,30 @@ async function init() {
         var tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tg;
         try { tgLocal.ready && tgLocal.ready(); tgLocal.expand && tgLocal.expand(); } catch (e) {}
 
+        // Ждём initData, если открыто внутри Telegram
+        if (!tgLocal.initData || String(tgLocal.initData).length < 10) {
+            if (isTelegramEnvironment()) {
+                if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
+                var waited = await waitForTelegramInitData(2800);
+                tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tgLocal;
+                try { if (typeof tg !== 'undefined') tg = tgLocal; } catch (e) {}
+                if (waited) {
+                    try { tgLocal.initData = waited; } catch (e) {}
+                }
+            }
+        }
+
         __isMiniApp = !!(tgLocal && tgLocal.initData && String(tgLocal.initData).length > 10);
 
-        if (!__isMiniApp) {
+        if (__isMiniApp) {
+            // Миниапп: только initData, web-сессию не используем для API
+            try { /* keep session for website later, but api prefers initData */ } catch (e) {}
+        } else {
             // Сайт (браузер): сессия или экран входа через Telegram
             var sess = loadWebSession();
             if (sess && sess.token) {
                 __webSessionToken = sess.token;
                 try {
-                    // продление / проверка сессии
                     await apiFetch('/api/auth/session', { method: 'GET', timeout: 8000 });
                     await continueAfterAuth();
                     return;
@@ -16025,6 +16085,18 @@ function openTelegramOrExternal(url) {
         } catch (e) {}
     }, 400);
 })();
+
+
+// если всё-таки пришёл initData после показа логина — прячем и грузим как миниапп
+setTimeout(async function() {
+  try {
+    if (isTelegramMiniApp() && document.getElementById('login-overlay') &&
+        document.getElementById('login-overlay').style.display === 'flex') {
+      hideLoginOverlay();
+      if (typeof init === 'function') init();
+    }
+  } catch (e) {}
+}, 3000);
 
 document.addEventListener('visibilitychange', function() {
     if (document.visibilityState !== 'visible') return;
