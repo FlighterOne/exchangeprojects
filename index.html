@@ -1227,7 +1227,7 @@
  <input class="form-input" type="number" id="listing-users-month" placeholder="1000" min="0">
  </div>
  <div class="form-group">
- <label class="form-label">Заработок за месяц ($), средний за 6 мес.</label>
+ <label class="form-label" data-i18n="earn_month">Заработок за месяц ($), средний за 6 мес.</label>
  <input class="form-input" type="number" id="listing-earnings-month" placeholder="500" min="0" step="0.01">
  </div>
  <div class="form-group">
@@ -1250,15 +1250,15 @@
  <button class="btn" onclick="listingCreateNext()" data-i18n="continue">Далее</button>
  </div>
  <div id="listing-step-photos" style="display:none;">
- <div class="info-block" style="margin-bottom:14px;">
- Загрузите от <b>1</b> до <b>5</b> фото. Первое фото — титульное. Можно менять порядок перетаскиванием.
+ <div class="info-block" style="margin-bottom:14px;" data-i18n="photos_hint">
+ Загрузите от 1 до 5 фото. Первое фото — титульное. Можно менять порядок перетаскиванием.
  </div>
  <div class="form-group">
- <label class="form-label">Фото объявления</label>
+ <label class="form-label" data-i18n="listing_photos">Фото объявления</label>
  <div class="file-drop" onclick="document.getElementById('listing-photos').click()">
  <div class="fd-icon">🖼️</div>
- <div class="fd-title">Загрузить фото</div>
- <div class="fd-sub">JPG, PNG · макс. 5</div>
+ <div class="fd-title" data-i18n="upload_photos">Загрузить фото</div>
+ <div class="fd-sub" data-i18n="photos_formats">JPG, PNG · макс. 5</div>
  </div>
  <input type="file" id="listing-photos" accept="image/*" multiple style="display:none;" onchange="onListingPhotosPicked(this)">
  <div id="listing-photos-list" class="photo-grid"></div>
@@ -1266,25 +1266,21 @@
  <button class="btn" onclick="listingPhotosNext()" data-i18n="continue">Далее</button>
  </div>
  <div id="listing-step-2" style="display:none;">
- <div class="info-block" style="margin-bottom:14px;">
- <b>Обязательно</b> должен быть файл <code>guide.txt</code> — инструкция.
- Если его не будет, объявление отклонит модерация.
- Если инструкция по установке будет неполной, покупатель может не разобраться и отклонить покупку.<br><br>
- Продавец сам решает: публиковать токен сразу или отправить в ЛС.
- Если публикуете на площадке — загрузите отдельный файл <code>apitoken.txt</code>.
+ <div class="info-block" style="margin-bottom:14px;" data-i18n="guide_note_full">
+ Обязательно должен быть файл guide.txt — инструкция. Без него объявление отклонит модерация. Неполная инструкция — риск отказа покупателя. Токен можно опубликовать (apitoken.txt) или отправить в ЛС.
  </div>
  <div class="form-group">
- <label class="form-label">Файлы бота</label>
+ <label class="form-label" data-i18n="bot_files">Файлы бота</label>
  <div class="file-drop" onclick="document.getElementById('listing-files').click()">
  <div class="fd-icon">📁</div>
- <div class="fd-title">Загрузить файлы</div>
- <div class="fd-sub">Нажмите, чтобы выбрать</div>
+ <div class="fd-title" data-i18n="upload_files">Загрузить файлы</div>
+ <div class="fd-sub" data-i18n="click_to_choose">Нажмите, чтобы выбрать</div>
  </div>
  <input type="file" id="listing-files" multiple style="display:none;" onchange="onListingFilesPicked(this)">
  <div id="listing-files-list"></div>
  </div>
  <div class="form-group">
- <label class="form-label">Есть ли файлы, которые вы отправите покупателю в ЛС?</label>
+ <label class="form-label" data-i18n="files_dm">Есть ли файлы, которые вы отправите покупателю в ЛС?</label>
  <div class="type-toggle" style="display:flex;gap:8px;">
  <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-yes" onclick="selectDmFiles(true)" style="flex:1;" data-i18n="yes">Да</button>
  <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-no" onclick="selectDmFiles(false)" style="flex:1;" data-i18n="no">Нет</button>
@@ -1510,8 +1506,8 @@
  <div class="info-block" style="margin-bottom:14px;">От 1 до 5 фото. Первое — титульное. Можно менять порядок перетаскиванием.</div>
  <div class="file-drop" onclick="document.getElementById('fl-photos').click()">
  <div class="fd-icon">🖼️</div>
- <div class="fd-title">Загрузить фото</div>
- <div class="fd-sub">JPG, PNG · макс. 5</div>
+ <div class="fd-title" data-i18n="upload_photos">Загрузить фото</div>
+ <div class="fd-sub" data-i18n="photos_formats">JPG, PNG · макс. 5</div>
  </div>
  <input type="file" id="fl-photos" accept="image/*" multiple style="display:none;" onchange="onFlPhotosPicked(this)">
  <div id="fl-photos-list" class="photo-grid"></div>
@@ -2229,9 +2225,12 @@ async function continueAfterAuth() {
  } catch (e) {}
  __authReady = true;
  window.__xcodBootOk = true;
- if (typeof renderMain === 'function') renderMain();
- else if (typeof loadFeed === 'function') loadFeed();
- if (box) box.style.display = 'none';
+ try { if (typeof renderMain === 'function') renderMain(); } catch (e) {}
+  if (box) box.style.display = 'none';
+  try {
+    if (typeof showPage === 'function') showPage('home');
+    else if (typeof loadListings === 'function') loadListings();
+  } catch (e) {}
  } catch (e) {
  if (box) box.innerHTML = '<div class="empty"><div style="margin-bottom:8px;">Не удалось загрузить данные</div><button class="btn" style="margin-top:16px;" onclick="location.reload()">Обновить</button></div>';
  }
@@ -2719,6 +2718,14 @@ var I18N = {
  min_photos: 'Минимум 1 фото',
  max_photos: 'Максимум 5 фото',
  guide_note: 'Обязателен файл guide.txt',
+ guide_note_full: 'Обязательно должен быть файл guide.txt — инструкция. Без него объявление отклонит модерация. Неполная инструкция — риск отказа покупателя. Токен можно опубликовать (apitoken.txt) или отправить в ЛС.',
+ photos_hint: 'Загрузите от 1 до 5 фото. Первое фото — титульное. Можно менять порядок перетаскиванием.',
+ listing_photos: 'Фото объявления',
+ photos_formats: 'JPG, PNG · макс. 5',
+ bot_files: 'Файлы бота',
+ click_to_choose: 'Нажмите, чтобы выбрать',
+ earn_month: 'Заработок за месяц ($), средний за 6 мес.',
+
  files_dm: 'Есть файлы, которые отправите в ЛС?',
  yes: 'Да',
  no: 'Нет',
@@ -3248,6 +3255,14 @@ var I18N = {
  min_photos: 'At least 1 photo',
  max_photos: 'Max 5 photos',
  guide_note: 'guide.txt is required',
+ guide_note_full: 'A guide.txt file is required — setup instructions. Without it moderation will reject the listing. Incomplete instructions may lead to a buyer refund. Publish token via apitoken.txt or send in DM.',
+ photos_hint: 'Upload 1 to 5 photos. The first photo is the cover. Drag to reorder.',
+ listing_photos: 'Listing photos',
+ photos_formats: 'JPG, PNG · max 5',
+ bot_files: 'Bot files',
+ click_to_choose: 'Click to choose',
+ earn_month: 'Monthly earnings ($), avg last 6 months',
+
  files_dm: 'Files to send via DM?',
  yes: 'Yes',
  no: 'No',
