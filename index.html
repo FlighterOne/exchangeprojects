@@ -1553,10 +1553,10 @@
  </div>
  <div style="display:flex;flex-direction:row;gap:8px;margin:10px 0;align-items:stretch;">
  <button type="button" class="btn btn-secondary" id="my-cat-sheet-btn" onclick="openMyCatSheet()" style="flex:1;text-align:center;font-weight:400;">
- <span id="my-cat-sheet-label">Все</span> ▾
+ <span id="my-cat-sheet-label" data-i18n="all">Все</span> ▾
  </button>
  <button type="button" class="btn btn-secondary" id="my-fl-sheet-btn" onclick="openMyFlKindSheet()" style="flex:1;text-align:center;font-weight:400;display:none;">
- <span id="my-fl-sheet-label">Все</span> ▾
+ <span id="my-fl-sheet-label" data-i18n="all">Все</span> ▾
  </button>
  </div>
 
@@ -2622,6 +2622,7 @@ function setAppLang(code, syncServer) {
  try { document.documentElement.dir = (code === 'ar') ? 'rtl' : 'ltr'; } catch (e) {}
  try { applyI18n(); } catch (e) {}
  try { updateLangLabels(); } catch (e) {}
+ try { updateMyListingsSheetLabels(); } catch (e) {}
  if (syncServer !== false) {
  try { apiPost('/api/lang', { lang: code }).catch(function(){}); } catch (e) {}
  }
@@ -10635,6 +10636,7 @@ function applyI18n() {
  var flagImg = document.getElementById('top-lang-flag');
  if (flagImg) flagImg.src = 'https://flagcdn.com/w40/' + (flags[lang] || 'ru') + '.png';
  try { updateLangLabels(); } catch (e) {}
+ try { updateMyListingsSheetLabels(); } catch (e) {}
 
  document.querySelectorAll('[data-i18n]').forEach(function(el) {
  var key = el.getAttribute('data-i18n');
@@ -11335,7 +11337,7 @@ function txTypeLabel(tp) {
 
 var MONTHS_I18N = {
  ru: ['янв.','фев.','мар.','апр.','мая','июн.','июл.','авг.','сент.','окт.','нояб.','дек.'],
- en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+ en: ['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'],
  uk: ['січ.','лют.','бер.','квіт.','трав.','черв.','лип.','серп.','вер.','жовт.','лист.','груд.'],
  de: ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sep.','Okt.','Nov.','Dez.'],
  fr: ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'],
@@ -11356,10 +11358,30 @@ function localizeMonths(str) {
  var target = MONTHS_I18N[lang] || MONTHS_I18N.en;
  var ru = MONTHS_I18N.ru;
  var out = String(str);
+ // ISO → "19 Aug. 2026 20:00"
+ if (/^\d{4}-\d{2}-\d{2}/.test(out)) {
+   try {
+     var d = new Date(out);
+     if (!isNaN(d.getTime())) {
+       var day = d.getDate();
+       var mon = target[d.getMonth()] || '';
+       var hh = d.getHours(); hh = hh < 10 ? '0'+hh : ''+hh;
+       var mm = d.getMinutes(); mm = mm < 10 ? '0'+mm : ''+mm;
+       return day + ' ' + mon + ' ' + d.getFullYear() + ' ' + hh + ':' + mm;
+     }
+   } catch (e) {}
+ }
  for (var i = 0; i < 12; i++) {
  if (out.indexOf(ru[i]) !== -1) out = out.split(ru[i]).join(target[i]);
  }
- // MSK label
+ // also replace English short without dot
+ var enShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ for (var j = 0; j < 12; j++) {
+   if (out.indexOf(enShort[j]) !== -1 && out.indexOf(enShort[j]+'.') === -1) {
+     // only whole token-ish
+     out = out.split(enShort[j]).join(target[j]);
+   }
+ }
  if (out.indexOf('МСК') !== -1) out = out.split('МСК').join(tBlock('msk'));
  if (out.indexOf('мин ') !== -1) out = out.replace(/(\d+)мин /g, '$1' + tBlock('minute') + ' ').replace(/(\d+)сек/g, '$1' + tBlock('seconds'));
  return out;
@@ -14294,6 +14316,24 @@ var _myListingsTab = 'moderation';
 var _myListingsCache = [];
 var _myListingsCat = 'all';
 var _myFlKind = '';
+
+function updateMyListingsSheetLabels() {
+  try {
+    var cat = (typeof _myListingsCat !== 'undefined' && _myListingsCat) ? _myListingsCat : 'all';
+    var lab = document.getElementById('my-cat-sheet-label');
+    if (lab) {
+      var labels = { all: tBlock('all'), sale: tBlock('sale'), freelance: tBlock('freelance') };
+      lab.textContent = labels[cat] || tBlock('all');
+    }
+    var fl = document.getElementById('my-fl-sheet-label');
+    if (fl) {
+      var fk = (typeof _myFlKind !== 'undefined' && _myFlKind) ? _myFlKind : '';
+      var flabels = { '': tBlock('all'), order: tBlock('customer'), execute: tBlock('executor') };
+      fl.textContent = flabels[fk] || tBlock('all');
+    }
+  } catch (e) {}
+}
+
 function setMyListingsCat(cat) {
  _myListingsCat = cat || 'all';
  var labels = { all: tBlock('all'), sale: tBlock('sale'), freelance: tBlock('freelance') };
