@@ -12799,12 +12799,15 @@ function listingExtraInfoHtml(l, opts) {
  var hideContract = !!opts.hideContract;
  var parts = [];
  if (l.listing_type === 'partner') {
- parts.push('<b>Тип:</b> Партнёр');
+ parts.push('<b>' + (tBlock('type') || 'Тип') + ':</b> ' + (tBlock('partner_xcod') || 'Партнёр'));
  if (!hideContract && l.contract_number) {
- parts.push('<b>Договор:</b> ' + String(l.contract_number).replace(/</g,'&lt;'));
+ parts.push('<b>' + (tBlock('contract_no') || 'Договор') + ':</b> ' + String(l.contract_number).replace(/</g,'&lt;'));
  }
+ } else if (l.contract_number && !hideContract) {
+ parts.push('<b>' + (tBlock('type') || 'Тип') + ':</b> ' + (tBlock('partner_xcod') || 'Партнёр'));
+ parts.push('<b>' + (tBlock('contract_no') || 'Договор') + ':</b> ' + String(l.contract_number).replace(/</g,'&lt;'));
  } else {
- parts.push('<b>Тип:</b> Свой товар');
+ parts.push('<b>' + (tBlock('type') || 'Тип') + ':</b> ' + (tBlock('own_product') || 'Свой товар'));
  if (l.product_type) parts.push('<b>Вид:</b> ' + String(l.product_type).replace(/</g,'&lt;'));
  if (l.bot_username) parts.push('<b>Username:</b> @' + String(l.bot_username).replace(/</g,'&lt;'));
  if (l.tgstat_url) parts.push('<b>TGStat:</b> ' + String(l.tgstat_url).replace(/</g,'&lt;'));
