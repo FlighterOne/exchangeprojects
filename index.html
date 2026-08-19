@@ -2753,6 +2753,8 @@ var I18N = {
  edit: 'Редактировать',
  delete: 'Удалить',
  unpublish: 'Снять с публикации',
+        delete_from_history: 'Удалить из истории'',
+        delete_listing: 'Удалить объявление',
  favorite: 'В избранное',
  unfavorite: 'Из избранного',
  active_listings: 'Активные',
@@ -3290,6 +3292,8 @@ var I18N = {
  edit: 'Edit',
  delete: 'Delete',
  unpublish: 'Unpublish',
+        delete_from_history: 'Delete from history',
+        delete_listing: 'Delete listing',
  favorite: 'Favorite',
  unfavorite: 'Unfavorite',
  active_listings: 'Active',
@@ -5935,6 +5939,8 @@ var I18N = {
  edit: 'Редагувати',
  delete: 'Видалити',
  unpublish: 'Зняти з публікації',
+        delete_from_history: 'Видалити з історії',
+        delete_listing: 'Видалити оголошення',
  favorite: 'В обране',
  unfavorite: 'З обраного',
  active_listings: 'Активні',
@@ -13222,27 +13228,27 @@ async function openListing(id) {
  } else if (l.status === 'rejected') {
  html += '<div class="btn-stack" style="margin-top:10px;">';
  html += '<button class="btn" onclick="editRejectedListing(' + l.id + ')">Редактировать</button>';
- html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
+ html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">' + tBlock('delete_from_history') + '</button>';
  html += '</div>';
  } else if (l.status === 'blocked') {
  html += '<div class="btn-stack" style="margin-top:10px;">';
- html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
+ html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">' + tBlock('delete_from_history') + '</button>';
  html += '</div>';
  } else if (['unpublished','sold','completed','closed'].indexOf(l.status) >= 0) {
  html += '<div class="btn-stack" style="margin-top:10px;">';
  html += '<button class="btn" onclick="republishListing(' + l.id + ')">Опубликовать</button>';
- html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить из истории</button>';
+ html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">' + tBlock('delete_from_history') + '</button>';
  html += '</div>';
  } else if (l.status === 'pending') {
  html += '<div class="info-block" style="margin-top:8px;">На модерации</div>';
- html += '<button class="btn" style="margin-top:10px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить</button>';
+ html += '<button class="btn" style="margin-top:10px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">' + tBlock('delete_from_history') + '</button>';
  } else if (l.status === 'refund_moderation') {
  html += '<div class="info-block" style="margin-top:8px;">На модерации: возврат средств по сделке. Удаление недоступно до решения модерации.</div>';
  }
  }
  // админ и выше могут удалить чужое объявление
  if (!isOwner && userData && userData.role >= 4 && l.status !== 'deleted') {
- html += '<button class="btn" style="margin-top:14px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">Удалить объявление</button>';
+ html += '<button class="btn" style="margin-top:14px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">' + tBlock('delete_listing') + '</button>';
  }
  box.innerHTML = html;
  } catch (e) {
