@@ -12315,7 +12315,7 @@ async function loadNewsPinned() {
  var data = await apiGet('/api/listings/pinned');
  var items = data.listings || [];
  if (box) {
- if (!items.length) box.innerHTML = '';
+ if (!items.length) box.innerHTML = '<div class="empty" style="padding:8px;font-size:12px;color:var(--hint);"> </div>';
  else {
  box.innerHTML = items.map(function(l) {
  var desc = (l.description || '').replace(/</g, '&lt;');
@@ -13912,8 +13912,8 @@ function downloadOrderFile(orderId, index) {
 async function editRejectedListing(id) {
  try {
  var l = await apiGet('/api/listings/' + id);
- window._editingListingId = id;
  resetListingCreate();
+ window._editingListingId = id; // после reset — тот же #id, без нового объявления
  // prefill
  document.getElementById('listing-title').value = l.title || '';
  document.getElementById('listing-desc').value = l.description || '';
@@ -13996,15 +13996,17 @@ async function createListing() {
 
  btn.disabled = true; btn.textContent = tBlock('sending');
  try {
- if (window._editingListingId) {
+ var editId = window._editingListingId || null;
+ if (editId) {
  body.resubmit = true;
- await apiFetch('/api/listings/' + window._editingListingId, {
+ body.edit_id = editId;
+ await apiFetch('/api/listings/' + editId, {
  method: 'PUT',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify(body)
  });
  window._editingListingId = null;
- tg.showAlert(tBlock('sent_mod'));
+ tg.showAlert(tBlock('sent_mod') || 'Отправлено на модерацию');
  } else {
  await apiPost('/api/listings', body);
  tg.showAlert(tBlock('listing_sent_mod'));
@@ -14034,7 +14036,8 @@ async function saveListing() {
  title: document.getElementById('edit-listing-title').value.trim(),
  description: document.getElementById('edit-listing-desc').value.trim(),
  price: parseFloat(document.getElementById('edit-listing-price').value),
- bot_username: document.getElementById('edit-listing-bot').value.trim()
+ bot_username: document.getElementById('edit-listing-bot').value.trim(),
+ resubmit: true
  })
  });
  var data = await res.json().catch(function(){ return {}; });
