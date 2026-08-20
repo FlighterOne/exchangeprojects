@@ -786,21 +786,8 @@
  justify-content: space-between;
  gap: 10px;
  margin-bottom: 4px;
- min-height: 40px;
  }
  .profile-top-bar .back-link { margin-bottom: 0; }
- .profile-logout-btn {
- padding: 8px 14px;
- border-radius: 10px;
- border: 1px solid #e53935;
- background: #0a0a0a;
- color: #e53935;
- font-size: 14px;
- font-weight: 600;
- cursor: pointer;
- line-height: 1;
- }
- .profile-logout-btn:active { opacity: 0.85; }
  .profile-edit-btn {
  width: 40px; height: 40px; border-radius: 12px;
  border: 1.5px solid rgba(128,128,128,0.35);
@@ -1853,10 +1840,6 @@
 
  <!-- PROFILE -->
  <div id="page-profile" class="page">
- <div class="profile-top-bar" id="own-profile-top-bar" style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px;margin-bottom:4px;">
- <button type="button" class="back-link" id="btn-profile-back" onclick="showPage('home')" style="margin-bottom:0;" data-i18n="back">← Назад</button>
- <button type="button" class="profile-logout-btn" id="btn-profile-logout" onclick="logoutWebAccount()" style="display:none;">Выйти</button>
- </div>
  <div class="profile-header">
  <div class="profile-avatar-wrap" id="profile-avatar-wrap">
  <img id="profile-avatar-img" class="profile-avatar-img" alt="" style="display:none;">
@@ -2166,37 +2149,6 @@ function hideLoginOverlay() {
  try { document.body.style.overflow = ''; } catch (e) {}
 }
 
-function logoutWebAccount() {
- try {
- if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return;
- } catch (e) {}
- try {
- var tok = (typeof getAuthToken === 'function' ? getAuthToken() : null);
- if (tok) {
- fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/logout', {
- method: 'POST',
- headers: { 'Authorization': 'Bearer ' + tok, 'X-Session-Token': tok, 'Accept': 'application/json' }
- }).catch(function(){});
- }
- } catch (e) {}
- try { localStorage.removeItem(typeof WEB_SESSION_KEY !== 'undefined' ? WEB_SESSION_KEY : 'exchange_web_session'); } catch (e) {}
- try { __webSessionToken = null; } catch (e) {}
- try { userData = null; } catch (e) {}
- showLoginOverlay();
-}
-
-function updateOwnProfileLogoutBtn() {
- try {
- var back = document.getElementById('btn-profile-back');
- if (back) back.style.display = 'inline-flex';
- var btn = document.getElementById('btn-profile-logout');
- if (!btn) return;
- var isSite = true;
- try { isSite = !isTelegramMiniApp(); } catch (e) {}
- btn.style.display = isSite ? 'inline-flex' : 'none';
- } catch (e) {}
-}
-
 function loadTelegramLoginWidget() {
  var wrap = document.getElementById('login-widget-wrap');
  if (!wrap) return;
@@ -2250,16 +2202,10 @@ async function handleTelegramLogin(user) {
  photo_url: data.photo_url
  });
  hideLoginOverlay();
- // First login: ask privacy consent (website vs miniapp flags)
- try {
- var needPrivacy = false;
- if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
- needPrivacy = !data.privacy_miniapp;
- } else {
- needPrivacy = !(data.privacy_website || data.privacy_miniapp);
+ // privacy if first time
+ if (!data.privacy_miniapp) {
+ try { showPrivacyOverlay(data.privacy_policy_url || ''); } catch (e) {}
  }
- if (needPrivacy) showPrivacyOverlay(data.privacy_policy_url || '');
- } catch (e) {}
  // continue boot
  await continueAfterAuth();
  } catch (e) {
@@ -2273,19 +2219,9 @@ async function continueAfterAuth() {
  if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
  userData = await apiGet('/api/user');
  if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
- // First visit: privacy permission
- try {
- var needPrivacy = false;
- if (userData) {
- if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
- needPrivacy = !userData.privacy_miniapp;
- } else {
- needPrivacy = !(userData.privacy_website || userData.privacy_miniapp);
+ if (userData && !userData.privacy_miniapp) {
+ showPrivacyOverlay(userData.privacy_policy_url || '');
  }
- }
- if (needPrivacy) showPrivacyOverlay(userData.privacy_policy_url || '');
- } catch (e) {}
- try { updateOwnProfileLogoutBtn(); } catch (e) {}
  // lang/theme sync
  try {
  var srvLang = (userData && userData.lang) ? userData.lang : null;
@@ -2399,51 +2335,87 @@ async function apiPost(path, body) {
  });
 }
 
+var __initInFlight = false;
 async function init() {
+ if (__initInFlight) return;
+ __initInFlight = true;
  var box = document.getElementById('page-loading');
- function setLoad() {
+ function setLoad(msg) {
  try {
- var lab = box && box.querySelector('.load-msg');
- if (lab) lab.textContent = tBlock('loading');
+ if (!box) return;
+ var lab = box.querySelector('.load-msg');
+ if (lab) lab.textContent = msg || (typeof tBlock === 'function' ? tBlock('loading') : 'Загрузка...');
  } catch (e) {}
  }
- try { applyThemeFromStorage();
- try { applyI18n(); } catch (e) {} } catch (e) {}
+ function showLoadError(detail) {
+ try {
+ if (!box) return;
+ box.style.display = '';
+ var d = (detail ? String(detail) : '').replace(/</g, '&lt;').slice(0, 180);
+ box.innerHTML = '<div class="empty" style="padding:24px;text-align:center;">' +
+ '<div style="font-weight:600;margin-bottom:8px;">Не удалось загрузить</div>' +
+ (d ? '<div style="font-size:12px;color:var(--hint);margin-bottom:12px;word-break:break-word;">' + d + '</div>' : '') +
+ '<div style="font-size:11px;color:var(--hint);margin-bottom:14px;">API: ' + String(API_URL || '').replace(/</g, '') + '</div>' +
+ '<button class="btn" style="margin-top:8px;" onclick="location.reload()">Обновить</button></div>';
+ } catch (e) {}
+ }
+ try { applyThemeFromStorage(); try { applyI18n(); } catch (e) {} } catch (e) {}
  setLoad();
 
  try {
- if (!window.Telegram || !Telegram.WebApp) {
- // тихо ждём / пробуем дальше через заглушку
- }
- var tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tg;
- try { tgLocal.ready && tgLocal.ready(); tgLocal.expand && tgLocal.expand(); } catch (e) {}
+ var tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : (typeof getTg === 'function' ? getTg() : tg);
+ try { tg = tgLocal; } catch (e) {}
+ try { tgLocal.ready && tgLocal.ready(); } catch (e) {}
+ try { tgLocal.expand && tgLocal.expand(); } catch (e) {}
+ try { tgLocal.disableVerticalSwipes && tgLocal.disableVerticalSwipes(); } catch (e) {}
 
- // Ждём initData, если открыто внутри Telegram
- if (!tgLocal.initData || String(tgLocal.initData).length < 10) {
- if (isTelegramEnvironment()) {
- if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
- var waited = await waitForTelegramInitData(2800);
- tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tgLocal;
- try { if (typeof tg !== 'undefined') tg = tgLocal; } catch (e) {}
- if (waited) {
- try { tgLocal.initData = waited; } catch (e) {}
+ var inTg = false;
+ try { inTg = isTelegramEnvironment(); } catch (e) {}
+
+ // Mobile Telegram often delivers initData later than desktop — wait longer
+ if ((!tgLocal.initData || String(tgLocal.initData).length < 10) && inTg) {
+ if (box) {
+ box.style.display = '';
+ box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Подключение к Telegram…</div></div>';
  }
+ var waited = await waitForTelegramInitData(5500);
+ tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tgLocal;
+ try { tg = tgLocal; } catch (e) {}
+ if (waited) {
+ try { /* initData is read-only on real WebApp */ } catch (e) {}
+ }
+ // second short wait if still empty (slow Android WebView)
+ if (!tgLocal.initData || String(tgLocal.initData).length < 10) {
+ waited = await waitForTelegramInitData(2500);
+ tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tgLocal;
+ try { tg = tgLocal; } catch (e) {}
  }
  }
 
  __isMiniApp = !!(tgLocal && tgLocal.initData && String(tgLocal.initData).length > 10);
 
- if (__isMiniApp) {
- // Миниапп: только initData, web-сессию не используем для API
- try { /* keep session for website later, but api prefers initData */ } catch (e) {}
- } else {
- // Сайт (браузер): сессия или экран входа через Telegram
+ // Inside Telegram but still no initData — do NOT open website login widget (hangs on mobile)
+ if (!__isMiniApp && inTg) {
+ if (box) {
+ box.style.display = '';
+ box.innerHTML = '<div class="empty" style="padding:24px;text-align:center;">' +
+ '<div style="font-weight:600;margin-bottom:10px;">Нет данных Telegram</div>' +
+ '<div style="font-size:13px;color:var(--hint);margin-bottom:16px;line-height:1.4;">Откройте мини-приложение кнопкой из бота (Menu / Web App), не через браузер.</div>' +
+ '<button class="btn" onclick="location.reload()">Повторить</button></div>';
+ }
+ __initInFlight = false;
+ return;
+ }
+
+ if (!__isMiniApp) {
+ // Browser / website only
  var sess = loadWebSession();
  if (sess && sess.token) {
  __webSessionToken = sess.token;
  try {
- await apiFetch('/api/auth/session', { method: 'GET', timeout: 8000 });
+ await apiFetch('/api/auth/session', { method: 'GET', timeout: 10000 });
  await continueAfterAuth();
+ __initInFlight = false;
  return;
  } catch (eSess) {
  clearWebSession();
@@ -2451,34 +2423,34 @@ async function init() {
  }
  if (box) box.style.display = 'none';
  showLoginOverlay();
+ __initInFlight = false;
  return;
  }
 
- // health + user с повтором, без показа технических ошибок
+ // Mini App path: health + user
+ if (box) {
+ box.style.display = '';
+ box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
+ }
  var ok = false;
- for (var attempt = 0; attempt < 3 && !ok; attempt++) {
+ var lastErr = '';
+ for (var attempt = 0; attempt < 4 && !ok; attempt++) {
  try {
- await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
+ if (attempt > 0) setLoad('Повтор ' + (attempt + 1) + '…');
+ await apiFetch('/api/health', { method: 'GET', timeout: 10000 });
  userData = await apiGet('/api/user');
- if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
+ if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); __initInFlight = false; return; }
  if (userData && !userData.privacy_miniapp) {
  showPrivacyOverlay(userData.privacy_policy_url || '');
  }
- // sync lang + theme from bot/server
  try {
  var srvLang = (userData && userData.lang) ? userData.lang : null;
  var srvTheme = (userData && userData.theme) ? userData.theme : null;
  if (!srvLang) {
- try {
- var lr = await apiGet('/api/lang');
- if (lr && lr.lang) srvLang = lr.lang;
- } catch (e1) {}
+ try { var lr = await apiGet('/api/lang'); if (lr && lr.lang) srvLang = lr.lang; } catch (e1) {}
  }
  if (!srvTheme) {
- try {
- var tr = await apiGet('/api/theme');
- if (tr && tr.theme) srvTheme = tr.theme;
- } catch (e2) {}
+ try { var tr = await apiGet('/api/theme'); if (tr && tr.theme) srvTheme = tr.theme; } catch (e2) {}
  }
  if (srvLang) {
  window._serverLang = srvLang;
@@ -2493,23 +2465,25 @@ async function init() {
  } catch (eSync) {}
  ok = true;
  } catch (e) {
- await new Promise(function(r){ setTimeout(r, 800); });
+ lastErr = (e && e.message) ? e.message : String(e);
+ await new Promise(function(r){ setTimeout(r, 600 + attempt * 400); });
  }
  }
  if (!ok) {
- box.innerHTML = '<div class="empty"><div class="spinner"></div>' +
- '<div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div>' +
- '<button class="btn" style="margin-top:16px;" onclick="location.reload()" data-i18n="refresh">Обновить</button></div>';
+ showLoadError(lastErr || 'Нет ответа API');
+ __initInFlight = false;
  return;
  }
 
  try { renderMain(); } catch (re) {}
- showPage('home');
+ try { if (box) box.style.display = 'none'; } catch (e) {}
+ try { showPage('home'); } catch (e) {}
+ try { if (typeof loadFeed === 'function') loadFeed(); } catch (e) {}
  window.__xcodBootOk = true;
  } catch (e) {
- box.innerHTML = '<div class="empty"><div class="spinner"></div>' +
- '<div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div>' +
- '<button class="btn" style="margin-top:16px;" onclick="location.reload()" data-i18n="refresh">Обновить</button></div>';
+ showLoadError(e && e.message ? e.message : e);
+ } finally {
+ __initInFlight = false;
  }
 }
 
@@ -16226,36 +16200,35 @@ function openTelegramOrExternal(url) {
 (function boot() {
  function start() {
  try {
- // если официальный скрипт уже подменил WebApp — берём его
  tg = getTg();
  if (tg.ready) tg.ready();
  if (tg.expand) tg.expand();
  } catch (e) {}
  init();
  }
- // стартуем сразу (есть заглушка), через 300мс ещё раз если пришёл реальный WebApp
- start();
+ // Delay first start slightly so telegram-web-app.js (async) can attach on mobile
+ setTimeout(start, 50);
+ // Retry once if initData arrived late and boot did not finish
  setTimeout(function() {
  try {
- if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+ if (window.__xcodBootOk) return;
+ if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData &&
+ String(Telegram.WebApp.initData).length > 10) {
  tg = Telegram.WebApp;
- if (!window.__xcodBootOk) start();
+ init();
  }
  } catch (e) {}
- }, 400);
-})();
-
-
-// если всё-таки пришёл initData после показа логина — прячем и грузим как миниапп
-setTimeout(async function() {
+ }, 1200);
+ setTimeout(function() {
  try {
- if (isTelegramMiniApp() && document.getElementById('login-overlay') &&
- document.getElementById('login-overlay').style.display === 'flex') {
- hideLoginOverlay();
- if (typeof init === 'function') init();
+ if (window.__xcodBootOk) return;
+ if (isTelegramMiniApp()) {
+ try { hideLoginOverlay(); } catch (e) {}
+ init();
  }
  } catch (e) {}
-}, 3000);
+ }, 4000);
+})();
 
 document.addEventListener('visibilitychange', function() {
  if (document.visibilityState !== 'visible') return;
@@ -16288,14 +16261,12 @@ function showPrivacyOverlay(policyUrl) {
  else lang = localStorage.getItem('xcod_lang') || 'ru';
  } catch (e) {}
  var isEn = (lang !== 'ru' && lang !== 'uk');
- var isSite = false;
- try { isSite = !isTelegramMiniApp(); } catch (e) {}
 
  var title = isEn ? 'Privacy policy' : 'Политика конфиденциальности';
  var prefix = isEn ? 'By continuing, you agree to the ' : 'Продолжая, вы соглашаетесь с ';
  var linkLabel = isEn
- ? (isSite ? 'privacy and data collection policy (for Website)' : "privacy and data collection policy (for MiniApp's)")
- : (isSite ? 'политикой конфиденциальности и сбора данных (for Website)' : "политикой конфиденциальности и сбора данных (for MiniApp's)");
+ ? "privacy and data collection policy (for MiniApp's)"
+ : "политикой конфиденциальности и сбора данных (for MiniApp's)";
  var accept = isEn ? 'Accept and continue' : 'Принимаю и продолжаю';
 
  if (h2) h2.textContent = title;
@@ -16328,26 +16299,15 @@ function hidePrivacyOverlay() {
 }
 async function acceptPrivacyMiniapp() {
  try {
- var src = 'miniapp';
- try { if (!isTelegramMiniApp()) src = 'website'; } catch (e) {}
- await apiPost('/api/privacy/accept', { source: src });
+ await apiPost('/api/privacy/accept', {});
  } catch (e) {}
- if (userData) {
- try {
- if (isTelegramMiniApp()) userData.privacy_miniapp = true;
- else userData.privacy_website = true;
- } catch (e2) {
- userData.privacy_miniapp = true;
- }
- }
+ if (userData) userData.privacy_miniapp = true;
  hidePrivacyOverlay();
  try { if (typeof loadFeed === 'function') loadFeed(); } catch(e) {}
- try { if (typeof showPage === 'function') showPage('home'); } catch(e) {}
 }
 document.addEventListener('DOMContentLoaded', function() {
  var btn = document.getElementById('privacy-accept-btn');
  if (btn) btn.addEventListener('click', function() { acceptPrivacyMiniapp(); });
- try { updateOwnProfileLogoutBtn(); } catch (e) {}
 });
 
 </script>
