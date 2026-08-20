@@ -34,7 +34,8 @@
  };
  }
  </script>
- <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+ <!-- sync load: on iOS async often races and Mini App never gets initData -->
+ <script src="https://telegram.org/js/telegram-web-app.js"></script>
  <script>
  // Аварийный таймер: если за 10 сек init не сменил экран — показать ошибку
  window.__xcodBoot = Date.now();
@@ -786,8 +787,21 @@
  justify-content: space-between;
  gap: 10px;
  margin-bottom: 4px;
+ min-height: 40px;
  }
  .profile-top-bar .back-link { margin-bottom: 0; }
+ .profile-logout-btn {
+ padding: 8px 14px;
+ border-radius: 10px;
+ border: 1px solid #e53935;
+ background: #0a0a0a;
+ color: #e53935;
+ font-size: 14px;
+ font-weight: 600;
+ cursor: pointer;
+ line-height: 1;
+ }
+ .profile-logout-btn:active { opacity: 0.85; }
  .profile-edit-btn {
  width: 40px; height: 40px; border-radius: 12px;
  border: 1.5px solid rgba(128,128,128,0.35);
@@ -1840,6 +1854,10 @@
 
  <!-- PROFILE -->
  <div id="page-profile" class="page">
+ <div class="profile-top-bar" id="own-profile-top-bar" style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px;margin-bottom:4px;">
+ <button type="button" class="back-link" id="btn-profile-back" onclick="showPage('home')" style="margin-bottom:0;" data-i18n="back">← Назад</button>
+ <button type="button" class="profile-logout-btn" id="btn-profile-logout" onclick="logoutWebAccount()" style="display:none;">Выйти</button>
+ </div>
  <div class="profile-header">
  <div class="profile-avatar-wrap" id="profile-avatar-wrap">
  <img id="profile-avatar-img" class="profile-avatar-img" alt="" style="display:none;">
@@ -2149,6 +2167,37 @@ function hideLoginOverlay() {
  try { document.body.style.overflow = ''; } catch (e) {}
 }
 
+function logoutWebAccount() {
+ try {
+ if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return;
+ } catch (e) {}
+ try {
+ var tok = (typeof getAuthToken === 'function' ? getAuthToken() : null);
+ if (tok) {
+ fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/logout', {
+ method: 'POST',
+ headers: { 'Authorization': 'Bearer ' + tok, 'X-Session-Token': tok, 'Accept': 'application/json' }
+ }).catch(function(){});
+ }
+ } catch (e) {}
+ try { localStorage.removeItem(typeof WEB_SESSION_KEY !== 'undefined' ? WEB_SESSION_KEY : 'exchange_web_session'); } catch (e) {}
+ try { __webSessionToken = null; } catch (e) {}
+ try { userData = null; } catch (e) {}
+ showLoginOverlay();
+}
+
+function updateOwnProfileLogoutBtn() {
+ try {
+ var back = document.getElementById('btn-profile-back');
+ if (back) back.style.display = 'inline-flex';
+ var btn = document.getElementById('btn-profile-logout');
+ if (!btn) return;
+ var isSite = true;
+ try { isSite = !isTelegramMiniApp(); } catch (e) {}
+ btn.style.display = isSite ? 'inline-flex' : 'none';
+ } catch (e) {}
+}
+
 function loadTelegramLoginWidget() {
  var wrap = document.getElementById('login-widget-wrap');
  if (!wrap) return;
@@ -2267,16 +2316,19 @@ async function continueAfterAuth() {
 
 function apiFetch(path, options) {
  options = options || {};
- var ms = options.timeout || 10000;
+ var ms = options.timeout || 12000;
  var initData = '';
  try { initData = (getTg() && getTg().initData) || (tg && tg.initData) || ''; } catch (e) {}
  var sessionTok = '';
  try { if (!initData) sessionTok = getAuthToken() || ''; } catch (e) {}
 
- var sep = path.indexOf('?') >= 0 ? '&' : '?';
+ // iOS WKWebView: long initData in query string breaks requests (URL length).
+ // Auth only via headers (and POST body). session_token in query only if short.
  var url = API_URL + path;
- if (initData) url += sep + 'initData=' + encodeURIComponent(initData);
- else if (sessionTok) url += sep + 'session_token=' + encodeURIComponent(sessionTok);
+ if (sessionTok && !initData) {
+ var sep = path.indexOf('?') >= 0 ? '&' : '?';
+ url += sep + 'session_token=' + encodeURIComponent(sessionTok);
+ }
 
  var headers = { 'Accept': 'application/json' };
  if (initData) headers['X-Telegram-Init-Data'] = initData;
@@ -2288,7 +2340,12 @@ function apiFetch(path, options) {
  for (var k in options.headers) headers[k] = options.headers[k];
  }
 
- var fetchOpts = { method: options.method || 'GET', headers: headers };
+ var fetchOpts = {
+ method: options.method || 'GET',
+ headers: headers,
+ credentials: 'omit',
+ cache: 'no-store'
+ };
  if (options.body) fetchOpts.body = options.body;
 
  var p = fetch(url, fetchOpts).then(function(res) {
@@ -2351,7 +2408,7 @@ async function init() {
  try {
  if (!box) return;
  box.style.display = '';
- var d = (detail ? String(detail) : '').replace(/</g, '&lt;').slice(0, 180);
+ var d = (detail ? String(detail) : '').replace(/</g, '&lt;').slice(0, 200);
  box.innerHTML = '<div class="empty" style="padding:24px;text-align:center;">' +
  '<div style="font-weight:600;margin-bottom:8px;">Не удалось загрузить</div>' +
  (d ? '<div style="font-size:12px;color:var(--hint);margin-bottom:12px;word-break:break-word;">' + d + '</div>' : '') +
@@ -2367,26 +2424,21 @@ async function init() {
  try { tg = tgLocal; } catch (e) {}
  try { tgLocal.ready && tgLocal.ready(); } catch (e) {}
  try { tgLocal.expand && tgLocal.expand(); } catch (e) {}
- try { tgLocal.disableVerticalSwipes && tgLocal.disableVerticalSwipes(); } catch (e) {}
 
  var inTg = false;
  try { inTg = isTelegramEnvironment(); } catch (e) {}
 
- // Mobile Telegram often delivers initData later than desktop — wait longer
+ // iOS: initData often later than Android
  if ((!tgLocal.initData || String(tgLocal.initData).length < 10) && inTg) {
  if (box) {
  box.style.display = '';
  box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Подключение к Telegram…</div></div>';
  }
- var waited = await waitForTelegramInitData(5500);
+ await waitForTelegramInitData(6000);
  tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tgLocal;
  try { tg = tgLocal; } catch (e) {}
- if (waited) {
- try { /* initData is read-only on real WebApp */ } catch (e) {}
- }
- // second short wait if still empty (slow Android WebView)
  if (!tgLocal.initData || String(tgLocal.initData).length < 10) {
- waited = await waitForTelegramInitData(2500);
+ await waitForTelegramInitData(3000);
  tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tgLocal;
  try { tg = tgLocal; } catch (e) {}
  }
@@ -2394,13 +2446,13 @@ async function init() {
 
  __isMiniApp = !!(tgLocal && tgLocal.initData && String(tgLocal.initData).length > 10);
 
- // Inside Telegram but still no initData — do NOT open website login widget (hangs on mobile)
+ // Inside Telegram without initData — never show website Login Widget (broken on iOS Mini App)
  if (!__isMiniApp && inTg) {
  if (box) {
  box.style.display = '';
  box.innerHTML = '<div class="empty" style="padding:24px;text-align:center;">' +
  '<div style="font-weight:600;margin-bottom:10px;">Нет данных Telegram</div>' +
- '<div style="font-size:13px;color:var(--hint);margin-bottom:16px;line-height:1.4;">Откройте мини-приложение кнопкой из бота (Menu / Web App), не через браузер.</div>' +
+ '<div style="font-size:13px;color:var(--hint);margin-bottom:16px;line-height:1.4;">Откройте мини-приложение из меню бота (кнопка Web App / Menu).</div>' +
  '<button class="btn" onclick="location.reload()">Повторить</button></div>';
  }
  __initInFlight = false;
@@ -2408,13 +2460,13 @@ async function init() {
  }
 
  if (!__isMiniApp) {
- // Browser / website only
  var sess = loadWebSession();
  if (sess && sess.token) {
  __webSessionToken = sess.token;
  try {
  await apiFetch('/api/auth/session', { method: 'GET', timeout: 10000 });
  await continueAfterAuth();
+ try { updateOwnProfileLogoutBtn(); } catch (e) {}
  __initInFlight = false;
  return;
  } catch (eSess) {
@@ -2427,7 +2479,6 @@ async function init() {
  return;
  }
 
- // Mini App path: health + user
  if (box) {
  box.style.display = '';
  box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
@@ -2436,8 +2487,7 @@ async function init() {
  var lastErr = '';
  for (var attempt = 0; attempt < 4 && !ok; attempt++) {
  try {
- if (attempt > 0) setLoad('Повтор ' + (attempt + 1) + '…');
- await apiFetch('/api/health', { method: 'GET', timeout: 10000 });
+ await apiFetch('/api/health', { method: 'GET', timeout: 12000 });
  userData = await apiGet('/api/user');
  if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); __initInFlight = false; return; }
  if (userData && !userData.privacy_miniapp) {
@@ -2466,7 +2516,7 @@ async function init() {
  ok = true;
  } catch (e) {
  lastErr = (e && e.message) ? e.message : String(e);
- await new Promise(function(r){ setTimeout(r, 600 + attempt * 400); });
+ await new Promise(function(r){ setTimeout(r, 500 + attempt * 400); });
  }
  }
  if (!ok) {
@@ -2476,6 +2526,7 @@ async function init() {
  }
 
  try { renderMain(); } catch (re) {}
+ try { updateOwnProfileLogoutBtn(); } catch (e) {}
  try { if (box) box.style.display = 'none'; } catch (e) {}
  try { showPage('home'); } catch (e) {}
  try { if (typeof loadFeed === 'function') loadFeed(); } catch (e) {}
@@ -13352,9 +13403,9 @@ async function republishListing(id) {
 async function deleteListingHistory(id) {
  if (!confirm('Удалить объявление из истории?')) return;
  try {
- var res = await fetch(API_URL + '/api/listings/' + id + '?initData=' + encodeURIComponent(tg.initData || ''), {
+ var res = await fetch(API_URL + '/api/listings/' + id, {
  method: 'DELETE',
- headers: { 'X-Telegram-Init-Data': tg.initData || '' }
+ headers: { 'Accept': 'application/json', 'X-Telegram-Init-Data': (tg && tg.initData) || '' }
  });
  var data = await res.json().catch(function(){ return {}; });
  if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
@@ -16200,35 +16251,36 @@ function openTelegramOrExternal(url) {
 (function boot() {
  function start() {
  try {
+ // если официальный скрипт уже подменил WebApp — берём его
  tg = getTg();
  if (tg.ready) tg.ready();
  if (tg.expand) tg.expand();
  } catch (e) {}
  init();
  }
- // Delay first start slightly so telegram-web-app.js (async) can attach on mobile
- setTimeout(start, 50);
- // Retry once if initData arrived late and boot did not finish
+ // стартуем сразу (есть заглушка), через 300мс ещё раз если пришёл реальный WebApp
+ start();
  setTimeout(function() {
  try {
- if (window.__xcodBootOk) return;
- if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData &&
- String(Telegram.WebApp.initData).length > 10) {
+ if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
  tg = Telegram.WebApp;
- init();
+ if (!window.__xcodBootOk) start();
  }
  } catch (e) {}
- }, 1200);
- setTimeout(function() {
- try {
- if (window.__xcodBootOk) return;
- if (isTelegramMiniApp()) {
- try { hideLoginOverlay(); } catch (e) {}
- init();
- }
- } catch (e) {}
- }, 4000);
+ }, 400);
 })();
+
+
+// если всё-таки пришёл initData после показа логина — прячем и грузим как миниапп
+setTimeout(async function() {
+ try {
+ if (isTelegramMiniApp() && document.getElementById('login-overlay') &&
+ document.getElementById('login-overlay').style.display === 'flex') {
+ hideLoginOverlay();
+ if (typeof init === 'function') init();
+ }
+ } catch (e) {}
+}, 3000);
 
 document.addEventListener('visibilitychange', function() {
  if (document.visibilityState !== 'visible') return;
