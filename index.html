@@ -84,33 +84,6 @@
  .topbar-left { display: flex; align-items: center; }
  .topbar-right { display: flex; align-items: center; gap: 10px; }
 
- .topbar-right .logout-btn {
- width: auto; min-width: 36px; height: 36px; padding: 0 10px; border-radius: 10px;
- border: 1px solid rgba(128,128,128,0.35);
- background: rgba(128,128,128,0.12); color: var(--text); cursor: pointer; font-size: 13px;
- display: none; align-items: center; justify-content: center; font-weight: 600;
- }
- body.site-mode .topbar-right .logout-btn { display: flex !important; }
- body.site-mode .topbar-left { gap: 8px; }
- body.site-mode .topbar-left .lang-btn,
- body.site-mode .topbar-left .balance-chip { display: flex; }
- body.site-mode .topbar-right .lang-btn,
- body.site-mode .topbar-right .balance-chip { display: none; }
- .login-btn-primary {
- width: 100%; padding: 12px 16px; border: none; border-radius: 12px;
- background: #2AABEE; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
- margin-top: 8px;
- }
- .login-btn-secondary {
- width: 100%; padding: 11px 16px; border: 1px solid rgba(128,128,128,0.35); border-radius: 12px;
- background: transparent; color: var(--hint, #888); font-size: 14px; font-weight: 500; cursor: pointer;
- margin-top: 10px;
- }
- .login-as-label { font-size: 13px; color: var(--hint,#888); margin: 8px 0 4px; text-align: center; }
- #login-widget-wrap { min-height: 0; }
- #login-widget-wrap iframe { margin: 8px auto !important; }
-
-
  .icon-btn {
  width: 40px; height: 40px; border: none; background: transparent;
  color: var(--text); font-size: 22px; cursor: pointer;
@@ -813,15 +786,9 @@
  justify-content: space-between;
  gap: 10px;
  margin-bottom: 4px;
+ min-height: 40px;
  }
  .profile-top-bar .back-link { margin-bottom: 0; }
- .profile-edit-btn {
- width: 40px; height: 40px; border-radius: 12px;
- border: 1.5px solid rgba(128,128,128,0.35);
- background: var(--secondary-bg); color: var(--text);
- font-size: 18px; cursor: pointer; display: flex;
- align-items: center; justify-content: center; flex-shrink: 0;
- }
  .profile-logout-btn {
  padding: 8px 14px;
  border-radius: 10px;
@@ -834,16 +801,13 @@
  line-height: 1;
  }
  .profile-logout-btn:active { opacity: 0.85; }
- .profile-top-bar {
- display: flex;
- align-items: center;
- justify-content: space-between;
- gap: 10px;
- margin-bottom: 4px;
- min-height: 36px;
+ .profile-edit-btn {
+ width: 40px; height: 40px; border-radius: 12px;
+ border: 1.5px solid rgba(128,128,128,0.35);
+ background: var(--secondary-bg); color: var(--text);
+ font-size: 18px; cursor: pointer; display: flex;
+ align-items: center; justify-content: center; flex-shrink: 0;
  }
- .profile-top-bar .profile-edit-btn { margin-left: auto; }
-
  .rating-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 14px; }
  .rating-chip {
  background: var(--secondary-bg); border-radius: 12px; padding: 10px 14px;
@@ -1149,8 +1113,9 @@
  <div class="login-card">
  <h2 id="login-title">Exchange</h2>
  <p class="sub" id="login-sub">Войдите через Telegram, чтобы пользоваться площадкой на сайте. Те же аккаунт, баланс и настройки, что и в боте.</p>
- <div id="login-choice" style="display:none;"></div>
- <div class="login-widget-wrap" id="login-widget-wrap" style="display:none;"></div>
+ <div class="login-widget-wrap" id="login-widget-wrap">
+ <div class="spinner" style="margin:12px auto;"></div>
+ </div>
  <p class="sub" id="login-hint" style="margin-top:16px;font-size:12px;opacity:.6;">Если виджет не загрузился — откройте бота в Telegram и зайдите в мини-приложение.</p>
  </div>
 </div>
@@ -2088,9 +2053,6 @@ function withTimeout(promise, ms, msg) {
 
 /* ===== Web session (сайт) + Mini App dual mode ===== */
 var WEB_SESSION_KEY = 'exchange_web_session';
-var LAST_WEB_ACCOUNT_KEY = 'exchange_last_account';
-var __loginWidgetMode = 'primary'; // primary | other
-
 var WEB_SESSION_DAYS = 14;
 var __webSessionToken = null;
 var __isMiniApp = false;
@@ -2191,185 +2153,82 @@ function getAuthToken() {
  return s ? s.token : null;
 }
 
-
-function getLastWebAccount() {
-  // Deprecated: no separate "last login" store — only active session (14 days)
-  return null;
-}
-function saveLastWebAccount(acc) {
-  // no-op: account is kept only inside web session
-}
-function clearLastWebAccount() {
-  try { localStorage.removeItem(LAST_WEB_ACCOUNT_KEY); } catch (e) {}
-}
-function formatLoginAsLabel(acc) {
-  if (!acc) return 'Telegram';
-  var n = ((acc.first_name || '') + ' ' + (acc.last_name || '')).trim();
-  if (n) return n;
-  if (acc.username) return '@' + String(acc.username).replace(/^@/, '');
-  return 'ID ' + (acc.id || '');
+function showLoginOverlay() {
+ var ov = document.getElementById('login-overlay');
+ if (ov) ov.style.display = 'flex';
+ try { document.body.style.overflow = 'hidden'; } catch (e) {}
+ loadTelegramLoginWidget();
 }
 
-/** Resume existing valid session without Telegram widget */
-async function resumeWebSessionLogin() {
-  var sess = loadWebSession();
-  if (!sess || !sess.token) {
-    showTelegramWidgetInWrap();
-    return;
-  }
-  __webSessionToken = sess.token;
-  hideLoginOverlay();
-  try {
-    await continueAfterAuth();
-  } catch (e) {
-    // Session rejected by server — clear and show Telegram login
-    clearWebSession();
-    showLoginOverlay();
-  }
+function hideLoginOverlay() {
+ var ov = document.getElementById('login-overlay');
+ if (ov) ov.style.display = 'none';
+ try { document.body.style.overflow = ''; } catch (e) {}
 }
-function syncTopBalanceChips() {
-  try {
-    var r = document.getElementById('top-balance');
-    var l = document.getElementById('top-balance-left');
-    if (r && l) l.textContent = r.textContent;
-  } catch (e) {}
+
+function logoutWebAccount() {
+ try {
+ if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return;
+ } catch (e) {}
+ try {
+ var tok = (typeof getAuthToken === 'function' ? getAuthToken() : null);
+ if (tok) {
+ fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/logout', {
+ method: 'POST',
+ headers: { 'Authorization': 'Bearer ' + tok, 'X-Session-Token': tok, 'Accept': 'application/json' }
+ }).catch(function(){});
+ }
+ } catch (e) {}
+ try { localStorage.removeItem(typeof WEB_SESSION_KEY !== 'undefined' ? WEB_SESSION_KEY : 'exchange_web_session'); } catch (e) {}
+ try { __webSessionToken = null; } catch (e) {}
+ try { userData = null; } catch (e) {}
+ showLoginOverlay();
 }
 
 function updateOwnProfileLogoutBtn() {
-  try {
-    var btn = document.getElementById('btn-profile-logout');
-    if (!btn) return;
-    var isSite = true;
-    try { isSite = !isTelegramMiniApp(); } catch (e) {}
-    btn.style.display = isSite ? 'inline-flex' : 'none';
-  } catch (e) {}
+ try {
+ var back = document.getElementById('btn-profile-back');
+ if (back) back.style.display = 'inline-flex';
+ var btn = document.getElementById('btn-profile-logout');
+ if (!btn) return;
+ var isSite = true;
+ try { isSite = !isTelegramMiniApp(); } catch (e) {}
+ btn.style.display = isSite ? 'inline-flex' : 'none';
+ } catch (e) {}
 }
 
-function applySiteChrome() {
-  try {
-    document.body.classList.remove('site-mode');
-    updateOwnProfileLogoutBtn();
-  } catch (e) {}
-}
-function logoutWebAccount() {
-  try {
-    if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return;
-  } catch (e) {}
-  try {
-    var tok = (typeof getAuthToken === 'function' ? getAuthToken() : null);
-    if (tok) {
-      fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/logout', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + tok, 'X-Session-Token': tok, 'Accept': 'application/json' }
-      }).catch(function(){});
-    }
-  } catch (e) {}
-  try {
-    localStorage.removeItem(typeof WEB_SESSION_KEY !== 'undefined' ? WEB_SESSION_KEY : 'exchange_web_session');
-  } catch (e) {}
-  try { __webSessionToken = null; } catch (e) {}
-  try { userData = null; } catch (e) {}
-  showLoginOverlay();
-}
-function showLoginOverlay() {
-  var ov = document.getElementById('login-overlay');
-  if (ov) ov.style.display = 'flex';
-  try { document.body.style.overflow = 'hidden'; } catch (e) {}
-  renderLoginChoices();
-}
-function hideLoginOverlay() {
-  var ov = document.getElementById('login-overlay');
-  if (ov) ov.style.display = 'none';
-  try { document.body.style.overflow = ''; } catch (e) {}
-}
-function renderLoginChoices() {
-  var choice = document.getElementById('login-choice');
-  var wrap = document.getElementById('login-widget-wrap');
-  if (!choice || !wrap) return;
-  wrap.style.display = 'none';
-  wrap.innerHTML = '';
-  choice.style.display = 'block';
-  choice.innerHTML = '';
-
-  // Valid session (14 days) → one button "Войти как Имя" that enters the app directly
-  var sess = null;
-  try { sess = loadWebSession(); } catch (e) {}
-  var user = (sess && sess.user) ? sess.user : null;
-
-  if (sess && sess.token && user) {
-    var b1 = document.createElement('button');
-    b1.type = 'button';
-    b1.className = 'login-btn-primary';
-    b1.id = 'btn-login-as';
-    b1.textContent = (typeof tBlock === 'function' ? tBlock('login_as') : 'Войти как') + ' ' + formatLoginAsLabel(user);
-    b1.onclick = function() {
-      // Direct resume — no second menu / Telegram widget
-      resumeWebSessionLogin();
-    };
-    choice.appendChild(b1);
-  } else {
-    // No session → Telegram login only
-    var b0 = document.createElement('button');
-    b0.type = 'button';
-    b0.className = 'login-btn-primary';
-    b0.id = 'btn-login-tg';
-    b0.textContent = (typeof tBlock === 'function' ? tBlock('login_telegram') : 'Войти через Telegram');
-    b0.onclick = function() {
-      __loginWidgetMode = 'primary';
-      showTelegramWidgetInWrap();
-    };
-    choice.appendChild(b0);
-  }
-}
-function showTelegramWidgetInWrap() {
-  var choice = document.getElementById('login-choice');
-  var wrap = document.getElementById('login-widget-wrap');
-  if (choice) choice.style.display = 'none';
-  if (!wrap) return;
-  wrap.style.display = 'block';
-  wrap.innerHTML = '<div class="spinner" style="margin:12px auto;"></div>';
-  // back button
-  var back = document.createElement('button');
-  back.type = 'button';
-  back.className = 'login-btn-secondary';
-  back.textContent = (typeof tBlock === 'function' ? tBlock('back') : 'Назад');
-  back.style.marginBottom = '10px';
-  back.onclick = function() { renderLoginChoices(); };
-  fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/config', { method: 'GET' })
-  .then(function(r) { return r.json(); })
-  .then(function(cfg) {
-    var bot = (cfg && cfg.bot_username) ? cfg.bot_username : '';
-    if (!bot) {
-      wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Бот не настроен (BOT_USERNAME).</p>';
-      wrap.insertBefore(back, wrap.firstChild);
-      return;
-    }
-    wrap.innerHTML = '';
-    wrap.appendChild(back);
-    window.onTelegramAuth = function(user) {
-      handleTelegramLogin(user);
-    };
-    // Mobile-friendly: use large button + explicit userpic off to avoid broken layout
-    var s = document.createElement('script');
-    s.async = true;
-    s.src = 'https://telegram.org/js/telegram-widget.js?22';
-    s.setAttribute('data-telegram-login', bot);
-    s.setAttribute('data-size', 'large');
-    s.setAttribute('data-radius', '12');
-    s.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    s.setAttribute('data-request-access', 'write');
-    // Do NOT use data-userpic on mobile - can break label
-    wrap.appendChild(s);
-  })
-  .catch(function() {
-    wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Не удалось загрузить вход. Проверьте API.</p>';
-  });
-}
 function loadTelegramLoginWidget() {
-  // compatibility: show choice screen instead of raw widget
-  renderLoginChoices();
+ var wrap = document.getElementById('login-widget-wrap');
+ if (!wrap) return;
+ wrap.innerHTML = '<div class="spinner" style="margin:12px auto;"></div>';
+ // config from API
+ fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/config', { method: 'GET' })
+ .then(function(r) { return r.json(); })
+ .then(function(cfg) {
+ var bot = (cfg && cfg.bot_username) ? cfg.bot_username : '';
+ if (!bot) {
+ wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Бот не настроен (BOT_USERNAME). Откройте мини-приложение в Telegram.</p>';
+ return;
+ }
+ wrap.innerHTML = '';
+ // Telegram Login Widget
+ window.onTelegramAuth = function(user) {
+ handleTelegramLogin(user);
+ };
+ var s = document.createElement('script');
+ s.async = true;
+ s.src = 'https://telegram.org/js/telegram-widget.js?22';
+ s.setAttribute('data-telegram-login', bot);
+ s.setAttribute('data-size', 'large');
+ s.setAttribute('data-radius', '12');
+ s.setAttribute('data-onauth', 'onTelegramAuth(user)');
+ s.setAttribute('data-request-access', 'write');
+ wrap.appendChild(s);
+ })
+ .catch(function() {
+ wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Не удалось загрузить вход. Проверьте API.</p>';
+ });
 }
-
 
 async function handleTelegramLogin(user) {
  try {
@@ -2390,15 +2249,18 @@ async function handleTelegramLogin(user) {
  last_name: data.last_name,
  photo_url: data.photo_url
  });
- saveLastWebAccount({
- id: data.user_id,
- username: data.username,
- first_name: data.first_name,
- last_name: data.last_name,
- photo_url: data.photo_url
- });
  hideLoginOverlay();
- // continue boot (privacy website checked inside continueAfterAuth)
+ // First login: ask privacy consent (website vs miniapp flags)
+ try {
+ var needPrivacy = false;
+ if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
+ needPrivacy = !data.privacy_miniapp;
+ } else {
+ needPrivacy = !(data.privacy_website || data.privacy_miniapp);
+ }
+ if (needPrivacy) showPrivacyOverlay(data.privacy_policy_url || '');
+ } catch (e) {}
+ // continue boot
  await continueAfterAuth();
  } catch (e) {
  alert('Ошибка входа: ' + (e && e.message ? e.message : e));
@@ -2411,13 +2273,19 @@ async function continueAfterAuth() {
  if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
  userData = await apiGet('/api/user');
  if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
+ // First visit: privacy permission
+ try {
+ var needPrivacy = false;
  if (userData) {
- if (isTelegramMiniApp()) {
- if (!userData.privacy_miniapp) showPrivacyOverlay(userData.privacy_policy_url || '');
+ if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
+ needPrivacy = !userData.privacy_miniapp;
  } else {
- if (!userData.privacy_website) showPrivacyOverlay(userData.privacy_policy_url || '');
+ needPrivacy = !(userData.privacy_website || userData.privacy_miniapp);
  }
  }
+ if (needPrivacy) showPrivacyOverlay(userData.privacy_policy_url || '');
+ } catch (e) {}
+ try { updateOwnProfileLogoutBtn(); } catch (e) {}
  // lang/theme sync
  try {
  var srvLang = (userData && userData.lang) ? userData.lang : null;
@@ -2430,9 +2298,7 @@ async function continueAfterAuth() {
  } catch (e) {}
  __authReady = true;
  window.__xcodBootOk = true;
- try { applySiteChrome(); } catch (e) {}
  try { if (typeof renderMain === 'function') renderMain(); } catch (e) {}
- try { applySiteChrome(); syncTopBalanceChips && syncTopBalanceChips(); } catch (e) {}
   if (box) box.style.display = 'none';
   try {
     if (typeof showPage === 'function') showPage('home');
@@ -2465,7 +2331,7 @@ async function continueAfterAuth() {
 
 function apiFetch(path, options) {
  options = options || {};
- var ms = options.timeout || 20000;
+ var ms = options.timeout || 10000;
  var initData = '';
  try { initData = (getTg() && getTg().initData) || (tg && tg.initData) || ''; } catch (e) {}
  var sessionTok = '';
@@ -2576,13 +2442,8 @@ async function init() {
  if (sess && sess.token) {
  __webSessionToken = sess.token;
  try {
- await apiFetch('/api/auth/session', { method: 'GET', timeout: 20000 });
- try {
-   if (sess.user) saveLastWebAccount(sess.user);
-   else if (sess.id) saveLastWebAccount(sess);
- } catch (eL) {}
+ await apiFetch('/api/auth/session', { method: 'GET', timeout: 8000 });
  await continueAfterAuth();
- try { applySiteChrome(); } catch (e) {}
  return;
  } catch (eSess) {
  clearWebSession();
@@ -2597,15 +2458,11 @@ async function init() {
  var ok = false;
  for (var attempt = 0; attempt < 3 && !ok; attempt++) {
  try {
- await apiFetch('/api/health', { method: 'GET', timeout: 15000 });
+ await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
  userData = await apiGet('/api/user');
  if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
- if (userData) {
- if (isTelegramMiniApp()) {
- if (!userData.privacy_miniapp) showPrivacyOverlay(userData.privacy_policy_url || '');
- } else {
- if (!userData.privacy_website) showPrivacyOverlay(userData.privacy_policy_url || '');
- }
+ if (userData && !userData.privacy_miniapp) {
+ showPrivacyOverlay(userData.privacy_policy_url || '');
  }
  // sync lang + theme from bot/server
  try {
@@ -2761,7 +2618,6 @@ function setBalance(bal) {
  var html = formatted + ' <small>$</small>';
  document.getElementById('balance-value').innerHTML = html;
  document.getElementById('top-balance').textContent = formatted + ' $';
- try { syncTopBalanceChips(); } catch(e) {}
  var avail = document.getElementById('withdraw-available');
  if (avail) avail.textContent = formatted;
 }
@@ -2771,7 +2627,6 @@ function showPage(name) {
  var page = document.getElementById('page-' + name);
  if (page) page.classList.add('active');
  try { applyI18n(); } catch (e) {}
- try { if (name === 'profile' && typeof updateOwnProfileLogoutBtn === 'function') updateOwnProfileLogoutBtn(); } catch (e) {}
  if (name === 'collaborate' || name === 'support-hire') { try { renderHireInfo(); } catch (e) {} }
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
  if (name === 'deposit' || name === 'withdraw') { try { updateFeeHint(name); } catch (e) {} }
@@ -2990,11 +2845,6 @@ var I18N = {
  edit: 'Редактировать',
  delete: 'Удалить',
  unpublish: 'Снять с публикации',
-        login_as: 'Войти как',
-        other_account: 'Другой аккаунт',
-        login_telegram: 'Войти через Telegram',
-        last_login: 'Последний вход',
-
         delete_from_history: 'Удалить из истории',
         delete_listing: 'Удалить объявление',
  favorite: 'В избранное',
@@ -3534,11 +3384,6 @@ var I18N = {
  edit: 'Edit',
  delete: 'Delete',
  unpublish: 'Unpublish',
-        login_as: 'Log in as',
-        other_account: 'Another account',
-        login_telegram: 'Log in with Telegram',
-        last_login: 'Last login',
-
         delete_from_history: 'Delete from history',
         delete_listing: 'Delete listing',
  favorite: 'Favorite',
@@ -16443,14 +16288,14 @@ function showPrivacyOverlay(policyUrl) {
  else lang = localStorage.getItem('xcod_lang') || 'ru';
  } catch (e) {}
  var isEn = (lang !== 'ru' && lang !== 'uk');
+ var isSite = false;
+ try { isSite = !isTelegramMiniApp(); } catch (e) {}
 
  var title = isEn ? 'Privacy policy' : 'Политика конфиденциальности';
  var prefix = isEn ? 'By continuing, you agree to the ' : 'Продолжая, вы соглашаетесь с ';
- var isSite = false;
- try { isSite = !isTelegramMiniApp(); } catch (e) {}
  var linkLabel = isEn
- ? (isSite ? "privacy and data collection policy (for Website)" : "privacy and data collection policy (for MiniApp's)")
- : (isSite ? "политикой конфиденциальности и сбора данных (for Website)" : "политикой конфиденциальности и сбора данных (for MiniApp's)");
+ ? (isSite ? 'privacy and data collection policy (for Website)' : "privacy and data collection policy (for MiniApp's)")
+ : (isSite ? 'политикой конфиденциальности и сбора данных (for Website)' : "политикой конфиденциальности и сбора данных (for MiniApp's)");
  var accept = isEn ? 'Accept and continue' : 'Принимаю и продолжаю';
 
  if (h2) h2.textContent = title;
@@ -16483,21 +16328,26 @@ function hidePrivacyOverlay() {
 }
 async function acceptPrivacyMiniapp() {
  try {
- var src = isTelegramMiniApp() ? 'miniapp' : 'website';
+ var src = 'miniapp';
+ try { if (!isTelegramMiniApp()) src = 'website'; } catch (e) {}
  await apiPost('/api/privacy/accept', { source: src });
  } catch (e) {}
  if (userData) {
+ try {
  if (isTelegramMiniApp()) userData.privacy_miniapp = true;
  else userData.privacy_website = true;
+ } catch (e2) {
+ userData.privacy_miniapp = true;
+ }
  }
  hidePrivacyOverlay();
  try { if (typeof loadFeed === 'function') loadFeed(); } catch(e) {}
  try { if (typeof showPage === 'function') showPage('home'); } catch(e) {}
 }
 document.addEventListener('DOMContentLoaded', function() {
- try { applySiteChrome(); } catch (e) {}
  var btn = document.getElementById('privacy-accept-btn');
  if (btn) btn.addEventListener('click', function() { acceptPrivacyMiniapp(); });
+ try { updateOwnProfileLogoutBtn(); } catch (e) {}
 });
 
 </script>
