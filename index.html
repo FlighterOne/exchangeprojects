@@ -84,6 +84,32 @@
  .topbar-left { display: flex; align-items: center; }
  .topbar-right { display: flex; align-items: center; gap: 10px; }
 
+ .topbar-right .logout-btn {
+ width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(128,128,128,0.25);
+ background: transparent; color: var(--text); cursor: pointer; font-size: 16px;
+ display: none; align-items: center; justify-content: center;
+ }
+ body.site-mode .topbar-right .logout-btn { display: flex; }
+ body.site-mode .topbar-left { gap: 8px; }
+ body.site-mode .topbar-left .lang-btn,
+ body.site-mode .topbar-left .balance-chip { display: flex; }
+ body.site-mode .topbar-right .lang-btn,
+ body.site-mode .topbar-right .balance-chip { display: none; }
+ .login-btn-primary {
+ width: 100%; padding: 12px 16px; border: none; border-radius: 12px;
+ background: #2AABEE; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+ margin-top: 8px;
+ }
+ .login-btn-secondary {
+ width: 100%; padding: 11px 16px; border: 1px solid rgba(128,128,128,0.35); border-radius: 12px;
+ background: transparent; color: var(--hint, #888); font-size: 14px; font-weight: 500; cursor: pointer;
+ margin-top: 10px;
+ }
+ .login-as-label { font-size: 13px; color: var(--hint,#888); margin: 8px 0 4px; text-align: center; }
+ #login-widget-wrap { min-height: 0; }
+ #login-widget-wrap iframe { margin: 8px auto !important; }
+
+
  .icon-btn {
  width: 40px; height: 40px; border: none; background: transparent;
  color: var(--text); font-size: 22px; cursor: pointer;
@@ -1100,9 +1126,8 @@
  <div class="login-card">
  <h2 id="login-title">Exchange</h2>
  <p class="sub" id="login-sub">Войдите через Telegram, чтобы пользоваться площадкой на сайте. Те же аккаунт, баланс и настройки, что и в боте.</p>
- <div class="login-widget-wrap" id="login-widget-wrap">
- <div class="spinner" style="margin:12px auto;"></div>
- </div>
+ <div id="login-choice" style="display:none;"></div>
+ <div class="login-widget-wrap" id="login-widget-wrap" style="display:none;"></div>
  <p class="sub" id="login-hint" style="margin-top:16px;font-size:12px;opacity:.6;">Если виджет не загрузился — откройте бота в Telegram и зайдите в мини-приложение.</p>
  </div>
 </div>
@@ -1112,10 +1137,13 @@
 <div class="topbar">
  <div class="topbar-left">
  <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
+ <button class="lang-btn site-only-top" onclick="showPage('settings-lang')" title="Language" style="display:none;"><img class="flag-img sm" id="top-lang-flag-left" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"></button>
+ <div class="balance-chip site-only-top" onclick="showPage('balance')" id="top-balance-left" style="display:none;">0 $</div>
  </div>
  <div class="topbar-right">
- <button class="lang-btn" onclick="showPage('settings-lang')" title="Language"><img class="flag-img sm" id="top-lang-flag" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"></button>
+ <button class="lang-btn" id="top-lang-right" onclick="showPage('settings-lang')" title="Language"><img class="flag-img sm" id="top-lang-flag" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"></button>
  <div class="balance-chip" onclick="showPage('balance')" id="top-balance">0 $</div>
+ <button type="button" class="logout-btn" id="btn-logout" title="Logout" onclick="logoutWebAccount()" aria-label="Logout">⎋</button>
  <div class="user-chip" id="top-avatar" onclick="showPage('profile')"><span id="top-avatar-letter">?</span></div>
  </div>
 </div>
@@ -2036,6 +2064,9 @@ function withTimeout(promise, ms, msg) {
 
 /* ===== Web session (сайт) + Mini App dual mode ===== */
 var WEB_SESSION_KEY = 'exchange_web_session';
+var LAST_WEB_ACCOUNT_KEY = 'exchange_last_account';
+var __loginWidgetMode = 'primary'; // primary | other
+
 var WEB_SESSION_DAYS = 14;
 var __webSessionToken = null;
 var __isMiniApp = false;
@@ -2136,51 +2167,206 @@ function getAuthToken() {
  return s ? s.token : null;
 }
 
+
+function getLastWebAccount() {
+  try {
+    var raw = localStorage.getItem(LAST_WEB_ACCOUNT_KEY);
+    if (!raw) return null;
+    var o = JSON.parse(raw);
+    if (!o || !o.id) return null;
+    return o;
+  } catch (e) { return null; }
+}
+function saveLastWebAccount(acc) {
+  try {
+    if (!acc || !acc.id) return;
+    localStorage.setItem(LAST_WEB_ACCOUNT_KEY, JSON.stringify({
+      id: acc.id,
+      username: acc.username || '',
+      first_name: acc.first_name || '',
+      last_name: acc.last_name || '',
+      photo_url: acc.photo_url || '',
+      at: Date.now()
+    }));
+  } catch (e) {}
+}
+function clearLastWebAccount() {
+  try { localStorage.removeItem(LAST_WEB_ACCOUNT_KEY); } catch (e) {}
+}
+function formatLoginAsLabel(acc) {
+  if (!acc) return 'Telegram';
+  if (acc.username) return '@' + String(acc.username).replace(/^@/, '');
+  var n = ((acc.first_name || '') + ' ' + (acc.last_name || '')).trim();
+  return n || ('ID ' + acc.id);
+}
+function syncTopBalanceChips() {
+  try {
+    var r = document.getElementById('top-balance');
+    var l = document.getElementById('top-balance-left');
+    if (r && l) l.textContent = r.textContent;
+  } catch (e) {}
+}
+function applySiteChrome() {
+  try {
+    var isSite = !isTelegramMiniApp();
+    document.body.classList.toggle('site-mode', isSite);
+    var leftLang = document.querySelector('.topbar-left .lang-btn');
+    var leftBal = document.getElementById('top-balance-left');
+    var rightLang = document.getElementById('top-lang-right');
+    var rightBal = document.getElementById('top-balance');
+    var logout = document.getElementById('btn-logout');
+    if (isSite) {
+      if (leftLang) leftLang.style.display = 'flex';
+      if (leftBal) leftBal.style.display = 'flex';
+      if (rightLang) rightLang.style.display = 'none';
+      if (rightBal) rightBal.style.display = 'none';
+      if (logout) logout.style.display = 'flex';
+      // sync left balance text with right
+      try {
+        if (leftBal && rightBal) leftBal.textContent = rightBal.textContent;
+      } catch (e) {}
+      try {
+        var fl = document.getElementById('top-lang-flag');
+        var fll = document.getElementById('top-lang-flag-left');
+        if (fl && fll) fll.src = fl.src;
+      } catch (e) {}
+    } else {
+      if (leftLang) leftLang.style.display = 'none';
+      if (leftBal) leftBal.style.display = 'none';
+      if (rightLang) rightLang.style.display = '';
+      if (rightBal) rightBal.style.display = '';
+      if (logout) logout.style.display = 'none';
+    }
+  } catch (e) {}
+}
+function logoutWebAccount() {
+  try {
+    if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return;
+  } catch (e) {}
+  try {
+    var tok = (typeof getAuthToken === 'function' ? getAuthToken() : null);
+    if (tok) {
+      fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + tok, 'X-Session-Token': tok, 'Accept': 'application/json' }
+      }).catch(function(){});
+    }
+  } catch (e) {}
+  try {
+    localStorage.removeItem(typeof WEB_SESSION_KEY !== 'undefined' ? WEB_SESSION_KEY : 'exchange_web_session');
+  } catch (e) {}
+  try { __webSessionToken = null; } catch (e) {}
+  try { userData = null; } catch (e) {}
+  showLoginOverlay();
+}
 function showLoginOverlay() {
- var ov = document.getElementById('login-overlay');
- if (ov) ov.style.display = 'flex';
- try { document.body.style.overflow = 'hidden'; } catch (e) {}
- loadTelegramLoginWidget();
+  var ov = document.getElementById('login-overlay');
+  if (ov) ov.style.display = 'flex';
+  try { document.body.style.overflow = 'hidden'; } catch (e) {}
+  renderLoginChoices();
 }
-
 function hideLoginOverlay() {
- var ov = document.getElementById('login-overlay');
- if (ov) ov.style.display = 'none';
- try { document.body.style.overflow = ''; } catch (e) {}
+  var ov = document.getElementById('login-overlay');
+  if (ov) ov.style.display = 'none';
+  try { document.body.style.overflow = ''; } catch (e) {}
+}
+function renderLoginChoices() {
+  var choice = document.getElementById('login-choice');
+  var wrap = document.getElementById('login-widget-wrap');
+  if (!choice || !wrap) return;
+  var last = getLastWebAccount();
+  wrap.style.display = 'none';
+  wrap.innerHTML = '';
+  choice.style.display = 'block';
+  choice.innerHTML = '';
+  if (last) {
+    var lab = document.createElement('div');
+    lab.className = 'login-as-label';
+    lab.id = 'login-as-label';
+    lab.textContent = (typeof tBlock === 'function' ? tBlock('last_login') : 'Последний вход');
+    choice.appendChild(lab);
+    var b1 = document.createElement('button');
+    b1.type = 'button';
+    b1.className = 'login-btn-primary';
+    b1.id = 'btn-login-as';
+    b1.textContent = (typeof tBlock === 'function' ? tBlock('login_as') : 'Войти как') + ' ' + formatLoginAsLabel(last);
+    b1.onclick = function() {
+      __loginWidgetMode = 'as';
+      showTelegramWidgetInWrap();
+    };
+    choice.appendChild(b1);
+    var b2 = document.createElement('button');
+    b2.type = 'button';
+    b2.className = 'login-btn-secondary';
+    b2.id = 'btn-login-other';
+    b2.textContent = (typeof tBlock === 'function' ? tBlock('other_account') : 'Другой аккаунт');
+    b2.onclick = function() {
+      __loginWidgetMode = 'other';
+      showTelegramWidgetInWrap();
+    };
+    choice.appendChild(b2);
+  } else {
+    var b0 = document.createElement('button');
+    b0.type = 'button';
+    b0.className = 'login-btn-primary';
+    b0.id = 'btn-login-tg';
+    b0.textContent = (typeof tBlock === 'function' ? tBlock('login_telegram') : 'Войти через Telegram');
+    b0.onclick = function() {
+      __loginWidgetMode = 'primary';
+      showTelegramWidgetInWrap();
+    };
+    choice.appendChild(b0);
+  }
+}
+function showTelegramWidgetInWrap() {
+  var choice = document.getElementById('login-choice');
+  var wrap = document.getElementById('login-widget-wrap');
+  if (choice) choice.style.display = 'none';
+  if (!wrap) return;
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<div class="spinner" style="margin:12px auto;"></div>';
+  // back button
+  var back = document.createElement('button');
+  back.type = 'button';
+  back.className = 'login-btn-secondary';
+  back.textContent = (typeof tBlock === 'function' ? tBlock('back') : 'Назад');
+  back.style.marginBottom = '10px';
+  back.onclick = function() { renderLoginChoices(); };
+  fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/config', { method: 'GET' })
+  .then(function(r) { return r.json(); })
+  .then(function(cfg) {
+    var bot = (cfg && cfg.bot_username) ? cfg.bot_username : '';
+    if (!bot) {
+      wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Бот не настроен (BOT_USERNAME).</p>';
+      wrap.insertBefore(back, wrap.firstChild);
+      return;
+    }
+    wrap.innerHTML = '';
+    wrap.appendChild(back);
+    window.onTelegramAuth = function(user) {
+      handleTelegramLogin(user);
+    };
+    // Mobile-friendly: use large button + explicit userpic off to avoid broken layout
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://telegram.org/js/telegram-widget.js?22';
+    s.setAttribute('data-telegram-login', bot);
+    s.setAttribute('data-size', 'large');
+    s.setAttribute('data-radius', '12');
+    s.setAttribute('data-onauth', 'onTelegramAuth(user)');
+    s.setAttribute('data-request-access', 'write');
+    // Do NOT use data-userpic on mobile - can break label
+    wrap.appendChild(s);
+  })
+  .catch(function() {
+    wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Не удалось загрузить вход. Проверьте API.</p>';
+  });
+}
+function loadTelegramLoginWidget() {
+  // compatibility: show choice screen instead of raw widget
+  renderLoginChoices();
 }
 
-function loadTelegramLoginWidget() {
- var wrap = document.getElementById('login-widget-wrap');
- if (!wrap) return;
- wrap.innerHTML = '<div class="spinner" style="margin:12px auto;"></div>';
- // config from API
- fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/config', { method: 'GET' })
- .then(function(r) { return r.json(); })
- .then(function(cfg) {
- var bot = (cfg && cfg.bot_username) ? cfg.bot_username : '';
- if (!bot) {
- wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Бот не настроен (BOT_USERNAME). Откройте мини-приложение в Telegram.</p>';
- return;
- }
- wrap.innerHTML = '';
- // Telegram Login Widget
- window.onTelegramAuth = function(user) {
- handleTelegramLogin(user);
- };
- var s = document.createElement('script');
- s.async = true;
- s.src = 'https://telegram.org/js/telegram-widget.js?22';
- s.setAttribute('data-telegram-login', bot);
- s.setAttribute('data-size', 'large');
- s.setAttribute('data-radius', '12');
- s.setAttribute('data-onauth', 'onTelegramAuth(user)');
- s.setAttribute('data-request-access', 'write');
- wrap.appendChild(s);
- })
- .catch(function() {
- wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Не удалось загрузить вход. Проверьте API.</p>';
- });
-}
 
 async function handleTelegramLogin(user) {
  try {
@@ -2201,12 +2387,15 @@ async function handleTelegramLogin(user) {
  last_name: data.last_name,
  photo_url: data.photo_url
  });
+ saveLastWebAccount({
+ id: data.user_id,
+ username: data.username,
+ first_name: data.first_name,
+ last_name: data.last_name,
+ photo_url: data.photo_url
+ });
  hideLoginOverlay();
- // privacy if first time
- if (!data.privacy_miniapp) {
- try { showPrivacyOverlay(data.privacy_policy_url || ''); } catch (e) {}
- }
- // continue boot
+ // continue boot (privacy website checked inside continueAfterAuth)
  await continueAfterAuth();
  } catch (e) {
  alert('Ошибка входа: ' + (e && e.message ? e.message : e));
@@ -2219,8 +2408,12 @@ async function continueAfterAuth() {
  if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
  userData = await apiGet('/api/user');
  if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
- if (userData && !userData.privacy_miniapp) {
- showPrivacyOverlay(userData.privacy_policy_url || '');
+ if (userData) {
+ if (isTelegramMiniApp()) {
+ if (!userData.privacy_miniapp) showPrivacyOverlay(userData.privacy_policy_url || '');
+ } else {
+ if (!userData.privacy_website) showPrivacyOverlay(userData.privacy_policy_url || '');
+ }
  }
  // lang/theme sync
  try {
@@ -2267,7 +2460,7 @@ async function continueAfterAuth() {
 
 function apiFetch(path, options) {
  options = options || {};
- var ms = options.timeout || 10000;
+ var ms = options.timeout || 20000;
  var initData = '';
  try { initData = (getTg() && getTg().initData) || (tg && tg.initData) || ''; } catch (e) {}
  var sessionTok = '';
@@ -2378,7 +2571,7 @@ async function init() {
  if (sess && sess.token) {
  __webSessionToken = sess.token;
  try {
- await apiFetch('/api/auth/session', { method: 'GET', timeout: 8000 });
+ await apiFetch('/api/auth/session', { method: 'GET', timeout: 20000 });
  await continueAfterAuth();
  return;
  } catch (eSess) {
@@ -2394,11 +2587,15 @@ async function init() {
  var ok = false;
  for (var attempt = 0; attempt < 3 && !ok; attempt++) {
  try {
- await apiFetch('/api/health', { method: 'GET', timeout: 6000 });
+ await apiFetch('/api/health', { method: 'GET', timeout: 15000 });
  userData = await apiGet('/api/user');
  if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
- if (userData && !userData.privacy_miniapp) {
- showPrivacyOverlay(userData.privacy_policy_url || '');
+ if (userData) {
+ if (isTelegramMiniApp()) {
+ if (!userData.privacy_miniapp) showPrivacyOverlay(userData.privacy_policy_url || '');
+ } else {
+ if (!userData.privacy_website) showPrivacyOverlay(userData.privacy_policy_url || '');
+ }
  }
  // sync lang + theme from bot/server
  try {
@@ -2554,6 +2751,7 @@ function setBalance(bal) {
  var html = formatted + ' <small>$</small>';
  document.getElementById('balance-value').innerHTML = html;
  document.getElementById('top-balance').textContent = formatted + ' $';
+ try { syncTopBalanceChips(); } catch(e) {}
  var avail = document.getElementById('withdraw-available');
  if (avail) avail.textContent = formatted;
 }
@@ -2781,6 +2979,11 @@ var I18N = {
  edit: 'Редактировать',
  delete: 'Удалить',
  unpublish: 'Снять с публикации',
+        login_as: 'Войти как',
+        other_account: 'Другой аккаунт',
+        login_telegram: 'Войти через Telegram',
+        last_login: 'Последний вход',
+
         delete_from_history: 'Удалить из истории',
         delete_listing: 'Удалить объявление',
  favorite: 'В избранное',
@@ -3320,6 +3523,11 @@ var I18N = {
  edit: 'Edit',
  delete: 'Delete',
  unpublish: 'Unpublish',
+        login_as: 'Log in as',
+        other_account: 'Another account',
+        login_telegram: 'Log in with Telegram',
+        last_login: 'Last login',
+
         delete_from_history: 'Delete from history',
         delete_listing: 'Delete listing',
  favorite: 'Favorite',
@@ -16227,9 +16435,11 @@ function showPrivacyOverlay(policyUrl) {
 
  var title = isEn ? 'Privacy policy' : 'Политика конфиденциальности';
  var prefix = isEn ? 'By continuing, you agree to the ' : 'Продолжая, вы соглашаетесь с ';
+ var isSite = false;
+ try { isSite = !isTelegramMiniApp(); } catch (e) {}
  var linkLabel = isEn
- ? "privacy and data collection policy (for MiniApp's)"
- : "политикой конфиденциальности и сбора данных (for MiniApp's)";
+ ? (isSite ? "privacy and data collection policy (for Website)" : "privacy and data collection policy (for MiniApp's)")
+ : (isSite ? "политикой конфиденциальности и сбора данных (for Website)" : "политикой конфиденциальности и сбора данных (for MiniApp's)");
  var accept = isEn ? 'Accept and continue' : 'Принимаю и продолжаю';
 
  if (h2) h2.textContent = title;
@@ -16262,11 +16472,16 @@ function hidePrivacyOverlay() {
 }
 async function acceptPrivacyMiniapp() {
  try {
- await apiPost('/api/privacy/accept', {});
+ var src = isTelegramMiniApp() ? 'miniapp' : 'website';
+ await apiPost('/api/privacy/accept', { source: src });
  } catch (e) {}
- if (userData) userData.privacy_miniapp = true;
+ if (userData) {
+ if (isTelegramMiniApp()) userData.privacy_miniapp = true;
+ else userData.privacy_website = true;
+ }
  hidePrivacyOverlay();
  try { if (typeof loadFeed === 'function') loadFeed(); } catch(e) {}
+ try { if (typeof showPage === 'function') showPage('home'); } catch(e) {}
 }
 document.addEventListener('DOMContentLoaded', function() {
  var btn = document.getElementById('privacy-accept-btn');
