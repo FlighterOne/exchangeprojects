@@ -2193,43 +2193,39 @@ function getAuthToken() {
 
 
 function getLastWebAccount() {
-  try {
-    var raw = localStorage.getItem(LAST_WEB_ACCOUNT_KEY);
-    if (!raw) return null;
-    var o = JSON.parse(raw);
-    if (!o || !o.id) return null;
-    // Remember last account for 14 days (same window as web session)
-    var maxAge = (typeof WEB_SESSION_DAYS !== 'undefined' ? WEB_SESSION_DAYS : 14) * 86400000;
-    if (o.at && (Date.now() - Number(o.at)) > maxAge) {
-      try { localStorage.removeItem(LAST_WEB_ACCOUNT_KEY); } catch (e2) {}
-      return null;
-    }
-    return o;
-  } catch (e) { return null; }
+  // Deprecated: no separate "last login" store — only active session (14 days)
+  return null;
 }
 function saveLastWebAccount(acc) {
-  try {
-    if (!acc || !acc.id) return;
-    localStorage.setItem(LAST_WEB_ACCOUNT_KEY, JSON.stringify({
-      id: acc.id,
-      username: acc.username || '',
-      first_name: acc.first_name || '',
-      last_name: acc.last_name || '',
-      photo_url: acc.photo_url || '',
-      at: Date.now()
-    }));
-  } catch (e) {}
+  // no-op: account is kept only inside web session
 }
 function clearLastWebAccount() {
   try { localStorage.removeItem(LAST_WEB_ACCOUNT_KEY); } catch (e) {}
 }
 function formatLoginAsLabel(acc) {
   if (!acc) return 'Telegram';
-  // Prefer full name, not @username
   var n = ((acc.first_name || '') + ' ' + (acc.last_name || '')).trim();
   if (n) return n;
   if (acc.username) return '@' + String(acc.username).replace(/^@/, '');
   return 'ID ' + (acc.id || '');
+}
+
+/** Resume existing valid session without Telegram widget */
+async function resumeWebSessionLogin() {
+  var sess = loadWebSession();
+  if (!sess || !sess.token) {
+    showTelegramWidgetInWrap();
+    return;
+  }
+  __webSessionToken = sess.token;
+  hideLoginOverlay();
+  try {
+    await continueAfterAuth();
+  } catch (e) {
+    // Session rejected by server — clear and show Telegram login
+    clearWebSession();
+    showLoginOverlay();
+  }
 }
 function syncTopBalanceChips() {
   try {
@@ -2241,8 +2237,6 @@ function syncTopBalanceChips() {
 
 function updateOwnProfileLogoutBtn() {
   try {
-    var back = document.getElementById('btn-profile-back');
-    if (back) back.style.display = 'inline-flex';
     var btn = document.getElementById('btn-profile-logout');
     if (!btn) return;
     var isSite = true;
@@ -2292,37 +2286,29 @@ function renderLoginChoices() {
   var choice = document.getElementById('login-choice');
   var wrap = document.getElementById('login-widget-wrap');
   if (!choice || !wrap) return;
-  var last = getLastWebAccount();
-  // fallback from session payload (still valid within 14 days)
-  if (!last) {
-    try {
-      var sess = (typeof loadWebSession === 'function') ? loadWebSession() : null;
-      if (sess && sess.user && sess.user.id) last = sess.user;
-      else if (sess && sess.id) last = sess;
-    } catch (e) {}
-  }
   wrap.style.display = 'none';
   wrap.innerHTML = '';
   choice.style.display = 'block';
   choice.innerHTML = '';
-  // Only two states: last account (14 days) OR fresh login — no "other account"
-  if (last) {
-    var lab = document.createElement('div');
-    lab.className = 'login-as-label';
-    lab.id = 'login-as-label';
-    lab.textContent = (typeof tBlock === 'function' ? tBlock('last_login') : 'Последний вход');
-    choice.appendChild(lab);
+
+  // Valid session (14 days) → one button "Войти как Имя" that enters the app directly
+  var sess = null;
+  try { sess = loadWebSession(); } catch (e) {}
+  var user = (sess && sess.user) ? sess.user : null;
+
+  if (sess && sess.token && user) {
     var b1 = document.createElement('button');
     b1.type = 'button';
     b1.className = 'login-btn-primary';
     b1.id = 'btn-login-as';
-    b1.textContent = (typeof tBlock === 'function' ? tBlock('login_as') : 'Войти как') + ' ' + formatLoginAsLabel(last);
+    b1.textContent = (typeof tBlock === 'function' ? tBlock('login_as') : 'Войти как') + ' ' + formatLoginAsLabel(user);
     b1.onclick = function() {
-      __loginWidgetMode = 'as';
-      showTelegramWidgetInWrap();
+      // Direct resume — no second menu / Telegram widget
+      resumeWebSessionLogin();
     };
     choice.appendChild(b1);
   } else {
+    // No session → Telegram login only
     var b0 = document.createElement('button');
     b0.type = 'button';
     b0.className = 'login-btn-primary';
