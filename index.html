@@ -1888,7 +1888,8 @@
 
  <!-- PROFILE -->
  <div id="page-profile" class="page">
- <div class="profile-top-bar" id="own-profile-top-bar" style="display:flex;align-items:center;justify-content:flex-end;min-height:40px;margin-bottom:4px;">
+ <div class="profile-top-bar" id="own-profile-top-bar" style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px;margin-bottom:4px;">
+ <button type="button" class="back-link" id="btn-profile-back" onclick="showPage('home')" style="margin-bottom:0;" data-i18n="back">← Назад</button>
  <button type="button" class="profile-logout-btn" id="btn-profile-logout" onclick="logoutWebAccount()" style="display:none;">Выйти</button>
  </div>
  <div class="profile-header">
@@ -2224,6 +2225,15 @@ function formatLoginAsLabel(acc) {
   if (acc.username) return '@' + String(acc.username).replace(/^@/, '');
   return 'ID ' + (acc.id || '');
 }
+
+/** Clear active web session only (keeps last-account hint for the main login screen). */
+function clearActiveWebSession() {
+  try {
+    localStorage.removeItem(typeof WEB_SESSION_KEY !== 'undefined' ? WEB_SESSION_KEY : 'exchange_web_session');
+  } catch (e) {}
+  try { __webSessionToken = null; } catch (e) {}
+  try { userData = null; } catch (e) {}
+}
 function syncTopBalanceChips() {
   try {
     var r = document.getElementById('top-balance');
@@ -2306,7 +2316,7 @@ function renderLoginChoices() {
     b1.type = 'button';
     b1.className = 'login-btn-primary';
     b1.id = 'btn-login-as';
-    // Final-style label: "Войти как Имя Фамилия" (not @username)
+    // "Войти как Имя Фамилия"
     b1.textContent = (typeof tBlock === 'function' ? tBlock('login_as') : 'Войти как') + ' ' + formatLoginAsLabel(last);
     b1.onclick = function() {
       __loginWidgetMode = 'as';
@@ -2319,8 +2329,9 @@ function renderLoginChoices() {
     b2.id = 'btn-login-other';
     b2.textContent = (typeof tBlock === 'function' ? tBlock('other_account') : 'Другой аккаунт');
     b2.onclick = function() {
-      // Show "Log in with Telegram" intermediate step (fresh login), not the name-style widget button
+      // Fresh login: drop active session; keep last-account only for "Назад" on this screen
       __loginWidgetMode = 'other';
+      clearActiveWebSession();
       renderOtherAccountLoginChoice();
     };
     choice.appendChild(b2);
@@ -2345,6 +2356,7 @@ function renderOtherAccountLoginChoice() {
   wrap.innerHTML = '';
   choice.style.display = 'block';
   choice.innerHTML = '';
+  // Generic entry — not "Войти как Имя"
   var b0 = document.createElement('button');
   b0.type = 'button';
   b0.className = 'login-btn-primary';
@@ -2352,6 +2364,8 @@ function renderOtherAccountLoginChoice() {
   b0.textContent = (typeof tBlock === 'function' ? tBlock('login_telegram') : 'Войти через Telegram');
   b0.onclick = function() {
     __loginWidgetMode = 'other';
+    // Clear session again right before widget so no stale token is reused
+    clearActiveWebSession();
     showTelegramWidgetInWrap();
   };
   choice.appendChild(b0);
@@ -2359,7 +2373,10 @@ function renderOtherAccountLoginChoice() {
   back.type = 'button';
   back.className = 'login-btn-secondary';
   back.textContent = (typeof tBlock === 'function' ? tBlock('back') : 'Назад');
-  back.onclick = function() { renderLoginChoices(); };
+  back.onclick = function() {
+    // Return to main login: still shows last saved account name
+    renderLoginChoices();
+  };
   choice.appendChild(back);
 }
 function showTelegramWidgetInWrap() {
