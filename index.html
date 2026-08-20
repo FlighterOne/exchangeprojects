@@ -2198,6 +2198,12 @@ function getLastWebAccount() {
     if (!raw) return null;
     var o = JSON.parse(raw);
     if (!o || !o.id) return null;
+    // Remember last account for 14 days (same window as web session)
+    var maxAge = (typeof WEB_SESSION_DAYS !== 'undefined' ? WEB_SESSION_DAYS : 14) * 86400000;
+    if (o.at && (Date.now() - Number(o.at)) > maxAge) {
+      try { localStorage.removeItem(LAST_WEB_ACCOUNT_KEY); } catch (e2) {}
+      return null;
+    }
     return o;
   } catch (e) { return null; }
 }
@@ -2219,20 +2225,11 @@ function clearLastWebAccount() {
 }
 function formatLoginAsLabel(acc) {
   if (!acc) return 'Telegram';
-  // Prefer full name (final login style), not @username
+  // Prefer full name, not @username
   var n = ((acc.first_name || '') + ' ' + (acc.last_name || '')).trim();
   if (n) return n;
   if (acc.username) return '@' + String(acc.username).replace(/^@/, '');
   return 'ID ' + (acc.id || '');
-}
-
-/** Clear active web session only (keeps last-account hint for the main login screen). */
-function clearActiveWebSession() {
-  try {
-    localStorage.removeItem(typeof WEB_SESSION_KEY !== 'undefined' ? WEB_SESSION_KEY : 'exchange_web_session');
-  } catch (e) {}
-  try { __webSessionToken = null; } catch (e) {}
-  try { userData = null; } catch (e) {}
 }
 function syncTopBalanceChips() {
   try {
@@ -2244,6 +2241,8 @@ function syncTopBalanceChips() {
 
 function updateOwnProfileLogoutBtn() {
   try {
+    var back = document.getElementById('btn-profile-back');
+    if (back) back.style.display = 'inline-flex';
     var btn = document.getElementById('btn-profile-logout');
     if (!btn) return;
     var isSite = true;
@@ -2294,7 +2293,7 @@ function renderLoginChoices() {
   var wrap = document.getElementById('login-widget-wrap');
   if (!choice || !wrap) return;
   var last = getLastWebAccount();
-  // fallback from session payload
+  // fallback from session payload (still valid within 14 days)
   if (!last) {
     try {
       var sess = (typeof loadWebSession === 'function') ? loadWebSession() : null;
@@ -2306,6 +2305,7 @@ function renderLoginChoices() {
   wrap.innerHTML = '';
   choice.style.display = 'block';
   choice.innerHTML = '';
+  // Only two states: last account (14 days) OR fresh login — no "other account"
   if (last) {
     var lab = document.createElement('div');
     lab.className = 'login-as-label';
@@ -2316,25 +2316,12 @@ function renderLoginChoices() {
     b1.type = 'button';
     b1.className = 'login-btn-primary';
     b1.id = 'btn-login-as';
-    // "Войти как Имя Фамилия"
     b1.textContent = (typeof tBlock === 'function' ? tBlock('login_as') : 'Войти как') + ' ' + formatLoginAsLabel(last);
     b1.onclick = function() {
       __loginWidgetMode = 'as';
       showTelegramWidgetInWrap();
     };
     choice.appendChild(b1);
-    var b2 = document.createElement('button');
-    b2.type = 'button';
-    b2.className = 'login-btn-secondary';
-    b2.id = 'btn-login-other';
-    b2.textContent = (typeof tBlock === 'function' ? tBlock('other_account') : 'Другой аккаунт');
-    b2.onclick = function() {
-      // Fresh login: drop active session; keep last-account only for "Назад" on this screen
-      __loginWidgetMode = 'other';
-      clearActiveWebSession();
-      renderOtherAccountLoginChoice();
-    };
-    choice.appendChild(b2);
   } else {
     var b0 = document.createElement('button');
     b0.type = 'button';
@@ -2347,37 +2334,6 @@ function renderLoginChoices() {
     };
     choice.appendChild(b0);
   }
-}
-function renderOtherAccountLoginChoice() {
-  var choice = document.getElementById('login-choice');
-  var wrap = document.getElementById('login-widget-wrap');
-  if (!choice || !wrap) return;
-  wrap.style.display = 'none';
-  wrap.innerHTML = '';
-  choice.style.display = 'block';
-  choice.innerHTML = '';
-  // Generic entry — not "Войти как Имя"
-  var b0 = document.createElement('button');
-  b0.type = 'button';
-  b0.className = 'login-btn-primary';
-  b0.id = 'btn-login-tg';
-  b0.textContent = (typeof tBlock === 'function' ? tBlock('login_telegram') : 'Войти через Telegram');
-  b0.onclick = function() {
-    __loginWidgetMode = 'other';
-    // Clear session again right before widget so no stale token is reused
-    clearActiveWebSession();
-    showTelegramWidgetInWrap();
-  };
-  choice.appendChild(b0);
-  var back = document.createElement('button');
-  back.type = 'button';
-  back.className = 'login-btn-secondary';
-  back.textContent = (typeof tBlock === 'function' ? tBlock('back') : 'Назад');
-  back.onclick = function() {
-    // Return to main login: still shows last saved account name
-    renderLoginChoices();
-  };
-  choice.appendChild(back);
 }
 function showTelegramWidgetInWrap() {
   var choice = document.getElementById('login-choice');
