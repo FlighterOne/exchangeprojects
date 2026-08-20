@@ -2241,7 +2241,26 @@ async function continueAfterAuth() {
     else if (typeof loadListings === 'function') loadListings();
   } catch (e) {}
  } catch (e) {
- if (box) box.innerHTML = '<div class="empty"><div style="margin-bottom:8px;">Не удалось загрузить данные</div><button class="btn" style="margin-top:16px;" onclick="location.reload()">Обновить</button></div>';
+ var msg = (e && e.message) ? String(e.message) : 'ошибка';
+ if (box) {
+ box.style.display = '';
+ var safe = msg.replace(/</g, '&lt;');
+ var apiLine = (typeof API_URL !== 'undefined' ? API_URL : '');
+ box.innerHTML = '<div class="empty" style="padding:20px;text-align:center;">'
+ + '<div style="margin-bottom:10px;font-weight:600;">Не удалось загрузить данные</div>'
+ + '<div style="font-size:13px;color:var(--hint);margin-bottom:8px;">' + safe + '</div>'
+ + '<div style="font-size:11px;color:var(--hint);word-break:break-all;margin-bottom:14px;">API: ' + apiLine + '</div>'
+ + '<button class="btn" style="margin-top:8px;" onclick="location.reload()">Обновить</button>'
+ + '<button class="btn btn-secondary" style="margin-top:8px;" id="btn-reset-session">Сбросить вход</button>'
+ + '</div>';
+ var rb = document.getElementById('btn-reset-session');
+ if (rb) rb.onclick = function() {
+ try { localStorage.removeItem('clossr_web_session'); } catch (e1) {}
+ try { localStorage.removeItem('exchange_web_session'); } catch (e2) {}
+ location.reload();
+ };
+ }
+ try { console.error('continueAfterAuth', e); } catch (e2) {}
  }
 }
 
@@ -2762,7 +2781,7 @@ var I18N = {
  edit: 'Редактировать',
  delete: 'Удалить',
  unpublish: 'Снять с публикации',
-        delete_from_history: 'Удалить из истории'',
+        delete_from_history: 'Удалить из истории',
         delete_listing: 'Удалить объявление',
  favorite: 'В избранное',
  unfavorite: 'Из избранного',
