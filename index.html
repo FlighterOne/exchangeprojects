@@ -2218,9 +2218,11 @@ function clearLastWebAccount() {
 }
 function formatLoginAsLabel(acc) {
   if (!acc) return 'Telegram';
-  if (acc.username) return '@' + String(acc.username).replace(/^@/, '');
+  // Prefer full name (final login style), not @username
   var n = ((acc.first_name || '') + ' ' + (acc.last_name || '')).trim();
-  return n || ('ID ' + acc.id);
+  if (n) return n;
+  if (acc.username) return '@' + String(acc.username).replace(/^@/, '');
+  return 'ID ' + (acc.id || '');
 }
 function syncTopBalanceChips() {
   try {
@@ -2304,6 +2306,7 @@ function renderLoginChoices() {
     b1.type = 'button';
     b1.className = 'login-btn-primary';
     b1.id = 'btn-login-as';
+    // Final-style label: "Войти как Имя Фамилия" (not @username)
     b1.textContent = (typeof tBlock === 'function' ? tBlock('login_as') : 'Войти как') + ' ' + formatLoginAsLabel(last);
     b1.onclick = function() {
       __loginWidgetMode = 'as';
@@ -2316,8 +2319,9 @@ function renderLoginChoices() {
     b2.id = 'btn-login-other';
     b2.textContent = (typeof tBlock === 'function' ? tBlock('other_account') : 'Другой аккаунт');
     b2.onclick = function() {
+      // Show "Log in with Telegram" intermediate step (fresh login), not the name-style widget button
       __loginWidgetMode = 'other';
-      showTelegramWidgetInWrap();
+      renderOtherAccountLoginChoice();
     };
     choice.appendChild(b2);
   } else {
@@ -2332,6 +2336,31 @@ function renderLoginChoices() {
     };
     choice.appendChild(b0);
   }
+}
+function renderOtherAccountLoginChoice() {
+  var choice = document.getElementById('login-choice');
+  var wrap = document.getElementById('login-widget-wrap');
+  if (!choice || !wrap) return;
+  wrap.style.display = 'none';
+  wrap.innerHTML = '';
+  choice.style.display = 'block';
+  choice.innerHTML = '';
+  var b0 = document.createElement('button');
+  b0.type = 'button';
+  b0.className = 'login-btn-primary';
+  b0.id = 'btn-login-tg';
+  b0.textContent = (typeof tBlock === 'function' ? tBlock('login_telegram') : 'Войти через Telegram');
+  b0.onclick = function() {
+    __loginWidgetMode = 'other';
+    showTelegramWidgetInWrap();
+  };
+  choice.appendChild(b0);
+  var back = document.createElement('button');
+  back.type = 'button';
+  back.className = 'login-btn-secondary';
+  back.textContent = (typeof tBlock === 'function' ? tBlock('back') : 'Назад');
+  back.onclick = function() { renderLoginChoices(); };
+  choice.appendChild(back);
 }
 function showTelegramWidgetInWrap() {
   var choice = document.getElementById('login-choice');
