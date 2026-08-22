@@ -114,9 +114,6 @@
  width: auto !important; padding: 8px 14px !important; margin: 0 !important; flex-shrink: 0;
  border-radius: 10px !important; font-weight: 600 !important;
  }
- .app-install-section-title {
- font-size: 13px; font-weight: 600; color: var(--hint); margin: 16px 0 8px; padding: 0 2px;
- }
  .support-grid.app-install-grid {
  display: grid;
  grid-template-columns: 1fr 1fr;
@@ -125,6 +122,14 @@
  .support-grid.app-install-grid .support-tile.tile-span-full {
  grid-column: 1 / -1;
  max-width: calc(50% - 5px);
+ }
+ .app-install-expand-btn {
+ margin-top: 12px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 10px;
+ width: 100%;
  }
 
 
@@ -1246,28 +1251,7 @@
   <button type="button" class="back-link" onclick="showPage('home')" data-i18n="back">← Назад</button>
   <div class="section-title" id="app-install-main-title">Установка приложения</div>
 
-  <div id="app-install-tg-block" style="display:none;">
-   <div class="app-install-section-title" id="app-install-tg-section">Мы в Telegram</div>
-   <div class="support-grid app-install-grid">
-    <button type="button" class="support-tile" onclick="openTelegramBotLink()">
-     <div class="app-install-icon-wrap">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8.02c-.13.58-.47.72-.95.45l-2.62-1.93-1.26 1.21c-.14.14-.26.26-.53.26l.19-2.67 4.89-4.42c.21-.19-.05-.29-.33-.11l-6.04 3.8-2.6-.81c-.57-.18-.58-.57.12-.84l10.16-3.92c.47-.18.88.11.67.78z"/></svg>
-     </div>
-     <div class="support-tile-title" id="app-install-label-tg-bot">Бот</div>
-     <div class="support-tile-sub">@exchangeprojectbot</div>
-    </button>
-    <button type="button" class="support-tile" onclick="openTelegramMiniAppLink()">
-     <div class="app-install-icon-wrap">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01" stroke-linecap="round"/></svg>
-     </div>
-     <div class="support-tile-title" id="app-install-label-tg-app">Мини-приложение</div>
-     <div class="support-tile-sub" id="app-install-tg-app-sub">Открыть</div>
-    </button>
-   </div>
-  </div>
-
-  <div class="app-install-section-title" id="app-install-devices-section">Устройства</div>
-  <div class="support-grid app-install-grid">
+  <div class="support-grid app-install-grid" style="margin-top:8px;">
    <button type="button" class="support-tile" onclick="openAppInstallDetail('android')">
     <div class="app-install-icon-wrap">
      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18a.5.5 0 00-.86-.5l-1.86 3.22A7.97 7.97 0 0012 8c-1.48 0-2.85.4-4.02 1.1L6.1 5.8a.5.5 0 10-.86.5L7.1 9.48C5.2 10.8 4 12.97 4 15.4v.1c0 .28.22.5.5.5h15c.28 0 .5-.22.5-.5v-.1c0-2.43-1.2-4.6-3.4-5.92zM9.5 13.5a1 1 0 110-2 1 1 0 010 2zm5 0a1 1 0 110-2 1 1 0 010 2zM7 17.5h10v2H7v-2z"/></svg>
@@ -1281,7 +1265,9 @@
     <div class="support-tile-title" id="app-install-label-ios">Установить на iOS</div>
    </button>
   </div>
-  <button type="button" class="btn btn-secondary" id="btn-app-install-pc" style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:10px;" onclick="toggleAppInstallPc()">
+
+  <!-- PC expand -->
+  <button type="button" class="btn btn-secondary app-install-expand-btn" id="btn-app-install-pc" onclick="toggleAppInstallPc()">
    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
    <span id="app-install-label-pc">Установить на ПК</span>
   </button>
@@ -1303,6 +1289,28 @@
      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 2c-.6 0-1.2.5-1.4 1.2-.3 1-.2 2.3.3 3.3-.9.4-1.6 1.2-1.9 2.2-.5 1.5-.2 3.2.8 4.4-.3.7-.4 1.5-.2 2.3.3 1.2 1.2 2.1 2.4 2.4.2.7.6 1.4 1.2 1.9-.5.3-1 .8-1.1 1.4-.1.6.2 1.2.7 1.5.6.3 1.3.2 1.8-.2.3.4.8.7 1.3.7.7 0 1.3-.5 1.4-1.2.1-.5-.1-1-.4-1.3.7-.5 1.2-1.3 1.3-2.2.2-.8 0-1.6-.5-2.3 1-1.2 1.3-2.9.8-4.4-.3-1-1-1.8-1.9-2.2.5-1 .6-2.3.3-3.3C14.7 2.5 14.1 2 13.5 2h-1z"/></svg>
     </div>
     <div class="support-tile-title" id="app-install-label-linux">Linux</div>
+   </button>
+  </div>
+
+  <!-- Telegram expand (always below PC block, so when PC open it sits under Linux) -->
+  <button type="button" class="btn btn-secondary app-install-expand-btn" id="btn-app-install-tg" onclick="toggleAppInstallTg()">
+   <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8.02c-.13.58-.47.72-.95.45l-2.62-1.93-1.26 1.21c-.14.14-.26.26-.53.26l.19-2.67 4.89-4.42c.21-.19-.05-.29-.33-.11l-6.04 3.8-2.6-.81c-.57-.18-.58-.57.12-.84l10.16-3.92c.47-.18.88.11.67.78z"/></svg>
+   <span id="app-install-label-tg">Мы в Telegram</span>
+  </button>
+  <div id="app-install-tg-grid" class="support-grid app-install-grid" style="display:none;margin-top:12px;">
+   <button type="button" class="support-tile" onclick="openTelegramBotLink()">
+    <div class="app-install-icon-wrap">
+     <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8.02c-.13.58-.47.72-.95.45l-2.62-1.93-1.26 1.21c-.14.14-.26.26-.53.26l.19-2.67 4.89-4.42c.21-.19-.05-.29-.33-.11l-6.04 3.8-2.6-.81c-.57-.18-.58-.57.12-.84l10.16-3.92c.47-.18.88.11.67.78z"/></svg>
+    </div>
+    <div class="support-tile-title" id="app-install-label-tg-bot">Бот</div>
+    <div class="support-tile-sub">@exchangeprojectsbot</div>
+   </button>
+   <button type="button" class="support-tile" onclick="openTelegramMiniAppLink()">
+    <div class="app-install-icon-wrap">
+     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01" stroke-linecap="round"/></svg>
+    </div>
+    <div class="support-tile-title" id="app-install-label-tg-app">Мини-приложение</div>
+    <div class="support-tile-sub" id="app-install-tg-app-sub">Открыть</div>
    </button>
   </div>
  </div>
@@ -2098,9 +2106,7 @@ window.addEventListener('unhandledrejection', function(ev) {
 const API_URL = "https://exchange-stavka.waw0.amvera.tech";
 
 var SITE_URL = 'https://exchangeprojects.site/';
-var TG_BOT_USERNAME = 'exchangeprojectbot';
-/* Mini App deep link: BotFather → Bot Settings → Configure Mini App → short name.
-   Default pattern: https://t.me/<bot>/<short_name>  — change SHORT_NAME if needed */
+var TG_BOT_USERNAME = 'exchangeprojectsbot';
 var TG_MINIAPP_SHORT_NAME = 'app';
 var TG_BOT_URL = 'https://t.me/' + TG_BOT_USERNAME;
 var TG_MINIAPP_URL = 'https://t.me/' + TG_BOT_USERNAME + '/' + TG_MINIAPP_SHORT_NAME;
@@ -2113,13 +2119,13 @@ var APP_INSTALL_FILES = {
 };
 var __appInstallPlatform = null;
 var APP_I18N = {
-  ru: { dl_app:'Скачать приложение', dl_to_site:'На сайт', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Скачать', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux', dl_tg_section:'Мы в Telegram', dl_devices_section:'Устройства', dl_tg_bot:'Бот', dl_tg_app:'Мини-приложение', dl_tg_app_sub:'Открыть',
+  ru: { dl_app:'Скачать приложение', dl_to_site:'На сайт', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Скачать', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux', dl_tg:'Мы в Telegram', dl_tg_bot:'Бот', dl_tg_app:'Мини-приложение', dl_tg_app_sub:'Открыть',
     dl_android_guide:'1. Нажмите «Скачать» и сохраните APK.\n2. Откройте файл на телефоне.\n3. Разрешите установку из этого источника.\n4. Установите и откройте Exchange.',
     dl_ios_guide:'На iPhone: Safari → Поделиться → На экран «Домой» → Добавить.',
     dl_windows_guide:'1. Скачайте .exe.\n2. Запустите установщик.\n3. При SmartScreen — «Подробнее» → «Выполнить».\n4. Завершите установку.',
     dl_macos_guide:'1. Скачайте .dmg.\n2. Перетащите в «Программы».\n3. При блоке разрешите в безопасности.\n4. Запустите Exchange.',
     dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x файл\n3. Запустите.' },
-  en: { dl_app:'Download app', dl_to_site:'Website', dl_app_title:'Install the app', dl_android:'Download for Android', dl_ios:'Install on iOS', dl_pc:'Install on PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Download', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux', dl_tg_section:'We are on Telegram', dl_devices_section:'Devices', dl_tg_bot:'Bot', dl_tg_app:'Mini App', dl_tg_app_sub:'Open',
+  en: { dl_app:'Download app', dl_to_site:'Website', dl_app_title:'Install the app', dl_android:'Download for Android', dl_ios:'Install on iOS', dl_pc:'Install on PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Download', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux', dl_tg:'We are on Telegram', dl_tg_bot:'Bot', dl_tg_app:'Mini App', dl_tg_app_sub:'Open',
     dl_android_guide:'1. Download the APK.\n2. Open the file.\n3. Allow installation.\n4. Install and open Exchange.',
     dl_ios_guide:'On iPhone: Safari → Share → Add to Home Screen.',
     dl_windows_guide:'1. Download the .exe.\n2. Run the installer.\n3. Confirm SmartScreen if needed.\n4. Finish setup.',
@@ -2235,17 +2241,20 @@ function onTopSideBtnClick() {
   openAppInstallMenu();
 }
 function openAppInstallMenu() {
-  try { var g = document.getElementById('app-install-pc-grid'); if (g) g.style.display = 'none'; } catch (e) {}
-  try { applyAppInstallI18n(); } catch (e) {}
-  // show Telegram block always (bot + miniapp) — useful from site too
   try {
-    var tgBlock = document.getElementById('app-install-tg-block');
-    if (tgBlock) tgBlock.style.display = '';
-  } catch (e2) {}
+    var g = document.getElementById('app-install-pc-grid'); if (g) g.style.display = 'none';
+    var tg = document.getElementById('app-install-tg-grid'); if (tg) tg.style.display = 'none';
+  } catch (e) {}
+  try { applyAppInstallI18n(); } catch (e) {}
   showPage('app-install');
 }
 function toggleAppInstallPc() {
   var g = document.getElementById('app-install-pc-grid');
+  if (!g) return;
+  g.style.display = (g.style.display === 'none' || !g.style.display) ? 'grid' : 'none';
+}
+function toggleAppInstallTg() {
+  var g = document.getElementById('app-install-tg-grid');
   if (!g) return;
   g.style.display = (g.style.display === 'none' || !g.style.display) ? 'grid' : 'none';
 }
@@ -2275,8 +2284,8 @@ function applyAppInstallI18n() {
     var map = {
       'app-install-label-android':'dl_android','app-install-label-ios':'dl_ios','app-install-label-pc':'dl_pc',
       'app-install-label-windows':'dl_windows','app-install-label-macos':'dl_macos','app-install-label-linux':'dl_linux',
-      'app-install-tg-section':'dl_tg_section','app-install-devices-section':'dl_devices_section',
-      'app-install-label-tg-bot':'dl_tg_bot','app-install-label-tg-app':'dl_tg_app','app-install-tg-app-sub':'dl_tg_app_sub',
+      'app-install-label-tg':'dl_tg','app-install-label-tg-bot':'dl_tg_bot','app-install-label-tg-app':'dl_tg_app',
+      'app-install-tg-app-sub':'dl_tg_app_sub',
       'drawer-dl-app-label': shouldShowOpenSiteBtn() ? 'dl_to_site' : 'dl_app'
     };
     for (var id in map) { var el = document.getElementById(id); if (el) el.textContent = tApp(map[id]); }
