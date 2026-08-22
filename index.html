@@ -91,29 +91,36 @@
  border-radius: 10px;
  }
  .icon-btn:active { background: var(--secondary-bg); }
- .top-dl-app-btn {
+ .topbar-left { display: flex; align-items: center; gap: 2px; }
+ .top-side-btn {
  width: auto !important;
- height: 36px;
+ height: 34px;
  padding: 0 10px 0 8px !important;
  gap: 6px;
  border: 1px solid rgba(128,128,128,0.28);
  background: var(--secondary-bg);
  border-radius: 10px !important;
  color: var(--text);
+ font-weight: 600;
+ line-height: 1;
  }
- .top-dl-app-btn .dl-app-icon { flex-shrink: 0; display: block; }
- .top-dl-app-btn .top-dl-app-text {
+ .top-side-btn .dl-app-icon { flex-shrink: 0; display: block; width: 18px; height: 18px; }
+ .top-side-btn .top-side-btn-text {
  font-size: 12px;
  font-weight: 600;
  white-space: nowrap;
- line-height: 1;
- max-width: 120px;
+ max-width: 130px;
  overflow: hidden;
  text-overflow: ellipsis;
  }
- @media (max-width: 380px) {
- .top-dl-app-btn .top-dl-app-text { display: none; }
- .top-dl-app-btn { padding: 0 8px !important; }
+ /* phone / narrow: smaller label so topbar does not overflow */
+ @media (max-width: 720px) {
+ .top-side-btn { height: 30px; padding: 0 8px 0 6px !important; gap: 4px; }
+ .top-side-btn .dl-app-icon { width: 16px; height: 16px; }
+ .top-side-btn .top-side-btn-text { font-size: 10px; max-width: 88px; }
+ }
+ @media (max-width: 360px) {
+ .top-side-btn .top-side-btn-text { max-width: 72px; font-size: 9.5px; }
  }
  .app-install-icon-wrap {
  width: 48px; height: 48px; margin: 0 auto 8px;
@@ -1141,15 +1148,15 @@
 
 <!-- TOP BAR -->
 <div class="topbar">
- <div class="topbar-left" style="display:flex;align-items:center;gap:2px;">
+ <div class="topbar-left">
  <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
- <button type="button" class="icon-btn top-dl-app-btn" id="btn-top-download-app" onclick="openAppInstallMenu()" title="Скачать приложение">
-  <svg class="dl-app-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+ <button type="button" class="icon-btn top-side-btn" id="btn-top-side" onclick="onTopSideBtnClick()" title="">
+  <svg class="dl-app-icon" id="top-side-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
    <path d="M12 3v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
    <path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
    <path d="M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
   </svg>
-  <span class="top-dl-app-text" id="top-download-app-label">Скачать приложение</span>
+  <span class="top-side-btn-text" id="top-side-btn-label">Скачать приложение</span>
  </button>
  </div>
  <div class="topbar-right">
@@ -1229,7 +1236,7 @@
  <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
  </div>
 
- <!-- APP INSTALL -->
+ <!-- APP INSTALL (website only entry; page available if opened) -->
  <div id="page-app-install" class="page">
   <button type="button" class="back-link" onclick="showPage('home')" data-i18n="back">← Назад</button>
   <div class="section-title" id="app-install-main-title">Установка приложения</div>
@@ -1253,26 +1260,19 @@
   </button>
   <div id="app-install-pc-grid" class="support-grid" style="display:none;margin-top:12px;">
    <button type="button" class="support-tile" onclick="openAppInstallDetail('windows')">
-    <div class="app-install-icon-wrap">
-     <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5l8-1.1v7.1H3V5.5zm9-1.2l9-1.2v8.5h-9V4.3zM3 12.5h8v7.1l-8-1.1v-6zm9 0h9v8.5l-9-1.2v-7.3z"/></svg>
-    </div>
+    <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5l8-1.1v7.1H3V5.5zm9-1.2l9-1.2v8.5h-9V4.3zM3 12.5h8v7.1l-8-1.1v-6zm9 0h9v8.5l-9-1.2v-7.3z"/></svg></div>
     <div class="support-tile-title" id="app-install-label-windows">Windows</div>
    </button>
    <button type="button" class="support-tile" onclick="openAppInstallDetail('macos')">
-    <div class="app-install-icon-wrap">
-     <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8s-1.6-.7-2.7-.7c-1.4 0-2.7.8-3.4 2.1-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7 1.9-1 2.6-2c.8-1.1 1.1-2.2 1.1-2.2s-2.2-.8-2.2-3.5zM14.5 6.8c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.6.6-1.1 1.6-1 2.6 1 .1 1.9-.5 2.6-1.2z"/></svg>
-    </div>
+    <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8s-1.6-.7-2.7-.7c-1.4 0-2.7.8-3.4 2.1-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7 1.9-1 2.6-2c.8-1.1 1.1-2.2 1.1-2.2s-2.2-.8-2.2-3.5zM14.5 6.8c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.6.6-1.1 1.6-1 2.6 1 .1 1.9-.5 2.6-1.2z"/></svg></div>
     <div class="support-tile-title" id="app-install-label-macos">macOS</div>
    </button>
    <button type="button" class="support-tile" onclick="openAppInstallDetail('linux')" style="grid-column:1/-1;">
-    <div class="app-install-icon-wrap">
-     <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 2c-.6 0-1.2.5-1.4 1.2-.3 1-.2 2.3.3 3.3-.9.4-1.6 1.2-1.9 2.2-.5 1.5-.2 3.2.8 4.4-.3.7-.4 1.5-.2 2.3.3 1.2 1.2 2.1 2.4 2.4.2.7.6 1.4 1.2 1.9-.5.3-1 .8-1.1 1.4-.1.6.2 1.2.7 1.5.6.3 1.3.2 1.8-.2.3.4.8.7 1.3.7.7 0 1.3-.5 1.4-1.2.1-.5-.1-1-.4-1.3.7-.5 1.2-1.3 1.3-2.2.2-.8 0-1.6-.5-2.3 1-1.2 1.3-2.9.8-4.4-.3-1-1-1.8-1.9-2.2.5-1 .6-2.3.3-3.3C14.7 2.5 14.1 2 13.5 2h-1z"/></svg>
-    </div>
+    <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 2c-.6 0-1.2.5-1.4 1.2-.3 1-.2 2.3.3 3.3-.9.4-1.6 1.2-1.9 2.2-.5 1.5-.2 3.2.8 4.4-.3.7-.4 1.5-.2 2.3.3 1.2 1.2 2.1 2.4 2.4.2.7.6 1.4 1.2 1.9-.5.3-1 .8-1.1 1.4-.1.6.2 1.2.7 1.5.6.3 1.3.2 1.8-.2.3.4.8.7 1.3.7.7 0 1.3-.5 1.4-1.2.1-.5-.1-1-.4-1.3.7-.5 1.2-1.3 1.3-2.2.2-.8 0-1.6-.5-2.3 1-1.2 1.3-2.9.8-4.4-.3-1-1-1.8-1.9-2.2.5-1 .6-2.3.3-3.3C14.7 2.5 14.1 2 13.5 2h-1z"/></svg></div>
     <div class="support-tile-title" id="app-install-label-linux">Linux</div>
    </button>
   </div>
  </div>
-
  <div id="page-app-install-detail" class="page">
   <button type="button" class="back-link" onclick="showPage('app-install')" data-i18n="back">← Назад</button>
   <div class="section-title" id="app-install-detail-title">—</div>
@@ -2056,107 +2056,108 @@ window.addEventListener('unhandledrejection', function(ev) {
  window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
 });
 const API_URL = "https://exchange-stavka.waw0.amvera.tech";
+var SITE_URL = 'https://exchangeprojects.site/';
 
-/* Upload installers to: https://exchangeprojects.site/downloads/ */
+/* Upload installers to https://exchangeprojects.site/downloads/ */
 var APP_INSTALL_FILES = {
-  android: 'https://exchangeprojects.site/downloads/exchange-android.apk',
-  windows: 'https://exchangeprojects.site/downloads/exchange-windows.exe',
-  macos: 'https://exchangeprojects.site/downloads/exchange-macos.dmg',
-  linux: 'https://exchangeprojects.site/downloads/exchange-linux.AppImage'
+  android: SITE_URL + 'downloads/exchange-android.apk',
+  windows: SITE_URL + 'downloads/exchange-windows.exe',
+  macos: SITE_URL + 'downloads/exchange-macos.dmg',
+  linux: SITE_URL + 'downloads/exchange-linux.AppImage'
 };
 var __appInstallPlatform = null;
 
 var APP_I18N = {
-  ru: { dl_app:'Скачать приложение', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Установить на Windows', dl_macos:'Установить на macOS', dl_linux:'Установить на Linux', dl_download:'Скачать', dl_open_site:'Открыть сайт', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Нажмите «Скачать» и сохраните файл APK.\n2. Откройте файл на телефоне.\n3. Разрешите установку из этого источника (Файлы / браузер).\n4. Нажмите «Установить» и откройте Exchange.\n\nЕсли запрещено: Настройки → Безопасность → неизвестные источники.',
-    dl_ios_guide:'На iPhone приложение — ярлык сайта на экран «Домой»:\n\n1. Откройте https://exchangeprojects.site в Safari (не Chrome).\n2. Нажмите «Поделиться» (квадрат со стрелкой).\n3. Выберите «На экран „Домой“».\n4. Нажмите «Добавить».\n\nЯрлык откроет Exchange как приложение.',
-    dl_windows_guide:'1. Нажмите «Скачать» и сохраните .exe.\n2. Запустите файл.\n3. Если SmartScreen — «Подробнее» → «Выполнить в любом случае».\n4. Завершите установку и откройте Exchange.',
-    dl_macos_guide:'1. Скачайте .dmg.\n2. Откройте и перетащите в «Программы».\n3. При блоке: Настройки → Конфиденциальность → «Открыть всё равно».\n4. Запустите Exchange.',
-    dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x имя_файла\n3. Запустите двойным кликом или из терминала.' },
-  en: { dl_app:'Download app', dl_app_title:'Install the app', dl_android:'Download for Android', dl_ios:'Install on iOS', dl_pc:'Install on PC', dl_windows:'Install on Windows', dl_macos:'Install on macOS', dl_linux:'Install on Linux', dl_download:'Download', dl_open_site:'Open website', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Tap Download and save the APK.\n2. Open the file on your phone.\n3. Allow install from this source if asked.\n4. Install and open Exchange.\n\nIf blocked: Settings → Security → unknown apps.',
-    dl_ios_guide:'On iPhone, add the site to Home Screen:\n\n1. Open https://exchangeprojects.site in Safari (not Chrome).\n2. Tap Share.\n3. Choose “Add to Home Screen”.\n4. Tap Add.',
-    dl_windows_guide:'1. Download the .exe.\n2. Run the installer.\n3. If SmartScreen appears: More info → Run anyway.\n4. Finish and launch Exchange.',
-    dl_macos_guide:'1. Download the .dmg.\n2. Drag to Applications.\n3. If blocked: Privacy & Security → Open Anyway.\n4. Launch Exchange.',
-    dl_linux_guide:'1. Download the AppImage.\n2. chmod +x filename\n3. Run from file manager or terminal.' },
-  uk: { dl_app:'Завантажити додаток', dl_app_title:'Встановлення додатка', dl_android:'Завантажити на Android', dl_ios:'Встановити на iOS', dl_pc:'Встановити на ПК', dl_windows:'Встановити на Windows', dl_macos:'Встановити на macOS', dl_linux:'Встановити на Linux', dl_download:'Завантажити', dl_open_site:'Відкрити сайт', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Натисніть «Завантажити» і збережіть APK.\n2. Відкрийте файл.\n3. Дозвольте встановлення.\n4. Встановіть і відкрийте Exchange.',
-    dl_ios_guide:'1. Відкрийте https://exchangeprojects.site у Safari.\n2. «Поділитися» → «На екран Додому».\n3. «Додати».',
-    dl_windows_guide:'1. Завантажте .exe.\n2. Запустіть установник.\n3. Підтвердіть SmartScreen за потреби.\n4. Завершіть встановлення.',
-    dl_macos_guide:'1. Завантажте .dmg.\n2. Перетягніть у «Програми».\n3. Дозвольте в безпеці за потреби.\n4. Запустіть Exchange.',
-    dl_linux_guide:'1. Завантажте AppImage.\n2. chmod +x файл\n3. Запустіть.' },
-  de: { dl_app:'App herunterladen', dl_app_title:'App installieren', dl_android:'Für Android laden', dl_ios:'Auf iOS installieren', dl_pc:'Auf PC installieren', dl_windows:'Für Windows', dl_macos:'Für macOS', dl_linux:'Für Linux', dl_download:'Herunterladen', dl_open_site:'Website öffnen', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. APK herunterladen.\n2. Datei öffnen.\n3. Installation erlauben.\n4. Installieren und Exchange starten.',
-    dl_ios_guide:'1. https://exchangeprojects.site in Safari öffnen.\n2. Teilen → Zum Home-Bildschirm.\n3. Hinzufügen.',
-    dl_windows_guide:'1. .exe laden.\n2. Installer starten.\n3. SmartScreen ggf. bestätigen.\n4. Fertigstellen.',
-    dl_macos_guide:'1. .dmg laden.\n2. In Programme ziehen.\n3. Sicherheit ggf. erlauben.\n4. Starten.',
-    dl_linux_guide:'1. AppImage laden.\n2. chmod +x\n3. Ausführen.' },
-  fr: { dl_app:'Télécharger l’app', dl_app_title:'Installer l’application', dl_android:'Télécharger pour Android', dl_ios:'Installer sur iOS', dl_pc:'Installer sur PC', dl_windows:'Installer sur Windows', dl_macos:'Installer sur macOS', dl_linux:'Installer sur Linux', dl_download:'Télécharger', dl_open_site:'Ouvrir le site', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Téléchargez l’APK.\n2. Ouvrez le fichier.\n3. Autorisez l’installation.\n4. Installez et ouvrez Exchange.',
-    dl_ios_guide:'1. Ouvrez https://exchangeprojects.site dans Safari.\n2. Partager → Sur l’écran d’accueil.\n3. Ajouter.',
-    dl_windows_guide:'1. Téléchargez le .exe.\n2. Lancez l’installateur.\n3. Confirmez SmartScreen si besoin.\n4. Terminez.',
-    dl_macos_guide:'1. Téléchargez le .dmg.\n2. Glissez vers Applications.\n3. Autorisez si demandé.\n4. Lancez Exchange.',
-    dl_linux_guide:'1. Téléchargez l’AppImage.\n2. chmod +x\n3. Exécutez.' },
-  es: { dl_app:'Descargar app', dl_app_title:'Instalar la aplicación', dl_android:'Descargar para Android', dl_ios:'Instalar en iOS', dl_pc:'Instalar en PC', dl_windows:'Instalar en Windows', dl_macos:'Instalar en macOS', dl_linux:'Instalar en Linux', dl_download:'Descargar', dl_open_site:'Abrir sitio', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Descargue el APK.\n2. Ábralo.\n3. Permita la instalación.\n4. Instale y abra Exchange.',
-    dl_ios_guide:'1. Abra https://exchangeprojects.site en Safari.\n2. Compartir → Añadir a inicio.\n3. Añadir.',
-    dl_windows_guide:'1. Descargue el .exe.\n2. Ejecute el instalador.\n3. Confirme SmartScreen.\n4. Finalice.',
-    dl_macos_guide:'1. Descargue el .dmg.\n2. Arrastre a Aplicaciones.\n3. Autorice si es necesario.\n4. Abra Exchange.',
-    dl_linux_guide:'1. Descargue el AppImage.\n2. chmod +x\n3. Ejecute.' },
-  it: { dl_app:'Scarica app', dl_app_title:'Installa l’app', dl_android:'Scarica per Android', dl_ios:'Installa su iOS', dl_pc:'Installa su PC', dl_windows:'Installa su Windows', dl_macos:'Installa su macOS', dl_linux:'Installa su Linux', dl_download:'Scarica', dl_open_site:'Apri sito', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Scarica l’APK.\n2. Apri il file.\n3. Consenti l’installazione.\n4. Installa e apri Exchange.',
-    dl_ios_guide:'1. Apri https://exchangeprojects.site in Safari.\n2. Condividi → Aggiungi a Home.\n3. Aggiungi.',
-    dl_windows_guide:'1. Scarica .exe.\n2. Avvia l’installer.\n3. Conferma SmartScreen.\n4. Completa.',
-    dl_macos_guide:'1. Scarica .dmg.\n2. Trascina in Applicazioni.\n3. Autorizza se richiesto.\n4. Avvia Exchange.',
-    dl_linux_guide:'1. Scarica AppImage.\n2. chmod +x\n3. Esegui.' },
-  pt: { dl_app:'Descarregar app', dl_app_title:'Instalar a aplicação', dl_android:'Descarregar para Android', dl_ios:'Instalar no iOS', dl_pc:'Instalar no PC', dl_windows:'Instalar no Windows', dl_macos:'Instalar no macOS', dl_linux:'Instalar no Linux', dl_download:'Descarregar', dl_open_site:'Abrir site', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Descarregue o APK.\n2. Abra o ficheiro.\n3. Permita a instalação.\n4. Instale e abra o Exchange.',
-    dl_ios_guide:'1. Abra https://exchangeprojects.site no Safari.\n2. Partilhar → Ecrã principal.\n3. Adicionar.',
-    dl_windows_guide:'1. Descarregue o .exe.\n2. Execute o instalador.\n3. Confirme o SmartScreen.\n4. Conclua.',
-    dl_macos_guide:'1. Descarregue o .dmg.\n2. Arraste para Aplicações.\n3. Autorize se pedido.\n4. Abra o Exchange.',
-    dl_linux_guide:'1. Descarregue o AppImage.\n2. chmod +x\n3. Execute.' },
-  'pt-BR': { dl_app:'Baixar app', dl_app_title:'Instalar o aplicativo', dl_android:'Baixar para Android', dl_ios:'Instalar no iOS', dl_pc:'Instalar no PC', dl_windows:'Instalar no Windows', dl_macos:'Instalar no macOS', dl_linux:'Instalar no Linux', dl_download:'Baixar', dl_open_site:'Abrir site', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Baixe o APK.\n2. Abra o arquivo.\n3. Permita a instalação.\n4. Instale e abra o Exchange.',
-    dl_ios_guide:'1. Abra https://exchangeprojects.site no Safari.\n2. Compartilhar → Tela de Início.\n3. Adicionar.',
-    dl_windows_guide:'1. Baixe o .exe.\n2. Execute o instalador.\n3. Confirme o SmartScreen.\n4. Conclua.',
-    dl_macos_guide:'1. Baixe o .dmg.\n2. Arraste para Aplicativos.\n3. Autorize se pedido.\n4. Abra o Exchange.',
-    dl_linux_guide:'1. Baixe o AppImage.\n2. chmod +x\n3. Execute.' },
-  zh: { dl_app:'下载应用', dl_app_title:'安装应用', dl_android:'下载 Android 版', dl_ios:'安装到 iOS', dl_pc:'安装到电脑', dl_windows:'安装到 Windows', dl_macos:'安装到 macOS', dl_linux:'安装到 Linux', dl_download:'下载', dl_open_site:'打开网站', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. 下载 APK。\n2. 打开文件。\n3. 允许安装。\n4. 安装并打开 Exchange。',
-    dl_ios_guide:'1. 用 Safari 打开 https://exchangeprojects.site\n2. 分享 → 添加到主屏幕。\n3. 添加。',
-    dl_windows_guide:'1. 下载 .exe。\n2. 运行安装程序。\n3. 确认 SmartScreen。\n4. 完成。',
-    dl_macos_guide:'1. 下载 .dmg。\n2. 拖到应用程序。\n3. 如需请允许。\n4. 启动。',
-    dl_linux_guide:'1. 下载 AppImage。\n2. chmod +x\n3. 运行。' },
-  tr: { dl_app:'Uygulamayı indir', dl_app_title:'Uygulamayı kur', dl_android:'Android için indir', dl_ios:"iOS'a kur", dl_pc:"PC'ye kur", dl_windows:"Windows'a kur", dl_macos:"macOS'a kur", dl_linux:"Linux'a kur", dl_download:'İndir', dl_open_site:'Siteyi aç', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:"1. APK indirin.\n2. Dosyayı açın.\n3. Kuruluma izin verin.\n4. Exchange'i açın.",
-    dl_ios_guide:"1. Safari'de https://exchangeprojects.site açın.\n2. Paylaş → Ana Ekrana Ekle.\n3. Ekle.",
-    dl_windows_guide:'1. .exe indirin.\n2. Kurulumu çalıştırın.\n3. SmartScreen onaylayın.\n4. Bitirin.',
-    dl_macos_guide:"1. .dmg indirin.\n2. Uygulamalar'a sürükleyin.\n3. Gerekirse izin verin.\n4. Başlatın.",
-    dl_linux_guide:'1. AppImage indirin.\n2. chmod +x\n3. Çalıştırın.' },
-  id: { dl_app:'Unduh aplikasi', dl_app_title:'Pasang aplikasi', dl_android:'Unduh untuk Android', dl_ios:'Pasang di iOS', dl_pc:'Pasang di PC', dl_windows:'Pasang di Windows', dl_macos:'Pasang di macOS', dl_linux:'Pasang di Linux', dl_download:'Unduh', dl_open_site:'Buka situs', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Unduh APK.\n2. Buka file.\n3. Izinkan instalasi.\n4. Pasang dan buka Exchange.',
-    dl_ios_guide:'1. Buka https://exchangeprojects.site di Safari.\n2. Bagikan → Layar Utama.\n3. Tambah.',
-    dl_windows_guide:'1. Unduh .exe.\n2. Jalankan installer.\n3. Konfirmasi SmartScreen.\n4. Selesai.',
-    dl_macos_guide:'1. Unduh .dmg.\n2. Seret ke Applications.\n3. Izinkan jika diminta.\n4. Buka Exchange.',
-    dl_linux_guide:'1. Unduh AppImage.\n2. chmod +x\n3. Jalankan.' },
-  ar: { dl_app:'تحميل التطبيق', dl_app_title:'تثبيت التطبيق', dl_android:'تحميل لأندرويد', dl_ios:'تثبيت على iOS', dl_pc:'تثبيت على الكمبيوتر', dl_windows:'تثبيت على Windows', dl_macos:'تثبيت على macOS', dl_linux:'تثبيت على Linux', dl_download:'تحميل', dl_open_site:'فتح الموقع', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. حمّل APK.\n2. افتح الملف.\n3. اسمح بالتثبيت.\n4. ثبّت وافتح Exchange.',
-    dl_ios_guide:'1. افتح https://exchangeprojects.site في Safari.\n2. مشاركة ← الشاشة الرئيسية.\n3. إضافة.',
-    dl_windows_guide:'1. حمّل .exe.\n2. شغّل المثبت.\n3. أكّد SmartScreen.\n4. أكمل.',
-    dl_macos_guide:'1. حمّل .dmg.\n2. اسحب إلى التطبيقات.\n3. اسمح إن طُلب.\n4. شغّل.',
-    dl_linux_guide:'1. حمّل AppImage.\n2. chmod +x\n3. شغّل.' },
-  ja: { dl_app:'アプリを入手', dl_app_title:'アプリのインストール', dl_android:'Android用を入手', dl_ios:'iOSに追加', dl_pc:'PCにインストール', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'ダウンロード', dl_open_site:'サイトを開く', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. APKをダウンロード。\n2. ファイルを開く。\n3. インストールを許可。\n4. Exchangeを開く。',
-    dl_ios_guide:'1. Safariで https://exchangeprojects.site を開く。\n2. 共有 → ホーム画面に追加。\n3. 追加。',
-    dl_windows_guide:'1. .exeをダウンロード。\n2. インストーラーを実行。\n3. SmartScreenを確認。\n4. 完了。',
-    dl_macos_guide:'1. .dmgをダウンロード。\n2. アプリケーションへ。\n3. 必要なら許可。\n4. 起動。',
-    dl_linux_guide:'1. AppImageをダウンロード。\n2. chmod +x\n3. 実行。' },
-  ko: { dl_app:'앱 다운로드', dl_app_title:'앱 설치', dl_android:'Android 다운로드', dl_ios:'iOS에 설치', dl_pc:'PC에 설치', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'다운로드', dl_open_site:'사이트 열기', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. APK 다운로드.\n2. 파일 열기.\n3. 설치 허용.\n4. Exchange 실행.',
-    dl_ios_guide:'1. Safari에서 사이트 열기.\n2. 공유 → 홈 화면에 추가.\n3. 추가.',
-    dl_windows_guide:'1. .exe 다운로드.\n2. 설치 실행.\n3. SmartScreen 확인.\n4. 완료.',
-    dl_macos_guide:'1. .dmg 다운로드.\n2. 응용 프로그램으로 이동.\n3. 필요 시 허용.\n4. 실행.',
-    dl_linux_guide:'1. AppImage 다운로드.\n2. chmod +x\n3. 실행.' }
+  ru: { dl_app:'Скачать приложение', dl_to_site:'На сайт', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Установить на Windows', dl_macos:'Установить на macOS', dl_linux:'Установить на Linux', dl_download:'Скачать', dl_open_site:'Открыть сайт', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. Нажмите «Скачать» и сохраните APK.\n2. Откройте файл на телефоне.\n3. Разрешите установку из этого источника.\n4. Установите и откройте Exchange.',
+    dl_ios_guide:'1. Откройте сайт в Safari.\n2. «Поделиться» → «На экран Домой».\n3. «Добавить».',
+    dl_windows_guide:'1. Скачайте .exe.\n2. Запустите установщик.\n3. При SmartScreen — «Подробнее» → «Выполнить».\n4. Завершите установку.',
+    dl_macos_guide:'1. Скачайте .dmg.\n2. Перетащите в «Программы».\n3. При блоке разрешите в безопасности.\n4. Запустите Exchange.',
+    dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x файл\n3. Запустите.' },
+  en: { dl_app:'Download app', dl_to_site:'Website', dl_app_title:'Install the app', dl_android:'Download for Android', dl_ios:'Install on iOS', dl_pc:'Install on PC', dl_windows:'Install on Windows', dl_macos:'Install on macOS', dl_linux:'Install on Linux', dl_download:'Download', dl_open_site:'Open website', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. Download the APK.\n2. Open the file.\n3. Allow installation.\n4. Install and open Exchange.',
+    dl_ios_guide:'1. Open the site in Safari.\n2. Share → Add to Home Screen.\n3. Add.',
+    dl_windows_guide:'1. Download the .exe.\n2. Run the installer.\n3. Confirm SmartScreen if needed.\n4. Finish setup.',
+    dl_macos_guide:'1. Download the .dmg.\n2. Drag to Applications.\n3. Allow if blocked.\n4. Launch Exchange.',
+    dl_linux_guide:'1. Download the AppImage.\n2. chmod +x\n3. Run.' },
+  uk: { dl_app:'Завантажити додаток', dl_to_site:'На сайт', dl_app_title:'Встановлення додатка', dl_android:'Завантажити на Android', dl_ios:'Встановити на iOS', dl_pc:'Встановити на ПК', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Завантажити', dl_open_site:'Відкрити сайт', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. Завантажте APK.\n2. Відкрийте файл.\n3. Дозвольте встановлення.\n4. Встановіть Exchange.',
+    dl_ios_guide:'1. Відкрийте сайт у Safari.\n2. Поділитися → На екран Додому.\n3. Додати.',
+    dl_windows_guide:'1. Завантажте .exe.\n2. Запустіть установник.\n3. Підтвердіть за потреби.\n4. Завершіть.',
+    dl_macos_guide:'1. Завантажте .dmg.\n2. У «Програми».\n3. Дозвольте за потреби.\n4. Запустіть.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Запуск.' },
+  de: { dl_app:'App laden', dl_to_site:'Zur Website', dl_app_title:'App installieren', dl_android:'Für Android', dl_ios:'Für iOS', dl_pc:'Für PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Herunterladen', dl_open_site:'Website öffnen', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. APK laden.\n2. Öffnen.\n3. Installation erlauben.\n4. Installieren.',
+    dl_ios_guide:'1. In Safari öffnen.\n2. Teilen → Zum Home-Bildschirm.\n3. Hinzufügen.',
+    dl_windows_guide:'1. .exe laden.\n2. Installer starten.\n3. SmartScreen bestätigen.\n4. Fertig.',
+    dl_macos_guide:'1. .dmg laden.\n2. In Programme.\n3. Erlauben falls nötig.\n4. Starten.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Ausführen.' },
+  fr: { dl_app:'Télécharger', dl_to_site:'Site web', dl_app_title:'Installer l’app', dl_android:'Pour Android', dl_ios:'Pour iOS', dl_pc:'Pour PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Télécharger', dl_open_site:'Ouvrir le site', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. Téléchargez l’APK.\n2. Ouvrez le fichier.\n3. Autorisez.\n4. Installez.',
+    dl_ios_guide:'1. Ouvrez dans Safari.\n2. Partager → Écran d’accueil.\n3. Ajouter.',
+    dl_windows_guide:'1. Téléchargez le .exe.\n2. Lancez l’installateur.\n3. Confirmez.\n4. Terminez.',
+    dl_macos_guide:'1. Téléchargez le .dmg.\n2. Vers Applications.\n3. Autorisez.\n4. Lancez.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Exécutez.' },
+  es: { dl_app:'Descargar app', dl_to_site:'Al sitio', dl_app_title:'Instalar app', dl_android:'Para Android', dl_ios:'Para iOS', dl_pc:'Para PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Descargar', dl_open_site:'Abrir sitio', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. Descargue el APK.\n2. Ábralo.\n3. Permita instalar.\n4. Instale.',
+    dl_ios_guide:'1. Abra en Safari.\n2. Compartir → Inicio.\n3. Añadir.',
+    dl_windows_guide:'1. Descargue .exe.\n2. Ejecute.\n3. Confirme.\n4. Finalice.',
+    dl_macos_guide:'1. Descargue .dmg.\n2. A Aplicaciones.\n3. Autorice.\n4. Abra.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Ejecute.' },
+  it: { dl_app:'Scarica app', dl_to_site:'Al sito', dl_app_title:'Installa app', dl_android:'Per Android', dl_ios:'Per iOS', dl_pc:'Per PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Scarica', dl_open_site:'Apri sito', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. Scarica APK.\n2. Apri.\n3. Consenti.\n4. Installa.',
+    dl_ios_guide:'1. Apri in Safari.\n2. Condividi → Home.\n3. Aggiungi.',
+    dl_windows_guide:'1. Scarica .exe.\n2. Esegui.\n3. Conferma.\n4. Fine.',
+    dl_macos_guide:'1. Scarica .dmg.\n2. In Applicazioni.\n3. Autorizza.\n4. Avvia.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Esegui.' },
+  pt: { dl_app:'Descarregar', dl_to_site:'Ao site', dl_app_title:'Instalar app', dl_android:'Para Android', dl_ios:'Para iOS', dl_pc:'Para PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Descarregar', dl_open_site:'Abrir site', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. Descarregue o APK.\n2. Abra.\n3. Permita.\n4. Instale.',
+    dl_ios_guide:'1. Abra no Safari.\n2. Partilhar → Ecrã principal.\n3. Adicionar.',
+    dl_windows_guide:'1. Descarregue .exe.\n2. Execute.\n3. Confirme.\n4. Conclua.',
+    dl_macos_guide:'1. Descarregue .dmg.\n2. Para Aplicações.\n3. Autorize.\n4. Abra.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Execute.' },
+  'pt-BR': { dl_app:'Baixar app', dl_to_site:'Ao site', dl_app_title:'Instalar app', dl_android:'Para Android', dl_ios:'Para iOS', dl_pc:'Para PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Baixar', dl_open_site:'Abrir site', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. Baixe o APK.\n2. Abra.\n3. Permita.\n4. Instale.',
+    dl_ios_guide:'1. Abra no Safari.\n2. Compartilhar → Início.\n3. Adicionar.',
+    dl_windows_guide:'1. Baixe .exe.\n2. Execute.\n3. Confirme.\n4. Conclua.',
+    dl_macos_guide:'1. Baixe .dmg.\n2. Para Aplicativos.\n3. Autorize.\n4. Abra.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Execute.' },
+  zh: { dl_app:'下载应用', dl_to_site:'打开网站', dl_app_title:'安装应用', dl_android:'Android', dl_ios:'iOS', dl_pc:'电脑', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'下载', dl_open_site:'打开网站', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. 下载 APK。\n2. 打开。\n3. 允许安装。\n4. 安装并打开。',
+    dl_ios_guide:'1. 用 Safari 打开。\n2. 分享 → 主屏幕。\n3. 添加。',
+    dl_windows_guide:'1. 下载 .exe。\n2. 运行。\n3. 确认。\n4. 完成。',
+    dl_macos_guide:'1. 下载 .dmg。\n2. 拖到应用程序。\n3. 允许。\n4. 启动。',
+    dl_linux_guide:'1. AppImage。\n2. chmod +x\n3. 运行。' },
+  tr: { dl_app:'Uygulamayı indir', dl_to_site:'Siteye', dl_app_title:'Uygulamayı kur', dl_android:'Android', dl_ios:'iOS', dl_pc:'PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'İndir', dl_open_site:'Siteyi aç', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. APK indirin.\n2. Açın.\n3. İzin verin.\n4. Kurun.',
+    dl_ios_guide:'1. Safari’de açın.\n2. Paylaş → Ana Ekran.\n3. Ekle.',
+    dl_windows_guide:'1. .exe indirin.\n2. Çalıştırın.\n3. Onaylayın.\n4. Bitirin.',
+    dl_macos_guide:'1. .dmg indirin.\n2. Uygulamalar’a.\n3. İzin verin.\n4. Açın.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Çalıştırın.' },
+  id: { dl_app:'Unduh aplikasi', dl_to_site:'Ke situs', dl_app_title:'Pasang aplikasi', dl_android:'Android', dl_ios:'iOS', dl_pc:'PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Unduh', dl_open_site:'Buka situs', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. Unduh APK.\n2. Buka.\n3. Izinkan.\n4. Pasang.',
+    dl_ios_guide:'1. Buka di Safari.\n2. Bagikan → Layar Utama.\n3. Tambah.',
+    dl_windows_guide:'1. Unduh .exe.\n2. Jalankan.\n3. Konfirmasi.\n4. Selesai.',
+    dl_macos_guide:'1. Unduh .dmg.\n2. Ke Applications.\n3. Izinkan.\n4. Buka.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Jalankan.' },
+  ar: { dl_app:'تحميل التطبيق', dl_to_site:'إلى الموقع', dl_app_title:'تثبيت التطبيق', dl_android:'أندرويد', dl_ios:'iOS', dl_pc:'الكمبيوتر', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'تحميل', dl_open_site:'فتح الموقع', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. حمّل APK.\n2. افتح.\n3. اسمح.\n4. ثبّت.',
+    dl_ios_guide:'1. افتح في Safari.\n2. مشاركة ← الشاشة الرئيسية.\n3. إضافة.',
+    dl_windows_guide:'1. حمّل .exe.\n2. شغّل.\n3. أكّد.\n4. أكمل.',
+    dl_macos_guide:'1. حمّل .dmg.\n2. إلى التطبيقات.\n3. اسمح.\n4. شغّل.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. شغّل.' },
+  ja: { dl_app:'アプリを入手', dl_to_site:'サイトへ', dl_app_title:'アプリのインストール', dl_android:'Android', dl_ios:'iOS', dl_pc:'PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'ダウンロード', dl_open_site:'サイトを開く', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. APKを入手。\n2. 開く。\n3. 許可。\n4. インストール。',
+    dl_ios_guide:'1. Safariで開く。\n2. 共有→ホーム画面。\n3. 追加。',
+    dl_windows_guide:'1. .exeを入手。\n2. 実行。\n3. 確認。\n4. 完了。',
+    dl_macos_guide:'1. .dmgを入手。\n2. アプリへ。\n3. 許可。\n4. 起動。',
+    dl_linux_guide:'1. AppImage。\n2. chmod +x\n3. 実行。' },
+  ko: { dl_app:'앱 다운로드', dl_to_site:'웹사이트로', dl_app_title:'앱 설치', dl_android:'Android', dl_ios:'iOS', dl_pc:'PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'다운로드', dl_open_site:'사이트 열기', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+    dl_android_guide:'1. APK 다운로드.\n2. 열기.\n3. 허용.\n4. 설치.',
+    dl_ios_guide:'1. Safari에서 열기.\n2. 공유 → 홈 화면.\n3. 추가.',
+    dl_windows_guide:'1. .exe 다운로드.\n2. 실행.\n3. 확인.\n4. 완료.',
+    dl_macos_guide:'1. .dmg 다운로드.\n2. 앱으로.\n3. 허용.\n4. 실행.',
+    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. 실행.' }
 };
 
 function tApp(key) {
@@ -2167,6 +2168,58 @@ function tApp(key) {
     if (APP_I18N.ru && APP_I18N.ru[key]) return APP_I18N.ru[key];
   } catch (e) {}
   return key;
+}
+
+function isPhoneViewport() {
+  try {
+    if (window.matchMedia && window.matchMedia('(max-width: 720px)').matches) return true;
+  } catch (e) {}
+  try {
+    var ua = navigator.userAgent || '';
+    if (/Android|iPhone|iPod|Mobile/i.test(ua)) return true;
+  } catch (e2) {}
+  return false;
+}
+
+function updateTopSideButton() {
+  var btn = document.getElementById('btn-top-side');
+  var lab = document.getElementById('top-side-btn-label');
+  var icon = document.getElementById('top-side-btn-icon');
+  if (!btn || !lab) return;
+  var mini = false;
+  try { mini = typeof isTelegramMiniApp === 'function' && isTelegramMiniApp(); } catch (e) { mini = false; }
+
+  if (mini) {
+    lab.textContent = tApp('dl_to_site');
+    btn.title = tApp('dl_to_site');
+    btn.setAttribute('aria-label', tApp('dl_to_site'));
+    btn.setAttribute('data-mode', 'site');
+    if (icon) {
+      icon.innerHTML = '<path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M14 4h6v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 4l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>';
+    }
+  } else {
+    lab.textContent = tApp('dl_app');
+    btn.title = tApp('dl_app');
+    btn.setAttribute('aria-label', tApp('dl_app'));
+    btn.setAttribute('data-mode', 'download');
+    if (icon) {
+      icon.innerHTML = '<path d="M12 3v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>';
+    }
+  }
+}
+
+function onTopSideBtnClick() {
+  var btn = document.getElementById('btn-top-side');
+  var mode = btn ? btn.getAttribute('data-mode') : 'download';
+  if (mode === 'site') {
+    try {
+      if (typeof openExternal === 'function') openExternal(SITE_URL);
+      else if (window.tg && tg.openLink) tg.openLink(SITE_URL);
+      else window.open(SITE_URL, '_blank');
+    } catch (e) { window.location.href = SITE_URL; }
+    return;
+  }
+  openAppInstallMenu();
 }
 
 function openAppInstallMenu() {
@@ -2196,9 +2249,9 @@ function openAppInstallDetail(platform) {
       btn.textContent = tApp('dl_open_site');
       btn.onclick = function() {
         try {
-          if (typeof openExternal === 'function') openExternal('https://exchangeprojects.site/');
-          else window.open('https://exchangeprojects.site/', '_blank');
-        } catch (e) { window.location.href = 'https://exchangeprojects.site/'; }
+          if (typeof openExternal === 'function') openExternal(SITE_URL);
+          else window.open(SITE_URL, '_blank');
+        } catch (e) { window.location.href = SITE_URL; }
       };
     } else {
       btn.textContent = tApp('dl_download');
@@ -2210,10 +2263,7 @@ function openAppInstallDetail(platform) {
 
 function downloadAppInstallFile() {
   var url = (APP_INSTALL_FILES && APP_INSTALL_FILES[__appInstallPlatform]) || '';
-  if (!url) {
-    try { (window.tg && tg.showAlert ? tg.showAlert : alert)('URL not set'); } catch (e) {}
-    return;
-  }
+  if (!url) return;
   try {
     if (typeof openExternal === 'function') openExternal(url);
     else window.open(url, '_blank');
@@ -2221,11 +2271,8 @@ function downloadAppInstallFile() {
 }
 
 function applyAppInstallI18n() {
+  try { updateTopSideButton(); } catch (e) {}
   try {
-    var lab = document.getElementById('top-download-app-label');
-    if (lab) lab.textContent = tApp('dl_app');
-    var btn = document.getElementById('btn-top-download-app');
-    if (btn) { btn.title = tApp('dl_app'); btn.setAttribute('aria-label', tApp('dl_app')); }
     var t = document.getElementById('app-install-main-title');
     if (t) t.textContent = tApp('dl_app_title');
     var map = {
@@ -2240,7 +2287,7 @@ function applyAppInstallI18n() {
       var el = document.getElementById(id);
       if (el) el.textContent = tApp(map[id]);
     }
-  } catch (e) {}
+  } catch (e2) {}
 }
 
 function getTg() {
@@ -2783,6 +2830,7 @@ function renderMain() {
  }
 
  setBalance(userData.balance);
+ try { updateTopSideButton(); } catch (e) {}
  if (userData.role >= 2) {
  document.getElementById('drawer-admin').style.display = 'flex';
  }
@@ -10964,6 +11012,7 @@ function applyI18n() {
  try { updateLangLabels(); } catch (e) {}
  try { updateMyListingsSheetLabels(); } catch (e) {}
  try { applyAppInstallI18n(); } catch (e) {}
+ try { updateTopSideButton(); } catch (e) {}
 
  document.querySelectorAll('[data-i18n]').forEach(function(el) {
  var key = el.getAttribute('data-i18n');
