@@ -91,44 +91,24 @@
  border-radius: 10px;
  }
  .icon-btn:active { background: var(--secondary-bg); }
- .topbar-left { display: flex; align-items: center; gap: 2px; }
+
  .top-side-btn {
- width: auto !important;
- height: 34px;
- padding: 0 10px 0 8px !important;
- gap: 6px;
- border: 1px solid rgba(128,128,128,0.28);
- background: var(--secondary-bg);
- border-radius: 10px !important;
- color: var(--text);
- font-weight: 600;
- line-height: 1;
+ width: auto !important; height: 34px; padding: 0 10px 0 8px !important; gap: 6px;
+ border: 1px solid rgba(128,128,128,0.28); background: var(--secondary-bg);
+ border-radius: 10px !important; color: var(--text); font-weight: 600; line-height: 1;
  }
  .top-side-btn .dl-app-icon { flex-shrink: 0; display: block; width: 18px; height: 18px; }
- .top-side-btn .top-side-btn-text {
- font-size: 12px;
- font-weight: 600;
- white-space: nowrap;
- max-width: 130px;
- overflow: hidden;
- text-overflow: ellipsis;
- }
- /* phone / narrow: smaller label so topbar does not overflow */
+ .top-side-btn .top-side-btn-text { font-size: 12px; font-weight: 600; white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
  @media (max-width: 720px) {
  .top-side-btn { height: 30px; padding: 0 8px 0 6px !important; gap: 4px; }
  .top-side-btn .dl-app-icon { width: 16px; height: 16px; }
  .top-side-btn .top-side-btn-text { font-size: 10px; max-width: 88px; }
  }
- @media (max-width: 360px) {
- .top-side-btn .top-side-btn-text { max-width: 72px; font-size: 9.5px; }
- }
  .app-install-icon-wrap {
- width: 48px; height: 48px; margin: 0 auto 8px;
- display: flex; align-items: center; justify-content: center;
- border-radius: 14px; background: rgba(46,166,255,0.12);
- color: var(--button);
+ width: 48px; height: 48px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;
+ border-radius: 14px; background: rgba(46,166,255,0.12); color: var(--button);
  }
- .app-install-icon-wrap svg { display: block; }
+
 
  .lang-btn {
  height: 32px; padding: 0 10px; border-radius: 8px;
@@ -1148,10 +1128,10 @@
 
 <!-- TOP BAR -->
 <div class="topbar">
- <div class="topbar-left">
+ <div class="topbar-left" style="display:flex;align-items:center;gap:2px;">
  <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
  <button type="button" class="icon-btn top-side-btn" id="btn-top-side" onclick="onTopSideBtnClick()" title="">
-  <svg class="dl-app-icon" id="top-side-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <svg class="dl-app-icon" id="top-side-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
    <path d="M12 3v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
    <path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
    <path d="M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
@@ -1236,48 +1216,45 @@
  <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
  </div>
 
- <!-- APP INSTALL (website only entry; page available if opened) -->
+
+ <!-- APP INSTALL -->
  <div id="page-app-install" class="page">
   <button type="button" class="back-link" onclick="showPage('home')" data-i18n="back">← Назад</button>
   <div class="section-title" id="app-install-main-title">Установка приложения</div>
   <div class="support-grid" style="margin-top:8px;">
    <button type="button" class="support-tile" onclick="openAppInstallDetail('android')">
-    <div class="app-install-icon-wrap">
-     <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18a.5.5 0 00-.86-.5l-1.86 3.22A7.97 7.97 0 0012 8c-1.48 0-2.85.4-4.02 1.1L6.1 5.8a.5.5 0 10-.86.5L7.1 9.48C5.2 10.8 4 12.97 4 15.4v.1c0 .28.22.5.5.5h15c.28 0 .5-.22.5-.5v-.1c0-2.43-1.2-4.6-3.4-5.92zM9.5 13.5a1 1 0 110-2 1 1 0 010 2zm5 0a1 1 0 110-2 1 1 0 010 2zM7 17.5h10v2H7v-2z"/></svg>
-    </div>
+    <div class="app-install-icon-wrap"><span style="font-size:28px;">🤖</span></div>
     <div class="support-tile-title" id="app-install-label-android">Скачать на Android</div>
    </button>
    <button type="button" class="support-tile" onclick="openAppInstallDetail('ios')">
-    <div class="app-install-icon-wrap">
-     <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.7 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8s-1.6-.7-2.7-.7c-1.4 0-2.7.8-3.4 2.1-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7 1.9-1 2.6-2c.8-1.1 1.1-2.2 1.1-2.2s-2.2-.8-2.2-3.5zM14.5 6.8c.6-.7 1-1.7.9-2.7-0.9.1-1.9.6-2.5 1.3-.6.6-1.1 1.6-1 2.6 1 .1 1.9-.5 2.6-1.2z"/></svg>
-    </div>
+    <div class="app-install-icon-wrap"><span style="font-size:28px;">🍎</span></div>
     <div class="support-tile-title" id="app-install-label-ios">Установить на iOS</div>
    </button>
   </div>
   <button type="button" class="btn btn-secondary" id="btn-app-install-pc" style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:10px;" onclick="toggleAppInstallPc()">
-   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+   <span style="font-size:20px;">💻</span>
    <span id="app-install-label-pc">Установить на ПК</span>
   </button>
   <div id="app-install-pc-grid" class="support-grid" style="display:none;margin-top:12px;">
    <button type="button" class="support-tile" onclick="openAppInstallDetail('windows')">
-    <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5l8-1.1v7.1H3V5.5zm9-1.2l9-1.2v8.5h-9V4.3zM3 12.5h8v7.1l-8-1.1v-6zm9 0h9v8.5l-9-1.2v-7.3z"/></svg></div>
+    <div class="app-install-icon-wrap"><span style="font-size:26px;">🪟</span></div>
     <div class="support-tile-title" id="app-install-label-windows">Windows</div>
    </button>
    <button type="button" class="support-tile" onclick="openAppInstallDetail('macos')">
-    <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8s-1.6-.7-2.7-.7c-1.4 0-2.7.8-3.4 2.1-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7 1.9-1 2.6-2c.8-1.1 1.1-2.2 1.1-2.2s-2.2-.8-2.2-3.5zM14.5 6.8c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.6.6-1.1 1.6-1 2.6 1 .1 1.9-.5 2.6-1.2z"/></svg></div>
+    <div class="app-install-icon-wrap"><span style="font-size:26px;">🍏</span></div>
     <div class="support-tile-title" id="app-install-label-macos">macOS</div>
    </button>
-   <button type="button" class="support-tile" onclick="openAppInstallDetail('linux')" style="grid-column:1/-1;">
-    <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 2c-.6 0-1.2.5-1.4 1.2-.3 1-.2 2.3.3 3.3-.9.4-1.6 1.2-1.9 2.2-.5 1.5-.2 3.2.8 4.4-.3.7-.4 1.5-.2 2.3.3 1.2 1.2 2.1 2.4 2.4.2.7.6 1.4 1.2 1.9-.5.3-1 .8-1.1 1.4-.1.6.2 1.2.7 1.5.6.3 1.3.2 1.8-.2.3.4.8.7 1.3.7.7 0 1.3-.5 1.4-1.2.1-.5-.1-1-.4-1.3.7-.5 1.2-1.3 1.3-2.2.2-.8 0-1.6-.5-2.3 1-1.2 1.3-2.9.8-4.4-.3-1-1-1.8-1.9-2.2.5-1 .6-2.3.3-3.3C14.7 2.5 14.1 2 13.5 2h-1z"/></svg></div>
+   <button type="button" class="support-tile" onclick="openAppInstallDetail('linux')">
+    <div class="app-install-icon-wrap"><span style="font-size:26px;">🐧</span></div>
     <div class="support-tile-title" id="app-install-label-linux">Linux</div>
    </button>
-  </div>
+</div>
  </div>
  <div id="page-app-install-detail" class="page">
   <button type="button" class="back-link" onclick="showPage('app-install')" data-i18n="back">← Назад</button>
   <div class="section-title" id="app-install-detail-title">—</div>
   <div class="info-block" id="app-install-detail-guide" style="white-space:pre-line;line-height:1.55;"></div>
-  <button type="button" class="btn" id="app-install-detail-btn" style="margin-top:12px;" onclick="downloadAppInstallFile()">Скачать</button>
+  <button type="button" class="btn" id="app-install-detail-btn" style="margin-top:12px;display:none;" onclick="downloadAppInstallFile()">Скачать</button>
  </div>
 
  <!-- LISTING DETAIL -->
@@ -1930,6 +1907,10 @@
 
  <!-- PROFILE -->
  <div id="page-profile" class="page">
+ <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
+  <button type="button" class="back-link" id="own-profile-back" onclick="showPage('home')" data-i18n="back" style="margin:0;">← Назад</button>
+  <button type="button" class="btn btn-secondary" id="profile-logout-btn" onclick="webLogout()" style="display:none;width:auto;padding:8px 14px;margin:0;flex-shrink:0;">Выйти</button>
+ </div>
  <div class="profile-header">
  <div class="profile-avatar-wrap" id="profile-avatar-wrap">
  <img id="profile-avatar-img" class="profile-avatar-img" alt="" style="display:none;">
@@ -2017,9 +1998,12 @@
  </div>
 
  <div id="page-user-profile" class="page">
- <div class="profile-top-bar">
- <button class="back-link" id="user-profile-back" onclick="showPage('home')" data-i18n="back">← Назад</button>
- <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
+ <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
+ <button type="button" class="back-link" id="user-profile-back" onclick="backFromUserProfile()" data-i18n="back" style="margin:0;">← Назад</button>
+ <div style="display:flex;align-items:center;gap:8px;">
+  <button type="button" class="btn btn-secondary" id="user-profile-logout-btn" onclick="webLogout()" style="display:none;width:auto;padding:8px 14px;margin:0;">Выйти</button>
+  <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
+ </div>
  </div>
  <div id="user-profile-content"></div>
  </div>
@@ -2056,9 +2040,8 @@ window.addEventListener('unhandledrejection', function(ev) {
  window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
 });
 const API_URL = "https://exchange-stavka.waw0.amvera.tech";
-var SITE_URL = 'https://exchangeprojects.site/';
 
-/* Upload installers to https://exchangeprojects.site/downloads/ */
+var SITE_URL = 'https://exchangeprojects.site/';
 var APP_INSTALL_FILES = {
   android: SITE_URL + 'downloads/exchange-android.apk',
   windows: SITE_URL + 'downloads/exchange-windows.exe',
@@ -2066,100 +2049,20 @@ var APP_INSTALL_FILES = {
   linux: SITE_URL + 'downloads/exchange-linux.AppImage'
 };
 var __appInstallPlatform = null;
-
 var APP_I18N = {
-  ru: { dl_app:'Скачать приложение', dl_to_site:'На сайт', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Установить на Windows', dl_macos:'Установить на macOS', dl_linux:'Установить на Linux', dl_download:'Скачать', dl_open_site:'Открыть сайт', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+  ru: { dl_app:'Скачать приложение', dl_to_site:'На сайт', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Скачать', dl_open_site:'Открыть сайт', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
     dl_android_guide:'1. Нажмите «Скачать» и сохраните APK.\n2. Откройте файл на телефоне.\n3. Разрешите установку из этого источника.\n4. Установите и откройте Exchange.',
-    dl_ios_guide:'1. Откройте сайт в Safari.\n2. «Поделиться» → «На экран Домой».\n3. «Добавить».',
+    dl_ios_guide:'На iPhone приложение — ярлык сайта на экран «Домой»:\n\n1. Откройте https://exchangeprojects.site в Safari (не Chrome).\n2. Нажмите «Поделиться».\n3. Выберите «На экран „Домой“».\n4. Нажмите «Добавить».\n\nКнопка скачивания не нужна — установка через Safari.',
     dl_windows_guide:'1. Скачайте .exe.\n2. Запустите установщик.\n3. При SmartScreen — «Подробнее» → «Выполнить».\n4. Завершите установку.',
     dl_macos_guide:'1. Скачайте .dmg.\n2. Перетащите в «Программы».\n3. При блоке разрешите в безопасности.\n4. Запустите Exchange.',
     dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x файл\n3. Запустите.' },
-  en: { dl_app:'Download app', dl_to_site:'Website', dl_app_title:'Install the app', dl_android:'Download for Android', dl_ios:'Install on iOS', dl_pc:'Install on PC', dl_windows:'Install on Windows', dl_macos:'Install on macOS', dl_linux:'Install on Linux', dl_download:'Download', dl_open_site:'Open website', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
+  en: { dl_app:'Download app', dl_to_site:'Website', dl_app_title:'Install the app', dl_android:'Download for Android', dl_ios:'Install on iOS', dl_pc:'Install on PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Download', dl_open_site:'Open website', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
     dl_android_guide:'1. Download the APK.\n2. Open the file.\n3. Allow installation.\n4. Install and open Exchange.',
-    dl_ios_guide:'1. Open the site in Safari.\n2. Share → Add to Home Screen.\n3. Add.',
+    dl_ios_guide:'On iPhone, add the site to Home Screen via Safari Share → Add to Home Screen. No download button needed.',
     dl_windows_guide:'1. Download the .exe.\n2. Run the installer.\n3. Confirm SmartScreen if needed.\n4. Finish setup.',
     dl_macos_guide:'1. Download the .dmg.\n2. Drag to Applications.\n3. Allow if blocked.\n4. Launch Exchange.',
-    dl_linux_guide:'1. Download the AppImage.\n2. chmod +x\n3. Run.' },
-  uk: { dl_app:'Завантажити додаток', dl_to_site:'На сайт', dl_app_title:'Встановлення додатка', dl_android:'Завантажити на Android', dl_ios:'Встановити на iOS', dl_pc:'Встановити на ПК', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Завантажити', dl_open_site:'Відкрити сайт', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Завантажте APK.\n2. Відкрийте файл.\n3. Дозвольте встановлення.\n4. Встановіть Exchange.',
-    dl_ios_guide:'1. Відкрийте сайт у Safari.\n2. Поділитися → На екран Додому.\n3. Додати.',
-    dl_windows_guide:'1. Завантажте .exe.\n2. Запустіть установник.\n3. Підтвердіть за потреби.\n4. Завершіть.',
-    dl_macos_guide:'1. Завантажте .dmg.\n2. У «Програми».\n3. Дозвольте за потреби.\n4. Запустіть.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Запуск.' },
-  de: { dl_app:'App laden', dl_to_site:'Zur Website', dl_app_title:'App installieren', dl_android:'Für Android', dl_ios:'Für iOS', dl_pc:'Für PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Herunterladen', dl_open_site:'Website öffnen', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. APK laden.\n2. Öffnen.\n3. Installation erlauben.\n4. Installieren.',
-    dl_ios_guide:'1. In Safari öffnen.\n2. Teilen → Zum Home-Bildschirm.\n3. Hinzufügen.',
-    dl_windows_guide:'1. .exe laden.\n2. Installer starten.\n3. SmartScreen bestätigen.\n4. Fertig.',
-    dl_macos_guide:'1. .dmg laden.\n2. In Programme.\n3. Erlauben falls nötig.\n4. Starten.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Ausführen.' },
-  fr: { dl_app:'Télécharger', dl_to_site:'Site web', dl_app_title:'Installer l’app', dl_android:'Pour Android', dl_ios:'Pour iOS', dl_pc:'Pour PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Télécharger', dl_open_site:'Ouvrir le site', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Téléchargez l’APK.\n2. Ouvrez le fichier.\n3. Autorisez.\n4. Installez.',
-    dl_ios_guide:'1. Ouvrez dans Safari.\n2. Partager → Écran d’accueil.\n3. Ajouter.',
-    dl_windows_guide:'1. Téléchargez le .exe.\n2. Lancez l’installateur.\n3. Confirmez.\n4. Terminez.',
-    dl_macos_guide:'1. Téléchargez le .dmg.\n2. Vers Applications.\n3. Autorisez.\n4. Lancez.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Exécutez.' },
-  es: { dl_app:'Descargar app', dl_to_site:'Al sitio', dl_app_title:'Instalar app', dl_android:'Para Android', dl_ios:'Para iOS', dl_pc:'Para PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Descargar', dl_open_site:'Abrir sitio', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Descargue el APK.\n2. Ábralo.\n3. Permita instalar.\n4. Instale.',
-    dl_ios_guide:'1. Abra en Safari.\n2. Compartir → Inicio.\n3. Añadir.',
-    dl_windows_guide:'1. Descargue .exe.\n2. Ejecute.\n3. Confirme.\n4. Finalice.',
-    dl_macos_guide:'1. Descargue .dmg.\n2. A Aplicaciones.\n3. Autorice.\n4. Abra.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Ejecute.' },
-  it: { dl_app:'Scarica app', dl_to_site:'Al sito', dl_app_title:'Installa app', dl_android:'Per Android', dl_ios:'Per iOS', dl_pc:'Per PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Scarica', dl_open_site:'Apri sito', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Scarica APK.\n2. Apri.\n3. Consenti.\n4. Installa.',
-    dl_ios_guide:'1. Apri in Safari.\n2. Condividi → Home.\n3. Aggiungi.',
-    dl_windows_guide:'1. Scarica .exe.\n2. Esegui.\n3. Conferma.\n4. Fine.',
-    dl_macos_guide:'1. Scarica .dmg.\n2. In Applicazioni.\n3. Autorizza.\n4. Avvia.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Esegui.' },
-  pt: { dl_app:'Descarregar', dl_to_site:'Ao site', dl_app_title:'Instalar app', dl_android:'Para Android', dl_ios:'Para iOS', dl_pc:'Para PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Descarregar', dl_open_site:'Abrir site', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Descarregue o APK.\n2. Abra.\n3. Permita.\n4. Instale.',
-    dl_ios_guide:'1. Abra no Safari.\n2. Partilhar → Ecrã principal.\n3. Adicionar.',
-    dl_windows_guide:'1. Descarregue .exe.\n2. Execute.\n3. Confirme.\n4. Conclua.',
-    dl_macos_guide:'1. Descarregue .dmg.\n2. Para Aplicações.\n3. Autorize.\n4. Abra.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Execute.' },
-  'pt-BR': { dl_app:'Baixar app', dl_to_site:'Ao site', dl_app_title:'Instalar app', dl_android:'Para Android', dl_ios:'Para iOS', dl_pc:'Para PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Baixar', dl_open_site:'Abrir site', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Baixe o APK.\n2. Abra.\n3. Permita.\n4. Instale.',
-    dl_ios_guide:'1. Abra no Safari.\n2. Compartilhar → Início.\n3. Adicionar.',
-    dl_windows_guide:'1. Baixe .exe.\n2. Execute.\n3. Confirme.\n4. Conclua.',
-    dl_macos_guide:'1. Baixe .dmg.\n2. Para Aplicativos.\n3. Autorize.\n4. Abra.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Execute.' },
-  zh: { dl_app:'下载应用', dl_to_site:'打开网站', dl_app_title:'安装应用', dl_android:'Android', dl_ios:'iOS', dl_pc:'电脑', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'下载', dl_open_site:'打开网站', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. 下载 APK。\n2. 打开。\n3. 允许安装。\n4. 安装并打开。',
-    dl_ios_guide:'1. 用 Safari 打开。\n2. 分享 → 主屏幕。\n3. 添加。',
-    dl_windows_guide:'1. 下载 .exe。\n2. 运行。\n3. 确认。\n4. 完成。',
-    dl_macos_guide:'1. 下载 .dmg。\n2. 拖到应用程序。\n3. 允许。\n4. 启动。',
-    dl_linux_guide:'1. AppImage。\n2. chmod +x\n3. 运行。' },
-  tr: { dl_app:'Uygulamayı indir', dl_to_site:'Siteye', dl_app_title:'Uygulamayı kur', dl_android:'Android', dl_ios:'iOS', dl_pc:'PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'İndir', dl_open_site:'Siteyi aç', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. APK indirin.\n2. Açın.\n3. İzin verin.\n4. Kurun.',
-    dl_ios_guide:'1. Safari’de açın.\n2. Paylaş → Ana Ekran.\n3. Ekle.',
-    dl_windows_guide:'1. .exe indirin.\n2. Çalıştırın.\n3. Onaylayın.\n4. Bitirin.',
-    dl_macos_guide:'1. .dmg indirin.\n2. Uygulamalar’a.\n3. İzin verin.\n4. Açın.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Çalıştırın.' },
-  id: { dl_app:'Unduh aplikasi', dl_to_site:'Ke situs', dl_app_title:'Pasang aplikasi', dl_android:'Android', dl_ios:'iOS', dl_pc:'PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Unduh', dl_open_site:'Buka situs', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. Unduh APK.\n2. Buka.\n3. Izinkan.\n4. Pasang.',
-    dl_ios_guide:'1. Buka di Safari.\n2. Bagikan → Layar Utama.\n3. Tambah.',
-    dl_windows_guide:'1. Unduh .exe.\n2. Jalankan.\n3. Konfirmasi.\n4. Selesai.',
-    dl_macos_guide:'1. Unduh .dmg.\n2. Ke Applications.\n3. Izinkan.\n4. Buka.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. Jalankan.' },
-  ar: { dl_app:'تحميل التطبيق', dl_to_site:'إلى الموقع', dl_app_title:'تثبيت التطبيق', dl_android:'أندرويد', dl_ios:'iOS', dl_pc:'الكمبيوتر', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'تحميل', dl_open_site:'فتح الموقع', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. حمّل APK.\n2. افتح.\n3. اسمح.\n4. ثبّت.',
-    dl_ios_guide:'1. افتح في Safari.\n2. مشاركة ← الشاشة الرئيسية.\n3. إضافة.',
-    dl_windows_guide:'1. حمّل .exe.\n2. شغّل.\n3. أكّد.\n4. أكمل.',
-    dl_macos_guide:'1. حمّل .dmg.\n2. إلى التطبيقات.\n3. اسمح.\n4. شغّل.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. شغّل.' },
-  ja: { dl_app:'アプリを入手', dl_to_site:'サイトへ', dl_app_title:'アプリのインストール', dl_android:'Android', dl_ios:'iOS', dl_pc:'PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'ダウンロード', dl_open_site:'サイトを開く', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. APKを入手。\n2. 開く。\n3. 許可。\n4. インストール。',
-    dl_ios_guide:'1. Safariで開く。\n2. 共有→ホーム画面。\n3. 追加。',
-    dl_windows_guide:'1. .exeを入手。\n2. 実行。\n3. 確認。\n4. 完了。',
-    dl_macos_guide:'1. .dmgを入手。\n2. アプリへ。\n3. 許可。\n4. 起動。',
-    dl_linux_guide:'1. AppImage。\n2. chmod +x\n3. 実行。' },
-  ko: { dl_app:'앱 다운로드', dl_to_site:'웹사이트로', dl_app_title:'앱 설치', dl_android:'Android', dl_ios:'iOS', dl_pc:'PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'다운로드', dl_open_site:'사이트 열기', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux',
-    dl_android_guide:'1. APK 다운로드.\n2. 열기.\n3. 허용.\n4. 설치.',
-    dl_ios_guide:'1. Safari에서 열기.\n2. 공유 → 홈 화면.\n3. 추가.',
-    dl_windows_guide:'1. .exe 다운로드.\n2. 실행.\n3. 확인.\n4. 완료.',
-    dl_macos_guide:'1. .dmg 다운로드.\n2. 앱으로.\n3. 허용.\n4. 실행.',
-    dl_linux_guide:'1. AppImage.\n2. chmod +x\n3. 실행.' }
+    dl_linux_guide:'1. Download the AppImage.\n2. chmod +x\n3. Run.' }
 };
-
 function tApp(key) {
   try {
     var lang = (typeof getAppLang === 'function' ? getAppLang() : null) || (localStorage.getItem('xcod_lang') || 'ru');
@@ -2169,74 +2072,47 @@ function tApp(key) {
   } catch (e) {}
   return key;
 }
-
-function isPhoneViewport() {
-  try {
-    if (window.matchMedia && window.matchMedia('(max-width: 720px)').matches) return true;
-  } catch (e) {}
-  try {
-    var ua = navigator.userAgent || '';
-    if (/Android|iPhone|iPod|Mobile/i.test(ua)) return true;
-  } catch (e2) {}
-  return false;
-}
-
 function updateTopSideButton() {
   var btn = document.getElementById('btn-top-side');
   var lab = document.getElementById('top-side-btn-label');
   var icon = document.getElementById('top-side-btn-icon');
   if (!btn || !lab) return;
   var mini = false;
-  try { mini = typeof isTelegramMiniApp === 'function' && isTelegramMiniApp(); } catch (e) { mini = false; }
-
+  try { mini = typeof isTelegramMiniApp === 'function' && isTelegramMiniApp(); } catch (e) {}
   if (mini) {
     lab.textContent = tApp('dl_to_site');
     btn.title = tApp('dl_to_site');
-    btn.setAttribute('aria-label', tApp('dl_to_site'));
     btn.setAttribute('data-mode', 'site');
-    if (icon) {
-      icon.innerHTML = '<path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M14 4h6v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 4l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>';
-    }
+    if (icon) icon.innerHTML = '<path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M14 4h6v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 4l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>';
   } else {
     lab.textContent = tApp('dl_app');
     btn.title = tApp('dl_app');
-    btn.setAttribute('aria-label', tApp('dl_app'));
     btn.setAttribute('data-mode', 'download');
-    if (icon) {
-      icon.innerHTML = '<path d="M12 3v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>';
-    }
+    if (icon) icon.innerHTML = '<path d="M12 3v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>';
   }
 }
-
 function onTopSideBtnClick() {
   var btn = document.getElementById('btn-top-side');
   var mode = btn ? btn.getAttribute('data-mode') : 'download';
   if (mode === 'site') {
     try {
-      if (typeof openExternal === 'function') openExternal(SITE_URL);
-      else if (window.tg && tg.openLink) tg.openLink(SITE_URL);
+      if (window.tg && tg.openLink) tg.openLink(SITE_URL);
       else window.open(SITE_URL, '_blank');
     } catch (e) { window.location.href = SITE_URL; }
     return;
   }
   openAppInstallMenu();
 }
-
 function openAppInstallMenu() {
-  try {
-    var g = document.getElementById('app-install-pc-grid');
-    if (g) g.style.display = 'none';
-  } catch (e) {}
+  try { var g = document.getElementById('app-install-pc-grid'); if (g) g.style.display = 'none'; } catch (e) {}
   try { applyAppInstallI18n(); } catch (e) {}
   showPage('app-install');
 }
-
 function toggleAppInstallPc() {
   var g = document.getElementById('app-install-pc-grid');
   if (!g) return;
   g.style.display = (g.style.display === 'none' || !g.style.display) ? 'grid' : 'none';
 }
-
 function openAppInstallDetail(platform) {
   __appInstallPlatform = platform;
   var title = document.getElementById('app-install-detail-title');
@@ -2246,49 +2122,31 @@ function openAppInstallDetail(platform) {
   if (guide) guide.textContent = tApp('dl_' + platform + '_guide');
   if (btn) {
     if (platform === 'ios') {
-      btn.textContent = tApp('dl_open_site');
-      btn.onclick = function() {
-        try {
-          if (typeof openExternal === 'function') openExternal(SITE_URL);
-          else window.open(SITE_URL, '_blank');
-        } catch (e) { window.location.href = SITE_URL; }
-      };
+      btn.style.display = 'none';
+      btn.onclick = null;
     } else {
+      btn.style.display = '';
       btn.textContent = tApp('dl_download');
       btn.onclick = downloadAppInstallFile;
     }
   }
   showPage('app-install-detail');
 }
-
 function downloadAppInstallFile() {
   var url = (APP_INSTALL_FILES && APP_INSTALL_FILES[__appInstallPlatform]) || '';
   if (!url) return;
-  try {
-    if (typeof openExternal === 'function') openExternal(url);
-    else window.open(url, '_blank');
-  } catch (e) { window.location.href = url; }
+  try { window.open(url, '_blank'); } catch (e) { window.location.href = url; }
 }
-
 function applyAppInstallI18n() {
   try { updateTopSideButton(); } catch (e) {}
   try {
     var t = document.getElementById('app-install-main-title');
     if (t) t.textContent = tApp('dl_app_title');
-    var map = {
-      'app-install-label-android': 'dl_android',
-      'app-install-label-ios': 'dl_ios',
-      'app-install-label-pc': 'dl_pc',
-      'app-install-label-windows': 'dl_windows',
-      'app-install-label-macos': 'dl_macos',
-      'app-install-label-linux': 'dl_linux'
-    };
-    for (var id in map) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = tApp(map[id]);
-    }
+    var map = { 'app-install-label-android':'dl_android','app-install-label-ios':'dl_ios','app-install-label-pc':'dl_pc','app-install-label-windows':'dl_windows','app-install-label-macos':'dl_macos','app-install-label-linux':'dl_linux' };
+    for (var id in map) { var el = document.getElementById(id); if (el) el.textContent = tApp(map[id]); }
   } catch (e2) {}
 }
+
 
 function getTg() {
  try {
@@ -2452,6 +2310,42 @@ function saveWebSession(token, expiresAt, userMeta) {
 function clearWebSession() {
  try { localStorage.removeItem(WEB_SESSION_KEY); } catch (e) {}
  __webSessionToken = null;
+}
+
+function webLogout() {
+ try { clearWebSession(); } catch (e) {}
+ try { localStorage.removeItem('clossr_web_session'); } catch (e2) {}
+ try { localStorage.removeItem('exchange_web_session'); } catch (e3) {}
+ userData = null;
+ __authReady = false;
+ try {
+  if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
+   try { if (tg && tg.close) tg.close(); } catch (e4) {}
+   return;
+  }
+ } catch (e5) {}
+ try { showLoginOverlay(); } catch (e6) {}
+ try { location.reload(); } catch (e7) {}
+}
+
+function updateProfileLogoutVisibility() {
+ var mini = false;
+ try { mini = typeof isTelegramMiniApp === 'function' && isTelegramMiniApp(); } catch (e) {}
+ var show = !mini;
+ try {
+  var a = document.getElementById('profile-logout-btn');
+  if (a) {
+   a.style.display = show ? 'inline-flex' : 'none';
+   a.textContent = (typeof tBlock === 'function' ? (tBlock('logout') !== 'logout' ? tBlock('logout') : null) : null) || 'Выйти';
+  }
+  var b = document.getElementById('user-profile-logout-btn');
+  if (b) {
+   // logout only on own profile on website
+   var own = userData && window._profileUid && Number(window._profileUid) === Number(userData.user_id);
+   b.style.display = (show && own) ? 'inline-flex' : 'none';
+   b.textContent = (typeof tBlock === 'function' && tBlock('logout') !== 'logout') ? tBlock('logout') : 'Выйти';
+  }
+ } catch (e2) {}
 }
 
 function getAuthToken() {
@@ -2830,7 +2724,6 @@ function renderMain() {
  }
 
  setBalance(userData.balance);
- try { updateTopSideButton(); } catch (e) {}
  if (userData.role >= 2) {
  document.getElementById('drawer-admin').style.display = 'flex';
  }
@@ -2892,7 +2785,7 @@ function showPage(name) {
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
  if (name === 'deposit' || name === 'withdraw') { try { updateFeeHint(name); } catch (e) {} }
  if (name === 'home') loadListings();
- if (name === 'profile') loadOwnProfileListings();
+ if (name === 'profile') { loadOwnProfileListings(); try { updateProfileLogoutVisibility(); } catch (e) {} }
  if (name === 'my-listings') loadMyListings();
  if (name === 'favorites') loadFavorites();
  if (name === 'news') loadNewsPinned();
@@ -10980,21 +10873,6 @@ var I18N = {
 
 };
 
-function tBlock(key) {
- try {
-  if (key && String(key).indexOf('dl_') === 0 && typeof tApp === 'function') {
-   var a = tApp(key);
-   if (a && a !== key) return a;
-  }
- } catch (e) {}
- try {
-  var lang = typeof getAppLang === 'function' ? getAppLang() : 'ru';
-  var pack = (typeof I18N !== 'undefined' && (I18N[lang] || I18N[String(lang).split('-')[0]] || I18N.ru)) || {};
-  if (pack[key] != null && pack[key] !== '') return pack[key];
-  if (I18N.ru && I18N.ru[key] != null && I18N.ru[key] !== '') return I18N.ru[key];
- } catch (e2) {}
- return key;
-}
 function t(key) {
  return tBlock(key);
 }
@@ -11013,6 +10891,7 @@ function applyI18n() {
  try { updateMyListingsSheetLabels(); } catch (e) {}
  try { applyAppInstallI18n(); } catch (e) {}
  try { updateTopSideButton(); } catch (e) {}
+ try { updateProfileLogoutVisibility(); } catch (e) {}
 
  document.querySelectorAll('[data-i18n]').forEach(function(el) {
  var key = el.getAttribute('data-i18n');
@@ -11776,6 +11655,12 @@ function formatDateTimeLocal(iso) {
 }
 
 function tBlock(key) {
+ try {
+  if (key && String(key).indexOf('dl_') === 0 && typeof tApp === 'function') {
+   var a = tApp(key);
+   if (a && a !== key) return a;
+  }
+ } catch (e) {}
  var lang = getAppLang();
  var pack = I18N[lang] || I18N.en || I18N.ru;
  if (pack && pack[key] != null) return pack[key];
@@ -12567,6 +12452,7 @@ async function openUserProfile(uid, backPage) {
  if (box) box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
  showPage('user-profile');
  await renderUserProfile();
+    try { updateProfileLogoutVisibility(); } catch (e0) {}
  } catch (e) {
  console.error('openUserProfile', e);
  try { tg.showAlert(tBlock('err_profile')); } catch (e2) {}
