@@ -92,6 +92,33 @@
  }
  .icon-btn:active { background: var(--secondary-bg); }
 
+ .top-side-btn {
+ width: auto !important; height: 34px; padding: 0 10px 0 8px !important; gap: 6px;
+ border: 1px solid rgba(128,128,128,0.28); background: var(--secondary-bg);
+ border-radius: 10px !important; color: var(--text); font-weight: 600; line-height: 1;
+ }
+ .top-side-btn .dl-app-icon { flex-shrink: 0; display: block; width: 18px; height: 18px; }
+ .top-side-btn .top-side-btn-text { font-size: 12px; font-weight: 600; white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+ @media (max-width: 720px) {
+ .top-side-btn { height: 30px; padding: 0 8px 0 6px !important; gap: 4px; }
+ .top-side-btn .dl-app-icon { width: 16px; height: 16px; }
+ .top-side-btn .top-side-btn-text { font-size: 10px; max-width: 88px; }
+ }
+ .app-install-icon-wrap {
+ width: 48px; height: 48px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;
+ border-radius: 14px; background: rgba(46,166,255,0.12); color: var(--button);
+ }
+ .app-install-icon-wrap svg { display: block; }
+ .btn-logout-red {
+ background: #ff3b30 !important; color: #fff !important; border: none !important;
+ width: auto !important; padding: 8px 14px !important; margin: 0 !important; flex-shrink: 0;
+ border-radius: 10px !important; font-weight: 600 !important;
+ }
+ .support-grid.app-install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+ .support-grid.app-install-grid .support-tile.tile-span-full { grid-column: 1 / -1; max-width: calc(50% - 5px); }
+ .app-install-expand-btn { margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
+
+
  .lang-btn {
  height: 32px; padding: 0 10px; border-radius: 8px;
  border: 1px solid rgba(128,128,128,0.3); background: var(--secondary-bg);
@@ -1110,8 +1137,16 @@
 
 <!-- TOP BAR -->
 <div class="topbar">
- <div class="topbar-left">
+ <div class="topbar-left" style="display:flex;align-items:center;gap:2px;">
  <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
+ <button type="button" class="icon-btn top-side-btn" id="btn-top-side" onclick="onTopSideBtnClick()" title="">
+  <svg class="dl-app-icon" id="top-side-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+   <path d="M12 3v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+   <path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+   <path d="M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>
+  <span class="top-side-btn-text" id="top-side-btn-label">Скачать приложение</span>
+ </button>
  </div>
  <div class="topbar-right">
  <button class="lang-btn" onclick="showPage('settings-lang')" title="Language"><img class="flag-img sm" id="top-lang-flag" src="https://flagcdn.com/w40/ru.png" alt="" width="18" height="13"></button>
@@ -1188,6 +1223,67 @@
  <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()" data-i18n="create">+ Создать</button>
  </div>
  <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
+ </div>
+
+
+ <!-- APP INSTALL -->
+ <div id="page-app-install" class="page">
+  <button type="button" class="back-link" onclick="showPage('home')" data-i18n="back">← Назад</button>
+  <div class="section-title" id="app-install-main-title">Установка приложения</div>
+  <div class="support-grid app-install-grid" style="margin-top:8px;">
+   <button type="button" class="support-tile" onclick="openAppInstallDetail('android')">
+    <div class="app-install-icon-wrap">
+     <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.48l1.84-3.18a.5.5 0 00-.86-.5l-1.86 3.22A7.97 7.97 0 0012 8c-1.48 0-2.85.4-4.02 1.1L6.1 5.8a.5.5 0 10-.86.5L7.1 9.48C5.2 10.8 4 12.97 4 15.4v.1c0 .28.22.5.5.5h15c.28 0 .5-.22.5-.5v-.1c0-2.43-1.2-4.6-3.4-5.92zM9.5 13.5a1 1 0 110-2 1 1 0 010 2zm5 0a1 1 0 110-2 1 1 0 010 2zM7 17.5h10v2H7v-2z"/></svg>
+    </div>
+    <div class="support-tile-title" id="app-install-label-android">Скачать на Android</div>
+   </button>
+   <button type="button" class="support-tile" onclick="openAppInstallDetail('ios')">
+    <div class="app-install-icon-wrap">
+     <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8s-1.6-.7-2.7-.7c-1.4 0-2.7.8-3.4 2.1-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7 1.9-1 2.6-2c.8-1.1 1.1-2.2 1.1-2.2s-2.2-.8-2.2-3.5zM14.5 6.8c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.6.6-1.1 1.6-1 2.6 1 .1 1.9-.5 2.6-1.2z"/></svg>
+    </div>
+    <div class="support-tile-title" id="app-install-label-ios">Установить на iOS</div>
+   </button>
+  </div>
+  <button type="button" class="btn btn-secondary app-install-expand-btn" id="btn-app-install-pc" onclick="toggleAppInstallPc()">
+   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+   <span id="app-install-label-pc">Установить на ПК</span>
+  </button>
+  <div id="app-install-pc-grid" class="support-grid app-install-grid" style="display:none;margin-top:12px;">
+   <button type="button" class="support-tile" onclick="openAppInstallDetail('windows')">
+    <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5l8-1.1v7.1H3V5.5zm9-1.2l9-1.2v8.5h-9V4.3zM3 12.5h8v7.1l-8-1.1v-6zm9 0h9v8.5l-9-1.2v-7.3z"/></svg></div>
+    <div class="support-tile-title" id="app-install-label-windows">Windows</div>
+   </button>
+   <button type="button" class="support-tile" onclick="openAppInstallDetail('macos')">
+    <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8s-1.6-.7-2.7-.7c-1.4 0-2.7.8-3.4 2.1-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7 1.9-1 2.6-2c.8-1.1 1.1-2.2 1.1-2.2s-2.2-.8-2.2-3.5zM14.5 6.8c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.6.6-1.1 1.6-1 2.6 1 .1 1.9-.5 2.6-1.2z"/></svg></div>
+    <div class="support-tile-title" id="app-install-label-macos">macOS</div>
+   </button>
+   <button type="button" class="support-tile tile-span-full" onclick="openAppInstallDetail('linux')">
+    <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 2c-.6 0-1.2.5-1.4 1.2-.3 1-.2 2.3.3 3.3-.9.4-1.6 1.2-1.9 2.2-.5 1.5-.2 3.2.8 4.4-.3.7-.4 1.5-.2 2.3.3 1.2 1.2 2.1 2.4 2.4.2.7.6 1.4 1.2 1.9-.5.3-1 .8-1.1 1.4-.1.6.2 1.2.7 1.5.6.3 1.3.2 1.8-.2.3.4.8.7 1.3.7.7 0 1.3-.5 1.4-1.2.1-.5-.1-1-.4-1.3.7-.5 1.2-1.3 1.3-2.2.2-.8 0-1.6-.5-2.3 1-1.2 1.3-2.9.8-4.4-.3-1-1-1.8-1.9-2.2.5-1 .6-2.3.3-3.3C14.7 2.5 14.1 2 13.5 2h-1z"/></svg></div>
+    <div class="support-tile-title" id="app-install-label-linux">Linux</div>
+   </button>
+  </div>
+  <button type="button" class="btn btn-secondary app-install-expand-btn" id="btn-app-install-tg" onclick="toggleAppInstallTg()">
+   <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8.02c-.13.58-.47.72-.95.45l-2.62-1.93-1.26 1.21c-.14.14-.26.26-.53.26l.19-2.67 4.89-4.42c.21-.19-.05-.29-.33-.11l-6.04 3.8-2.6-.81c-.57-.18-.58-.57.12-.84l10.16-3.92c.47-.18.88.11.67.78z"/></svg>
+   <span id="app-install-label-tg">Мы в Telegram</span>
+  </button>
+  <div id="app-install-tg-grid" class="support-grid app-install-grid" style="display:none;margin-top:12px;">
+   <button type="button" class="support-tile" onclick="openTelegramBotLink()">
+    <div class="app-install-icon-wrap"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8.02c-.13.58-.47.72-.95.45l-2.62-1.93-1.26 1.21c-.14.14-.26.26-.53.26l.19-2.67 4.89-4.42c.21-.19-.05-.29-.33-.11l-6.04 3.8-2.6-.81c-.57-.18-.58-.57.12-.84l10.16-3.92c.47-.18.88.11.67.78z"/></svg></div>
+    <div class="support-tile-title" id="app-install-label-tg-bot">Бот</div>
+    <div class="support-tile-sub">@exchangeprojectsbot</div>
+   </button>
+   <button type="button" class="support-tile" onclick="openTelegramMiniAppLink()">
+    <div class="app-install-icon-wrap"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01" stroke-linecap="round"/></svg></div>
+    <div class="support-tile-title" id="app-install-label-tg-app">Мини-приложение</div>
+    <div class="support-tile-sub" id="app-install-tg-app-sub">Открыть</div>
+   </button>
+  </div>
+ </div>
+ <div id="page-app-install-detail" class="page">
+  <button type="button" class="back-link" onclick="showPage('app-install')" data-i18n="back">← Назад</button>
+  <div class="section-title" id="app-install-detail-title">—</div>
+  <div class="info-block" id="app-install-detail-guide" style="white-space:pre-line;line-height:1.55;"></div>
+  <button type="button" class="btn" id="app-install-detail-btn" style="margin-top:12px;display:none;" onclick="downloadAppInstallFile()">Скачать</button>
  </div>
 
  <!-- LISTING DETAIL -->
@@ -1840,6 +1936,10 @@
 
  <!-- PROFILE -->
  <div id="page-profile" class="page">
+ <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
+  <button type="button" class="back-link" id="own-profile-back" onclick="showPage('home')" data-i18n="back" style="margin:0;">← Назад</button>
+  <button type="button" class="btn-logout-red" id="profile-logout-btn" onclick="webLogout()" style="display:none;">Выйти</button>
+ </div>
  <div class="profile-header">
  <div class="profile-avatar-wrap" id="profile-avatar-wrap">
  <img id="profile-avatar-img" class="profile-avatar-img" alt="" style="display:none;">
@@ -1927,9 +2027,12 @@
  </div>
 
  <div id="page-user-profile" class="page">
- <div class="profile-top-bar">
- <button class="back-link" id="user-profile-back" onclick="showPage('home')" data-i18n="back">← Назад</button>
- <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
+ <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
+ <button type="button" class="back-link" id="user-profile-back" onclick="backFromUserProfile()" data-i18n="back" style="margin:0;">← Назад</button>
+ <div style="display:flex;align-items:center;gap:8px;">
+  <button type="button" class="btn-logout-red" id="user-profile-logout-btn" onclick="webLogout()" style="display:none;">Выйти</button>
+  <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
+ </div>
  </div>
  <div id="user-profile-content"></div>
  </div>
@@ -1966,6 +2069,188 @@ window.addEventListener('unhandledrejection', function(ev) {
  window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
 });
 const API_URL = "https://exchange-stavka.waw0.amvera.tech";
+
+var SITE_URL = 'https://exchangeprojects.site/';
+var TG_BOT_USERNAME = 'exchangeprojectsbot';
+var TG_MINIAPP_SHORT_NAME = 'app';
+var TG_BOT_URL = 'https://t.me/' + TG_BOT_USERNAME;
+var TG_MINIAPP_URL = 'https://t.me/' + TG_BOT_USERNAME + '/' + TG_MINIAPP_SHORT_NAME;
+var APP_INSTALL_FILES = {
+  android: SITE_URL + 'downloads/exchange-android.apk',
+  windows: SITE_URL + 'downloads/exchange-windows.exe',
+  macos: SITE_URL + 'downloads/exchange-macos.dmg',
+  linux: SITE_URL + 'downloads/exchange-linux.AppImage'
+};
+var __appInstallPlatform = null;
+var APP_I18N = {
+  ru: { dl_app:'Скачать приложение', dl_to_site:'На сайт', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Скачать', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux', dl_tg:'Мы в Telegram', dl_tg_bot:'Бот', dl_tg_app:'Мини-приложение', dl_tg_app_sub:'Открыть',
+    dl_android_guide:'1. Нажмите «Скачать» и сохраните APK.\n2. Откройте файл.\n3. Разрешите установку.\n4. Установите Exchange.',
+    dl_ios_guide:'Safari → Поделиться → На экран «Домой» → Добавить.',
+    dl_windows_guide:'1. Скачайте .exe.\n2. Запустите установщик.\n3. Подтвердите SmartScreen.\n4. Завершите.',
+    dl_macos_guide:'1. Скачайте .dmg.\n2. В «Программы».\n3. Разрешите при блоке.\n4. Запустите.',
+    dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x\n3. Запустите.' },
+  en: { dl_app:'Download app', dl_to_site:'Website', dl_app_title:'Install the app', dl_android:'Download for Android', dl_ios:'Install on iOS', dl_pc:'Install on PC', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Download', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux', dl_tg:'We are on Telegram', dl_tg_bot:'Bot', dl_tg_app:'Mini App', dl_tg_app_sub:'Open',
+    dl_android_guide:'1. Download APK.\n2. Open file.\n3. Allow install.\n4. Open Exchange.',
+    dl_ios_guide:'Safari → Share → Add to Home Screen.',
+    dl_windows_guide:'1. Download .exe.\n2. Run installer.\n3. Confirm SmartScreen.\n4. Finish.',
+    dl_macos_guide:'1. Download .dmg.\n2. Drag to Applications.\n3. Allow if blocked.\n4. Launch.',
+    dl_linux_guide:'1. Download AppImage.\n2. chmod +x\n3. Run.' }
+};
+function tApp(key) {
+  try {
+    var lang = (typeof getAppLang === 'function' ? getAppLang() : null) || (localStorage.getItem('xcod_lang') || 'ru');
+    var pack = APP_I18N[lang] || APP_I18N[String(lang).split('-')[0]] || APP_I18N.en || APP_I18N.ru;
+    if (pack && pack[key]) return pack[key];
+    if (APP_I18N.ru && APP_I18N.ru[key]) return APP_I18N.ru[key];
+  } catch (e) {}
+  return key;
+}
+function isNativeApp() {
+  try {
+    if (window.Capacitor) {
+      try {
+        if (Capacitor.isNativePlatform && Capacitor.isNativePlatform()) return true;
+        var p = Capacitor.getPlatform && Capacitor.getPlatform();
+        if (p && p !== 'web') return true;
+      } catch (e0) {}
+      if (window.Capacitor.Plugins) return true;
+    }
+  } catch (e) {}
+  try { if (/Capacitor/i.test(navigator.userAgent || '')) return true; } catch (e2) {}
+  try { if (window.__EXCHANGE_NATIVE_APP === true) return true; } catch (e3) {}
+  return false;
+}
+function shouldShowOpenSiteBtn() {
+  try { if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return true; } catch (e) {}
+  try { if (isNativeApp()) return true; } catch (e2) {}
+  return false;
+}
+function openSiteInBrowser() {
+  var url = SITE_URL;
+  try {
+    if (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Browser && Capacitor.Plugins.Browser.open) {
+      Capacitor.Plugins.Browser.open({ url: url }); return;
+    }
+  } catch (e) {}
+  try { if (window.tg && tg.openLink) { tg.openLink(url); return; } } catch (e3) {}
+  try { window.open(url, '_blank'); } catch (e4) { window.location.href = url; }
+}
+function openTelegramBotLink() {
+  var url = TG_BOT_URL;
+  try { if (window.tg && tg.openTelegramLink) { tg.openTelegramLink(url); return; } } catch (e) {}
+  try { if (window.tg && tg.openLink) { tg.openLink(url); return; } } catch (e2) {}
+  try { window.open(url, '_blank'); } catch (e3) { window.location.href = url; }
+}
+function openTelegramMiniAppLink() {
+  var url = TG_MINIAPP_URL;
+  try { if (window.tg && tg.openTelegramLink) { tg.openTelegramLink(url); return; } } catch (e) {}
+  try { if (window.tg && tg.openLink) { tg.openLink(url); return; } } catch (e2) {}
+  try { window.open(url, '_blank'); } catch (e3) { window.location.href = url; }
+}
+function webLogout() {
+  try { if (typeof clearWebSession === 'function') clearWebSession(); } catch (e) {}
+  try { localStorage.removeItem('exchange_web_session'); } catch (e3) {}
+  try { userData = null; __authReady = false; } catch (e4) {}
+  try {
+    if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
+      try { if (tg && tg.close) tg.close(); } catch (e5) {}
+      return;
+    }
+  } catch (e6) {}
+  try { if (typeof showLoginOverlay === 'function') showLoginOverlay(); } catch (e7) {}
+  try { location.reload(); } catch (e8) {}
+}
+function updateProfileLogoutVisibility() {
+  var mini = false;
+  try { mini = typeof isTelegramMiniApp === 'function' && isTelegramMiniApp(); } catch (e) {}
+  var show = !mini;
+  try {
+    var a = document.getElementById('profile-logout-btn');
+    if (a) { a.style.display = show ? 'inline-flex' : 'none'; a.textContent = 'Выйти'; }
+    var b = document.getElementById('user-profile-logout-btn');
+    if (b) {
+      var own = userData && window._profileUid && Number(window._profileUid) === Number(userData.user_id);
+      b.style.display = (show && own) ? 'inline-flex' : 'none';
+      b.textContent = 'Выйти';
+    }
+  } catch (e2) {}
+}
+function updateTopSideButton() {
+  var btn = document.getElementById('btn-top-side');
+  var lab = document.getElementById('top-side-btn-label');
+  var icon = document.getElementById('top-side-btn-icon');
+  if (!btn || !lab) return;
+  var openSite = shouldShowOpenSiteBtn();
+  if (openSite) {
+    lab.textContent = tApp('dl_to_site');
+    btn.title = tApp('dl_to_site');
+    btn.setAttribute('data-mode', 'site');
+    if (icon) icon.innerHTML = '<path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M14 4h6v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 4l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>';
+  } else {
+    lab.textContent = tApp('dl_app');
+    btn.title = tApp('dl_app');
+    btn.setAttribute('data-mode', 'download');
+    if (icon) icon.innerHTML = '<path d="M12 3v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>';
+  }
+}
+function onTopSideBtnClick() {
+  var btn = document.getElementById('btn-top-side');
+  var mode = btn ? btn.getAttribute('data-mode') : 'download';
+  if (mode === 'site') { openSiteInBrowser(); return; }
+  openAppInstallMenu();
+}
+function openAppInstallMenu() {
+  try {
+    var g = document.getElementById('app-install-pc-grid'); if (g) g.style.display = 'none';
+    var tg = document.getElementById('app-install-tg-grid'); if (tg) tg.style.display = 'none';
+  } catch (e) {}
+  try { applyAppInstallI18n(); } catch (e) {}
+  showPage('app-install');
+}
+function toggleAppInstallPc() {
+  var g = document.getElementById('app-install-pc-grid');
+  if (!g) return;
+  g.style.display = (g.style.display === 'none' || !g.style.display) ? 'grid' : 'none';
+}
+function toggleAppInstallTg() {
+  var g = document.getElementById('app-install-tg-grid');
+  if (!g) return;
+  g.style.display = (g.style.display === 'none' || !g.style.display) ? 'grid' : 'none';
+}
+function openAppInstallDetail(platform) {
+  __appInstallPlatform = platform;
+  var title = document.getElementById('app-install-detail-title');
+  var guide = document.getElementById('app-install-detail-guide');
+  var btn = document.getElementById('app-install-detail-btn');
+  if (title) title.textContent = tApp('dl_' + platform + '_title');
+  if (guide) guide.textContent = tApp('dl_' + platform + '_guide');
+  if (btn) {
+    if (platform === 'ios') { btn.style.display = 'none'; btn.onclick = null; }
+    else { btn.style.display = ''; btn.textContent = tApp('dl_download'); btn.onclick = downloadAppInstallFile; }
+  }
+  showPage('app-install-detail');
+}
+function downloadAppInstallFile() {
+  var url = (APP_INSTALL_FILES && APP_INSTALL_FILES[__appInstallPlatform]) || '';
+  if (!url) return;
+  try { window.open(url, '_blank'); } catch (e) { window.location.href = url; }
+}
+function applyAppInstallI18n() {
+  try { updateTopSideButton(); } catch (e) {}
+  try {
+    var t = document.getElementById('app-install-main-title');
+    if (t) t.textContent = tApp('dl_app_title');
+    var map = {
+      'app-install-label-android':'dl_android','app-install-label-ios':'dl_ios','app-install-label-pc':'dl_pc',
+      'app-install-label-windows':'dl_windows','app-install-label-macos':'dl_macos','app-install-label-linux':'dl_linux',
+      'app-install-label-tg':'dl_tg','app-install-label-tg-bot':'dl_tg_bot','app-install-label-tg-app':'dl_tg_app',
+      'app-install-tg-app-sub':'dl_tg_app_sub'
+    };
+    for (var id in map) { var el = document.getElementById(id); if (el) el.textContent = tApp(map[id]); }
+  } catch (e2) {}
+}
+
+
 function getTg() {
  try {
  if (window.Telegram && Telegram.WebApp) return Telegram.WebApp;
@@ -2567,7 +2852,7 @@ function showPage(name) {
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
  if (name === 'deposit' || name === 'withdraw') { try { updateFeeHint(name); } catch (e) {} }
  if (name === 'home') loadListings();
- if (name === 'profile') loadOwnProfileListings();
+ if (name === 'profile') { loadOwnProfileListings(); try { updateProfileLogoutVisibility(); } catch (e) {} }
  if (name === 'my-listings') loadMyListings();
  if (name === 'favorites') loadFavorites();
  if (name === 'news') loadNewsPinned();
@@ -10671,6 +10956,9 @@ function applyI18n() {
  if (flagImg) flagImg.src = 'https://flagcdn.com/w40/' + (flags[lang] || 'ru') + '.png';
  try { updateLangLabels(); } catch (e) {}
  try { updateMyListingsSheetLabels(); } catch (e) {}
+ try { applyAppInstallI18n(); } catch (e) {}
+ try { updateTopSideButton(); } catch (e) {}
+ try { updateProfileLogoutVisibility(); } catch (e) {}
 
  document.querySelectorAll('[data-i18n]').forEach(function(el) {
  var key = el.getAttribute('data-i18n');
@@ -11434,6 +11722,12 @@ function formatDateTimeLocal(iso) {
 }
 
 function tBlock(key) {
+ try {
+  if (key && String(key).indexOf('dl_') === 0 && typeof tApp === 'function') {
+   var a = tApp(key);
+   if (a && a !== key) return a;
+  }
+ } catch (e) {}
  var lang = getAppLang();
  var pack = I18N[lang] || I18N.en || I18N.ru;
  if (pack && pack[key] != null) return pack[key];
