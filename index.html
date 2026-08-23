@@ -1843,15 +1843,15 @@
  <div class="support-tile-title" data-i18n="support_hire">Сотрудничать</div>
  <div class="support-tile-sub" data-i18n="vacancies">Вакансии</div>
  </button>
- <button class="support-tile" onclick="openLink('https://t.me/xcodmanager')">
+ <button class="support-tile" onclick="openLink('https://t.me/clossrsuppbot')">
  <div class="support-tile-icon">✈️</div>
  <div class="support-tile-title" data-i18n="support_tg">Написать в Telegram</div>
- <div class="support-tile-sub">@xcodmanager</div>
+ <div class="support-tile-sub">@clossrsuppbot</div>
  </button>
- <button class="support-tile" onclick="openEmail('xcodsupport@gmail.com')">
+ <button class="support-tile" onclick="openEmail('clossr.support@gmail.com')">
  <div class="support-tile-icon">✉️</div>
  <div class="support-tile-title" data-i18n="support_mail">Написать на почту</div>
- <div class="support-tile-sub">xcodsupport@gmail.com</div>
+ <div class="support-tile-sub">clossr.support@gmail.com</div>
  </button>
  </div>
  <button type="button" class="btn btn-secondary" style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="openExternal('https://xcodinfo.ru/faq')"><span style="color:#e53935;font-size:22px;font-weight:700;line-height:1;">❓</span><span data-i18n="support_faq">FAQ</span></button>
@@ -1893,7 +1893,7 @@
  <div class="info-block" id="hire-info-block"></div>
  <div class="btn-stack">
  <button class="btn" onclick="showPage('job-form')" data-i18n="application_form">Составить анкету</button>
- <button class="btn btn-secondary" onclick="openLink('https://t.me/xcodmanager')" data-i18n="write_manager">Написать менеджеру</button>
+ <button class="btn btn-secondary" onclick="openLink('https://t.me/clossrsuppbot')" data-i18n="write_manager">Написать менеджеру</button>
  </div>
  </div>
 
@@ -12013,8 +12013,8 @@ function showBannedScreen(info) {
  '<button type="button" class="back-link" id="ban-support-back" style="margin-bottom:8px;">' + tBlock('back') + '</button>' +
  '<div class="section-title" style="margin-bottom:12px;">' + tBlock('support') + '</div>' +
  '<div class="support-grid">' +
- '<button type="button" class="support-tile" id="ban-sup-tg"><div class="support-tile-icon">✈️</div><div class="support-tile-title">' + tBlock('support_tg') + '</div><div class="support-tile-sub">@xcodmanager</div></button>' +
- '<button type="button" class="support-tile" id="ban-sup-mail"><div class="support-tile-icon">✉️</div><div class="support-tile-title">' + tBlock('support_mail') + '</div><div class="support-tile-sub">xcodsupport@gmail.com</div></button>' +
+ '<button type="button" class="support-tile" id="ban-sup-tg"><div class="support-tile-icon">✈️</div><div class="support-tile-title">' + tBlock('support_tg') + '</div><div class="support-tile-sub">@clossrsuppbot</div></button>' +
+ '<button type="button" class="support-tile" id="ban-sup-mail"><div class="support-tile-icon">✉️</div><div class="support-tile-title">' + tBlock('support_mail') + '</div><div class="support-tile-sub">clossr.support@gmail.com</div></button>' +
  '<button type="button" class="support-tile" id="ban-sup-faq"><div class="support-tile-icon" style="color:#e53935;">❓</div><div class="support-tile-title">' + tBlock('support_faq') + '</div><div class="support-tile-sub">xcodinfo.ru/faq</div></button>' +
  '</div>' +
  '<div style="font-size:12px;color:var(--hint);margin-top:16px;text-align:center;">' + tBlock('ban_support_note') + '</div>' +
@@ -12034,12 +12034,12 @@ function showBannedScreen(info) {
  document.getElementById('ban-support-btn').onclick = showBanSupport;
  document.getElementById('ban-support-back').onclick = showBanMain;
  document.getElementById('ban-sup-tg').onclick = function() {
- if (typeof openLink === 'function') openLink('https://t.me/xcodmanager');
- else location.href = 'https://t.me/xcodmanager';
+ if (typeof openLink === 'function') openLink('https://t.me/clossrsuppbot');
+ else location.href = 'https://t.me/clossrsuppbot';
  };
  document.getElementById('ban-sup-mail').onclick = function() {
- if (typeof openEmail === 'function') openEmail('xcodsupport@gmail.com');
- else location.href = 'mailto:xcodsupport@gmail.com';
+ if (typeof openEmail === 'function') openEmail('clossr.support@gmail.com');
+ else location.href = 'mailto:clossr.support@gmail.com';
  };
  document.getElementById('ban-sup-faq').onclick = function() {
  if (typeof openLink === 'function') openLink('https://xcodinfo.ru/faq');
