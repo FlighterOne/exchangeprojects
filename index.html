@@ -16416,11 +16416,36 @@ function openLink(url) {
  openTelegramOrExternal(url);
 }
 function openEmail(email) {
- var mailto = 'mailto:' + email;
- try {
- if (tg.openLink) { tg.openLink(mailto); return; }
- } catch (e) {}
- window.location.href = mailto;
+  // Как клик по email в чате: системный почтовый клиент + форма письма на этот адрес
+  email = String(email || '').trim().replace(/^mailto:/i, '');
+  if (!email) return;
+  var subject = 'Exchange Support';
+  try {
+    if (typeof tBlock === 'function') {
+      var s = tBlock('support_mail');
+      if (s && s !== 'support_mail') subject = 'Exchange — ' + s;
+    }
+  } catch (e0) {}
+  var mailto = 'mailto:' + email
+    + '?subject=' + encodeURIComponent(subject)
+    + '&body=';
+  try {
+    // <a href="mailto:"> — самый надёжный способ открыть клиент почты
+    var a = document.createElement('a');
+    a.setAttribute('href', mailto);
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      try { document.body.removeChild(a); } catch (e1) {}
+    }, 100);
+    return;
+  } catch (e) {}
+  try {
+    window.location.href = mailto;
+  } catch (e2) {
+    try { window.open(mailto, '_blank'); } catch (e3) {}
+  }
 }
 function openTgUser(username) {
  if (!username) return;
