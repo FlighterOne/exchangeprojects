@@ -1938,7 +1938,7 @@
  <div id="page-profile" class="page">
  <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
   <button type="button" class="back-link" id="own-profile-back" onclick="showPage('home')" data-i18n="back" style="margin:0;">← Назад</button>
-  <button type="button" class="btn-logout-red" id="profile-logout-btn" onclick="webLogout()" style="display:none;">Выйти</button>
+  <button type="button" class="btn-logout-red" id="profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Выйти</button>
  </div>
  <div class="profile-header">
  <div class="profile-avatar-wrap" id="profile-avatar-wrap">
@@ -2030,7 +2030,7 @@
  <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
  <button type="button" class="back-link" id="user-profile-back" onclick="backFromUserProfile()" data-i18n="back" style="margin:0;">← Назад</button>
  <div style="display:flex;align-items:center;gap:8px;">
-  <button type="button" class="btn-logout-red" id="user-profile-logout-btn" onclick="webLogout()" style="display:none;">Выйти</button>
+  <button type="button" class="btn-logout-red" id="user-profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Выйти</button>
   <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
  </div>
  </div>
@@ -2166,12 +2166,12 @@ function updateProfileLogoutVisibility() {
   var show = !mini;
   try {
     var a = document.getElementById('profile-logout-btn');
-    if (a) { a.style.display = show ? 'inline-flex' : 'none'; a.textContent = 'Выйти'; }
+    if (a) { a.style.display = show ? 'inline-flex' : 'none'; a.textContent = (typeof tBlock === 'function' ? tBlock('logout') : 'Выйти'); }
     var b = document.getElementById('user-profile-logout-btn');
     if (b) {
       var own = userData && window._profileUid && Number(window._profileUid) === Number(userData.user_id);
       b.style.display = (show && own) ? 'inline-flex' : 'none';
-      b.textContent = 'Выйти';
+      b.textContent = (typeof tBlock === 'function' ? tBlock('logout') : 'Выйти');
     }
   } catch (e2) {}
 }
@@ -3066,6 +3066,7 @@ var I18N = {
  edit: 'Редактировать',
  delete: 'Удалить',
  unpublish: 'Снять с публикации',
+ logout: 'Выйти',
         delete_from_history: 'Удалить из истории',
         delete_listing: 'Удалить объявление',
  favorite: 'В избранное',
@@ -3605,6 +3606,7 @@ var I18N = {
  edit: 'Edit',
  delete: 'Delete',
  unpublish: 'Unpublish',
+ logout: 'Log out',
         delete_from_history: 'Delete from history',
         delete_listing: 'Delete listing',
  favorite: 'Favorite',
@@ -4136,6 +4138,7 @@ var I18N = {
  edit: 'Bearbeiten',
  delete: 'Löschen',
  unpublish: 'Zurückziehen',
+ logout: 'Abmelden',
  favorite: 'Favorit',
  unfavorite: 'Entfernen',
  active_listings: 'Aktiv',
@@ -4665,6 +4668,7 @@ var I18N = {
  edit: 'Modifier',
  delete: 'Supprimer',
  unpublish: 'Retirer',
+ logout: 'Déconnexion',
  favorite: 'Favori',
  unfavorite: 'Retirer',
  active_listings: 'Actifs',
@@ -5194,6 +5198,7 @@ var I18N = {
  edit: 'Editar',
  delete: 'Eliminar',
  unpublish: 'Retirar',
+ logout: 'Cerrar sesión',
  favorite: 'Favorito',
  unfavorite: 'Quitar',
  active_listings: 'Activos',
@@ -5723,6 +5728,7 @@ var I18N = {
  edit: '编辑',
  delete: '删除',
  unpublish: '下架',
+ logout: '退出',
  favorite: '收藏',
  unfavorite: '取消收藏',
  active_listings: '上架中',
@@ -6252,6 +6258,7 @@ var I18N = {
  edit: 'Редагувати',
  delete: 'Видалити',
  unpublish: 'Зняти з публікації',
+ logout: 'Вийти',
         delete_from_history: 'Видалити з історії',
         delete_listing: 'Видалити оголошення',
  favorite: 'В обране',
@@ -6784,6 +6791,7 @@ var I18N = {
  edit: 'Modifica',
  delete: 'Elimina',
  unpublish: 'Ritira',
+ logout: 'Esci',
  favorite: 'Preferito',
  unfavorite: 'Rimuovi',
  active_listings: 'Attivi',
@@ -7314,6 +7322,7 @@ var I18N = {
  edit: 'Editar',
  delete: 'Eliminar',
  unpublish: 'Retirar',
+ logout: 'Sair',
  favorite: 'Favorito',
  unfavorite: 'Remover',
  active_listings: 'Ativos',
@@ -7844,6 +7853,7 @@ var I18N = {
  edit: 'Editar',
  delete: 'Excluir',
  unpublish: 'Retirar',
+ logout: 'Sair',
  favorite: 'Favorito',
  unfavorite: 'Remover',
  active_listings: 'Ativos',
@@ -8374,6 +8384,7 @@ var I18N = {
  edit: 'Düzenle',
  delete: 'Sil',
  unpublish: 'Yayından kaldır',
+ logout: 'Çıkış yap',
  favorite: 'Favorile',
  unfavorite: 'Kaldır',
  active_listings: 'Aktif',
@@ -8904,6 +8915,7 @@ var I18N = {
  edit: 'Edit',
  delete: 'Hapus',
  unpublish: 'Turunkan',
+ logout: 'Keluar',
  favorite: 'Favorit',
  unfavorite: 'Hapus',
  active_listings: 'Aktif',
@@ -9434,6 +9446,7 @@ var I18N = {
  edit: 'تعديل',
  delete: 'حذف',
  unpublish: 'إلغاء النشر',
+ logout: 'تسجيل الخروج',
  favorite: 'إضافة للمفضلة',
  unfavorite: 'إزالة',
  active_listings: 'نشط',
@@ -9964,6 +9977,7 @@ var I18N = {
  edit: '編集',
  delete: '削除',
  unpublish: '非公開',
+ logout: 'ログアウト',
  favorite: 'お気に入り',
  unfavorite: '解除',
  active_listings: '公開中',
@@ -10494,6 +10508,7 @@ var I18N = {
  edit: '수정',
  delete: '삭제',
  unpublish: '게시 취소',
+ logout: '로그아웃',
  favorite: '즐겨찾기',
  unfavorite: '해제',
  active_listings: '활성',
