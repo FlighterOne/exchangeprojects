@@ -1913,7 +1913,7 @@
  <div class="info-block" id="hire-info-block"></div>
  <div class="btn-stack">
  <button class="btn" onclick="showPage('job-form')" data-i18n="application_form">Составить анкету</button>
- <button class="btn btn-secondary" onclick="openLink('https://t.me/clossrsuppbot')" data-i18n="write_manager">Написать менеджеру</button>
+ <button class="btn btn-secondary" onclick="openSupportManager()" data-i18n="write_manager">Написать менеджеру</button>
  </div>
  </div>
 
@@ -16575,9 +16575,13 @@ function openSupportBot() {
   else window.open(url, '_blank');
 }
 function openSupportManager() {
-  var url = (typeof SUPPORT_MANAGER_URL !== 'undefined' && SUPPORT_MANAGER_URL) ? String(SUPPORT_MANAGER_URL).trim() : 'https://t.me/mediamanagering';
-  if (!url || url === 'https://t.me/' || url === 'https://t.me') url = 'https://t.me/mediamanagering';
+  var url = (typeof SUPPORT_MANAGER_URL !== 'undefined' && SUPPORT_MANAGER_URL) ? String(SUPPORT_MANAGER_URL).trim() : '';
+  if (!url || url === 'https://t.me/' || url === 'https://t.me') {
+    url = 'https://t.me/mediamanagering';
+  }
   if (typeof openLink === 'function') openLink(url);
+  else if (typeof openTelegramOrExternal === 'function') openTelegramOrExternal(url);
+  else if (typeof openExternal === 'function') openExternal(url);
   else window.open(url, '_blank');
 }
 function openSupportFaq() {
