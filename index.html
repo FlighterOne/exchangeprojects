@@ -1509,7 +1509,7 @@
  </div>
  </div>
 <button class="btn" style="margin-bottom:14px;" onclick="runExchangeSearch()" data-i18n="search_btn">Найти</button>
- <div id="exchange-results"><div class="empty"><div class="icon">🔍</div>' + tBlock('enter_query_or_filters') + '</div></div>
+ <div id="exchange-results"><div class="empty"><div class="icon">🔍</div><span data-i18n="enter_query_or_filters">Введите запрос или задайте фильтры</span></div></div>
  </div>
 
  <!-- MY LISTINGS -->
@@ -1557,7 +1557,7 @@
  <input class="form-input" type="number" id="fl-price-to" placeholder="до" style="flex:1;">
  </div>
  </div>
- <div id="freelance-results" style="margin-top:14px;"></div>
+ <div id="freelance-results" style="margin-top:14px;"><div class="empty"><div class="icon">🔍</div><span data-i18n="enter_query_or_filters">Введите запрос или задайте фильтры</span></div></div>
  </div>
 
  <div id="page-create-freelance" class="page">
@@ -13369,7 +13369,7 @@ async function runFreelanceSearch() {
  });
  // if empty because category not set on old data, show nothing
  if (!items.length) {
- box.innerHTML = '<div class="empty">Ничего не найдено</div>';
+ box.innerHTML = '<div class="empty"><div class="icon">📭</div>' + tBlock('nothing_found') + '</div>';
  return;
  }
  box.innerHTML = items.map(function(l) {
@@ -16674,6 +16674,24 @@ document.addEventListener('visibilitychange', function() {
 
 
 
+
+function refreshSearchPlaceholders() {
+  try {
+    var msg = (typeof tBlock === 'function' ? tBlock('enter_query_or_filters') : '') || 'Введите запрос или задайте фильтры';
+    if (msg === 'enter_query_or_filters') msg = 'Введите запрос или задайте фильтры';
+    ['exchange-results', 'freelance-results'].forEach(function(id) {
+      var box = document.getElementById(id);
+      if (!box) return;
+      if (box.innerHTML.indexOf('enter_query_or_filters') >= 0 || box.innerHTML.indexOf('tBlock') >= 0 || !box.innerHTML.trim()) {
+        box.innerHTML = '<div class="empty"><div class="icon">🔍</div><span data-i18n="enter_query_or_filters">' + msg + '</span></div>';
+        return;
+      }
+      var span = box.querySelector('span[data-i18n="enter_query_or_filters"]');
+      if (span) span.textContent = msg;
+    });
+  } catch (e) {}
+}
+
 function termsLabelHtml() {
   var prefix = (typeof tBlock === 'function' ? tBlock('terms_prefix') : '') || 'Продолжая, вы даёте ';
   var link = (typeof tBlock === 'function' ? tBlock('terms_link') : '') || 'пользовательское соглашение';
@@ -16685,6 +16703,7 @@ function termsLabelHtml() {
   return prefix + '<a href="' + url + '" target="_blank" rel="noopener" class="terms-link">' + link + '</a>' + suffix;
 }
 function applyTermsLabels() {
+  try { refreshSearchPlaceholders(); } catch (eR) {}
   try {
     var html = termsLabelHtml();
     ['listing-terms-label', 'fl-terms-label', 'deposit-terms-label', 'withdraw-terms-label'].forEach(function (id) {
