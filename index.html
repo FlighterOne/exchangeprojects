@@ -1833,28 +1833,37 @@
  <div id="page-support" class="page">
  <div class="section-title" data-i18n="support">Поддержка</div>
  <div class="support-grid">
- <button class="support-tile" onclick="openSupportChat()">
+ <button type="button" class="support-tile" onclick="openSupportChat()">
  <div class="support-tile-icon">💬</div>
  <div class="support-tile-title" data-i18n="support_ticket">Написать обращение</div>
  <div class="support-tile-sub" data-i18n="chat_manager">Чат с менеджером</div>
  </button>
- <button class="support-tile" onclick="showPage('collaborate')">
+ <button type="button" class="support-tile" onclick="showPage('collaborate')">
  <div class="support-tile-icon">🤝</div>
  <div class="support-tile-title" data-i18n="support_hire">Сотрудничать</div>
  <div class="support-tile-sub" data-i18n="vacancies">Вакансии</div>
  </button>
- <button class="support-tile" onclick="openLink('https://t.me/clossrsuppbot')">
- <div class="support-tile-icon">✈️</div>
- <div class="support-tile-title" data-i18n="support_tg">Написать в Telegram</div>
- <div class="support-tile-sub">@clossrsuppbot</div>
+ <button type="button" class="support-tile" onclick="openSupportBot()">
+ <div class="support-tile-icon">🤖</div>
+ <div class="support-tile-title" data-i18n="support_bot">Бот поддержки</div>
+ <div class="support-tile-sub" id="support-bot-sub">@clossrsuppbot</div>
  </button>
- <button class="support-tile" onclick="openEmail('clossr.support@gmail.com')">
+ <button type="button" class="support-tile" onclick="openSupportManager()">
+ <div class="support-tile-icon">✈️</div>
+ <div class="support-tile-title" data-i18n="support_manager">Менеджер в Telegram</div>
+ <div class="support-tile-sub" data-i18n="support_manager_sub">Telegram</div>
+ </button>
+ <button type="button" class="support-tile" onclick="openEmail(typeof SUPPORT_EMAIL_ADDR!=='undefined'?SUPPORT_EMAIL_ADDR:'clossr.support@gmail.com')">
  <div class="support-tile-icon">✉️</div>
  <div class="support-tile-title" data-i18n="support_mail">Написать на почту</div>
- <div class="support-tile-sub">clossr.support@gmail.com</div>
+ <div class="support-tile-sub" id="support-mail-sub">clossr.support@gmail.com</div>
+ </button>
+ <button type="button" class="support-tile" onclick="openSupportFaq()">
+ <div class="support-tile-icon" style="color:#e53935;font-size:28px;font-weight:700;">❓</div>
+ <div class="support-tile-title" data-i18n="support_faq">FAQ</div>
+ <div class="support-tile-sub" data-i18n="support_faq_sub">Вопросы и ответы</div>
  </button>
  </div>
- <button type="button" class="btn btn-secondary" style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="openExternal('https://xcodinfo.ru/faq')"><span style="color:#e53935;font-size:22px;font-weight:700;line-height:1;">❓</span><span data-i18n="support_faq">FAQ</span></button>
  </div>
 
  <div id="page-support-chat" class="page chat-page">
@@ -2069,6 +2078,12 @@ window.addEventListener('unhandledrejection', function(ev) {
  window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
 });
 const API_URL = "https://exchange-bot3.waw0.amvera.tech";
+var SUPPORT_MANAGER_URL = 'https://t.me/'; // ссылку менеджера вставишь позже
+var SUPPORT_BOT_URL = 'https://t.me/clossrsuppbot';
+var SUPPORT_BOT_USERNAME = 'clossrsuppbot';
+var SUPPORT_EMAIL_ADDR = 'clossr.support@gmail.com';
+var SUPPORT_FAQ_LINK = 'https://xcodinfo.ru/faq';
+
 
 var SITE_URL = 'https://exchangeprojects.site/';
 var TG_BOT_USERNAME = 'exchangeprojectsbot';
@@ -2983,7 +2998,7 @@ var I18N = {
  ban_for: ' на ', ban_days: ' дн.', ban_until_label: 'До разблокировки',
  ban_support_note: 'Остальные разделы недоступны на время блокировки',
  support_tg: 'Написать в Telegram', support_mail: 'Написать на почту',
- support_faq: 'FAQ', support_ticket: 'Написать обращение', support_hire: 'Сотрудничать',
+ support_faq: 'FAQ', support_faq_sub: 'Вопросы и ответы', support_bot: 'Бот поддержки', support_manager: 'Менеджер в Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Ссылка на менеджера скоро', support_ticket: 'Написать обращение', support_hire: 'Сотрудничать',
  publish_blocked: 'Модерация площадки ограничила публикацию объявлений для вас',
  publish_blocked_for: ' на ', publish_blocked_until: ' до ', day_short: 'д',
  status_blocked: 'Заблокировано', status_pending: 'На модерации', status_active: 'Активно',
@@ -3523,7 +3538,7 @@ var I18N = {
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Message on Telegram', support_mail: 'Send email',
- support_faq: 'FAQ', support_ticket: 'Open a ticket', support_hire: 'Work with us',
+ support_faq: 'FAQ', support_faq_sub: 'Q&A', support_bot: 'Support bot', support_manager: 'Manager on Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Manager link coming soon', support_ticket: 'Open a ticket', support_hire: 'Work with us',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Blocked', status_pending: 'Under review', status_active: 'Active',
@@ -4063,7 +4078,7 @@ var I18N = {
  ban_for: ' für ', ban_days: ' Tage', ban_until_label: 'Bis zur Entsperrung',
  ban_support_note: 'Andere Bereiche sind während der Sperre nicht verfügbar',
  support_tg: 'Telegram', support_mail: 'E-Mail',
- support_faq: 'FAQ', support_ticket: 'Anfrage senden', support_hire: 'Mitarbeiten',
+ support_faq: 'FAQ', support_faq_sub: 'Hilfe', support_bot: 'Support-Bot', support_manager: 'Manager in Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Manager-Link folgt', support_ticket: 'Anfrage senden', support_hire: 'Mitarbeiten',
  publish_blocked: 'Veröffentlichung von Anzeigen ist eingeschränkt',
  publish_blocked_for: ' für ', publish_blocked_until: ' bis ', day_short: 'T',
  status_blocked: 'Gesperrt', status_pending: 'In Prüfung', status_active: 'Aktiv',
@@ -4593,7 +4608,7 @@ var I18N = {
  ban_for: ' pendant ', ban_days: ' j', ban_until_label: 'Jusqu\'au déblocage',
  ban_support_note: 'Les autres sections sont indisponibles pendant le ban',
  support_tg: 'Telegram', support_mail: 'E-mail',
- support_faq: 'FAQ', support_ticket: 'Ouvrir un ticket', support_hire: 'Collaborer',
+ support_faq: 'FAQ', support_faq_sub: 'FAQ', support_bot: 'Bot support', support_manager: 'Manager Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Lien manager bientôt', support_ticket: 'Ouvrir un ticket', support_hire: 'Collaborer',
  publish_blocked: 'La publication d\'annonces est restreinte',
  publish_blocked_for: ' pendant ', publish_blocked_until: ' jusqu\'au ', day_short: 'j',
  status_blocked: 'Bloqué', status_pending: 'En modération', status_active: 'Actif',
@@ -5123,7 +5138,7 @@ var I18N = {
  ban_for: ' por ', ban_days: ' días', ban_until_label: 'Hasta el desbloqueo',
  ban_support_note: 'Otras secciones no están disponibles durante el ban',
  support_tg: 'Telegram', support_mail: 'Correo',
- support_faq: 'FAQ', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
+ support_faq: 'FAQ', support_faq_sub: 'Preguntas', support_bot: 'Bot de soporte', support_manager: 'Manager en Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Enlace del manager pronto', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
  publish_blocked: 'La publicación de anuncios está restringida',
  publish_blocked_for: ' por ', publish_blocked_until: ' hasta ', day_short: 'd',
  status_blocked: 'Bloqueado', status_pending: 'En moderación', status_active: 'Activo',
@@ -5653,7 +5668,7 @@ var I18N = {
  ban_for: ' 时长 ', ban_days: ' 天', ban_until_label: '解封倒计时',
  ban_support_note: '封禁期间其他功能不可用',
  support_tg: 'Telegram', support_mail: '邮件',
- support_faq: 'FAQ', support_ticket: '提交工单', support_hire: '加入我们',
+ support_faq: 'FAQ', support_faq_sub: '常见问题', support_bot: '客服机器人', support_manager: 'Telegram 经理', support_manager_sub: 'Telegram', support_manager_soon: '经理链接即将添加', support_ticket: '提交工单', support_hire: '加入我们',
  publish_blocked: '您的发布权限已被限制',
  publish_blocked_for: ' 时长 ', publish_blocked_until: ' 至 ', day_short: '天',
  status_blocked: '已封禁', status_pending: '审核中', status_active: '上架中',
@@ -6183,7 +6198,7 @@ var I18N = {
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Написати в Telegram', support_mail: 'Написати на пошту',
- support_faq: 'FAQ', support_ticket: 'Написати звернення', support_hire: 'Співпрацювати',
+ support_faq: 'FAQ', support_faq_sub: 'Питання', support_bot: 'Бот підтримки', support_manager: 'Менеджер в Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Посилання на менеджера згодом', support_ticket: 'Написати звернення', support_hire: 'Співпрацювати',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Заблоковано', status_pending: 'На модерації', status_active: 'Активно',
@@ -7247,7 +7262,7 @@ var I18N = {
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: 'E-mail',
- support_faq: 'FAQ', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
+ support_faq: 'FAQ', support_faq_sub: 'Preguntas', support_bot: 'Bot de soporte', support_manager: 'Manager en Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Enlace del manager pronto', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Bloqueado', status_pending: 'Em moderação', status_active: 'Ativo',
@@ -7778,7 +7793,7 @@ var I18N = {
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: 'E-mail',
- support_faq: 'FAQ', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
+ support_faq: 'FAQ', support_faq_sub: 'Preguntas', support_bot: 'Bot de soporte', support_manager: 'Manager en Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Enlace del manager pronto', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Bloqueado', status_pending: 'Em moderação', status_active: 'Ativo',
@@ -8840,7 +8855,7 @@ var I18N = {
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: 'Email',
- support_faq: 'FAQ', support_ticket: 'Buat tiket', support_hire: 'Bergabung',
+ support_faq: 'FAQ', support_faq_sub: 'FAQ', support_bot: 'Bot dukungan', support_manager: 'Manajer Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Tautan manajer segera', support_ticket: 'Buat tiket', support_hire: 'Bergabung',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Diblokir', status_pending: 'Moderasi', status_active: 'Aktif',
@@ -9371,7 +9386,7 @@ var I18N = {
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'تيليجرام', support_mail: 'البريد',
- support_faq: 'FAQ', support_ticket: 'فتح تذكرة', support_hire: 'التعاون',
+ support_faq: 'FAQ', support_faq_sub: 'الأسئلة', support_bot: 'بوت الدعم', support_manager: 'المدير على تيليجرام', support_manager_sub: 'Telegram', support_manager_soon: 'رابط المدير قريباً', support_ticket: 'فتح تذكرة', support_hire: 'التعاون',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'محظور', status_pending: 'قيد المراجعة', status_active: 'نشط',
@@ -16431,8 +16446,7 @@ function openLink(url) {
  openTelegramOrExternal(url);
 }
 function openEmail(email) {
-  // Как клик по email в чате: системный почтовый клиент + форма письма на этот адрес
-  email = String(email || '').trim().replace(/^mailto:/i, '');
+  email = String(email || (typeof SUPPORT_EMAIL_ADDR !== 'undefined' ? SUPPORT_EMAIL_ADDR : '') || '').trim().replace(/^mailto:/i, '');
   if (!email) return;
   var subject = 'Exchange Support';
   try {
@@ -16441,26 +16455,64 @@ function openEmail(email) {
       if (s && s !== 'support_mail') subject = 'Exchange — ' + s;
     }
   } catch (e0) {}
-  var mailto = 'mailto:' + email
-    + '?subject=' + encodeURIComponent(subject)
-    + '&body=';
+  var mailto = 'mailto:' + email + '?subject=' + encodeURIComponent(subject);
+  var gmail = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email) + '&su=' + encodeURIComponent(subject);
+  // 1) как клик по email: системный клиент
   try {
-    // <a href="mailto:"> — самый надёжный способ открыть клиент почты
     var a = document.createElement('a');
     a.setAttribute('href', mailto);
     a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    setTimeout(function() {
-      try { document.body.removeChild(a); } catch (e1) {}
-    }, 100);
-    return;
-  } catch (e) {}
+    setTimeout(function () { try { document.body.removeChild(a); } catch (e1) {} }, 120);
+  } catch (e2) {}
+  try { window.location.href = mailto; } catch (e3) {}
+  // 2) Telegram Mini App / in-app browser часто режет mailto → https Gmail compose
   try {
-    window.location.href = mailto;
-  } catch (e2) {
-    try { window.open(mailto, '_blank'); } catch (e3) {}
+    if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.openLink === 'function') {
+      setTimeout(function () {
+        try { Telegram.WebApp.openLink(gmail); } catch (e4) {
+          try { Telegram.WebApp.openLink(mailto); } catch (e5) {}
+        }
+      }, 200);
+      return;
+    }
+  } catch (e6) {}
+  try {
+    if (window.tg && tg.openLink) {
+      setTimeout(function () { try { tg.openLink(gmail); } catch (e7) {} }, 200);
+      return;
+    }
+  } catch (e8) {}
+  try {
+    if (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Browser && Capacitor.Plugins.Browser.open) {
+      Capacitor.Plugins.Browser.open({ url: mailto });
+      return;
+    }
+  } catch (e9) {}
+}
+function openSupportBot() {
+  var url = (typeof SUPPORT_BOT_URL !== 'undefined' && SUPPORT_BOT_URL) ? SUPPORT_BOT_URL : 'https://t.me/clossrsuppbot';
+  if (typeof openLink === 'function') openLink(url);
+  else window.open(url, '_blank');
+}
+function openSupportManager() {
+  var url = (typeof SUPPORT_MANAGER_URL !== 'undefined' && SUPPORT_MANAGER_URL) ? String(SUPPORT_MANAGER_URL).trim() : '';
+  if (!url || url === 'https://t.me/' || url === 'https://t.me') {
+    try {
+      if (typeof showToast === 'function') showToast((typeof tBlock === 'function' ? tBlock('support_manager_soon') : '') || 'Ссылка на менеджера скоро');
+      else alert('Ссылка на менеджера будет добавлена позже');
+    } catch (e) {}
+    return;
   }
+  if (typeof openLink === 'function') openLink(url);
+  else window.open(url, '_blank');
+}
+function openSupportFaq() {
+  var url = (typeof SUPPORT_FAQ_LINK !== 'undefined' && SUPPORT_FAQ_LINK) ? SUPPORT_FAQ_LINK : 'https://xcodinfo.ru/faq';
+  if (typeof openExternal === 'function') openExternal(url);
+  else if (typeof openLink === 'function') openLink(url);
+  else window.open(url, '_blank');
 }
 function openTgUser(username) {
  if (!username) return;
