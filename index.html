@@ -1109,6 +1109,10 @@
 .privacy-card h2{font-size:18px;margin:0 0 12px;font-weight:600;}
 .login-overlay{position:fixed;inset:0;z-index:99998;background:#0e0e0e;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}.login-card{max-width:420px;width:100%;background:#1c1c1e;border-radius:16px;padding:28px 24px;text-align:center;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.4);}.login-card h2{font-size:20px;margin:0 0 8px;font-weight:600;}.login-card .sub{font-size:14px;line-height:1.5;opacity:.85;margin:0 0 20px;}.login-widget-wrap{display:flex;justify-content:center;min-height:48px;margin:12px 0;}.privacy-card p{font-size:14px;line-height:1.5;opacity:.9;margin:0 0 20px;}
 .privacy-card a{color:#2AABEE!important;text-decoration:none!important;font-weight:500;}
+.terms-link{color:#2AABEE!important;text-decoration:none!important;font-weight:500;}
+.check-row{display:flex;align-items:flex-start;gap:10px;margin:10px 0;font-size:13px;line-height:1.4;cursor:pointer;}
+.check-row input{margin-top:3px;flex-shrink:0;}
+
 .privacy-card .btn{width:100%;}
 
 </style>
@@ -1320,10 +1324,6 @@
  <label class="form-label" data-i18n="contract_no">Номер договора</label>
  <input class="form-input" type="text" id="listing-contract" placeholder="XC-0000">
  </div>
- <label class="check-row">
- <input type="checkbox" id="listing-analytics">
- <span data-i18n="analytics_consent">Согласие на передачу данных и аналитики</span>
- </label>
  <div class="info-block" style="margin-top:12px;" data-i18n="price_xcod_note">Цена определяется партнёром по аналитике после модерации.</div>
  </div>
  <div id="fields-own" style="display:none;">
@@ -1352,6 +1352,10 @@
  <input class="form-input" type="number" id="listing-price" placeholder="100" min="1">
  </div>
  </div>
+ <label class="check-row" id="listing-terms-row">
+ <input type="checkbox" id="listing-analytics">
+ <span id="listing-terms-label">Продолжая, вы даёте <a href="https://clossr.site/terms.html" target="_blank" rel="noopener" class="terms-link">пользовательское соглашение</a> с правилами сервиса</span>
+ </label>
  <button class="btn" onclick="listingCreateNext()" data-i18n="continue">Далее</button>
  </div>
  <div id="listing-step-photos" style="display:none;">
@@ -1588,7 +1592,7 @@
  <input class="form-input" id="fl-contract" placeholder="№ договора">
  </div>
  <label style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
- <input type="checkbox" id="fl-analytics"> Согласие на передачу данных и аналитики
+ <label class="check-row" id="fl-terms-row"><input type="checkbox" id="fl-analytics"> <span id="fl-terms-label">Продолжая, вы даёте <a href="https://clossr.site/terms.html" target="_blank" rel="noopener" class="terms-link">пользовательское соглашение</a> с правилами сервиса</span></label>
  </label>
  </div>
  <div id="fl-own-fields" style="display:none;">
@@ -1729,7 +1733,11 @@
  <input class="form-input" type="text" id="deposit-comment" placeholder="Необязательно" data-i18n-placeholder="optional">
  </div>
 
- <button class="btn" id="deposit-btn" onclick="startDeposit()" data-i18n="continue_btn">Продолжить</button>
+ <label class="check-row" id="deposit-terms-row" style="margin:12px 0;">
+ <input type="checkbox" id="deposit-terms-agree">
+ <span id="deposit-terms-label">Продолжая, вы даёте <a href="https://clossr.site/terms.html" target="_blank" rel="noopener" class="terms-link">пользовательское соглашение</a> с правилами сервиса</span>
+</label>
+<button class="btn" id="deposit-btn" onclick="startDeposit()" data-i18n="continue_btn">Продолжить</button>
  </div>
 
  <!-- DEPOSIT RESULT -->
@@ -1770,7 +1778,11 @@
  <input class="form-input" type="text" id="withdraw-recipient" placeholder="Номер карты, Иванов И.И.">
  </div>
 
- <button class="btn" id="withdraw-btn" onclick="startWithdraw()">Вывести</button>
+ <label class="check-row" id="withdraw-terms-row" style="margin:12px 0;">
+ <input type="checkbox" id="withdraw-terms-agree">
+ <span id="withdraw-terms-label">Продолжая, вы даёте <a href="https://clossr.site/terms.html" target="_blank" rel="noopener" class="terms-link">пользовательское соглашение</a> с правилами сервиса</span>
+</label>
+<button class="btn" id="withdraw-btn" onclick="startWithdraw()">Вывести</button>
  </div>
 
  <!-- REQUESTS -->
@@ -2081,7 +2093,9 @@ var SUPPORT_MANAGER_URL = 'https://t.me/'; // ссылку менеджера в
 var SUPPORT_BOT_URL = 'https://t.me/clossrsuppbot';
 var SUPPORT_BOT_USERNAME = 'clossrsuppbot';
 var SUPPORT_EMAIL_ADDR = 'clossr.support@gmail.com';
-var SUPPORT_FAQ_LINK = 'https://xcodinfo.ru/faq';
+var SUPPORT_FAQ_LINK = 'https://clossr.site/#about';
+var PRIVACY_POLICY_URL = 'https://clossr.site/privacy.html';
+var TERMS_URL = 'https://clossr.site/terms.html';
 
 
 var SITE_URL = 'https://exchangeprojects.site/';
@@ -3301,6 +3315,10 @@ var I18N = {
  xcod_worker: 'Работник',
  independent: 'Самостоятельно',
  analytics_consent: 'Согласие на передачу данных и аналитики',
+ terms_prefix: 'Продолжая, вы даёте ',
+ terms_link: 'пользовательское соглашение',
+ terms_suffix: ' с правилами сервиса',
+ err_terms: 'Примите пользовательское соглашение',
  price_xcod: 'Цену определяет платформа',
  work_hours: 'Срок выполнения (часы)',
  buy_deadline_note: 'У вас будет время на проверку',
@@ -3841,6 +3859,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -4371,6 +4393,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -4901,6 +4927,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -5431,6 +5461,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -5961,6 +5995,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -6494,6 +6532,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -7025,6 +7067,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -7556,6 +7602,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -8087,6 +8137,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -8618,6 +8672,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -9149,6 +9207,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -9680,6 +9742,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -10211,6 +10277,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -10742,6 +10812,10 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
+ terms_prefix: 'By continuing, you accept the ',
+ terms_link: 'Terms of Service',
+ terms_suffix: ' and the service rules',
+ err_terms: 'Please accept the Terms of Service',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -12071,8 +12145,8 @@ function showBannedScreen(info) {
  else location.href = 'mailto:clossr.support@gmail.com';
  };
  document.getElementById('ban-sup-faq').onclick = function() {
- if (typeof openLink === 'function') openLink('https://xcodinfo.ru/faq');
- else location.href = 'https://xcodinfo.ru/faq';
+ if (typeof openLink === 'function') openLink('https://clossr.site/#about');
+ else location.href = 'https://clossr.site/#about';
  };
 
  function tickBan() {
@@ -13385,7 +13459,7 @@ function flCreateNextPhotos() {
  if (!flCreate.type) { tg.showAlert(tBlock('err_xcod_or_own')); return; }
  if (flCreate.type==='partner') {
  if (!document.getElementById('fl-contract').value.trim()) { tg.showAlert(tBlock('err_contract')); return; }
- if (!document.getElementById('fl-analytics').checked) { tg.showAlert(tBlock('err_analytics')); return; }
+ if (!document.getElementById('fl-analytics').checked) { tg.showAlert(tBlock('err_terms') || tBlock('err_analytics')); return; }
  } else {
  if (!document.getElementById('fl-portfolio').value.trim()) { tg.showAlert(tBlock('err_portfolio')); return; }
  }
@@ -14034,9 +14108,10 @@ function listingCreateNext() {
  if (!title) { tg.showAlert(tBlock('err_title')); return; }
  if (!description) { tg.showAlert(tBlock('err_desc')); return; }
  if (!selectedListingType) { tg.showAlert(tBlock('err_product_type')); return; }
+ var termsEl = document.getElementById('listing-analytics');
+ if (termsEl && !termsEl.checked) { tg.showAlert(tBlock('err_terms') || tBlock('err_analytics')); return; }
  if (selectedListingType === 'partner') {
  if (!document.getElementById('listing-contract').value.trim()) { tg.showAlert(tBlock('err_contract')); return; }
- if (!document.getElementById('listing-analytics').checked) { tg.showAlert(tBlock('err_analytics')); return; }
  } else {
  if (!document.getElementById('listing-product-type').value.trim()) { tg.showAlert(tBlock('err_product_kind')); return; }
  if (!document.getElementById('listing-bot').value.trim()) { tg.showAlert(tBlock('err_username')); return; }
@@ -14524,6 +14599,8 @@ async function startDeposit() {
  var amount = parseFloat(document.getElementById('deposit-amount').value);
  var comment = document.getElementById('deposit-comment').value.trim();
  var btn = document.getElementById('deposit-btn');
+ var dTerms = document.getElementById('deposit-terms-agree');
+ if (dTerms && !dTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Примите пользовательское соглашение'); return; }
  if (!amount || amount < 1) { tg.showAlert(tBlock('min_1')); return; }
  var feeInfo = calcFee(amount, selectedDepositMethod);
  btn.disabled = true; btn.textContent = tBlock('creating') || 'Создание...';
@@ -14572,6 +14649,8 @@ async function startWithdraw() {
  var amount = parseFloat(document.getElementById('withdraw-amount').value);
  var raw = document.getElementById('withdraw-recipient').value.trim();
  var btn = document.getElementById('withdraw-btn');
+ var wTerms = document.getElementById('withdraw-terms-agree');
+ if (wTerms && !wTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Примите пользовательское соглашение'); return; }
  if (!amount || amount < 5) { tg.showAlert(tBlock('min_5')); return; }
  var feeInfo = calcFee(amount, selectedWithdrawMethod);
  if (feeInfo.total > (userData.balance || 0)) { tg.showAlert(tBlock('insufficient') + ' (' + feeInfo.total.toFixed(2) + '$)'); return; }
@@ -16508,7 +16587,7 @@ function openSupportManager() {
   else window.open(url, '_blank');
 }
 function openSupportFaq() {
-  var url = (typeof SUPPORT_FAQ_LINK !== 'undefined' && SUPPORT_FAQ_LINK) ? SUPPORT_FAQ_LINK : 'https://xcodinfo.ru/faq';
+  var url = (typeof SUPPORT_FAQ_LINK !== 'undefined' && SUPPORT_FAQ_LINK) ? SUPPORT_FAQ_LINK : 'https://clossr.site/#about';
   if (typeof openExternal === 'function') openExternal(url);
   else if (typeof openLink === 'function') openLink(url);
   else window.open(url, '_blank');
@@ -16596,6 +16675,27 @@ document.addEventListener('visibilitychange', function() {
 });
 
 
+
+function termsLabelHtml() {
+  var prefix = (typeof tBlock === 'function' ? tBlock('terms_prefix') : '') || 'Продолжая, вы даёте ';
+  var link = (typeof tBlock === 'function' ? tBlock('terms_link') : '') || 'пользовательское соглашение';
+  var suffix = (typeof tBlock === 'function' ? tBlock('terms_suffix') : '') || ' с правилами сервиса';
+  if (prefix === 'terms_prefix') prefix = 'Продолжая, вы даёте ';
+  if (link === 'terms_link') link = 'пользовательское соглашение';
+  if (suffix === 'terms_suffix') suffix = ' с правилами сервиса';
+  var url = (typeof TERMS_URL !== 'undefined' && TERMS_URL) ? TERMS_URL : 'https://clossr.site/terms.html';
+  return prefix + '<a href="' + url + '" target="_blank" rel="noopener" class="terms-link">' + link + '</a>' + suffix;
+}
+function applyTermsLabels() {
+  try {
+    var html = termsLabelHtml();
+    ['listing-terms-label', 'fl-terms-label', 'deposit-terms-label', 'withdraw-terms-label'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    });
+  } catch (e) {}
+}
+
 function showPrivacyOverlay(policyUrl) {
  var ov = document.getElementById('privacy-overlay');
  var tx = document.getElementById('privacy-text');
@@ -16623,7 +16723,7 @@ function showPrivacyOverlay(policyUrl) {
  btn.onclick = function () { acceptPrivacyMiniapp(); };
  }
 
- var url = 'https://clossr.site/privacypolicy';
+ var url = (typeof PRIVACY_POLICY_URL !== 'undefined' && PRIVACY_POLICY_URL) ? PRIVACY_POLICY_URL : 'https://clossr.site/privacy.html';
  try {
  if (policyUrl && String(policyUrl).trim()) url = String(policyUrl).trim();
  else if (userData && userData.privacy_policy_url) url = String(userData.privacy_policy_url).trim();
