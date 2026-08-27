@@ -1863,7 +1863,7 @@
  <button type="button" class="support-tile" onclick="openSupportManager()">
  <div class="support-tile-icon">✈️</div>
  <div class="support-tile-title" data-i18n="support_manager">Менеджер в Telegram</div>
- <div class="support-tile-sub" data-i18n="support_manager_sub">Telegram</div>
+ <div class="support-tile-sub" id="support-manager-sub">@mediamanagering</div>
  </button>
  <button type="button" class="support-tile" onclick="openEmail(typeof SUPPORT_EMAIL_ADDR!=='undefined'?SUPPORT_EMAIL_ADDR:'clossr.support@gmail.com')">
  <div class="support-tile-icon">✉️</div>
@@ -2089,7 +2089,7 @@ window.addEventListener('unhandledrejection', function(ev) {
  window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
 });
 const API_URL = "https://exchange-bot3.waw0.amvera.tech";
-var SUPPORT_MANAGER_URL = 'https://t.me/'; // ссылку менеджера вставишь позже
+var SUPPORT_MANAGER_URL = 'https://t.me/mediamanagering';
 var SUPPORT_BOT_URL = 'https://t.me/clossrsuppbot';
 var SUPPORT_BOT_USERNAME = 'clossrsuppbot';
 var SUPPORT_EMAIL_ADDR = 'clossr.support@gmail.com';
@@ -16575,14 +16575,8 @@ function openSupportBot() {
   else window.open(url, '_blank');
 }
 function openSupportManager() {
-  var url = (typeof SUPPORT_MANAGER_URL !== 'undefined' && SUPPORT_MANAGER_URL) ? String(SUPPORT_MANAGER_URL).trim() : '';
-  if (!url || url === 'https://t.me/' || url === 'https://t.me') {
-    try {
-      if (typeof showToast === 'function') showToast((typeof tBlock === 'function' ? tBlock('support_manager_soon') : '') || 'Ссылка на менеджера скоро');
-      else alert('Ссылка на менеджера будет добавлена позже');
-    } catch (e) {}
-    return;
-  }
+  var url = (typeof SUPPORT_MANAGER_URL !== 'undefined' && SUPPORT_MANAGER_URL) ? String(SUPPORT_MANAGER_URL).trim() : 'https://t.me/mediamanagering';
+  if (!url || url === 'https://t.me/' || url === 'https://t.me') url = 'https://t.me/mediamanagering';
   if (typeof openLink === 'function') openLink(url);
   else window.open(url, '_blank');
 }
