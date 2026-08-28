@@ -1121,20 +1121,19 @@
 
 <div id="privacy-overlay" class="privacy-overlay" style="display:none;">
  <div class="privacy-card">
- <h2 id="privacy-title">Политика конфиденциальности</h2>
+ <h2 id="privacy-title">Privacy policy</h2>
  <p id="privacy-text"></p>
- <button type="button" class="btn" id="privacy-accept-btn">Принимаю и продолжаю</button>
+ <button type="button" class="btn" id="privacy-accept-btn">Accept and continue</button>
  </div>
 </div>
 
 <div id="login-overlay" class="login-overlay" style="display:none;">
  <div class="login-card">
- <h2 id="login-title">Exchange</h2>
- <p class="sub" id="login-sub">Войдите через Telegram, чтобы пользоваться площадкой на сайте. Те же аккаунт, баланс и настройки, что и в боте.</p>
+ <h2 id="login-title">ExChange</h2>
+ <p class="sub" id="login-sub">Sign in with Telegram to use the platform on the website. Same account, balance and settings as in the bot and mini app.</p>
  <div class="login-widget-wrap" id="login-widget-wrap">
  <div class="spinner" style="margin:12px auto;"></div>
  </div>
- <p class="sub" id="login-hint" style="margin-top:16px;font-size:12px;opacity:.6;">Если виджет не загрузился — откройте бота в Telegram и зайдите в мини-приложение.</p>
  </div>
 </div>
 
@@ -1337,15 +1336,15 @@
  </div>
  <div class="form-group">
  <label class="form-label" data-i18n="product_type">Вид товара</label>
- <input class="form-input" type="text" id="listing-product-type" placeholder="TG бот / Mini App + сайт / другое">
+ <input class="form-input" type="text" id="listing-product-type" placeholder="TG бот / Mini App + сайт / другое" data-i18n-placeholder="product_type_ph">
  </div>
  <div class="form-group" id="tgstat-group">
  <label class="form-label" data-i18n="tgstat">Ссылка на TGStat</label>
- <input class="form-input" type="text" id="listing-tgstat" placeholder="https://tgstat.ru/...">
+ <input class="form-input" type="text" id="listing-tgstat" placeholder="https://tgstat.ru/..." data-i18n-placeholder="tgstat_ph">
  </div>
  <div class="form-group">
  <label class="form-label">Username</label>
- <input class="form-input" type="text" id="listing-bot" placeholder="@my_bot">
+ <input class="form-input" type="text" id="listing-bot" placeholder="@my_bot" data-i18n-placeholder="bot_username_ph">
  </div>
  <div class="form-group">
  <label class="form-label" data-i18n="price_usd">Цена ($)</label>
@@ -1562,11 +1561,11 @@
 
  <div id="page-create-freelance" class="page">
  <button class="back-link" onclick="cancelFreelanceCreate()" data-i18n="back">← Назад</button>
- <div class="section-title" id="fl-create-title">Фриланс объявление</div>
+ <div class="section-title" id="fl-create-title" data-i18n="fl_create_title">Фриланс объявление</div>
  <div id="fl-step-1">
  <div class="form-group">
  <label class="form-label" data-i18n="title">Название</label>
- <input class="form-input" id="fl-title" placeholder="Название услуги / заказа">
+ <input class="form-input" id="fl-title" placeholder="Название услуги / заказа" data-i18n-placeholder="fl_title_ph">
  </div>
  <div class="form-group">
  <label class="form-label" data-i18n="description">Описание</label>
@@ -1597,13 +1596,13 @@
  </div>
  <div id="fl-own-fields" style="display:none;">
  <div class="form-group">
- <label class="form-label">Портфолио / удостоверение</label>
- <input class="form-input" id="fl-portfolio" placeholder="https://...">
+ <label class="form-label" data-i18n="portfolio">Портфолио / удостоверение</label>
+ <input class="form-input" id="fl-portfolio" placeholder="https://..." data-i18n-placeholder="portfolio_ph">
  </div>
  </div>
  <div class="form-group">
- <label class="form-label">Вид (бот / сайт / другое)</label>
- <input class="form-input" id="fl-product-type" placeholder="бот, сайт...">
+ <label class="form-label" data-i18n="product_kind_label">Вид (бот / сайт / другое)</label>
+ <input class="form-input" id="fl-product-type" placeholder="бот, сайт..." data-i18n-placeholder="product_type_ph_short">
  </div>
  <div class="form-group">
  <label class="form-label" data-i18n="price_usd">Цена ($)</label>
@@ -1612,7 +1611,7 @@
  <button class="btn" onclick="flCreateNextPhotos()" data-i18n="continue">Далее</button>
  </div>
  <div id="fl-step-photos" style="display:none;">
- <div class="info-block" style="margin-bottom:14px;">От 1 до 5 фото. Первое — титульное. Можно менять порядок перетаскиванием.</div>
+ <div class="info-block" style="margin-bottom:14px;" data-i18n="photos_hint">От 1 до 5 фото. Первое — титульное. Можно менять порядок перетаскиванием.</div>
  <div class="file-drop" onclick="document.getElementById('fl-photos').click()">
  <div class="fd-icon">🖼️</div>
  <div class="fd-title" data-i18n="upload_photos">Загрузить фото</div>
@@ -1623,24 +1622,24 @@
  <button class="btn" style="margin-top:12px;" onclick="flCreateNextPay()" data-i18n="continue">Далее</button>
  </div>
  <div id="fl-step-pay" style="display:none;">
- <div class="info-block" style="margin-bottom:14px;">Оплата публикации фриланс-объявления</div>
+ <div class="info-block" style="margin-bottom:14px;" data-i18n="fl_pay_hint">Оплата публикации фриланс-объявления</div>
  <div class="support-grid" style="margin-bottom:14px;">
  <button type="button" class="support-tile" id="fl-plan-month" onclick="selectFlPlan('month')">
  <div class="support-tile-icon">📅</div>
- <div class="support-tile-title">1 месяц</div>
+ <div class="support-tile-title" data-i18n="plan_month">1 месяц</div>
  <div style="font-size:16px;font-weight:700;margin-top:4px;">2.5$</div>
- <div style="font-size:11px;color:var(--accent);margin-top:4px;">популярное</div>
+ <div style="font-size:11px;color:var(--accent);margin-top:4px;" data-i18n="popular">популярное</div>
  </button>
  <button type="button" class="support-tile" id="fl-plan-week" onclick="selectFlPlan('week')">
  <div class="support-tile-icon">🗓️</div>
- <div class="support-tile-title">1 неделя</div>
+ <div class="support-tile-title" data-i18n="plan_week">1 неделя</div>
  <div style="font-size:16px;font-weight:700;margin-top:4px;">1$</div>
  </button>
  <button type="button" class="support-tile" id="fl-plan-quarter" onclick="selectFlPlan('quarter')">
  <div class="support-tile-icon">💎</div>
- <div class="support-tile-title">3 месяца</div>
+ <div class="support-tile-title" data-i18n="plan_quarter">3 месяца</div>
  <div style="font-size:16px;font-weight:700;margin-top:4px;">6.5$</div>
- <div style="font-size:11px;color:var(--success);margin-top:4px;">выгодно</div>
+ <div style="font-size:11px;color:var(--success);margin-top:4px;" data-i18n="profitable">выгодно</div>
  </button>
  </div>
  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
@@ -1710,7 +1709,7 @@
  <div class="form-group">
  <label class="form-label" data-i18n="amount">Сумма</label>
  <input class="form-input" type="number" id="deposit-amount" placeholder="0.00" min="1" step="0.01" oninput="updateFeeHint('deposit')">
- <div class="field-hint" id="deposit-fee-hint" style="color:var(--hint,#8e8e93);font-size:12px;margin-top:6px;">Комиссия 2.5%. Итого к оплате: 0.00 $</div>
+ <div class="field-hint" id="deposit-fee-hint" style="display:none;"></div>
  </div>
 
  <div class="form-group">
@@ -1758,7 +1757,7 @@
  <label class="form-label" data-i18n="amount">Сумма</label>
  <input class="form-input" type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01" oninput="updateFeeHint('withdraw')">
  <div class="field-hint">Доступно: <span id="withdraw-available">0.00</span> $</div>
- <div class="field-hint" id="withdraw-fee-hint" style="color:var(--hint,#8e8e93);font-size:12px;margin-top:4px;">Комиссия 2.5%. Итого с баланса: 0.00 $</div>
+ <div class="field-hint" id="withdraw-fee-hint" style="display:none;"></div>
  </div>
 
  <div class="form-group">
@@ -2137,7 +2136,7 @@ var APP_I18N = {
 };
 function tApp(key) {
   try {
-    var lang = (typeof getAppLang === 'function' ? getAppLang() : null) || (localStorage.getItem('xcod_lang') || 'ru');
+    var lang = (typeof getAppLang === 'function' ? getAppLang() : null) || (localStorage.getItem('xcod_lang') || 'en');
     var pack = APP_I18N[lang] || APP_I18N[String(lang).split('-')[0]] || APP_I18N.en || APP_I18N.ru;
     if (pack && pack[key]) return pack[key];
     if (APP_I18N.ru && APP_I18N.ru[key]) return APP_I18N.ru[key];
@@ -2483,7 +2482,7 @@ function loadTelegramLoginWidget() {
  .then(function(cfg) {
  var bot = (cfg && cfg.bot_username) ? cfg.bot_username : '';
  if (!bot) {
- wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Бот не настроен (BOT_USERNAME). Откройте мини-приложение в Telegram.</p>';
+ wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Bot is not configured. Please open the mini app in Telegram.</p>';
  return;
  }
  wrap.innerHTML = '';
@@ -2502,7 +2501,7 @@ function loadTelegramLoginWidget() {
  wrap.appendChild(s);
  })
  .catch(function() {
- wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Не удалось загрузить вход. Проверьте API.</p>';
+ wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Could not load sign-in. Check API connection.</p>';
  });
 }
 
@@ -2515,7 +2514,7 @@ async function handleTelegramLogin(user) {
  });
  var data = await res.json();
  if (!res.ok || !data.session_token) {
- alert((data && data.error) || 'Ошибка входа');
+ alert((data && data.error) || 'Sign-in failed');
  return;
  }
  saveWebSession(data.session_token, data.expires_at, {
@@ -2533,7 +2532,7 @@ async function handleTelegramLogin(user) {
  // continue boot
  await continueAfterAuth();
  } catch (e) {
- alert('Ошибка входа: ' + (e && e.message ? e.message : e));
+ alert('Sign-in error: ' + (e && e.message ? e.message : e));
  }
 }
 
@@ -3011,6 +3010,9 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ privacy_title: 'Политика конфиденциальности',
+ privacy_body: "Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp's)</a>.",
+ privacy_accept: 'Принимаю и продолжаю',
  support: 'Поддержка', back: '← Назад', menu: 'Меню',
  home: 'Главная', news: 'Новости', exchange: 'Биржа', freelance: 'Фриланс',
  balance: 'Баланс', favorites: 'Избранные', my_listings: 'Мои объявления',
@@ -3326,7 +3328,25 @@ var I18N = {
  xcod_worker: 'Работник',
  independent: 'Самостоятельно',
  analytics_consent: 'Согласие на передачу данных и аналитики',
- terms_prefix: 'Продолжая, вы даёте ',
+  product_type_ph: 'TG бот / Mini App + сайт / другое',
+ product_type_ph_short: 'бот, сайт...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Название услуги / заказа',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Вид (бот / сайт / другое)',
+ fl_pay_hint: 'Оплата публикации фриланс-объявления',
+ fl_create_title: 'Фриланс объявление',
+ plan_month: '1 месяц',
+ plan_week: '1 неделя',
+ plan_quarter: '3 месяца',
+ popular: 'популярное',
+ profitable: 'выгодно',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Вид',
+ users_month_label: 'Пользователей/мес',
+ earn_month_label: 'Заработок/мес',
+terms_prefix: 'Продолжая, вы даёте ',
  terms_link: 'пользовательское соглашение',
  terms_suffix: ' с правилами сервиса',
  err_terms: 'Примите пользовательское соглашение',
@@ -3555,6 +3575,9 @@ var I18N = {
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ privacy_title: 'Privacy policy',
+ privacy_body: "By continuing, you agree to the <a href=\"{url}\">privacy and data collection policy (for MiniApp's)</a>.",
+ privacy_accept: 'Accept and continue',
  support: 'Support', back: '← Back', menu: 'Menu',
  home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
  balance: 'Balance', favorites: 'Favorites', my_listings: 'My listings',
@@ -3870,7 +3893,25 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
+  product_type_ph: 'TG bot / Mini App + site / other',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Service / order title',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / other)',
+ fl_pay_hint: 'Freelance listing publication fee',
+ fl_create_title: 'Freelance listing',
+ plan_month: '1 month',
+ plan_week: '1 week',
+ plan_quarter: '3 months',
+ popular: 'popular',
+ profitable: 'best value',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Users/month',
+ earn_month_label: 'Earnings/month',
+terms_prefix: 'By continuing, you accept the ',
  terms_link: 'Terms of Service',
  terms_suffix: ' and the service rules',
  err_terms: 'Please accept the Terms of Service',
@@ -4099,6 +4140,9 @@ var I18N = {
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ privacy_title: 'Datenschutzrichtlinie',
+ privacy_body: "Indem Sie fortfahren, stimmen Sie der <a href=\"{url}\">Datenschutzrichtlinie (for MiniApp's)</a> zu.",
+ privacy_accept: 'Akzeptieren und fortfahren',
  support: 'Support', back: '← Zurück', menu: 'Menü',
  home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
  balance: 'Guthaben', favorites: 'Favoriten', my_listings: 'Meine Anzeigen',
@@ -4404,10 +4448,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG-Bot / Mini App + Website / anderes',
+ product_type_ph_short: 'Bot, Website...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Titel der Leistung / Bestellung',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Art (Bot / Website / anderes)',
+ fl_pay_hint: 'Gebühr für Freelance-Anzeige',
+ fl_create_title: 'Freelance-Anzeige',
+ plan_month: '1 Monat',
+ plan_week: '1 Woche',
+ plan_quarter: '3 Monate',
+ beliebt: 'beliebt',
+ profitable: 'günstig',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Art',
+ users_month_label: 'Nutzer/Monat',
+ earn_month_label: 'Einnahmen/Monat',
+terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
+ terms_link: 'Nutzungsbedingungen',
+ terms_suffix: ' und die Regeln des Dienstes',
+ err_terms: 'Bitte akzeptieren Sie die Nutzungsbedingungen',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -4633,6 +4695,9 @@ var I18N = {
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ privacy_title: 'Politique de confidentialité',
+ privacy_body: "En continuant, vous acceptez la <a href=\"{url}\">politique de confidentialité (for MiniApp's)</a>.",
+ privacy_accept: 'Accepter et continuer',
  support: 'Support', back: '← Retour', menu: 'Menu',
  home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
  balance: 'Solde', favorites: 'Favoris', my_listings: 'Mes annonces',
@@ -4938,10 +5003,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'Bot TG / Mini App + site / autre',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Titre du service / commande',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / autre)',
+ fl_pay_hint: 'Frais de publication freelance',
+ fl_create_title: 'Annonce freelance',
+ plan_month: '1 mois',
+ plan_week: '1 semaine',
+ plan_quarter: '3 mois',
+ populaire: 'populaire',
+ profitable: 'avantageux',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Utilisateurs/mois',
+ earn_month_label: 'Revenus/mois',
+terms_prefix: 'En continuant, vous acceptez les ',
+ terms_link: 'conditions d\'utilisation',
+ terms_suffix: ' et les règles du service',
+ err_terms: 'Veuillez accepter les conditions d\'utilisation',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -5167,6 +5250,9 @@ var I18N = {
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ privacy_title: 'Política de privacidad',
+ privacy_body: "Al continuar, acepta la <a href=\"{url}\">política de privacidad (for MiniApp's)</a>.",
+ privacy_accept: 'Aceptar y continuar',
  support: 'Support', back: '← Atrás', menu: 'Menú',
  home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favoritos', my_listings: 'Mis anuncios',
@@ -5472,10 +5558,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'Bot TG / Mini App + sitio / otro',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Título del servicio / pedido',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Tipo (bot / sitio / otro)',
+ fl_pay_hint: 'Tarifa de publicación freelance',
+ fl_create_title: 'Anuncio freelance',
+ plan_month: '1 mes',
+ plan_week: '1 semana',
+ plan_quarter: '3 meses',
+ popular: 'popular',
+ profitable: 'rentable',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Usuarios/mes',
+ earn_month_label: 'Ingresos/mes',
+terms_prefix: 'Al continuar, acepta el ',
+ terms_link: 'acuerdo de usuario',
+ terms_suffix: ' y las reglas del servicio',
+ err_terms: 'Acepte el acuerdo de usuario',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -5701,6 +5805,9 @@ var I18N = {
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ privacy_title: '隐私政策',
+ privacy_body: "继续即表示您同意<a href=\"{url}\">隐私政策 (for MiniApp's)</a>。",
+ privacy_accept: '接受并继续',
  support: 'Support', back: '← 返回', menu: '菜单',
  home: '首页', news: '新闻', exchange: '交易所', freelance: '自由职业',
  balance: '余额', favorites: '收藏', my_listings: '我的广告',
@@ -6006,10 +6113,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG机器人 / Mini App + 网站 / 其他',
+ product_type_ph_short: '机器人、网站...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: '服务/订单标题',
+ portfolio_ph: 'https://...',
+ product_kind_label: '类型（机器人/网站/其他）',
+ fl_pay_hint: '自由职业广告发布费',
+ fl_create_title: '自由职业广告',
+ plan_month: '1个月',
+ plan_week: '1周',
+ plan_quarter: '3个月',
+ 热门: '热门',
+ profitable: '超值',
+ tgstat_btn: 'TG Stat',
+ kind_label: '类型',
+ users_month_label: '用户/月',
+ earn_month_label: '收入/月',
+terms_prefix: '继续即表示您同意',
+ terms_link: '用户协议',
+ terms_suffix: '及服务规则',
+ err_terms: '请接受用户协议',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -6235,6 +6360,9 @@ var I18N = {
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ privacy_title: 'Політика конфіденційності',
+ privacy_body: "Продовжуючи, ви погоджуєтесь з <a href=\"{url}\">політикою конфіденційності (for MiniApp's)</a>.",
+ privacy_accept: 'Приймаю і продовжую',
  support: 'Support', back: '← Назад', menu: 'Меню',
  home: 'Головна', news: 'Новини', exchange: 'Біржа', freelance: 'Фриланс',
  balance: 'Баланс', favorites: 'Обране', my_listings: 'Мої оголошення',
@@ -6543,10 +6671,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG бот / Mini App + сайт / інше',
+ product_type_ph_short: 'бот, сайт...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Назва послуги / замовлення',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Вид (бот / сайт / інше)',
+ fl_pay_hint: 'Оплата публікації фриланс-оголошення',
+ fl_create_title: 'Фриланс оголошення',
+ plan_month: '1 місяць',
+ plan_week: '1 тиждень',
+ plan_quarter: '3 місяці',
+ popular: 'популярне',
+ profitable: 'вигідно',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Вид',
+ users_month_label: 'Користувачів/міс',
+ earn_month_label: 'Заробіток/міс',
+terms_prefix: 'Продовжуючи, ви приймаєте ',
+ terms_link: 'користувацьку угоду',
+ terms_suffix: ' з правилами сервісу',
+ err_terms: 'Прийміть користувацьку угоду',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -6772,6 +6918,9 @@ var I18N = {
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ privacy_title: 'Informativa sulla privacy',
+ privacy_body: "Continuando, accetti l'<a href=\"{url}\">informativa sulla privacy (for MiniApp's)</a>.",
+ privacy_accept: 'Accetta e continua',
  support: 'Support', back: '← Indietro', menu: 'Menu',
  home: 'Home', news: 'Notizie', exchange: 'Borsa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Preferiti', my_listings: 'I miei annunci',
@@ -7078,10 +7227,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG bot / Mini App + site / other',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Service / order title',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / other)',
+ fl_pay_hint: 'Freelance listing publication fee',
+ fl_create_title: 'Freelance listing',
+ plan_month: '1 month',
+ plan_week: '1 week',
+ plan_quarter: '3 months',
+ popular: 'popular',
+ profitable: 'best value',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Users/month',
+ earn_month_label: 'Earnings/month',
+terms_prefix: 'Continuando, accetti i ',
+ terms_link: 'Termini di servizio',
+ terms_suffix: ' e le regole del servizio',
+ err_terms: 'Accetta i Termini di servizio',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -7307,6 +7474,9 @@ var I18N = {
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ privacy_title: 'Política de privacidade',
+ privacy_body: "Ao continuar, aceita a <a href=\"{url}\">política de privacidade (for MiniApp's)</a>.",
+ privacy_accept: 'Aceitar e continuar',
  support: 'Support', back: '← Voltar', menu: 'Menu',
  home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favoritos', my_listings: 'Os meus anúncios',
@@ -7613,10 +7783,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG bot / Mini App + site / other',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Service / order title',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / other)',
+ fl_pay_hint: 'Freelance listing publication fee',
+ fl_create_title: 'Freelance listing',
+ plan_month: '1 month',
+ plan_week: '1 week',
+ plan_quarter: '3 months',
+ popular: 'popular',
+ profitable: 'best value',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Users/month',
+ earn_month_label: 'Earnings/month',
+terms_prefix: 'Ao continuar, aceita o ',
+ terms_link: 'acordo de utilizador',
+ terms_suffix: ' e as regras do serviço',
+ err_terms: 'Aceite o acordo de utilizador',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -8148,10 +8336,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG bot / Mini App + site / other',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Service / order title',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / other)',
+ fl_pay_hint: 'Freelance listing publication fee',
+ fl_create_title: 'Freelance listing',
+ plan_month: '1 month',
+ plan_week: '1 week',
+ plan_quarter: '3 months',
+ popular: 'popular',
+ profitable: 'best value',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Users/month',
+ earn_month_label: 'Earnings/month',
+terms_prefix: 'Ao continuar, você aceita o ',
+ terms_link: 'termo de uso',
+ terms_suffix: ' e as regras do serviço',
+ err_terms: 'Aceite o termo de uso',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -8377,6 +8583,9 @@ var I18N = {
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ privacy_title: 'Gizlilik politikası',
+ privacy_body: "Devam ederek <a href=\"{url}\">gizlilik politikasını (for MiniApp's)</a> kabul edersiniz.",
+ privacy_accept: 'Kabul et ve devam et',
  support: 'Support', back: '← Geri', menu: 'Menü',
  home: 'Ana sayfa', news: 'Haberler', exchange: 'Borsa', freelance: 'Freelance',
  balance: 'Bakiye', favorites: 'Favoriler', my_listings: 'İlanlarım',
@@ -8683,10 +8892,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG bot / Mini App + site / other',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Service / order title',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / other)',
+ fl_pay_hint: 'Freelance listing publication fee',
+ fl_create_title: 'Freelance listing',
+ plan_month: '1 month',
+ plan_week: '1 week',
+ plan_quarter: '3 months',
+ popular: 'popular',
+ profitable: 'best value',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Users/month',
+ earn_month_label: 'Earnings/month',
+terms_prefix: 'Devam ederek ',
+ terms_link: 'kullanıcı sözleşmesini',
+ terms_suffix: ' ve hizmet kurallarını kabul edersiniz',
+ err_terms: 'Kullanıcı sözleşmesini kabul edin',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -8912,6 +9139,9 @@ var I18N = {
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ privacy_title: 'Kebijakan privasi',
+ privacy_body: "Dengan melanjutkan, Anda menyetujui <a href=\"{url}\">kebijakan privasi (for MiniApp's)</a>.",
+ privacy_accept: 'Terima dan lanjutkan',
  support: 'Support', back: '← Kembali', menu: 'Menu',
  home: 'Beranda', news: 'Berita', exchange: 'Bursa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favorit', my_listings: 'Iklan saya',
@@ -9218,10 +9448,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG bot / Mini App + site / other',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Service / order title',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / other)',
+ fl_pay_hint: 'Freelance listing publication fee',
+ fl_create_title: 'Freelance listing',
+ plan_month: '1 month',
+ plan_week: '1 week',
+ plan_quarter: '3 months',
+ popular: 'popular',
+ profitable: 'best value',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Users/month',
+ earn_month_label: 'Earnings/month',
+terms_prefix: 'Dengan melanjutkan, Anda menerima ',
+ terms_link: 'ketentuan layanan',
+ terms_suffix: ' dan aturan layanan',
+ err_terms: 'Harap terima ketentuan layanan',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -9447,6 +9695,9 @@ var I18N = {
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ privacy_title: 'سياسة الخصوصية',
+ privacy_body: "بالمتابعة فإنك توافق على <a href=\"{url}\">سياسة الخصوصية (for MiniApp's)</a>.",
+ privacy_accept: 'موافق ومتابعة',
  support: 'Support', back: '→ رجوع', menu: 'القائمة',
  home: 'الرئيسية', news: 'الأخبار', exchange: 'البورصة', freelance: 'العمل الحر',
  balance: 'الرصيد', favorites: 'المفضلة', my_listings: 'إعلاناتي',
@@ -9753,10 +10004,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG bot / Mini App + site / other',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Service / order title',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / other)',
+ fl_pay_hint: 'Freelance listing publication fee',
+ fl_create_title: 'Freelance listing',
+ plan_month: '1 month',
+ plan_week: '1 week',
+ plan_quarter: '3 months',
+ popular: 'popular',
+ profitable: 'best value',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Users/month',
+ earn_month_label: 'Earnings/month',
+terms_prefix: 'بالمتابعة فإنك توافق على ',
+ terms_link: 'اتفاقية المستخدم',
+ terms_suffix: ' وقواعد الخدمة',
+ err_terms: 'يرجى قبول اتفاقية المستخدم',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -9982,6 +10251,9 @@ var I18N = {
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ privacy_title: 'プライバシーポリシー',
+ privacy_body: "続行すると<a href=\"{url}\">プライバシーポリシー (for MiniApp's)</a>に同意したことになります。",
+ privacy_accept: '同意して続ける',
  support: 'Support', back: '← 戻る', menu: 'メニュー',
  home: 'ホーム', news: 'ニュース', exchange: '取引所', freelance: 'フリーランス',
  balance: '残高', favorites: 'お気に入り', my_listings: '自分の出品',
@@ -10288,10 +10560,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG bot / Mini App + site / other',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Service / order title',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / other)',
+ fl_pay_hint: 'Freelance listing publication fee',
+ fl_create_title: 'Freelance listing',
+ plan_month: '1 month',
+ plan_week: '1 week',
+ plan_quarter: '3 months',
+ popular: 'popular',
+ profitable: 'best value',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Users/month',
+ earn_month_label: 'Earnings/month',
+terms_prefix: '続行すると',
+ terms_link: '利用規約',
+ terms_suffix: 'およびサービス規約に同意したことになります',
+ err_terms: '利用規約に同意してください',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -10517,6 +10807,9 @@ var I18N = {
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ privacy_title: '개인정보 처리방침',
+ privacy_body: "계속하면 <a href=\"{url}\">개인정보 처리방침 (for MiniApp's)</a>에 동의하게 됩니다.",
+ privacy_accept: '동의하고 계속',
  support: 'Support', back: '← 뒤로', menu: '메뉴',
  home: '홈', news: '뉴스', exchange: '거래소', freelance: '프리랜스',
  balance: '잔액', favorites: '즐겨찾기', my_listings: '내 광고',
@@ -10823,10 +11116,28 @@ var I18N = {
  xcod_worker: 'Worker',
  independent: 'Independent',
  analytics_consent: 'Consent to data & analytics',
- terms_prefix: 'By continuing, you accept the ',
- terms_link: 'Terms of Service',
- terms_suffix: ' and the service rules',
- err_terms: 'Please accept the Terms of Service',
+  product_type_ph: 'TG bot / Mini App + site / other',
+ product_type_ph_short: 'bot, site...',
+ tgstat_ph: 'https://tgstat.ru/...',
+ bot_username_ph: '@my_bot',
+ fl_title_ph: 'Service / order title',
+ portfolio_ph: 'https://...',
+ product_kind_label: 'Type (bot / site / other)',
+ fl_pay_hint: 'Freelance listing publication fee',
+ fl_create_title: 'Freelance listing',
+ plan_month: '1 month',
+ plan_week: '1 week',
+ plan_quarter: '3 months',
+ popular: 'popular',
+ profitable: 'best value',
+ tgstat_btn: 'TG Stat',
+ kind_label: 'Type',
+ users_month_label: 'Users/month',
+ earn_month_label: 'Earnings/month',
+terms_prefix: '계속하면 ',
+ terms_link: '이용약관',
+ terms_suffix: ' 및 서비스 규칙에 동의하게 됩니다',
+ err_terms: '이용약관에 동의해 주세요',
  price_xcod: 'Price is set by the platform',
  work_hours: 'Deadline (hours)',
  buy_deadline_note: 'You will have time to review',
@@ -13250,14 +13561,24 @@ function listingExtraInfoHtml(l, opts) {
  parts.push('<b>' + (tBlock('contract_no') || 'Договор') + ':</b> ' + String(l.contract_number).replace(/</g,'&lt;'));
  } else {
  parts.push('<b>' + (tBlock('type') || 'Тип') + ':</b> ' + (tBlock('own_product') || 'Свой товар'));
- if (l.product_type) parts.push('<b>Вид:</b> ' + String(l.product_type).replace(/</g,'&lt;'));
+ if (l.product_type) parts.push('<b>' + (tBlock('kind_label') || tBlock('product_type') || 'Вид') + ':</b> ' + String(l.product_type).replace(/</g,'&lt;'));
  if (l.bot_username) parts.push('<b>Username:</b> @' + String(l.bot_username).replace(/</g,'&lt;'));
- if (l.tgstat_url) parts.push('<b>TGStat:</b> ' + String(l.tgstat_url).replace(/</g,'&lt;'));
- if (l.users_month) parts.push('<b>Пользователей/мес:</b> ' + l.users_month);
- if (l.earnings_month) parts.push('<b>Заработок/мес:</b> ' + l.earnings_month + '$');
+ if (l.users_month) parts.push('<b>' + (tBlock('users_month_label') || 'Пользователей/мес') + ':</b> ' + l.users_month);
+ if (l.earnings_month) parts.push('<b>' + (tBlock('earn_month_label') || 'Заработок/мес') + ':</b> ' + l.earnings_month + '$');
  }
- if (!parts.length) return '';
- return '<div class="info-block" style="margin-top:8px;margin-bottom:12px;">' + parts.join('<br>') + '</div>';
+ var html = '';
+ if (parts.length) {
+ html += '<div class="info-block" style="margin-top:8px;margin-bottom:12px;">' + parts.join('<br>') + '</div>';
+ }
+ if (l.tgstat_url) {
+ var tu = String(l.tgstat_url).trim();
+ if (tu && !/^https?:\/\//i.test(tu)) tu = 'https://' + tu;
+ var lab = tBlock('tgstat_btn') || 'TG Stat';
+ html += '<a class="btn btn-secondary" href="' + tu.replace(/"/g,'') + '" target="_blank" rel="noopener" onclick="event.stopPropagation();" ' +
+ 'style="display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0 0 12px;text-decoration:none;width:auto;padding:10px 14px;">' +
+ '<span style="font-size:16px;line-height:1;">↗</span><span>' + lab + '</span></a>';
+ }
+ return html;
 }
 function listingFilesBlockHtml(files, mode, id) {
  // mode: remove | download-listing | download-order
@@ -13433,7 +13754,7 @@ function startSaleCreate() {
  if (fl) fl.innerHTML = '';
  } catch (e) {}
  showPage('listing-create');
- try { setTimeout(applyI18n, 0); } catch (e) {}
+ try { setTimeout(function(){ applyI18n(); applyTermsLabels(); }, 0); } catch (e) {}
 }
 function startFreelanceCreate() {
  flCreate = { kind: '', type: '', plan: '' };
@@ -13446,10 +13767,11 @@ function startFreelanceCreate() {
  document.getElementById('fl-step-photos').style.display='none';
  document.getElementById('fl-step-pay').style.display='none';
  showPage('create-freelance');
+ try { setTimeout(function(){ applyI18n(); applyTermsLabels(); }, 0); } catch (e) {}
 }
 function cancelFreelanceCreate() {
- showPage('freelance');
- try { runFreelanceSearch(); } catch(e){}
+ showPage('my-listings');
+ try { loadMyListings(); } catch(e){}
 }
 function selectFlKind(k) {
  flCreate.kind = k;
@@ -14579,31 +14901,15 @@ function startStarsPaymentPoll(requestId) {
 
 var PLATFORM_FEE_RATE = 0.025;
 function calcFee(amount, method) {
- var a = Number(amount) || 0;
- if (a < 0) a = 0;
- // Telegram Stars — без комиссии
- if (method === 'stars') {
- return { amount: a, fee: 0, total: a };
- }
- var fee = Math.round(a * PLATFORM_FEE_RATE * 100) / 100;
- var total = Math.round((a + fee) * 100) / 100;
- return { amount: a, fee: fee, total: total };
+  // Комиссия пополнения/вывода отключена
+  var a = parseFloat(amount) || 0;
+  return { fee: 0, total: Math.round(a * 100) / 100, rate: 0 };
 }
 function updateFeeHint(kind) {
- var inp = document.getElementById(kind === 'withdraw' ? 'withdraw-amount' : 'deposit-amount');
- var hint = document.getElementById(kind === 'withdraw' ? 'withdraw-fee-hint' : 'deposit-fee-hint');
- if (!inp || !hint) return;
- var method = kind === 'withdraw' ? (typeof selectedWithdrawMethod !== 'undefined' ? selectedWithdrawMethod : 'card') : (typeof selectedDepositMethod !== 'undefined' ? selectedDepositMethod : 'card');
- var c = calcFee(inp.value, method);
- if (kind === 'deposit' && method === 'stars') {
- hint.textContent = (tBlock('fee_hint_stars') || 'Telegram Stars — no fee. Total: {total} $').replace('{total}', c.total.toFixed(2));
- return;
- }
- if (kind === 'withdraw') {
- hint.textContent = tBlock('fee_hint_withdraw').replace('{fee}', '2.5').replace('{total}', c.total.toFixed(2));
- } else {
- hint.textContent = tBlock('fee_hint_deposit').replace('{fee}', '2.5').replace('{total}', c.total.toFixed(2));
- }
+  try {
+    var el = document.getElementById(kind === "withdraw" ? "withdraw-fee-hint" : "deposit-fee-hint");
+    if (el) el.style.display = "none";
+  } catch (e) {}
 }
 
 async function startDeposit() {
@@ -16108,7 +16414,7 @@ function openAdminListingDetail(id) {
  } else {
  html += '<b>Вид товара:</b> ' + (l.product_type || '—') + '<br>' +
  (l.bot_username ? '<b>Бот:</b> @' + l.bot_username + '<br>' : '') +
- (l.tgstat_url ? '<b>TGStat:</b> ' + l.tgstat_url + '<br>' : '') +
+ (l.tgstat_url ? '' : '') +
  '<b>Цена:</b> ' + l.price + '$<br>';
  }
  html += '<b>Создано:</b> ' + (l.created_at || '').slice(0, 16).replace('T', ' ') + '</div>';
@@ -16747,42 +17053,38 @@ function showPrivacyOverlay(policyUrl) {
  var h2 = document.getElementById('privacy-title') || (ov && ov.querySelector('h2'));
  if (!ov) return;
 
- var lang = 'ru';
- try {
- if (typeof getAppLang === 'function') lang = getAppLang() || 'ru';
- else lang = localStorage.getItem('xcod_lang') || 'ru';
- } catch (e) {}
- var isEn = (lang !== 'ru' && lang !== 'uk');
-
- var title = isEn ? 'Privacy policy' : 'Политика конфиденциальности';
- var prefix = isEn ? 'By continuing, you agree to the ' : 'Продолжая, вы соглашаетесь с ';
- var linkLabel = isEn
- ? "privacy and data collection policy (for MiniApp's)"
- : "политикой конфиденциальности и сбора данных (for MiniApp's)";
- var accept = isEn ? 'Accept and continue' : 'Принимаю и продолжаю';
-
- if (h2) h2.textContent = title;
- if (btn) {
- btn.textContent = accept;
- btn.onclick = function () { acceptPrivacyMiniapp(); };
- }
-
  var url = (typeof PRIVACY_POLICY_URL !== 'undefined' && PRIVACY_POLICY_URL) ? PRIVACY_POLICY_URL : 'https://clossr.site/privacy.html';
  try {
  if (policyUrl && String(policyUrl).trim()) url = String(policyUrl).trim();
  else if (userData && userData.privacy_policy_url) url = String(userData.privacy_policy_url).trim();
  } catch (e) {}
 
- if (tx) {
- tx.innerHTML = prefix
- + '<a href="' + url.replace(/"/g, '') + '" target="_blank" rel="noopener noreferrer" '
- + 'style="color:#2AABEE;text-decoration:none;font-weight:500;">'
- + linkLabel + '</a>.';
+ var title = (typeof tBlock === 'function' ? tBlock('privacy_title') : '') || 'Privacy policy';
+ if (title === 'privacy_title') title = 'Privacy policy';
+ title = String(title).replace(/<[^>]+>/g, '').replace(/^📄\s*/, '').trim() || 'Privacy policy';
+
+ var bodyTpl = (typeof tBlock === 'function' ? tBlock('privacy_body') : '') || '';
+ if (!bodyTpl || bodyTpl === 'privacy_body') {
+ bodyTpl = "By continuing, you agree to the <a href=\"{url}\">privacy and data collection policy (for MiniApp's)</a>.";
  }
+ var body = bodyTpl.replace(/\{url\}/g, url.replace(/"/g, ''));
+ body = body.replace(/<a /g, '<a style="color:#2AABEE;text-decoration:none;font-weight:500;" target="_blank" rel="noopener noreferrer" ');
+
+ var accept = (typeof tBlock === 'function' ? tBlock('privacy_accept') : '') || 'Accept and continue';
+ if (accept === 'privacy_accept') accept = 'Accept and continue';
+ accept = String(accept).replace(/^✅\s*/, '').trim() || 'Accept and continue';
+
+ if (h2) h2.textContent = title;
+ if (btn) {
+ btn.textContent = accept;
+ btn.onclick = function () { acceptPrivacyMiniapp(); };
+ }
+ if (tx) tx.innerHTML = body;
 
  ov.style.display = 'flex';
  try { document.body.style.overflow = 'hidden'; } catch (e) {}
 }
+
 
 function hidePrivacyOverlay() {
  var ov = document.getElementById('privacy-overlay');
