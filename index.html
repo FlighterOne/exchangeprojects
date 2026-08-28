@@ -2557,6 +2557,7 @@ async function continueAfterAuth() {
  } catch (e) {}
  __authReady = true;
  window.__xcodBootOk = true;
+ try { if (!isTelegramMiniApp()) applyRouteFromHash(); } catch (eRoute) {}
  try { if (typeof renderMain === 'function') renderMain(); } catch (e) {}
   if (box) box.style.display = 'none';
   try {
@@ -2881,10 +2882,133 @@ function setBalance(bal) {
  if (avail) avail.textContent = formatted;
 }
 
+
+/* ========== HASH ROUTING (site deep links) ========== */
+var __hashNavLock = false;
+var PAGE_HASH_MAP = {
+  home: 'main',
+  main: 'main',
+  support: 'support',
+  balance: 'balance',
+  news: 'news',
+  exchange: 'exchange',
+  freelance: 'freelance',
+  favorites: 'favorites',
+  settings: 'settings',
+  orders: 'orders',
+  requests: 'requests',
+  'my-listings': 'mylistings',
+  mylistings: 'mylistings',
+  deposit: 'deposit',
+  withdraw: 'withdraw',
+  profile: 'profile',
+  admin: 'admin',
+  collaborate: 'collaborate'
+};
+var HASH_PAGE_MAP = {
+  main: 'home',
+  home: 'home',
+  support: 'support',
+  balance: 'balance',
+  news: 'news',
+  exchange: 'exchange',
+  freelance: 'freelance',
+  favorites: 'favorites',
+  settings: 'settings',
+  orders: 'orders',
+  requests: 'requests',
+  mylistings: 'my-listings',
+  'my-listings': 'my-listings',
+  deposit: 'deposit',
+  withdraw: 'withdraw',
+  profile: 'profile',
+  admin: 'admin',
+  collaborate: 'collaborate'
+};
+
+function setRouteHash(hash) {
+  try {
+    if (__hashNavLock) return;
+    var h = String(hash || '').replace(/^#/, '');
+    if (!h) return;
+    var cur = (location.hash || '').replace(/^#/, '');
+    if (cur === h) return;
+    __hashNavLock = true;
+    if (history && history.replaceState) {
+      history.replaceState(null, '', '#' + h);
+    } else {
+      location.hash = h;
+    }
+    setTimeout(function(){ __hashNavLock = false; }, 0);
+  } catch (e) { __hashNavLock = false; }
+}
+
+function applyRouteFromHash() {
+  try {
+    var raw = (location.hash || '').replace(/^#/, '').trim();
+    if (!raw) return false;
+
+    // #profile123456 or #profile/123456
+    var mProf = raw.match(/^profile[\/\-]?(\d+)$/i);
+    if (mProf) {
+      var pid = parseInt(mProf[1], 10);
+      if (pid) {
+        __hashNavLock = true;
+        try { openUserProfile(pid); } catch (e) {}
+        setTimeout(function(){ __hashNavLock = false; }, 50);
+        return true;
+      }
+    }
+
+    // #listing17 or #listing/17
+    var mList = raw.match(/^listing[\/\-]?(\d+)$/i);
+    if (mList) {
+      var lid = parseInt(mList[1], 10);
+      if (lid) {
+        __hashNavLock = true;
+        try { openListing(lid); } catch (e) {}
+        setTimeout(function(){ __hashNavLock = false; }, 50);
+        return true;
+      }
+    }
+
+    var key = raw.toLowerCase();
+    var page = HASH_PAGE_MAP[key];
+    if (page) {
+      __hashNavLock = true;
+      try { showPage(page); } catch (e) {}
+      setTimeout(function(){ __hashNavLock = false; }, 50);
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+function bindHashRouting() {
+  try {
+    window.addEventListener('hashchange', function() {
+      if (__hashNavLock) return;
+      applyRouteFromHash();
+    });
+  } catch (e) {}
+}
+
 function showPage(name) {
  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
  var page = document.getElementById('page-' + name);
  if (page) page.classList.add('active');
+ try {
+  if (!__hashNavLock) {
+    var h = PAGE_HASH_MAP[name];
+    if (h === 'profile') {
+      var uid = (userData && userData.id) ? userData.id : '';
+      if (uid) setRouteHash('profile' + uid);
+      else setRouteHash('profile');
+    } else if (h) {
+      setRouteHash(h);
+    }
+  }
+ } catch (eH) {}
  try { applyI18n(); } catch (e) {}
  if (name === 'collaborate' || name === 'support-hire') { try { renderHireInfo(); } catch (e) {} }
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
@@ -3177,7 +3301,7 @@ var I18N = {
  buyer: 'Покупатель',
  views: 'Просмотры',
  likes: 'Избранное',
- files: 'Файлы',
+ files: 'Файлы', selected: 'Выбрано', files_from_platform: 'Файлы с площадки', no_files_attached: 'Файлы не прикреплены',
  photos: 'Фото',
  send: 'Отправить',
  message_ph: 'Сообщение...',
@@ -3742,7 +3866,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Message...',
@@ -4297,7 +4421,7 @@ terms_prefix: 'By continuing, you accept the ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Nachricht...',
@@ -4852,7 +4976,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Message...',
@@ -5407,7 +5531,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Mensaje...',
@@ -5962,7 +6086,7 @@ terms_prefix: 'Al continuar, acepta el ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: '消息...',
@@ -6520,7 +6644,7 @@ terms_prefix: '继续即表示您同意',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Повідомлення...',
@@ -7076,7 +7200,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Messaggio...',
@@ -7632,7 +7756,7 @@ terms_prefix: 'Continuando, accetti i ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Mensagem...',
@@ -8185,7 +8309,7 @@ terms_prefix: 'Ao continuar, aceita o ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Mensagem...',
@@ -8741,7 +8865,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Mesaj...',
@@ -9297,7 +9421,7 @@ terms_prefix: 'Devam ederek ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'Pesan...',
@@ -9853,7 +9977,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'رسالة...',
@@ -10409,7 +10533,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: 'メッセージ...',
@@ -10965,7 +11089,7 @@ terms_prefix: '続行すると',
  buyer: 'Buyer',
  views: 'Views',
  likes: 'Favorites',
- files: 'Files',
+ files: 'Files', selected: 'Selected', files_from_platform: 'Platform files', no_files_attached: 'No files attached',
  photos: 'Photos',
  send: 'Send',
  message_ph: '메시지...',
@@ -12566,6 +12690,7 @@ function goProfile(uid, ev) {
  } catch (e) {}
  uid = parseInt(uid, 10);
  if (!uid) return false;
+ try { setRouteHash('profile' + uid); } catch (e2) {}
  openUserProfile(uid);
  return false;
 }
@@ -12581,7 +12706,7 @@ function bindProfileLinks(root) {
  e.stopPropagation();
  e.preventDefault();
  var id = parseInt(el.getAttribute('data-uid'), 10);
- if (id) openUserProfile(id);
+ if (id) { try { setRouteHash('profile' + id); } catch (eH) {} openUserProfile(id); }
  }, true);
  })(nodes[i]);
  }
@@ -13499,7 +13624,7 @@ async function loadListings() {
  var items = data.listings || [];
  if (!items.length) {
  var dbg = data.debug ? (' (active: ' + data.debug.active_total + ', в ленте: ' + data.debug.feed + ')') : '';
- box.innerHTML = '<div class="empty"><div class="icon">📭</div>' + tBlock('no_listings_yet') + (data.debug && data.debug.active_total > 2 ? '<div style="font-size:12px;margin-top:8px;color:var(--hint)">' + tBlock('check_moderation_hint') + '</div>' : '') + '</div>';
+ box.innerHTML = '<div class="empty"><div class="icon">📭</div>' + tBlock('no_listings_yet') + '</div>';
  return;
  }
  box.innerHTML = items.map(function(l) {
@@ -13584,7 +13709,7 @@ function listingFilesBlockHtml(files, mode, id) {
  // mode: remove | download-listing | download-order
  files = files || [];
  if (!files.length) return '';
- var html = '<div class="files-block"><div class="files-label">Файлы</div>';
+ var html = '<div class="files-block"><div class="files-label">' + (tBlock('files') || 'Files') + '</div>';
  files.forEach(function(f, i) {
  var nm = (typeof f === 'object' && f && f.name) ? f.name : String(f);
  var action = '';
@@ -13906,6 +14031,7 @@ async function openListing(id) {
 
  var box = document.getElementById('listing-detail-content');
  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+ try { if (id) setRouteHash('listing' + id); } catch (eH) {}
  showPage('listing-detail');
  try {
  var l = await apiGet('/api/listings/' + id);
@@ -14233,7 +14359,7 @@ function openOrderDetail(id) {
  } catch (e) {}
  var canSeeFiles = (o.status === 'buyer_review' || o.status === 'completed' || o.status === 'awaiting_seller' || o.status === 'refund_moderation');
  if (files.length && canSeeFiles) {
- html += listingFilesBlockHtml(files, 'download-order', o.id).replace('Файлы', 'Файлы с площадки');
+ html += listingFilesBlockHtml(files, 'download-order', o.id).replace(tBlock('files') || 'Files', tBlock('files_from_platform') || tBlock('files') || 'Files');
  }
 
  if (o.status === 'buyer_review' && isBuyer) {
@@ -14520,7 +14646,7 @@ function parseFilesMeta(meta) {
 function renderListingFilesList() {
  var box = document.getElementById('listing-files-list');
  if (!box) return;
- box.innerHTML = listingFilesBlockHtml(listingPickedFiles, 'remove', 0).replace('Файлы', 'Выбрано') || '';
+ box.innerHTML = listingFilesBlockHtml(listingPickedFiles, 'remove', 0).replace(tBlock('files') || 'Files', tBlock('selected') || tBlock('files') || 'Files') || '';
 }
 
 function removeListingFile(i) {
@@ -16422,7 +16548,7 @@ function openAdminListingDetail(id) {
  if (files.length) {
  html += listingFilesBlockHtml(files, 'download-listing', l.id);
  } else {
- html += '<div class="info-block">Файлы не прикреплены</div>';
+ html += '<div class="info-block">' + (tBlock('no_files_attached') || 'No files attached') + '</div>';
  }
  html += '<div class="btn-stack">';
  if (l.listing_type === 'partner') {
