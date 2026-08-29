@@ -3,11 +3,12 @@
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
- <title>Exchange</title>
+ <title>Exchange Projects</title>
+ <meta name="apple-mobile-web-app-title" content="Exchange Projects">
  <link rel="manifest" href="site.webmanifest">
  <meta name="theme-color" content="#0f0f0f">
- <meta name="application-name" content="ExChange">
- <meta property="og:title" content="ExChange">
+ <meta name="application-name" content="Exchange Projects">
+ <meta property="og:title" content="Exchange Projects">
  <meta property="og:type" content="website">
  <script>
  // Заглушка Telegram до загрузки официального скрипта (не блокирует страницу)
@@ -1779,7 +1780,7 @@
 
  <!-- DEPOSIT RESULT -->
  <div id="page-deposit-result" class="page">
- <button class="back-link" onclick="showPage('balance')">← К балансу</button>
+ <button class="back-link" onclick="showPage('balance')"><span data-i18n="back_to_balance">← К балансу</span></button>
  <div class="section-title">Реквизиты</div>
  <div id="deposit-result-content"></div>
  </div>
@@ -3037,6 +3038,16 @@ function applyRouteFromHash() {
     if (key === 'createfreelancelisting' || key === 'create-freelance-listing' || key === 'createfreelance') key = 'createfreelancelisting';
 
     var page = HASH_PAGE_MAP[key] || HASH_PAGE_MAP[raw.toLowerCase()];
+    if (key === 'profile' || raw === 'profile') {
+      __hashNavLock = true;
+      try {
+        showPage('profile');
+        var uid = (userData && (userData.user_id || userData.id)) ? (userData.user_id || userData.id) : '';
+        if (uid) setRouteHash('profile-' + uid);
+      } catch (e) {}
+      setTimeout(function(){ __hashNavLock = false; }, 50);
+      return true;
+    }
     if (page === '__create_sale__') {
       __hashNavLock = true;
       try { startSaleCreate(); setRouteHash('createsalelisting'); } catch (e) {}
@@ -3076,7 +3087,7 @@ function showPage(name) {
   if (!__hashNavLock) {
     var h = PAGE_HASH_MAP[name];
     if (name === 'profile') {
-      var uid = (userData && userData.id) ? userData.id : '';
+      var uid = (userData && (userData.user_id || userData.id)) ? (userData.user_id || userData.id) : '';
       if (uid) setRouteHash('profile-' + uid);
       else setRouteHash('profile');
     } else if (h) {
@@ -3543,7 +3554,9 @@ var I18N = {
  kind_label: 'Вид',
  users_month_label: 'Пользователей/мес',
  earn_month_label: 'Заработок/мес',
-  btn_i_paid: 'Я оплатил',
+   section_in_dev: 'Раздел пока в разработке',
+ back_to_balance: '← К балансу',
+btn_i_paid: 'Я оплатил',
  deposit_success: 'Средства успешно зачислены',
  deposit_fail: 'Ошибка оплаты. Средства не зачислены',
 total_to_pay: 'Итого к оплате',
@@ -4124,7 +4137,9 @@ terms_prefix: 'Продолжая, вы даёте ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
-  btn_i_paid: 'I paid',
+   section_in_dev: 'This section is under development',
+ back_to_balance: '← Back to balance',
+btn_i_paid: 'I paid',
  deposit_success: 'Funds credited successfully',
  deposit_fail: 'Payment error. Funds were not credited',
 total_to_pay: 'Total to pay',
@@ -4626,7 +4641,7 @@ terms_prefix: 'By continuing, you accept the ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'Kürzlich',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -4695,7 +4710,9 @@ terms_prefix: 'By continuing, you accept the ',
  kind_label: 'Art',
  users_month_label: 'Nutzer/Monat',
  earn_month_label: 'Einnahmen/Monat',
-  btn_i_paid: 'Ich habe bezahlt',
+   section_in_dev: 'Dieser Bereich ist noch in Entwicklung',
+ back_to_balance: '← Zum Guthaben',
+btn_i_paid: 'Ich habe bezahlt',
  deposit_success: 'Guthaben erfolgreich gutgeschrieben',
  deposit_fail: 'Zahlungsfehler. Guthaben nicht gutgeschrieben',
 total_to_pay: 'Gesamt zu zahlen',
@@ -5194,7 +5211,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'Récemment',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -5263,7 +5280,9 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  kind_label: 'Type',
  users_month_label: 'Utilisateurs/mois',
  earn_month_label: 'Revenus/mois',
-  btn_i_paid: 'J\'ai payé',
+   section_in_dev: 'Cette section est en cours de développement',
+ back_to_balance: '← Vers le solde',
+btn_i_paid: 'J\'ai payé',
  deposit_success: 'Fonds crédités avec succès',
  deposit_fail: 'Erreur de paiement. Fonds non crédités',
 total_to_pay: 'Total à payer',
@@ -5762,7 +5781,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'Recientemente',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -5831,7 +5850,9 @@ terms_prefix: 'En continuant, vous acceptez les ',
  kind_label: 'Type',
  users_month_label: 'Usuarios/mes',
  earn_month_label: 'Ingresos/mes',
-  btn_i_paid: 'Ya pagué',
+   section_in_dev: 'Esta sección está en desarrollo',
+ back_to_balance: '← Al saldo',
+btn_i_paid: 'Ya pagué',
  deposit_success: 'Fondos acreditados correctamente',
  deposit_fail: 'Error de pago. Fondos no acreditados',
 total_to_pay: 'Total a pagar',
@@ -6330,7 +6351,7 @@ terms_prefix: 'Al continuar, acepta el ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: '最近',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -6399,7 +6420,9 @@ terms_prefix: 'Al continuar, acepta el ',
  kind_label: '类型',
  users_month_label: '用户/月',
  earn_month_label: '收入/月',
-  btn_i_paid: '我已付款',
+   section_in_dev: '该功能正在开发中',
+ back_to_balance: '← 返回余额',
+btn_i_paid: '我已付款',
  deposit_success: '资金已成功到账',
  deposit_fail: '支付失败，资金未到账',
 total_to_pay: '应付总额',
@@ -6900,7 +6923,7 @@ terms_prefix: '继续即表示您同意',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'Нещодавно',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -6969,7 +6992,9 @@ terms_prefix: '继续即表示您同意',
  kind_label: 'Вид',
  users_month_label: 'Користувачів/міс',
  earn_month_label: 'Заробіток/міс',
-  btn_i_paid: 'Я оплатив',
+   section_in_dev: 'Розділ поки в розробці',
+ back_to_balance: '← До балансу',
+btn_i_paid: 'Я оплатив',
  deposit_success: 'Кошти успішно зараховано',
  deposit_fail: 'Помилка оплати. Кошти не зараховано',
 total_to_pay: 'Разом до сплати',
@@ -7468,7 +7493,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'Di recente',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -7537,7 +7562,9 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
-  btn_i_paid: 'Ho pagato',
+   section_in_dev: 'Sezione in fase di sviluppo',
+ back_to_balance: '← Al saldo',
+btn_i_paid: 'Ho pagato',
  deposit_success: 'Fondi accreditati con successo',
  deposit_fail: 'Errore di pagamento. Fondi non accreditati',
 total_to_pay: 'Totale da pagare',
@@ -8036,7 +8063,7 @@ terms_prefix: 'Continuando, accetti i ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'Recentemente',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -8105,7 +8132,9 @@ terms_prefix: 'Continuando, accetti i ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
-  btn_i_paid: 'Já paguei',
+   section_in_dev: 'Esta secção está em desenvolvimento',
+ back_to_balance: '← Ao saldo',
+btn_i_paid: 'Já paguei',
  deposit_success: 'Fundos creditados com sucesso',
  deposit_fail: 'Erro de pagamento. Fundos não creditados',
 total_to_pay: 'Total a pagar',
@@ -8601,7 +8630,7 @@ terms_prefix: 'Ao continuar, aceita o ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'Recentemente',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -8670,7 +8699,9 @@ terms_prefix: 'Ao continuar, aceita o ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
-  btn_i_paid: 'Já paguei',
+   section_in_dev: 'Esta secção está em desenvolvimento',
+ back_to_balance: '← Ao saldo',
+btn_i_paid: 'Já paguei',
  deposit_success: 'Fundos creditados com sucesso',
  deposit_fail: 'Erro de pagamento. Fundos não creditados',
 total_to_pay: 'Total a pagar',
@@ -9169,7 +9200,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'Yakınlarda',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -9238,7 +9269,9 @@ terms_prefix: 'Ao continuar, você aceita o ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
-  btn_i_paid: 'Ödedim',
+   section_in_dev: 'Bu bölüm henüz geliştirme aşamasında',
+ back_to_balance: '← Bakiyeye',
+btn_i_paid: 'Ödedim',
  deposit_success: 'Bakiye başarıyla yüklendi',
  deposit_fail: 'Ödeme hatası. Bakiye yüklenmedi',
 total_to_pay: 'Ödenecek toplam',
@@ -9737,7 +9770,7 @@ terms_prefix: 'Devam ederek ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'Baru saja',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -9806,7 +9839,9 @@ terms_prefix: 'Devam ederek ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
-  btn_i_paid: 'Saya sudah bayar',
+   section_in_dev: 'Bagian ini sedang dalam pengembangan',
+ back_to_balance: '← Ke saldo',
+btn_i_paid: 'Saya sudah bayar',
  deposit_success: 'Dana berhasil dikreditkan',
  deposit_fail: 'Pembayaran gagal. Dana tidak dikreditkan',
 total_to_pay: 'Total bayar',
@@ -10305,7 +10340,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: 'مؤخراً',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -10374,7 +10409,9 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
-  btn_i_paid: 'لقد دفعت',
+   section_in_dev: 'هذا القسم قيد التطوير',
+ back_to_balance: '← إلى الرصيد',
+btn_i_paid: 'لقد دفعت',
  deposit_success: 'تم إيداع الأموال بنجاح',
  deposit_fail: 'خطأ في الدفع. لم يتم إيداع الأموال',
 total_to_pay: 'الإجمالي للدفع',
@@ -10873,7 +10910,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: '最近',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -10942,7 +10979,9 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
-  btn_i_paid: '支払いました',
+   section_in_dev: 'このセクションは開発中です',
+ back_to_balance: '← 残高へ',
+btn_i_paid: '支払いました',
  deposit_success: '残高に正常に入金されました',
  deposit_fail: '支払エラー。入金されませんでした',
 total_to_pay: 'お支払い合計',
@@ -11441,7 +11480,7 @@ terms_prefix: '続行すると',
  leave_review: 'Leave a review',
  blocked_user: 'User is blocked for violating community rules',
  listing_blocked: 'Blocked',
- recent: 'Recently',
+ recent: '최근',
  pinned: 'Pinned',
  popular: 'Popular',
  new: 'New',
@@ -11510,7 +11549,9 @@ terms_prefix: '続行すると',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
-  btn_i_paid: '결제했습니다',
+   section_in_dev: '이 섹션은 개발 중입니다',
+ back_to_balance: '← 잔액으로',
+btn_i_paid: '결제했습니다',
  deposit_success: '잔액이 성공적으로 충전되었습니다',
  deposit_fail: '결제 오류. 잔액이 충전되지 않았습니다',
 total_to_pay: '결제 합계',
@@ -12495,7 +12536,10 @@ function localizeMonths(str) {
  var out = String(str).trim();
  // "Недавно" / Recently → current language
  var low = out.toLowerCase();
- if (out === 'Недавно' || out === 'недавно' || low === 'recently' || low === 'recent' || out === 'Недавно.') {
+ if (out === 'Недавно' || out === 'недавно' || low === 'recently' || low === 'recent' || out === 'Недавно.'
+     || low === 'kürzlich' || low === 'récemment' || low === 'recientemente' || low === 'нещодавно'
+     || low === 'di recente' || low === 'recentemente' || low === 'yakınlarda' || low === 'baru saja'
+     || out === '最近' || out === '최근' || low === 'مؤخراً' || low.indexOf('recent') === 0) {
    return (typeof tBlock === 'function' ? tBlock('recent') : null) || out;
  }
  if (out === 'Закреплено' || low === 'pinned') {
@@ -15377,69 +15421,26 @@ function updateFeeHint(kind) {
 
 function payDepositUnavailable() {
   try {
-    tg.showAlert(tBlock('pay_unavailable') || 'Payment is currently unavailable');
+    tg.showAlert(tBlock('section_in_dev') || 'This section is under development');
   } catch (e) {
-    alert('Payment is currently unavailable');
+    alert('This section is under development');
   }
 }
 
 
 async function confirmDepositPaid() {
-  var btn = document.getElementById('deposit-paid-btn');
   try {
-    if (btn) btn.disabled = true;
-    var amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
-    var method = selectedDepositMethod || 'card';
-    var result = await apiPost('/api/deposit/check-payment', {
-      amount: amount,
-      credit: amount,
-      method: method,
-      request_id: window._lastDepositRequestId || null
-    });
-    if (result && result.paid) {
-      try {
-        if (result.new_balance != null) setBalance(result.new_balance);
-        else loadBalance();
-      } catch (e) {}
-      tg.showAlert(tBlock('deposit_success') || 'Funds credited successfully');
-      showPage('balance');
-      try { loadBalance(); } catch (e) {}
-    } else {
-      tg.showAlert(tBlock('deposit_fail') || 'Payment error. Funds were not credited.');
-      // stay on payment screen
-    }
+    tg.showAlert(tBlock('section_in_dev') || 'This section is under development');
   } catch (e) {
-    tg.showAlert((e && e.message) || (tBlock('deposit_fail') || 'Payment error'));
-  } finally {
-    if (btn) btn.disabled = false;
+    alert('This section is under development');
   }
 }
 
 async function payDepositStars() {
-  var btn = document.getElementById('deposit-pay-btn');
   try {
-    if (btn) btn.disabled = true;
-    var amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
-    var result = await apiPost('/api/deposit/stars-invoice', {
-      amount: amount,
-      credit: amount,
-      method: 'stars'
-    });
-    if (result && result.invoice_sent) {
-      if (result.request_id) window._lastDepositRequestId = result.request_id;
-      try {
-        var box = document.getElementById('stars-pay-status');
-        if (box) box.innerHTML = '<div class="subtitle">' + (tBlock('stars_invoice_sent') || 'Invoice sent to the bot. Open the bot and pay.') + '</div>';
-      } catch (e) {}
-      openBotForStarsPay();
-      if (result.request_id) startStarsPaymentPoll(result.request_id);
-    } else {
-      tg.showAlert((result && result.error) || (tBlock('pay_unavailable') || 'Unavailable'));
-    }
+    tg.showAlert(tBlock('section_in_dev') || 'This section is under development');
   } catch (e) {
-    tg.showAlert(e.message || 'Error');
-  } finally {
-    if (btn) btn.disabled = false;
+    alert('This section is under development');
   }
 }
 
@@ -15475,7 +15476,7 @@ async function startDeposit() {
     html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" onclick="payDepositUnavailable()">' + (tBlock('pay_btn') || 'Оплатить') + '</button>';
   }
   html += '<button class="btn btn-secondary" style="margin-top:10px;" id="deposit-paid-btn" onclick="confirmDepositPaid()">' + (tBlock('btn_i_paid') || 'I paid') + '</button>';
-  html += '<button class="btn btn-secondary" style="margin-top:8px;" onclick="showPage(\'balance\');">' + (tBlock('back') || '← Назад') + '</button>';
+  html += '<button class="btn btn-secondary" style="margin-top:8px;" onclick="showPage(\'balance\');">' + (tBlock('back_to_balance') || tBlock('back') || '← Back to balance') + '</button>';
 
   document.getElementById('deposit-result-content').innerHTML = html;
   var titleEl = document.querySelector('#page-deposit-result .section-title');
