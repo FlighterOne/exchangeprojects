@@ -365,6 +365,27 @@
  .method-item .title { font-weight: 600; font-size: 15px; }
  .method-item .desc { font-size: 12px; color: var(--hint); margin-top: 2px; }
 
+ .method-item { position: relative; }
+ .method-item .method-fee {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff3b30;
+  white-space: nowrap;
+  flex-shrink: 0;
+ }
+ .amount-with-rub {
+  display: flex; align-items: center; gap: 8px;
+ }
+ .amount-with-rub .form-input { flex: 1; margin: 0; }
+ .amount-rub-hint {
+  font-size: 12px; color: var(--hint); white-space: nowrap; min-width: 64px; text-align: right;
+ }
+ .total-pay-line {
+  font-size: 12px; color: var(--hint); margin-top: 6px; line-height: 1.4;
+ }
+
+
  .payment-card { background: var(--secondary-bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
  .payment-card .row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
  .payment-card .label { color: var(--hint); }
@@ -1714,8 +1735,12 @@
  <div class="min-hint" data-i18n="min_1">Минимум 1$</div>
 
  <div class="form-group">
- <label class="form-label" data-i18n="amount">Сумма</label>
- <input class="form-input" type="number" id="deposit-amount" placeholder="0.00" min="1" step="0.01" oninput="updateFeeHint('deposit')">
+ <label class="form-label" data-i18n="amount_usdt">Сумма (USDT)</label>
+ <div class="amount-with-rub">
+ <input class="form-input" type="number" id="deposit-amount" placeholder="0.00" min="1" step="0.01" oninput="updateDepositTotals()">
+ <span class="amount-rub-hint" id="deposit-amount-rub">~0 ₽</span>
+ </div>
+ <div class="total-pay-line" id="deposit-total-line">Итого к оплате: 0.00 $</div>
  <div class="field-hint" id="deposit-fee-hint" style="display:none;"></div>
  </div>
 
@@ -1725,14 +1750,17 @@
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
  <div class="method-icon"><img src="data:image/png;base64,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" alt="СБП" style="width:36px;height:36px;object-fit:contain;border-radius:8px;background:transparent;"></div>
  <div class="title" data-i18n="sbp">СБП</div>
+ <span class="method-fee">8.5%</span>
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'deposit')">
  <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="30" r="16" fill="#F5B800"/><circle cx="40" cy="36" r="14" fill="#E8A317" stroke="#F5B800" stroke-width="2"/><path d="M38 30v-3h2.2c1.6 0 2.6.7 2.6 1.9 0 1-.6 1.6-1.5 1.8l1.8 2.5h-2.3l-1.5-2.2H38zm0 0h2c.7 0 1.1-.3 1.1-.9S40.7 28 40 28H38v2z" fill="#6B4E00"/><path d="M24 24v-3h2.5c1.8 0 3 .8 3 2.2 0 1.1-.7 1.8-1.7 2.1l2 2.9H27.5l-1.7-2.5H24zm0 0h2.2c.8 0 1.3-.4 1.3-1s-.5-1-1.3-1H24v2z" fill="#6B4E00"/></svg></div>
  <div class="title" data-i18n="crypto">Криптовалюта</div>
+ <span class="method-fee">5%</span>
  </div>
  <div class="method-item" data-method="stars" onclick="selectMethod(this,'deposit')">
  <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFE566"/><stop offset="100%" stop-color="#FFB800"/></linearGradient></defs><path d="M32 8l6.5 13.2 14.5 2.1-10.5 10.2 2.5 14.5L32 41.2 19 48l2.5-14.5L11 23.3l14.5-2.1L32 8z" fill="url(#sg)" stroke="#E6A800" stroke-width="1.5"/></svg></div>
  <div class="title" data-i18n="stars">Telegram Stars</div>
+ <span class="method-fee">0%</span>
  </div>
  </div>
  </div>
@@ -1764,9 +1792,13 @@
  <div class="min-hint" data-i18n="min_5">Минимум 5$</div>
 
  <div class="form-group">
- <label class="form-label" data-i18n="amount">Сумма</label>
- <input class="form-input" type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01" oninput="updateFeeHint('withdraw')">
+ <label class="form-label" data-i18n="amount_usdt">Сумма (USDT)</label>
+ <div class="amount-with-rub">
+ <input class="form-input" type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01" oninput="updateWithdrawTotals()">
+ <span class="amount-rub-hint" id="withdraw-amount-rub">~0 ₽</span>
+ </div>
  <div class="field-hint">Доступно: <span id="withdraw-available">0.00</span> $</div>
+ <div class="total-pay-line" id="withdraw-total-line">Итого к списанию: 0.00 $</div>
  <div class="field-hint" id="withdraw-fee-hint" style="display:none;"></div>
  </div>
 
@@ -1776,10 +1808,12 @@
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
  <div class="method-icon"><img src="data:image/png;base64,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" alt="СБП" style="width:36px;height:36px;object-fit:contain;border-radius:8px;background:transparent;"></div>
  <div class="title" data-i18n="sbp_card">СБП / карта</div>
+ <span class="method-fee">8.5%</span>
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'withdraw')">
  <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="30" r="16" fill="#F5B800"/><circle cx="40" cy="36" r="14" fill="#E8A317" stroke="#F5B800" stroke-width="2"/><path d="M38 30v-3h2.2c1.6 0 2.6.7 2.6 1.9 0 1-.6 1.6-1.5 1.8l1.8 2.5h-2.3l-1.5-2.2H38zm0 0h2c.7 0 1.1-.3 1.1-.9S40.7 28 40 28H38v2z" fill="#6B4E00"/><path d="M24 24v-3h2.5c1.8 0 3 .8 3 2.2 0 1.1-.7 1.8-1.7 2.1l2 2.9H27.5l-1.7-2.5H24zm0 0h2.2c.8 0 1.3-.4 1.3-1s-.5-1-1.3-1H24v2z" fill="#6B4E00"/></svg></div>
  <div class="title">USDT TRC20</div>
+ <span class="method-fee">5%</span>
  </div>
  </div>
  </div>
@@ -3053,7 +3087,7 @@ function showPage(name) {
  try { applyI18n(); } catch (e) {}
  if (name === 'collaborate' || name === 'support-hire') { try { renderHireInfo(); } catch (e) {} }
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
- if (name === 'deposit' || name === 'withdraw') { try { updateFeeHint(name); } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
+ if (name === 'deposit' || name === 'withdraw') { try { ensureUsdRate().then(function(){ if(name==='deposit') updateDepositTotals(); else updateWithdrawTotals(); }); } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
  if (name === 'home') loadListings();
  if (name === 'profile') { loadOwnProfileListings(); try { updateProfileLogoutVisibility(); } catch (e) {} }
  if (name === 'my-listings') loadMyListings();
@@ -3297,8 +3331,6 @@ var I18N = {
 ,
  fee_hint_deposit: 'Комиссия {fee}%. Итого к оплате: {total} $',
  fee_hint_withdraw: 'Комиссия {fee}%. Итого с баланса: {total} $',
- fee_label: 'Комиссия'
-,
  confirm: 'Подтвердить',
  create_short: 'Создать',
  error: 'Ошибка',
@@ -3511,6 +3543,21 @@ var I18N = {
  kind_label: 'Вид',
  users_month_label: 'Пользователей/мес',
  earn_month_label: 'Заработок/мес',
+ total_to_pay: 'Итого к оплате',
+ total_to_debit: 'Итого к списанию',
+ to_pay: 'К оплате',
+ to_credit: 'К зачислению',
+ pay_btn: 'Оплатить',
+ pay_unavailable: 'Сейчас оплата недоступна',
+ payment_details: 'Оплата',
+ stars_invoice_sent: 'Счёт отправлен в бота. Откройте бота и оплатите.',
+ press_pay_stars: 'Нажмите «Оплатить» — счёт придёт в бота',
+ err_method: 'Выберите способ оплаты',
+ amount_usdt: 'Сумма (USDT)',
+ fee_label: 'Комиссия',
+ method_fee_sbp: '8.5%',
+ method_fee_crypto: '5%',
+ method_fee_stars: '0%',
 terms_prefix: 'Продолжая, вы даёте ',
  terms_link: 'пользовательское соглашение',
  terms_suffix: ' с правилами сервиса',
@@ -3862,8 +3909,6 @@ terms_prefix: 'Продолжая, вы даёте ',
 ,
  fee_hint_deposit: 'Fee {fee}%. Total to pay: {total} $',
  fee_hint_withdraw: 'Fee {fee}%. Total from balance: {total} $',
- fee_label: 'Fee'
-,
  confirm: 'Confirm',
  create_short: 'Create',
  error: 'Error',
@@ -4076,6 +4121,21 @@ terms_prefix: 'Продолжая, вы даёте ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
+ total_to_pay: 'Total to pay',
+ total_to_debit: 'Total to debit',
+ to_pay: 'To pay',
+ to_credit: 'To credit',
+ pay_btn: 'Pay',
+ pay_unavailable: 'Payment is currently unavailable',
+ payment_details: 'Payment',
+ stars_invoice_sent: 'Invoice sent to the bot. Open the bot and pay.',
+ press_pay_stars: 'Press Pay — the invoice will be sent in the bot',
+ err_method: 'Select a payment method',
+ amount_usdt: 'Amount (USDT)',
+ fee_label: 'Fee',
+ method_fee_sbp: '8.5%',
+ method_fee_crypto: '5%',
+ method_fee_stars: '0%',
 terms_prefix: 'By continuing, you accept the ',
  terms_link: 'Terms of Service',
  terms_suffix: ' and the service rules',
@@ -4417,8 +4477,6 @@ terms_prefix: 'By continuing, you accept the ',
 ,
  fee_hint_deposit: 'Gebühr {fee}%. Gesamt zu zahlen: {total} $',
  fee_hint_withdraw: 'Gebühr {fee}%. Gesamt vom Guthaben: {total} $',
- fee_label: 'Gebühr'
-,
  confirm: 'Bestätigen',
  create_short: 'Erstellen',
  error: 'Fehler',
@@ -4631,6 +4689,18 @@ terms_prefix: 'By continuing, you accept the ',
  kind_label: 'Art',
  users_month_label: 'Nutzer/Monat',
  earn_month_label: 'Einnahmen/Monat',
+ total_to_pay: 'Gesamt zu zahlen',
+ total_to_debit: 'Gesamt abzubuchen',
+ to_pay: 'Zu zahlen',
+ to_credit: 'Gutschrift',
+ pay_btn: 'Bezahlen',
+ pay_unavailable: 'Zahlung derzeit nicht verfügbar',
+ payment_details: 'Zahlung',
+ stars_invoice_sent: 'Rechnung an den Bot gesendet. Öffnen Sie den Bot und zahlen Sie.',
+ press_pay_stars: 'Tippen Sie auf Bezahlen — die Rechnung kommt im Bot',
+ err_method: 'Zahlungsmethode wählen',
+ amount_usdt: 'Betrag (USDT)',
+ fee_label: 'Gebühr',
 terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  terms_link: 'Nutzungsbedingungen',
  terms_suffix: ' und die Regeln des Dienstes',
@@ -4972,8 +5042,6 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
 ,
  fee_hint_deposit: 'Frais {fee}%. Total à payer : {total} $',
  fee_hint_withdraw: 'Frais {fee}%. Total du solde : {total} $',
- fee_label: 'Frais'
-,
  confirm: 'Confirmer',
  create_short: 'Créer',
  error: 'Erreur',
@@ -5186,6 +5254,18 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  kind_label: 'Type',
  users_month_label: 'Utilisateurs/mois',
  earn_month_label: 'Revenus/mois',
+ total_to_pay: 'Total à payer',
+ total_to_debit: 'Total à débiter',
+ to_pay: 'À payer',
+ to_credit: 'À créditer',
+ pay_btn: 'Payer',
+ pay_unavailable: 'Paiement actuellement indisponible',
+ payment_details: 'Paiement',
+ stars_invoice_sent: 'Facture envoyée au bot. Ouvrez le bot et payez.',
+ press_pay_stars: 'Appuyez sur Payer — la facture arrivera dans le bot',
+ err_method: 'Choisissez un mode de paiement',
+ amount_usdt: 'Montant (USDT)',
+ fee_label: 'Frais',
 terms_prefix: 'En continuant, vous acceptez les ',
  terms_link: 'conditions d\'utilisation',
  terms_suffix: ' et les règles du service',
@@ -5527,8 +5607,6 @@ terms_prefix: 'En continuant, vous acceptez les ',
 ,
  fee_hint_deposit: 'Comisión {fee}%. Total a pagar: {total} $',
  fee_hint_withdraw: 'Comisión {fee}%. Total del saldo: {total} $',
- fee_label: 'Comisión'
-,
  confirm: 'Confirmar',
  create_short: 'Crear',
  error: 'Error',
@@ -5741,6 +5819,18 @@ terms_prefix: 'En continuant, vous acceptez les ',
  kind_label: 'Type',
  users_month_label: 'Usuarios/mes',
  earn_month_label: 'Ingresos/mes',
+ total_to_pay: 'Total a pagar',
+ total_to_debit: 'Total a debitar',
+ to_pay: 'A pagar',
+ to_credit: 'A acreditar',
+ pay_btn: 'Pagar',
+ pay_unavailable: 'Pago no disponible por ahora',
+ payment_details: 'Pago',
+ stars_invoice_sent: 'Factura enviada al bot. Abre el bot y paga.',
+ press_pay_stars: 'Pulsa Pagar — la factura llegará al bot',
+ err_method: 'Selecciona un método de pago',
+ amount_usdt: 'Importe (USDT)',
+ fee_label: 'Comisión',
 terms_prefix: 'Al continuar, acepta el ',
  terms_link: 'acuerdo de usuario',
  terms_suffix: ' y las reglas del servicio',
@@ -6082,8 +6172,6 @@ terms_prefix: 'Al continuar, acepta el ',
 ,
  fee_hint_deposit: '手续费 {fee}%。应付总额：{total} $',
  fee_hint_withdraw: '手续费 {fee}%。从余额扣除：{total} $',
- fee_label: '手续费'
-,
  confirm: '确认',
  create_short: '创建',
  error: '错误',
@@ -6296,6 +6384,18 @@ terms_prefix: 'Al continuar, acepta el ',
  kind_label: '类型',
  users_month_label: '用户/月',
  earn_month_label: '收入/月',
+ total_to_pay: '应付总额',
+ total_to_debit: '扣款总额',
+ to_pay: '应付',
+ to_credit: '到账',
+ pay_btn: '支付',
+ pay_unavailable: '目前无法支付',
+ payment_details: '支付',
+ stars_invoice_sent: '账单已发送到机器人，请打开机器人并支付。',
+ press_pay_stars: '点击「支付」— 账单将发送到机器人',
+ err_method: '请选择支付方式',
+ amount_usdt: '金额 (USDT)',
+ fee_label: '手续费',
 terms_prefix: '继续即表示您同意',
  terms_link: '用户协议',
  terms_suffix: '及服务规则',
@@ -6639,9 +6739,6 @@ terms_prefix: '继续即表示您同意',
 ,
  fee_hint_deposit: 'Комісія {fee}%. Разом до сплати: {total} $',
  fee_hint_withdraw: 'Комісія {fee}%. Разом з балансу: {total} $',
- fee_label: 'Fee'
-
- ,
  confirm: 'Підтвердити',
  create_short: 'Створити',
  error: 'Помилка',
@@ -6854,6 +6951,18 @@ terms_prefix: '继续即表示您同意',
  kind_label: 'Вид',
  users_month_label: 'Користувачів/міс',
  earn_month_label: 'Заробіток/міс',
+ total_to_pay: 'Разом до сплати',
+ total_to_debit: 'Разом до списання',
+ to_pay: 'До сплати',
+ to_credit: 'До зарахування',
+ pay_btn: 'Оплатити',
+ pay_unavailable: 'Оплата зараз недоступна',
+ payment_details: 'Оплата',
+ stars_invoice_sent: 'Рахунок надіслано в бота. Відкрийте бота та оплатіть.',
+ press_pay_stars: 'Натисніть «Оплатити» — рахунок прийде в бота',
+ err_method: 'Оберіть спосіб оплати',
+ amount_usdt: 'Сума (USDT)',
+ fee_label: 'Комісія',
 terms_prefix: 'Продовжуючи, ви приймаєте ',
  terms_link: 'користувацьку угоду',
  terms_suffix: ' з правилами сервісу',
@@ -7195,9 +7304,6 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
 ,
  fee_hint_deposit: 'Commissione {fee}%. Totale da pagare: {total} $',
  fee_hint_withdraw: 'Commissione {fee}%. Totale dal saldo: {total} $',
- fee_label: 'Fee'
-
- ,
  confirm: 'Conferma',
  create_short: 'Crea',
  error: 'Errore',
@@ -7410,6 +7516,18 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
+ total_to_pay: 'Totale da pagare',
+ total_to_debit: 'Totale da addebitare',
+ to_pay: 'Da pagare',
+ to_credit: 'Da accreditare',
+ pay_btn: 'Paga',
+ pay_unavailable: 'Pagamento attualmente non disponibile',
+ payment_details: 'Pagamento',
+ stars_invoice_sent: 'Fattura inviata al bot. Apri il bot e paga.',
+ press_pay_stars: 'Premi Paga — la fattura arriverà nel bot',
+ err_method: 'Seleziona un metodo di pagamento',
+ amount_usdt: 'Importo (USDT)',
+ fee_label: 'Commissione',
 terms_prefix: 'Continuando, accetti i ',
  terms_link: 'Termini di servizio',
  terms_suffix: ' e le regole del servizio',
@@ -7751,9 +7869,6 @@ terms_prefix: 'Continuando, accetti i ',
 ,
  fee_hint_deposit: 'Taxa {fee}%. Total a pagar: {total} $',
  fee_hint_withdraw: 'Taxa {fee}%. Total do saldo: {total} $',
- fee_label: 'Fee'
-
- ,
  confirm: 'Confirmar',
  create_short: 'Criar',
  error: 'Erro',
@@ -7966,6 +8081,18 @@ terms_prefix: 'Continuando, accetti i ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
+ total_to_pay: 'Total a pagar',
+ total_to_debit: 'Total a debitar',
+ to_pay: 'A pagar',
+ to_credit: 'A creditar',
+ pay_btn: 'Pagar',
+ pay_unavailable: 'Pagamento indisponível no momento',
+ payment_details: 'Pagamento',
+ stars_invoice_sent: 'Fatura enviada ao bot. Abra o bot e pague.',
+ press_pay_stars: 'Toque em Pagar — a fatura chegará no bot',
+ err_method: 'Selecione um método de pagamento',
+ amount_usdt: 'Valor (USDT)',
+ fee_label: 'Taxa',
 terms_prefix: 'Ao continuar, aceita o ',
  terms_link: 'acordo de utilizador',
  terms_suffix: ' e as regras do serviço',
@@ -8304,9 +8431,6 @@ terms_prefix: 'Ao continuar, aceita o ',
 ,
  fee_hint_deposit: 'Taxa {fee}%. Total a pagar: {total} $',
  fee_hint_withdraw: 'Taxa {fee}%. Total do saldo: {total} $',
- fee_label: 'Fee'
-
- ,
  confirm: 'Confirmar',
  create_short: 'Criar',
  error: 'Erro',
@@ -8519,6 +8643,18 @@ terms_prefix: 'Ao continuar, aceita o ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
+ total_to_pay: 'Total a pagar',
+ total_to_debit: 'Total a debitar',
+ to_pay: 'A pagar',
+ to_credit: 'A creditar',
+ pay_btn: 'Pagar',
+ pay_unavailable: 'Pagamento indisponível no momento',
+ payment_details: 'Pagamento',
+ stars_invoice_sent: 'Fatura enviada ao bot. Abra o bot e pague.',
+ press_pay_stars: 'Toque em Pagar — a fatura chegará no bot',
+ err_method: 'Selecione um método de pagamento',
+ amount_usdt: 'Valor (USDT)',
+ fee_label: 'Taxa',
 terms_prefix: 'Ao continuar, você aceita o ',
  terms_link: 'termo de uso',
  terms_suffix: ' e as regras do serviço',
@@ -8860,9 +8996,6 @@ terms_prefix: 'Ao continuar, você aceita o ',
 ,
  fee_hint_deposit: 'Komisyon %{fee}. Ödenecek toplam: {total} $',
  fee_hint_withdraw: 'Komisyon %{fee}. Bakiyeden toplam: {total} $',
- fee_label: 'Fee'
-
- ,
  confirm: 'Onayla',
  create_short: 'Oluştur',
  error: 'Hata',
@@ -9075,6 +9208,18 @@ terms_prefix: 'Ao continuar, você aceita o ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
+ total_to_pay: 'Ödenecek toplam',
+ total_to_debit: 'Kesilecek toplam',
+ to_pay: 'Ödenecek',
+ to_credit: 'Yatırılacak',
+ pay_btn: 'Öde',
+ pay_unavailable: 'Ödeme şu an kullanılamıyor',
+ payment_details: 'Ödeme',
+ stars_invoice_sent: 'Fatura bota gönderildi. Botu açıp ödeyin.',
+ press_pay_stars: 'Öde’ye basın — fatura bota gelecek',
+ err_method: 'Ödeme yöntemi seçin',
+ amount_usdt: 'Tutar (USDT)',
+ fee_label: 'Komisyon',
 terms_prefix: 'Devam ederek ',
  terms_link: 'kullanıcı sözleşmesini',
  terms_suffix: ' ve hizmet kurallarını kabul edersiniz',
@@ -9416,9 +9561,6 @@ terms_prefix: 'Devam ederek ',
 ,
  fee_hint_deposit: 'Biaya {fee}%. Total bayar: {total} $',
  fee_hint_withdraw: 'Biaya {fee}%. Total dari saldo: {total} $',
- fee_label: 'Fee'
-
- ,
  confirm: 'Konfirmasi',
  create_short: 'Buat',
  error: 'Kesalahan',
@@ -9631,6 +9773,18 @@ terms_prefix: 'Devam ederek ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
+ total_to_pay: 'Total bayar',
+ total_to_debit: 'Total didebit',
+ to_pay: 'Bayar',
+ to_credit: 'Dikredit',
+ pay_btn: 'Bayar',
+ pay_unavailable: 'Pembayaran saat ini tidak tersedia',
+ payment_details: 'Pembayaran',
+ stars_invoice_sent: 'Invoice dikirim ke bot. Buka bot dan bayar.',
+ press_pay_stars: 'Tekan Bayar — invoice akan dikirim ke bot',
+ err_method: 'Pilih metode pembayaran',
+ amount_usdt: 'Jumlah (USDT)',
+ fee_label: 'Biaya',
 terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  terms_link: 'ketentuan layanan',
  terms_suffix: ' dan aturan layanan',
@@ -9972,9 +10126,6 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
 ,
  fee_hint_deposit: 'عمولة {fee}%. الإجمالي للدفع: {total} $',
  fee_hint_withdraw: 'عمولة {fee}%. الإجمالي من الرصيد: {total} $',
- fee_label: 'Fee'
-
- ,
  confirm: 'تأكيد',
  create_short: 'إنشاء',
  error: 'خطأ',
@@ -10187,6 +10338,18 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
+ total_to_pay: 'الإجمالي للدفع',
+ total_to_debit: 'الإجمالي للخصم',
+ to_pay: 'للدفع',
+ to_credit: 'للإيداع',
+ pay_btn: 'ادفع',
+ pay_unavailable: 'الدفع غير متاح حالياً',
+ payment_details: 'الدفع',
+ stars_invoice_sent: 'تم إرسال الفاتورة إلى البوت. افتح البوت وادفع.',
+ press_pay_stars: 'اضغط ادفع — ستصل الفاتورة في البوت',
+ err_method: 'اختر طريقة الدفع',
+ amount_usdt: 'المبلغ (USDT)',
+ fee_label: 'العمولة',
 terms_prefix: 'بالمتابعة فإنك توافق على ',
  terms_link: 'اتفاقية المستخدم',
  terms_suffix: ' وقواعد الخدمة',
@@ -10528,9 +10691,6 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
 ,
  fee_hint_deposit: '手数料 {fee}%。支払合計: {total} $',
  fee_hint_withdraw: '手数料 {fee}%。残高から合計: {total} $',
- fee_label: 'Fee'
-
- ,
  confirm: '確認',
  create_short: '作成',
  error: 'エラー',
@@ -10743,6 +10903,18 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
+ total_to_pay: 'お支払い合計',
+ total_to_debit: '引き落とし合計',
+ to_pay: 'お支払い',
+ to_credit: '入金額',
+ pay_btn: '支払う',
+ pay_unavailable: '現在お支払いできません',
+ payment_details: 'お支払い',
+ stars_invoice_sent: '請求をボットに送信しました。ボットを開いてお支払いください。',
+ press_pay_stars: '「支払う」を押すとボットに請求が届きます',
+ err_method: '支払い方法を選択してください',
+ amount_usdt: '金額 (USDT)',
+ fee_label: '手数料',
 terms_prefix: '続行すると',
  terms_link: '利用規約',
  terms_suffix: 'およびサービス規約に同意したことになります',
@@ -11084,9 +11256,6 @@ terms_prefix: '続行すると',
 ,
  fee_hint_deposit: '수수료 {fee}%. 결제 합계: {total} $',
  fee_hint_withdraw: '수수료 {fee}%. 잔액에서 합계: {total} $',
- fee_label: 'Fee'
-
- ,
  confirm: '확인',
  create_short: '만들기',
  error: '오류',
@@ -11299,6 +11468,18 @@ terms_prefix: '続行すると',
  kind_label: 'Type',
  users_month_label: 'Users/month',
  earn_month_label: 'Earnings/month',
+ total_to_pay: '결제 합계',
+ total_to_debit: '출금 합계',
+ to_pay: '결제',
+ to_credit: '입금',
+ pay_btn: '결제',
+ pay_unavailable: '현재 결제할 수 없습니다',
+ payment_details: '결제',
+ stars_invoice_sent: '청구서가 봇으로 전송되었습니다. 봇을 열어 결제하세요.',
+ press_pay_stars: '결제를 누르면 봇으로 청구서가 전송됩니다',
+ err_method: '결제 수단을 선택하세요',
+ amount_usdt: '금액 (USDT)',
+ fee_label: '수수료',
 terms_prefix: '계속하면 ',
  terms_link: '이용약관',
  terms_suffix: ' 및 서비스 규칙에 동의하게 됩니다',
@@ -12266,10 +12447,18 @@ var MONTHS_I18N = {
 };
 function localizeMonths(str) {
  if (!str) return str;
+ var out = String(str).trim();
+ // "Недавно" / Recently → current language
+ var low = out.toLowerCase();
+ if (out === 'Недавно' || out === 'недавно' || low === 'recently' || low === 'recent' || out === 'Недавно.') {
+   return (typeof tBlock === 'function' ? tBlock('recent') : null) || out;
+ }
+ if (out === 'Закреплено' || low === 'pinned') {
+   return (typeof tBlock === 'function' ? tBlock('pinned') : null) || out;
+ }
  var lang = getAppLang();
  var target = MONTHS_I18N[lang] || MONTHS_I18N.en;
  var ru = MONTHS_I18N.ru;
- var out = String(str);
  // ISO → "19 Aug. 2026 20:00"
  if (/^\d{4}-\d{2}-\d{2}/.test(out)) {
    try {
@@ -13278,7 +13467,7 @@ async function loadNewsPinned() {
  body = body.replace(/\s+/g, ' ').trim();
  if (body.length > 140) body = body.slice(0, 140) + '…';
  body = body.replace(/</g,'&lt;').replace(/>/g,'&gt;');
- var dateLabel = localizeMonths(n.date_label || tBlock('recent'));
+ var dateLabel = localizeMonths((n.date_label && String(n.date_label).trim()) ? n.date_label : tBlock('recent'));
  var cover = '';
  if (n.media && n.media.length && n.media[0] && n.media[0].url) {
  var u = String(n.media[0].url);
@@ -13391,7 +13580,7 @@ async function openNewsDetail(id) {
  showPage('news-detail');
  try {
  var n = await apiGet('/api/news/' + id);
- var dateLabel = localizeMonths(n.date_label || tBlock('recent'));
+ var dateLabel = localizeMonths((n.date_label && String(n.date_label).trim()) ? n.date_label : tBlock('recent'));
  var html = '';
  var media = (n.media || []).filter(function(m) {
  var u = String((m && m.url) || '');
@@ -15007,7 +15196,7 @@ function selectMethod(el, type) {
  el.classList.add('selected');
  if (type === 'deposit') {
  selectedDepositMethod = el.dataset.method;
- try { updateFeeHint('deposit'); } catch (e) {}
+ try { updateDepositTotals(); } catch (e) {}
  } else {
  selectedWithdrawMethod = el.dataset.method;
  var label = document.getElementById('withdraw-recipient-label');
@@ -15019,7 +15208,7 @@ function selectMethod(el, type) {
  label.textContent = tBlock('recipient') || 'Wallet';
  input.placeholder = 'USDT TRC20';
  }
- try { updateFeeHint('withdraw'); } catch (e) {}
+ try { updateWithdrawTotals(); } catch (e) {}
  }
 }
 
@@ -15068,67 +15257,150 @@ function startStarsPaymentPoll(requestId) {
 
 
 var PLATFORM_FEE_RATE = 0.025;
-function calcFee(amount, method) {
-  // Комиссия пополнения/вывода отключена
-  var a = parseFloat(amount) || 0;
-  return { fee: 0, total: Math.round(a * 100) / 100, rate: 0 };
-}
-function updateFeeHint(kind) {
+
+var DEPOSIT_FEE_RATES = { card: 0.085, crypto: 0.05, stars: 0 };
+var WITHDRAW_FEE_RATES = { card: 0.085, crypto: 0.05 };
+var _usdRubRate = 90;
+
+async function ensureUsdRate() {
   try {
-    var el = document.getElementById(kind === "withdraw" ? "withdraw-fee-hint" : "deposit-fee-hint");
-    if (el) el.style.display = "none";
+    var d = await apiGet('/api/rates');
+    if (d && d.usd_rub) _usdRubRate = Number(d.usd_rub) || 90;
+  } catch (e) {}
+  return _usdRubRate;
+}
+
+function fmtUsd(n) {
+  n = Number(n) || 0;
+  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtRub(n) {
+  n = Number(n) || 0;
+  return Math.round(n).toLocaleString('ru-RU');
+}
+function rubOf(usd) {
+  return (Number(usd) || 0) * (_usdRubRate || 90);
+}
+
+function calcFee(amount, method, kind) {
+  var a = parseFloat(amount) || 0;
+  if (a < 0) a = 0;
+  var rates = (kind === 'withdraw') ? WITHDRAW_FEE_RATES : DEPOSIT_FEE_RATES;
+  var rate = (method && rates[method] != null) ? rates[method] : 0;
+  var fee = Math.round(a * rate * 100) / 100;
+  var total = Math.round((a + fee) * 100) / 100;
+  return { amount: a, fee: fee, total: total, rate: rate, credit: a };
+}
+
+function updateDepositTotals() {
+  try {
+    var amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
+    var method = selectedDepositMethod || null;
+    var rubEl = document.getElementById('deposit-amount-rub');
+    if (rubEl) rubEl.textContent = amount > 0 ? ('~' + fmtRub(rubOf(amount)) + ' ₽') : '~0 ₽';
+    var line = document.getElementById('deposit-total-line');
+    if (!line) return;
+    var info = calcFee(amount, method, 'deposit');
+    var pay = method ? info.total : amount;
+    var txt = (typeof tBlock === 'function' ? (tBlock('total_to_pay') || 'Итого к оплате') : 'Итого к оплате');
+    line.textContent = txt + ': ' + fmtUsd(pay) + '$ (~' + fmtRub(rubOf(pay)) + ' ₽)';
   } catch (e) {}
 }
 
-async function startDeposit() {
- var amount = parseFloat(document.getElementById('deposit-amount').value);
- var comment = document.getElementById('deposit-comment').value.trim();
- var btn = document.getElementById('deposit-btn');
- var dTerms = document.getElementById('deposit-terms-agree');
- if (dTerms && !dTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Примите пользовательское соглашение'); return; }
- if (!amount || amount < 1) { tg.showAlert(tBlock('min_1')); return; }
- var feeInfo = calcFee(amount, selectedDepositMethod);
- btn.disabled = true; btn.textContent = tBlock('creating') || 'Создание...';
- try {
- var result = await apiPost('/api/deposit', { amount: amount, fee: feeInfo.fee, total: feeInfo.total, method: selectedDepositMethod, comment: comment });
- if (selectedDepositMethod === 'stars') {
- var starsAmt = result.stars_amount || (Math.floor(amount) * 100);
- var htmlS = '<div class="payment-card">' +
- '<div class="row"><span class="label">Заявка</span><span class="value">#' + result.request_id + '</span></div>' +
- '<div class="row"><span class="label">Сумма</span><span class="value">' + amount + ' $</span></div>' +
- '<div class="row"><span class="label">К оплате</span><span class="value">' + starsAmt + ' ⭐</span></div>' +
- '</div>' +
- '<div class="info-block" style="margin-top:12px;">Перейдите в бота и оплатите счёт Telegram Stars. После оплаты сумма зачислится автоматически.</div>' +
- '<div id="stars-pay-status" class="list-item" style="margin-top:12px;"><div class="subtitle">Ожидание оплаты...</div></div>' +
- '<button class="btn btn-secondary" style="margin-top:12px;" onclick="openBotForStarsPay()">Открыть бота</button>' +
- '<button class="btn" style="margin-top:8px;" onclick="showPage(\'balance\');loadBalance();">К балансу</button>';
- document.getElementById('deposit-result-content').innerHTML = htmlS;
- showPage('deposit-result');
- startStarsPaymentPoll(result.request_id);
- return;
- }
- var html = '<div class="payment-card">' +
- '<div class="row"><span class="label">Заявка</span><span class="value">#' + result.request_id + '</span></div>' +
- '<div class="row"><span class="label">Сумма</span><span class="value">' + result.amount + '$</span></div>';
- if (result.method === 'card') {
- html += '<div class="row"><span class="label">К оплате</span><span class="value">' + result.rub_amount + ' ₽</span></div>' +
- '<div class="row"><span class="label">Телефон</span><span class="value"><code>' + result.payment_info.phone + '</code></span></div>' +
- '<div class="row"><span class="label">Банк</span><span class="value">' + result.payment_info.bank + '</span></div>' +
- '<div class="row"><span class="label">Получатель</span><span class="value">' + result.payment_info.recipient_name + '</span></div>';
- } else {
- html += '<div class="row"><span class="label">Сеть</span><span class="value">' + result.payment_info.network + '</span></div>' +
- '<div class="row"><span class="label">Адрес</span><span class="value"><code>' + result.payment_info.wallet + '</code></span></div>';
- }
- html += '</div><div class="info-block">После оплаты нажмите «Я оплатил»</div>' +
- '<div class="btn-stack">' +
- '<button class="btn btn-success" onclick="confirmRequest(' + result.request_id + ')">✅ Я оплатил</button>' +
- '<button class="btn btn-danger" onclick="cancelRequest(' + result.request_id + ')">❌ Отменить</button>' +
- '<button class="btn btn-secondary" onclick="showPage(\'requests\')">📜 Мои транзакции</button></div>';
- document.getElementById('deposit-result-content').innerHTML = html;
- showPage('deposit-result');
- } catch(e) { tg.showAlert(e.message); }
- finally { btn.disabled = false; btn.textContent = tBlock('create_request'); }
+function updateWithdrawTotals() {
+  try {
+    var amount = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+    var method = selectedWithdrawMethod || null;
+    var rubEl = document.getElementById('withdraw-amount-rub');
+    if (rubEl) rubEl.textContent = amount > 0 ? ('~' + fmtRub(rubOf(amount)) + ' ₽') : '~0 ₽';
+    var line = document.getElementById('withdraw-total-line');
+    if (!line) return;
+    var info = calcFee(amount, method, 'withdraw');
+    var pay = method ? info.total : amount;
+    var txt = (typeof tBlock === 'function' ? (tBlock('total_to_debit') || 'Итого к списанию') : 'Итого к списанию');
+    line.textContent = txt + ': ' + fmtUsd(pay) + '$ (~' + fmtRub(rubOf(pay)) + ' ₽)';
+  } catch (e) {}
 }
+
+function updateFeeHint(kind) {
+  if (kind === 'withdraw') updateWithdrawTotals();
+  else updateDepositTotals();
+}
+
+function payDepositUnavailable() {
+  try {
+    tg.showAlert(tBlock('pay_unavailable') || 'Payment is currently unavailable');
+  } catch (e) {
+    alert('Payment is currently unavailable');
+  }
+}
+
+async function payDepositStars() {
+  var btn = document.getElementById('deposit-pay-btn');
+  try {
+    if (btn) btn.disabled = true;
+    var amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
+    var result = await apiPost('/api/deposit/stars-invoice', {
+      amount: amount,
+      credit: amount,
+      method: 'stars'
+    });
+    if (result && result.invoice_sent) {
+      try {
+        var box = document.getElementById('stars-pay-status');
+        if (box) box.innerHTML = '<div class="subtitle">' + (tBlock('stars_invoice_sent') || 'Invoice sent to the bot. Open the bot and pay.') + '</div>';
+      } catch (e) {}
+      openBotForStarsPay();
+      if (result.request_id) startStarsPaymentPoll(result.request_id);
+    } else {
+      tg.showAlert((result && result.error) || (tBlock('pay_unavailable') || 'Unavailable'));
+    }
+  } catch (e) {
+    tg.showAlert(e.message || 'Error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function startDeposit() {
+  var amount = parseFloat(document.getElementById('deposit-amount').value);
+  var comment = (document.getElementById('deposit-comment') || {}).value || '';
+  comment = String(comment).trim();
+  var btn = document.getElementById('deposit-btn');
+  var dTerms = document.getElementById('deposit-terms-agree');
+  if (dTerms && !dTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Accept the terms'); return; }
+  if (!amount || amount < 1) { tg.showAlert(tBlock('min_1')); return; }
+  if (!selectedDepositMethod) { tg.showAlert(tBlock('err_method') || 'Select a payment method'); return; }
+  await ensureUsdRate();
+  var feeInfo = calcFee(amount, selectedDepositMethod, 'deposit');
+  var methodLabel = selectedDepositMethod === 'card' ? (tBlock('sbp') || 'SBP')
+    : (selectedDepositMethod === 'crypto' ? (tBlock('crypto') || 'Crypto') : (tBlock('stars') || 'Telegram Stars'));
+  var payUsd = feeInfo.total;
+  var creditUsd = feeInfo.credit;
+  var payRub = rubOf(payUsd);
+  var creditRub = rubOf(creditUsd);
+
+  var html = '<div class="payment-card">' +
+    '<div class="row"><span class="label">' + (tBlock('to_pay') || 'К оплате') + '</span><span class="value">' + fmtRub(payRub) + ' ₽ (~' + fmtUsd(payUsd) + '$)</span></div>' +
+    '<div class="row"><span class="label">' + (tBlock('to_credit') || 'К зачислению') + '</span><span class="value">' + fmtUsd(creditUsd) + '$ (~' + fmtRub(creditRub) + ' ₽)</span></div>' +
+    '<div class="row"><span class="label">' + (tBlock('pay_method') || 'Способ') + '</span><span class="value">' + methodLabel +
+    (feeInfo.rate ? (' · ' + (feeInfo.rate * 100).toFixed(1).replace(/\.0$/, '') + '%') : ' · 0%') + '</span></div>' +
+    '</div>';
+
+  if (selectedDepositMethod === 'stars') {
+    html += '<div id="stars-pay-status" class="list-item" style="margin-top:12px;"><div class="subtitle">' + (tBlock('press_pay_stars') || 'Press Pay — invoice will be sent in the bot') + '</div></div>';
+    html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" onclick="payDepositStars()">' + (tBlock('pay_btn') || 'Оплатить') + '</button>';
+  } else {
+    html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" onclick="payDepositUnavailable()">' + (tBlock('pay_btn') || 'Оплатить') + '</button>';
+  }
+  html += '<button class="btn btn-secondary" style="margin-top:8px;" onclick="showPage(\'balance\');">' + (tBlock('back') || '← Назад') + '</button>';
+
+  document.getElementById('deposit-result-content').innerHTML = html;
+  var titleEl = document.querySelector('#page-deposit-result .section-title');
+  if (titleEl) titleEl.textContent = tBlock('payment_details') || 'Оплата';
+  showPage('deposit-result');
+}
+
 
 async function startWithdraw() {
  var amount = parseFloat(document.getElementById('withdraw-amount').value);
@@ -15137,7 +15409,7 @@ async function startWithdraw() {
  var wTerms = document.getElementById('withdraw-terms-agree');
  if (wTerms && !wTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Примите пользовательское соглашение'); return; }
  if (!amount || amount < 5) { tg.showAlert(tBlock('min_5')); return; }
- var feeInfo = calcFee(amount, selectedWithdrawMethod);
+ var feeInfo = calcFee(amount, selectedWithdrawMethod, 'withdraw');
  if (feeInfo.total > (userData.balance || 0)) { tg.showAlert(tBlock('insufficient') + ' (' + feeInfo.total.toFixed(2) + '$)'); return; }
  if (!raw) { tg.showAlert(tBlock('enter_details')); return; }
  var recipient = raw, recipient_name = '';
