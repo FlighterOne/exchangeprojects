@@ -1350,7 +1350,7 @@
  <div id="fields-partner" style="display:none;">
  <div class="form-group">
  <label class="form-label" data-i18n="contract_no">Номер договора</label>
- <input class="form-input" type="text" id="listing-contract" placeholder="XC-0000">
+ <input class="form-input" type="text" id="listing-contract" placeholder="AA-0000" data-i18n-placeholder="contract_ph">
  </div>
  <div class="info-block" style="margin-top:12px;" data-i18n="price_xcod_note">Цена определяется партнёром по аналитике после модерации.</div>
  </div>
@@ -1617,7 +1617,7 @@
  <div id="fl-partner-fields" style="display:none;">
  <div class="form-group">
  <label class="form-label" data-i18n="contract_no">Номер договора</label>
- <input class="form-input" id="fl-contract" placeholder="№ договора">
+ <input class="form-input" id="fl-contract" placeholder="AA-0000" data-i18n-placeholder="contract_ph">
  </div>
  <label style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
  <label class="check-row" id="fl-terms-row"><input type="checkbox" id="fl-analytics"> <span id="fl-terms-label">Продолжая, вы даёте <a href="https://clossr.site/terms.html" target="_blank" rel="noopener" class="terms-link">пользовательское соглашение</a> с правилами сервиса</span></label>
@@ -2206,8 +2206,19 @@ function isNativeApp() {
   return false;
 }
 function shouldShowOpenSiteBtn() {
-  try { if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return true; } catch (e) {}
+  // Миниапп и нативное приложение → кнопка «На сайт»
+  // Сайт (браузер) → кнопка «Скачать приложение» / меню установки
+  try {
+    if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return true;
+  } catch (e) {}
+  try {
+    if (typeof isTelegramEnvironment === 'function' && isTelegramEnvironment()) {
+      // WebApp внутри Telegram без длинного initData всё равно миниапп
+      if (typeof isNativeApp !== 'function' || !isNativeApp()) return true;
+    }
+  } catch (e1) {}
   try { if (isNativeApp()) return true; } catch (e2) {}
+  try { if (window.__isMiniApp) return true; } catch (e3) {}
   return false;
 }
 function openSiteInBrowser() {
@@ -2606,6 +2617,7 @@ async function continueAfterAuth() {
  } catch (e) {}
  __authReady = true;
  window.__xcodBootOk = true;
+ try { updateTopSideButton(); } catch (eTB) {}
  try { if (!isTelegramMiniApp()) applyRouteFromHash(); } catch (eRoute) {}
  try { if (typeof renderMain === 'function') renderMain(); } catch (e) {}
   if (box) box.style.display = 'none';
@@ -2844,6 +2856,7 @@ async function init() {
  try { renderMain(); } catch (re) {}
  showPage('home');
  window.__xcodBootOk = true;
+ try { updateTopSideButton(); } catch (eTB) {}
  } catch (e) {
  box.innerHTML = '<div class="empty"><div class="spinner"></div>' +
  '<div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div>' +
@@ -3129,6 +3142,7 @@ function showPage(name) {
  try { applyI18n(); } catch (e) {}
  if (name === 'collaborate' || name === 'support-hire') { try { renderHireInfo(); } catch (e) {} }
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
+ if (name === 'listing-create' || name === 'listing-edit' || name === 'create-freelance') { try { applyTermsLabels(); applyI18n(); } catch (eLc) {} }
  if (name === 'deposit' || name === 'withdraw') { try { ensureUsdRate(true).then(function(){ if(name==='deposit') updateDepositTotals(); else updateWithdrawTotals(); }); } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
  if (name === 'home') loadListings();
  if (name === 'profile') { loadOwnProfileListings(); try { updateProfileLogoutVisibility(); } catch (e) {} }
@@ -3306,6 +3320,7 @@ var I18N = {
  send_mod: 'Отправить на модерацию',
  partner_xcod: 'Партнёр',
  contract_no: 'Номер договора',
+ contract_ph: 'AA-0000',
  tgstat: 'Ссылка на TGStat',
  username: 'Юзернейм',
  users_month: 'Пользователей / мес',
@@ -3605,6 +3620,11 @@ total_to_pay: 'Итого к оплате',
  method_fee_sbp: '8.5%',
  method_fee_crypto: '5%',
  method_fee_stars: '0%',
+ approve_set_price: 'Одобрить (указать цену)',
+ approve: 'Одобрить',
+ enter_partner_price: 'Укажите цену для партнёрского товара ($)',
+ listing_approved: 'Объявление одобрено',
+ listing_rejected: 'Объявление отклонено',
 terms_prefix: 'Продолжая, вы даёте ',
  terms_link: 'пользовательское соглашение',
  terms_suffix: ' с правилами сервиса',
@@ -3889,6 +3909,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  send_mod: 'Submit for review',
  partner_xcod: 'Partner',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -4188,6 +4209,11 @@ total_to_pay: 'Total to pay',
  method_fee_sbp: '8.5%',
  method_fee_crypto: '5%',
  method_fee_stars: '0%',
+ approve_set_price: 'Approve (set price)',
+ approve: 'Approve',
+ enter_partner_price: 'Set price for partner listing ($)',
+ listing_approved: 'Listing approved',
+ listing_rejected: 'Listing rejected',
 terms_prefix: 'By continuing, you accept the ',
  terms_link: 'Terms of Service',
  terms_suffix: ' and the service rules',
@@ -4472,6 +4498,7 @@ terms_prefix: 'By continuing, you accept the ',
  send_mod: 'Submit for review',
  partner_xcod: 'Partner',
  contract_no: 'Vertragsnummer',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat-Link',
  username: 'Benutzername',
  users_month: 'Nutzer / Mon',
@@ -4758,6 +4785,11 @@ total_to_pay: 'Gesamt zu zahlen',
  err_method: 'Zahlungsmethode wählen',
  amount_usdt: 'Betrag (USDT)',
  fee_label: 'Gebühr',
+ approve_set_price: 'Genehmigen (Preis festlegen)',
+ approve: 'Genehmigen',
+ enter_partner_price: 'Preis für Partner-Anzeige festlegen ($)',
+ listing_approved: 'Anzeige genehmigt',
+ listing_rejected: 'Anzeige abgelehnt',
 terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  terms_link: 'Nutzungsbedingungen',
  terms_suffix: ' und die Regeln des Dienstes',
@@ -5042,6 +5074,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  send_mod: 'Submit for review',
  partner_xcod: 'Partenaire',
  contract_no: 'N° de contrat',
+ contract_ph: 'AA-0000',
  tgstat: 'Lien TGStat',
  username: 'Nom d\'utilisateur',
  users_month: 'Utilisateurs / mois',
@@ -5328,6 +5361,11 @@ total_to_pay: 'Total à payer',
  err_method: 'Choisissez un mode de paiement',
  amount_usdt: 'Montant (USDT)',
  fee_label: 'Frais',
+ approve_set_price: 'Approuver (définir le prix)',
+ approve: 'Approuver',
+ enter_partner_price: 'Définir le prix pour l\'annonce partenaire ($)',
+ listing_approved: 'Annonce approuvée',
+ listing_rejected: 'Annonce rejetée',
 terms_prefix: 'En continuant, vous acceptez les ',
  terms_link: 'conditions d\'utilisation',
  terms_suffix: ' et les règles du service',
@@ -5612,6 +5650,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  send_mod: 'Submit for review',
  partner_xcod: 'Socio',
  contract_no: 'Nº de contrato',
+ contract_ph: 'AA-0000',
  tgstat: 'Enlace TGStat',
  username: 'Usuario',
  users_month: 'Usuarios / mes',
@@ -5898,6 +5937,11 @@ total_to_pay: 'Total a pagar',
  err_method: 'Selecciona un método de pago',
  amount_usdt: 'Importe (USDT)',
  fee_label: 'Comisión',
+ approve_set_price: 'Aprobar (indicar precio)',
+ approve: 'Aprobar',
+ enter_partner_price: 'Indique el precio del anuncio de socio ($)',
+ listing_approved: 'Anuncio aprobado',
+ listing_rejected: 'Anuncio rechazado',
 terms_prefix: 'Al continuar, acepta el ',
  terms_link: 'acuerdo de usuario',
  terms_suffix: ' y las reglas del servicio',
@@ -6182,6 +6226,7 @@ terms_prefix: 'Al continuar, acepta el ',
  send_mod: 'Submit for review',
  partner_xcod: '合作方',
  contract_no: '合同编号',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat 链接',
  username: '用户名',
  users_month: '用户/月',
@@ -6468,6 +6513,11 @@ total_to_pay: '应付总额',
  err_method: '请选择支付方式',
  amount_usdt: '金额 (USDT)',
  fee_label: '手续费',
+ approve_set_price: '批准（设定价格）',
+ approve: '批准',
+ enter_partner_price: '请为合作商品设置价格 ($)',
+ listing_approved: '广告已批准',
+ listing_rejected: '广告已拒绝',
 terms_prefix: '继续即表示您同意',
  terms_link: '用户协议',
  terms_suffix: '及服务规则',
@@ -6752,6 +6802,7 @@ terms_prefix: '继续即表示您同意',
  send_mod: 'Submit for review',
  partner_xcod: 'Партнёр',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -7040,6 +7091,11 @@ total_to_pay: 'Разом до сплати',
  err_method: 'Оберіть спосіб оплати',
  amount_usdt: 'Сума (USDT)',
  fee_label: 'Комісія',
+ approve_set_price: 'Схвалити (вказати ціну)',
+ approve: 'Схвалити',
+ enter_partner_price: 'Вкажіть ціну для партнерського товару ($)',
+ listing_approved: 'Оголошення схвалено',
+ listing_rejected: 'Оголошення відхилено',
 terms_prefix: 'Продовжуючи, ви приймаєте ',
  terms_link: 'користувацьку угоду',
  terms_suffix: ' з правилами сервісу',
@@ -7324,6 +7380,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  send_mod: 'Submit for review',
  partner_xcod: 'Partner',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -7610,6 +7667,11 @@ total_to_pay: 'Totale da pagare',
  err_method: 'Seleziona un metodo di pagamento',
  amount_usdt: 'Importo (USDT)',
  fee_label: 'Commissione',
+ approve_set_price: 'Approva (imposta prezzo)',
+ approve: 'Approva',
+ enter_partner_price: 'Imposta il prezzo per l\'annuncio partner ($)',
+ listing_approved: 'Annuncio approvato',
+ listing_rejected: 'Annuncio rifiutato',
 terms_prefix: 'Continuando, accetti i ',
  terms_link: 'Termini di servizio',
  terms_suffix: ' e le regole del servizio',
@@ -7894,6 +7956,7 @@ terms_prefix: 'Continuando, accetti i ',
  send_mod: 'Submit for review',
  partner_xcod: 'Parceiro ',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -8180,6 +8243,11 @@ total_to_pay: 'Total a pagar',
  err_method: 'Selecione um método de pagamento',
  amount_usdt: 'Valor (USDT)',
  fee_label: 'Taxa',
+ approve_set_price: 'Aprovar (definir preço)',
+ approve: 'Aprovar',
+ enter_partner_price: 'Defina o preço do anúncio de parceiro ($)',
+ listing_approved: 'Anúncio aprovado',
+ listing_rejected: 'Anúncio rejeitado',
 terms_prefix: 'Ao continuar, aceita o ',
  terms_link: 'acordo de utilizador',
  terms_suffix: ' e as regras do serviço',
@@ -8461,6 +8529,7 @@ terms_prefix: 'Ao continuar, aceita o ',
  send_mod: 'Submit for review',
  partner_xcod: 'Parceiro ',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -8747,6 +8816,11 @@ total_to_pay: 'Total a pagar',
  err_method: 'Selecione um método de pagamento',
  amount_usdt: 'Valor (USDT)',
  fee_label: 'Taxa',
+ approve_set_price: 'Aprovar (definir preço)',
+ approve: 'Aprovar',
+ enter_partner_price: 'Defina o preço do anúncio de parceiro ($)',
+ listing_approved: 'Anúncio aprovado',
+ listing_rejected: 'Anúncio rejeitado',
 terms_prefix: 'Ao continuar, você aceita o ',
  terms_link: 'termo de uso',
  terms_suffix: ' e as regras do serviço',
@@ -9031,6 +9105,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  send_mod: 'Submit for review',
  partner_xcod: ' ortağ',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -9317,6 +9392,11 @@ total_to_pay: 'Ödenecek toplam',
  err_method: 'Ödeme yöntemi seçin',
  amount_usdt: 'Tutar (USDT)',
  fee_label: 'Komisyon',
+ approve_set_price: 'Onayla (fiyat belirle)',
+ approve: 'Onayla',
+ enter_partner_price: 'Ortak ilan için fiyat girin ($)',
+ listing_approved: 'İlan onaylandı',
+ listing_rejected: 'İlan reddedildi',
 terms_prefix: 'Devam ederek ',
  terms_link: 'kullanıcı sözleşmesini',
  terms_suffix: ' ve hizmet kurallarını kabul edersiniz',
@@ -9601,6 +9681,7 @@ terms_prefix: 'Devam ederek ',
  send_mod: 'Submit for review',
  partner_xcod: 'Mitra ',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -9887,6 +9968,11 @@ total_to_pay: 'Total bayar',
  err_method: 'Pilih metode pembayaran',
  amount_usdt: 'Jumlah (USDT)',
  fee_label: 'Biaya',
+ approve_set_price: 'Setujui (tetapkan harga)',
+ approve: 'Setujui',
+ enter_partner_price: 'Tetapkan harga untuk listing mitra ($)',
+ listing_approved: 'Iklan disetujui',
+ listing_rejected: 'Iklan ditolak',
 terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  terms_link: 'ketentuan layanan',
  terms_suffix: ' dan aturan layanan',
@@ -10171,6 +10257,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  send_mod: 'Submit for review',
  partner_xcod: 'شريك ',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -10457,6 +10544,11 @@ total_to_pay: 'الإجمالي للدفع',
  err_method: 'اختر طريقة الدفع',
  amount_usdt: 'المبلغ (USDT)',
  fee_label: 'العمولة',
+ approve_set_price: 'موافقة (تحديد السعر)',
+ approve: 'موافقة',
+ enter_partner_price: 'حدد سعر إعلان الشريك ($)',
+ listing_approved: 'تمت الموافقة على الإعلان',
+ listing_rejected: 'تم رفض الإعلان',
 terms_prefix: 'بالمتابعة فإنك توافق على ',
  terms_link: 'اتفاقية المستخدم',
  terms_suffix: ' وقواعد الخدمة',
@@ -10741,6 +10833,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  send_mod: 'Submit for review',
  partner_xcod: 'パートナー',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -11027,6 +11120,11 @@ total_to_pay: 'お支払い合計',
  err_method: '支払い方法を選択してください',
  amount_usdt: '金額 (USDT)',
  fee_label: '手数料',
+ approve_set_price: '承認（価格を設定）',
+ approve: '承認',
+ enter_partner_price: 'パートナー出品の価格を入力 ($)',
+ listing_approved: '出品が承認されました',
+ listing_rejected: '出品が却下されました',
 terms_prefix: '続行すると',
  terms_link: '利用規約',
  terms_suffix: 'およびサービス規約に同意したことになります',
@@ -11311,6 +11409,7 @@ terms_prefix: '続行すると',
  send_mod: 'Submit for review',
  partner_xcod: ' 파트너',
  contract_no: 'Contract number',
+ contract_ph: 'AA-0000',
  tgstat: 'TGStat link',
  username: 'Username',
  users_month: 'Users / mo',
@@ -11597,6 +11696,11 @@ total_to_pay: '결제 합계',
  err_method: '결제 수단을 선택하세요',
  amount_usdt: '금액 (USDT)',
  fee_label: '수수료',
+ approve_set_price: '승인 (가격 지정)',
+ approve: '승인',
+ enter_partner_price: '파트너 상품 가격을 입력하세요 ($)',
+ listing_approved: '광고가 승인되었습니다',
+ listing_rejected: '광고가 거절되었습니다',
 terms_prefix: '계속하면 ',
  terms_link: '이용약관',
  terms_suffix: ' 및 서비스 규칙에 동의하게 됩니다',
@@ -14835,6 +14939,7 @@ function openEditListing(id) {
  document.getElementById('edit-listing-price').value = l.price || '';
  document.getElementById('edit-listing-bot').value = l.bot_username || '';
  showPage('listing-edit');
+ try { applyTermsLabels(); applyI18n(); } catch (e) {}
 }
 
 var selectedListingType = null;
@@ -15191,6 +15296,7 @@ async function editRejectedListing(id) {
  }
  document.getElementById('listing-create-title').textContent = tBlock('editing');
  showPage('listing-create');
+ try { applyTermsLabels(); applyI18n(); } catch (eT) {}
  renderListingFilesList();
  } catch (e) {
  tg.showAlert(e.message);
@@ -16988,9 +17094,9 @@ function openAdminListingDetail(id) {
  }
  html += '<div class="btn-stack">';
  if (l.listing_type === 'partner') {
- html += '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', true)">Одобрить (указать цену)</button>';
+ html += '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', true)">' + (tBlock('approve_set_price') || 'Approve (set price)') + '</button>';
  } else {
- html += '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', false)">Одобрить</button>';
+ html += '<button class="btn btn-success" onclick="adminApproveListing(' + l.id + ', false)">' + (tBlock('approve') || 'Approve') + '</button>';
  }
  html += '<button class="btn btn-danger" onclick="adminRejectListing(' + l.id + ')">Отклонить</button></div>';
  document.getElementById('admin-detail-content').innerHTML = html;
@@ -17002,7 +17108,7 @@ async function adminApproveListing(id, needPrice) {
 
  var price = null;
  if (needPrice) {
- var p = prompt('Укажите цену для партнерского товара ($)');
+ var p = prompt(tBlock('enter_partner_price') || 'Set price for partner listing ($)');
  if (p === null) return;
  price = parseFloat(p);
  if (!price || price < 1) { tg.showAlert(tBlock('err_bad_price')); return; }
@@ -17010,7 +17116,7 @@ async function adminApproveListing(id, needPrice) {
  try {
  var body = price ? { price: price } : {};
  await apiPost('/api/admin/listings/' + id + '/approve', body);
- tg.showAlert(tBlock('listings') + ' #' + id + ' одобрено');
+ tg.showAlert((tBlock('listing_approved') || 'Approved') + ' #' + id);
  openAdminSection('listings');
  } catch (e) { tg.showAlert(e.message); }
 }
@@ -17020,7 +17126,7 @@ async function adminRejectListing(id) {
 
  try {
  await apiPost('/api/admin/listings/' + id + '/reject', {});
- tg.showAlert(tBlock('listings') + ' #' + id + ' отклонено');
+ tg.showAlert((tBlock('listing_rejected') || 'Rejected') + ' #' + id);
  openAdminSection('listings');
  } catch (e) { tg.showAlert(e.message); }
 }
