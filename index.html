@@ -355,14 +355,14 @@
  }
  .method-item.selected { border-color: var(--button); }
  .method-item .method-icon {
- width: 48px; height: 32px; flex-shrink: 0;
+ width: 56px; height: 28px; flex-shrink: 0;
  display: flex; align-items: center; justify-content: center;
  border-radius: 0; overflow: visible;
  background: transparent;
  }
  .method-item .method-icon img,
  .method-item .method-icon svg {
- width: 48px; height: 28px; object-fit: contain; display: block;
+ width: 56px; height: 26px; object-fit: contain; display: block;
  background: transparent;
  }
  .method-item .icon { font-size: 22px; }
@@ -1727,10 +1727,13 @@
  <label class="form-label" data-i18n="pay_method">Способ оплаты</label>
   <div class="method-list">
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
- <div class="method-icon"><svg viewBox="0 0 90 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <text x="2" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#2A5BDA">С</text>
-  <text x="28" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#E31F24">Б</text>
-  <text x="54" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#F7941D">П</text>
+ <div class="method-icon"><svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
+  <!-- С -->
+  <path fill="#2E5BFF" d="M34.5 8.2c-12.2 0-21.2 8.4-21.2 19.8S22.3 47.8 34.5 47.8c7.4 0 13.6-3.2 17.2-8.6l-7.2-5.2c-2 2.8-5.2 4.6-9.6 4.6-6.6 0-11.2-4.6-11.2-10.6S28.7 17.4 35.3 17.4c4.2 0 7.4 1.8 9.4 4.6l7.2-5.2c-3.6-5.4-9.8-8.6-17.4-8.6z"/>
+  <!-- Б -->
+  <path fill="#E30613" d="M58 9h12.6c8.2 0 13.4 4.2 13.4 10.6 0 4.2-2.4 7.4-6.4 8.8 5 1.4 8 5 8 10.2 0 7-5.6 11.2-14.4 11.2H58V9zm10.4 15.2c3.4 0 5.4-1.6 5.4-4.2s-2-4.2-5.4-4.2h-5.2v8.4h5.2zm.6 16.4c4 0 6.4-1.8 6.4-4.8s-2.4-4.6-6.4-4.6h-5.8v9.4h5.8z"/>
+  <!-- П -->
+  <path fill="#FF9F1A" d="M92 9h11.2c12.4 0 20.2 7.6 20.2 19S115.6 47 103.2 47H92V9zm11 29.2c6.8 0 11-4 11-10.2S109.8 17.8 103 17.8H97.2v20.4H103z"/>
 </svg></div>
  <div class="title" data-i18n="sbp">СБП</div>
  </div>
@@ -1782,10 +1785,13 @@
  <label class="form-label" data-i18n="withdraw_method">Способ вывода</label>
   <div class="method-list">
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
- <div class="method-icon"><svg viewBox="0 0 90 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <text x="2" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#2A5BDA">С</text>
-  <text x="28" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#E31F24">Б</text>
-  <text x="54" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#F7941D">П</text>
+ <div class="method-icon"><svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
+  <!-- С -->
+  <path fill="#2E5BFF" d="M34.5 8.2c-12.2 0-21.2 8.4-21.2 19.8S22.3 47.8 34.5 47.8c7.4 0 13.6-3.2 17.2-8.6l-7.2-5.2c-2 2.8-5.2 4.6-9.6 4.6-6.6 0-11.2-4.6-11.2-10.6S28.7 17.4 35.3 17.4c4.2 0 7.4 1.8 9.4 4.6l7.2-5.2c-3.6-5.4-9.8-8.6-17.4-8.6z"/>
+  <!-- Б -->
+  <path fill="#E30613" d="M58 9h12.6c8.2 0 13.4 4.2 13.4 10.6 0 4.2-2.4 7.4-6.4 8.8 5 1.4 8 5 8 10.2 0 7-5.6 11.2-14.4 11.2H58V9zm10.4 15.2c3.4 0 5.4-1.6 5.4-4.2s-2-4.2-5.4-4.2h-5.2v8.4h5.2zm.6 16.4c4 0 6.4-1.8 6.4-4.8s-2.4-4.6-6.4-4.6h-5.8v9.4h5.8z"/>
+  <!-- П -->
+  <path fill="#FF9F1A" d="M92 9h11.2c12.4 0 20.2 7.6 20.2 19S115.6 47 103.2 47H92V9zm11 29.2c6.8 0 11-4 11-10.2S109.8 17.8 103 17.8H97.2v20.4H103z"/>
 </svg></div>
  <div class="title" data-i18n="sbp_card">СБП / карта</div>
  </div>
@@ -2986,7 +2992,7 @@ function applyRouteFromHash() {
     if (!raw) return false;
 
     // #profile123456 or #profile/123456
-    var mProf = raw.match(/^profile[\/\-]?(\d+)$/i);
+    var mProf = raw.match(/^profile[\/_\-]?(\d+)$/i);
     if (mProf) {
       var pid = parseInt(mProf[1], 10);
       if (pid) {
@@ -2998,7 +3004,7 @@ function applyRouteFromHash() {
     }
 
     // #listing17 or #listing/17
-    var mList = raw.match(/^listing[\/\-]?(\d+)$/i);
+    var mList = raw.match(/^listing[\/_\-]?(\d+)$/i);
     if (mList) {
       var lid = parseInt(mList[1], 10);
       if (lid) {
@@ -3055,7 +3061,7 @@ function showPage(name) {
     var h = PAGE_HASH_MAP[name];
     if (name === 'profile') {
       var uid = (userData && userData.id) ? userData.id : '';
-      if (uid) setRouteHash('profile' + uid);
+      if (uid) setRouteHash('profile-' + uid);
       else setRouteHash('profile');
     } else if (h) {
       setRouteHash(h);
@@ -12743,7 +12749,7 @@ function goProfile(uid, ev) {
  } catch (e) {}
  uid = parseInt(uid, 10);
  if (!uid) return false;
- try { setRouteHash('profile' + uid); } catch (e2) {}
+ try { setRouteHash('profile-' + uid); } catch (e2) {}
  openUserProfile(uid);
  return false;
 }
@@ -12759,7 +12765,7 @@ function bindProfileLinks(root) {
  e.stopPropagation();
  e.preventDefault();
  var id = parseInt(el.getAttribute('data-uid'), 10);
- if (id) { try { setRouteHash('profile' + id); } catch (eH) {} openUserProfile(id); }
+ if (id) { try { setRouteHash('profile-' + id); } catch (eH) {} openUserProfile(id); }
  }, true);
  })(nodes[i]);
  }
@@ -14085,7 +14091,7 @@ async function openListing(id) {
 
  var box = document.getElementById('listing-detail-content');
  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
- try { if (id) setRouteHash('listing' + id); } catch (eH) {}
+ try { if (id) setRouteHash('listing-' + id); } catch (eH) {}
  showPage('listing-detail');
  try {
  var l = await apiGet('/api/listings/' + id);
