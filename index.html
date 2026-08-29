@@ -31,7 +31,7 @@
  };
  }
  </script>
- <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+ <script src="https://telegram.org/js/telegram-web-app.js"></script>
  <script>
  // Аварийный таймер: если за 10 сек init не сменил экран — показать ошибку
  window.__xcodBoot = Date.now();
@@ -2442,23 +2442,25 @@ function isTelegramEnvironment() {
 }
 
 function waitForTelegramInitData(maxMs) {
- maxMs = maxMs || 2500;
+ maxMs = maxMs || 5000;
  return new Promise(function(resolve) {
  var start = Date.now();
  (function tick() {
  try {
- var id = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) || '';
+ var wa = window.Telegram && Telegram.WebApp;
+ var id = (wa && wa.initData) || '';
  if (id && String(id).length > 10) {
- try { if (typeof tg !== 'undefined') tg = Telegram.WebApp; } catch (e) {}
+ try { if (typeof tg !== 'undefined') tg = wa; } catch (e) {}
  resolve(id);
  return;
  }
+ // иногда initDataUnsafe.user уже есть — всё равно ждём полный initData для API
  } catch (e) {}
  if (Date.now() - start >= maxMs) {
- resolve('');
+ resolve((window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) || '');
  return;
  }
- setTimeout(tick, 100);
+ setTimeout(tick, 80);
  })();
  });
 }
@@ -2640,9 +2642,17 @@ function apiFetch(path, options) {
  options = options || {};
  var ms = options.timeout || 10000;
  var initData = '';
- try { initData = (getTg() && getTg().initData) || (tg && tg.initData) || ''; } catch (e) {}
+ try {
+   initData = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData)
+     || (getTg() && getTg().initData)
+     || (tg && tg.initData)
+     || '';
+ } catch (e) {}
  var sessionTok = '';
- try { if (!initData) sessionTok = getAuthToken() || ''; } catch (e) {}
+ // Миниапп: только initData. Сайт/приложение: session_token
+ try {
+   if (!initData) sessionTok = getAuthToken() || '';
+ } catch (e) {}
 
  var sep = path.indexOf('?') >= 0 ? '&' : '?';
  var url = API_URL + path;
@@ -2719,32 +2729,53 @@ async function init() {
  setLoad();
 
  try {
- if (!window.Telegram || !Telegram.WebApp) {
- // тихо ждём / пробуем дальше через заглушку
- }
  var tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tg;
  try { tgLocal.ready && tgLocal.ready(); tgLocal.expand && tgLocal.expand(); } catch (e) {}
 
- // Ждём initData, если открыто внутри Telegram
- if (!tgLocal.initData || String(tgLocal.initData).length < 10) {
- if (isTelegramEnvironment()) {
+ // В Telegram (миниапп) — всегда ждём initData и входим автоматически
+ var inTg = false;
+ try { inTg = isTelegramEnvironment() || isTelegramMiniApp(); } catch (e) {}
+
+ if (inTg) {
  if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">Загрузка данных с сервера...</div></div>';
- var waited = await waitForTelegramInitData(2800);
+ try { hideLoginOverlay(); } catch (eH) {}
+ // ждём initData дольше — WebApp.js подгружается async
+ if (!tgLocal.initData || String(tgLocal.initData).length < 10) {
+ var waited = await waitForTelegramInitData(5500);
  tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tgLocal;
- try { if (typeof tg !== 'undefined') tg = tgLocal; } catch (e) {}
  if (waited) {
  try { tgLocal.initData = waited; } catch (e) {}
  }
  }
- }
-
+ try { if (typeof tg !== 'undefined') tg = tgLocal; } catch (e) {}
  __isMiniApp = !!(tgLocal && tgLocal.initData && String(tgLocal.initData).length > 10);
-
+ if (!__isMiniApp) {
+ // ещё одна попытка
+ var waited2 = await waitForTelegramInitData(2500);
+ if (waited2) {
+ try { tgLocal.initData = waited2; tg = tgLocal; } catch (e) {}
+ __isMiniApp = true;
+ }
+ }
  if (__isMiniApp) {
- // Миниапп: только initData, web-сессию не используем для API
- try { /* keep session for website later, but api prefers initData */ } catch (e) {}
+ // авто-вход по initData — без экрана логина
+ try { hideLoginOverlay(); } catch (e) {}
  } else {
- // Сайт (браузер): сессия или экран входа через Telegram
+ // Telegram WebView без initData (редко) — не показываем login widget, пробуем session или ждём
+ var sessTg = loadWebSession();
+ if (sessTg && sessTg.token) {
+ __webSessionToken = sessTg.token;
+ try {
+ await apiFetch('/api/auth/session', { method: 'GET', timeout: 8000 });
+ await continueAfterAuth();
+ return;
+ } catch (eSess) { clearWebSession(); }
+ }
+ // остаёмся на спиннере и пробуем ещё раз initData в конце
+ }
+ } else {
+ // Сайт / приложение (браузер, Capacitor): сессия или экран входа
+ __isMiniApp = false;
  var sess = loadWebSession();
  if (sess && sess.token) {
  __webSessionToken = sess.token;
@@ -3098,7 +3129,7 @@ function showPage(name) {
  try { applyI18n(); } catch (e) {}
  if (name === 'collaborate' || name === 'support-hire') { try { renderHireInfo(); } catch (e) {} }
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
- if (name === 'deposit' || name === 'withdraw') { try { ensureUsdRate().then(function(){ if(name==='deposit') updateDepositTotals(); else updateWithdrawTotals(); }); } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
+ if (name === 'deposit' || name === 'withdraw') { try { ensureUsdRate(true).then(function(){ if(name==='deposit') updateDepositTotals(); else updateWithdrawTotals(); }); } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
  if (name === 'home') loadListings();
  if (name === 'profile') { loadOwnProfileListings(); try { updateProfileLogoutVisibility(); } catch (e) {} }
  if (name === 'my-listings') loadMyListings();
@@ -15354,10 +15385,14 @@ var DEPOSIT_FEE_RATES = { card: 0.085, crypto: 0.05, stars: 0 };
 var WITHDRAW_FEE_RATES = { card: 0.085, crypto: 0.05 };
 var _usdRubRate = 90;
 
-async function ensureUsdRate() {
+async function ensureUsdRate(force) {
   try {
-    var d = await apiGet('/api/rates');
-    if (d && d.usd_rub) _usdRubRate = Number(d.usd_rub) || 90;
+    var path = force ? '/api/rates?refresh=1' : '/api/rates';
+    var d = await apiGet(path);
+    if (d && d.usd_rub) {
+      var r = Number(d.usd_rub);
+      if (r && r > 1 && r < 500) _usdRubRate = r;
+    }
   } catch (e) {}
   return _usdRubRate;
 }
@@ -15453,7 +15488,7 @@ async function startDeposit() {
   if (dTerms && !dTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Accept the terms'); return; }
   if (!amount || amount < 1) { tg.showAlert(tBlock('min_1')); return; }
   if (!selectedDepositMethod) { tg.showAlert(tBlock('err_method') || 'Select a payment method'); return; }
-  await ensureUsdRate();
+  await ensureUsdRate(true);
   var feeInfo = calcFee(amount, selectedDepositMethod, 'deposit');
   var methodLabel = selectedDepositMethod === 'card' ? (tBlock('sbp') || 'SBP')
     : (selectedDepositMethod === 'crypto' ? (tBlock('crypto') || 'Crypto') : (tBlock('stars') || 'Telegram Stars'));
@@ -17507,13 +17542,22 @@ function openTelegramOrExternal(url) {
 // если всё-таки пришёл initData после показа логина — прячем и грузим как миниапп
 setTimeout(async function() {
  try {
- if (isTelegramMiniApp() && document.getElementById('login-overlay') &&
- document.getElementById('login-overlay').style.display === 'flex') {
- hideLoginOverlay();
+ if (isTelegramMiniApp() || isTelegramEnvironment()) {
+ try { hideLoginOverlay(); } catch (e) {}
+ if (!window.__xcodBootOk && typeof init === 'function') {
+ init();
+ }
+ }
+ } catch (e) {}
+}, 1500);
+setTimeout(async function() {
+ try {
+ if (isTelegramMiniApp() && !window.__xcodBootOk) {
+ try { hideLoginOverlay(); } catch (e) {}
  if (typeof init === 'function') init();
  }
  } catch (e) {}
-}, 3000);
+}, 4000);
 
 document.addEventListener('visibilitychange', function() {
  if (document.visibilityState !== 'visible') return;
