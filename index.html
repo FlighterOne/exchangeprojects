@@ -355,14 +355,15 @@
  }
  .method-item.selected { border-color: var(--button); }
  .method-item .method-icon {
- width: 36px; height: 36px; flex-shrink: 0;
+ width: 48px; height: 32px; flex-shrink: 0;
  display: flex; align-items: center; justify-content: center;
- border-radius: 10px; overflow: hidden;
+ border-radius: 0; overflow: visible;
  background: transparent;
  }
  .method-item .method-icon img,
  .method-item .method-icon svg {
- width: 32px; height: 32px; object-fit: contain; display: block;
+ width: 48px; height: 28px; object-fit: contain; display: block;
+ background: transparent;
  }
  .method-item .icon { font-size: 22px; }
  .method-item .title { font-weight: 600; font-size: 15px; }
@@ -1726,7 +1727,11 @@
  <label class="form-label" data-i18n="pay_method">Способ оплаты</label>
   <div class="method-list">
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
- <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="14" fill="#5B35B0"/><text x="32" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#fff">СБП</text><circle cx="48" cy="16" r="6" fill="#9EF01A"/></svg></div>
+ <div class="method-icon"><svg viewBox="0 0 90 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <text x="2" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#2A5BDA">С</text>
+  <text x="28" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#E31F24">Б</text>
+  <text x="54" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#F7941D">П</text>
+</svg></div>
  <div class="title" data-i18n="sbp">СБП</div>
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'deposit')">
@@ -1777,7 +1782,11 @@
  <label class="form-label" data-i18n="withdraw_method">Способ вывода</label>
   <div class="method-list">
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
- <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="14" fill="#5B35B0"/><text x="32" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#fff">СБП</text><circle cx="48" cy="16" r="6" fill="#9EF01A"/></svg></div>
+ <div class="method-icon"><svg viewBox="0 0 90 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <text x="2" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#2A5BDA">С</text>
+  <text x="28" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#E31F24">Б</text>
+  <text x="54" y="36" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#F7941D">П</text>
+</svg></div>
  <div class="title" data-i18n="sbp_card">СБП / карта</div>
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'withdraw')">
@@ -2910,15 +2919,22 @@ var PAGE_HASH_MAP = {
   freelance: 'freelance',
   favorites: 'favorites',
   settings: 'settings',
+  'settings-lang': 'settingslang',
+  'settings-theme': 'settingstheme',
   orders: 'orders',
   requests: 'requests',
   'my-listings': 'mylistings',
   mylistings: 'mylistings',
   deposit: 'deposit',
   withdraw: 'withdraw',
+  'deposit-result': 'deposit',
   profile: 'profile',
   admin: 'admin',
-  collaborate: 'collaborate'
+  collaborate: 'collaborate',
+  'listing-create': 'createsalelisting',
+  'create-freelance': 'createfreelancelisting',
+  'listing-detail': null,
+  'listing-edit': null
 };
 var HASH_PAGE_MAP = {
   main: 'home',
@@ -2930,6 +2946,8 @@ var HASH_PAGE_MAP = {
   freelance: 'freelance',
   favorites: 'favorites',
   settings: 'settings',
+  settingslang: 'settings-lang',
+  settingstheme: 'settings-theme',
   orders: 'orders',
   requests: 'requests',
   mylistings: 'my-listings',
@@ -2938,7 +2956,11 @@ var HASH_PAGE_MAP = {
   withdraw: 'withdraw',
   profile: 'profile',
   admin: 'admin',
-  collaborate: 'collaborate'
+  collaborate: 'collaborate',
+  createsalelisting: '__create_sale__',
+  createfreelancelisting: '__create_freelance__',
+  'create-sale-listing': '__create_sale__',
+  'create-freelance-listing': '__create_freelance__'
 };
 
 function setRouteHash(hash) {
@@ -2987,9 +3009,25 @@ function applyRouteFromHash() {
       }
     }
 
-    var key = raw.toLowerCase();
-    var page = HASH_PAGE_MAP[key];
-    if (page) {
+    var key = raw.toLowerCase().replace(/[^a-z0-9\-]/g, '');
+    // aliases
+    if (key === 'createsalelisting' || key === 'create-sale-listing' || key === 'createsale') key = 'createsalelisting';
+    if (key === 'createfreelancelisting' || key === 'create-freelance-listing' || key === 'createfreelance') key = 'createfreelancelisting';
+
+    var page = HASH_PAGE_MAP[key] || HASH_PAGE_MAP[raw.toLowerCase()];
+    if (page === '__create_sale__') {
+      __hashNavLock = true;
+      try { startSaleCreate(); setRouteHash('createsalelisting'); } catch (e) {}
+      setTimeout(function(){ __hashNavLock = false; }, 80);
+      return true;
+    }
+    if (page === '__create_freelance__') {
+      __hashNavLock = true;
+      try { startFreelanceCreate(); setRouteHash('createfreelancelisting'); } catch (e) {}
+      setTimeout(function(){ __hashNavLock = false; }, 80);
+      return true;
+    }
+    if (page && page.indexOf('__') !== 0) {
       __hashNavLock = true;
       try { showPage(page); } catch (e) {}
       setTimeout(function(){ __hashNavLock = false; }, 50);
@@ -3015,7 +3053,7 @@ function showPage(name) {
  try {
   if (!__hashNavLock) {
     var h = PAGE_HASH_MAP[name];
-    if (h === 'profile') {
+    if (name === 'profile') {
       var uid = (userData && userData.id) ? userData.id : '';
       if (uid) setRouteHash('profile' + uid);
       else setRouteHash('profile');
@@ -13893,6 +13931,7 @@ function startSaleCreate() {
  var fl = document.getElementById('listing-files-list');
  if (fl) fl.innerHTML = '';
  } catch (e) {}
+ try { setRouteHash('createsalelisting'); } catch (eH) {}
  showPage('listing-create');
  try { setTimeout(function(){ applyI18n(); applyTermsLabels(); }, 0); } catch (e) {}
 }
