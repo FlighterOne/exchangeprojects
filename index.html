@@ -349,11 +349,21 @@
 
  .method-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
  .method-item {
- background: var(--secondary-bg); border-radius: 12px; padding: 14px;
- display: flex; align-items: center; gap: 12px; cursor: pointer;
- border: 2px solid transparent;
+ display: flex; align-items: center; gap: 12px;
+ background: var(--secondary-bg); border: 1.5px solid transparent;
+ border-radius: 12px; padding: 12px 14px; cursor: pointer;
  }
  .method-item.selected { border-color: var(--button); }
+ .method-item .method-icon {
+ width: 36px; height: 36px; flex-shrink: 0;
+ display: flex; align-items: center; justify-content: center;
+ border-radius: 10px; overflow: hidden;
+ background: transparent;
+ }
+ .method-item .method-icon img,
+ .method-item .method-icon svg {
+ width: 32px; height: 32px; object-fit: contain; display: block;
+ }
  .method-item .icon { font-size: 22px; }
  .method-item .title { font-weight: 600; font-size: 15px; }
  .method-item .desc { font-size: 12px; color: var(--hint); margin-top: 2px; }
@@ -1714,15 +1724,18 @@
 
  <div class="form-group">
  <label class="form-label" data-i18n="pay_method">Способ оплаты</label>
- <div class="method-list">
+  <div class="method-list">
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
- <div class="title">СБП</div>
+ <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="14" fill="#5B35B0"/><text x="32" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#fff">СБП</text><circle cx="48" cy="16" r="6" fill="#9EF01A"/></svg></div>
+ <div class="title" data-i18n="sbp">СБП</div>
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'deposit')">
- <div class="title">USDT TRC20</div>
+ <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="30" r="16" fill="#F5B800"/><circle cx="40" cy="36" r="14" fill="#E8A317" stroke="#F5B800" stroke-width="2"/><path d="M38 30v-3h2.2c1.6 0 2.6.7 2.6 1.9 0 1-.6 1.6-1.5 1.8l1.8 2.5h-2.3l-1.5-2.2H38zm0 0h2c.7 0 1.1-.3 1.1-.9S40.7 28 40 28H38v2z" fill="#6B4E00"/><path d="M24 24v-3h2.5c1.8 0 3 .8 3 2.2 0 1.1-.7 1.8-1.7 2.1l2 2.9H27.5l-1.7-2.5H24zm0 0h2.2c.8 0 1.3-.4 1.3-1s-.5-1-1.3-1H24v2z" fill="#6B4E00"/></svg></div>
+ <div class="title" data-i18n="crypto">Криптовалюта</div>
  </div>
  <div class="method-item" data-method="stars" onclick="selectMethod(this,'deposit')">
- <div class="title">Telegram Stars</div>
+ <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFE566"/><stop offset="100%" stop-color="#FFB800"/></linearGradient></defs><path d="M32 8l6.5 13.2 14.5 2.1-10.5 10.2 2.5 14.5L32 41.2 19 48l2.5-14.5L11 23.3l14.5-2.1L32 8z" fill="url(#sg)" stroke="#E6A800" stroke-width="1.5"/></svg></div>
+ <div class="title" data-i18n="stars">Telegram Stars</div>
  </div>
  </div>
  </div>
@@ -1762,11 +1775,13 @@
 
  <div class="form-group">
  <label class="form-label" data-i18n="withdraw_method">Способ вывода</label>
- <div class="method-list">
+  <div class="method-list">
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
- <div class="title">СБП / карта</div>
+ <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="14" fill="#5B35B0"/><text x="32" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#fff">СБП</text><circle cx="48" cy="16" r="6" fill="#9EF01A"/></svg></div>
+ <div class="title" data-i18n="sbp_card">СБП / карта</div>
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'withdraw')">
+ <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="30" r="16" fill="#F5B800"/><circle cx="40" cy="36" r="14" fill="#E8A317" stroke="#F5B800" stroke-width="2"/><path d="M38 30v-3h2.2c1.6 0 2.6.7 2.6 1.9 0 1-.6 1.6-1.5 1.8l1.8 2.5h-2.3l-1.5-2.2H38zm0 0h2c.7 0 1.1-.3 1.1-.9S40.7 28 40 28H38v2z" fill="#6B4E00"/><path d="M24 24v-3h2.5c1.8 0 3 .8 3 2.2 0 1.1-.7 1.8-1.7 2.1l2 2.9H27.5l-1.7-2.5H24zm0 0h2.2c.8 0 1.3-.4 1.3-1s-.5-1-1.3-1H24v2z" fill="#6B4E00"/></svg></div>
  <div class="title">USDT TRC20</div>
  </div>
  </div>
@@ -3012,7 +3027,7 @@ function showPage(name) {
  try { applyI18n(); } catch (e) {}
  if (name === 'collaborate' || name === 'support-hire') { try { renderHireInfo(); } catch (e) {} }
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
- if (name === 'deposit' || name === 'withdraw') { try { updateFeeHint(name); } catch (e) {} }
+ if (name === 'deposit' || name === 'withdraw') { try { updateFeeHint(name); } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
  if (name === 'home') loadListings();
  if (name === 'profile') { loadOwnProfileListings(); try { updateProfileLogoutVisibility(); } catch (e) {} }
  if (name === 'my-listings') loadMyListings();
@@ -3168,7 +3183,7 @@ var I18N = {
  rating_from: 'Рейтинг сотрудника от', service_type: 'Вид услуги', order_svc: 'Заказать', execute_svc: 'Исполнять',
  partner: 'Партнёр', own_product: 'Свой товар', deposit: 'Пополнение', withdrawal: 'Вывод',
  salary: 'Зарплата', freelance_publish: 'Публикация фриланс', tx_done: 'Выполнено',
- tx_pending: 'В обработке', tx_rejected: 'Отклонено', lang_changed: 'Язык изменён',
+ tx_pending: 'В обработке', status_awaiting: 'Ожидает', sbp_card: 'СБП / карта', deal: 'Сделка', tx_rejected: 'Отклонено', lang_changed: 'Язык изменён',
  original: 'оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
  insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: 'Транзакции'
  ,
@@ -3733,7 +3748,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'Own product', deposit: 'Deposit', withdrawal: 'Withdrawal',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Language updated',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Language updated',
  original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Insufficient funds', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -6518,7 +6533,7 @@ terms_prefix: '继续即表示您同意',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'Свій товар', deposit: 'Поповнення', withdrawal: 'Виведення',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Мову змінено',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Мову змінено',
  original: 'оригінал', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Недостатньо коштів', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -7076,7 +7091,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'Prodotto proprio', deposit: 'Deposito', withdrawal: 'Prelievo',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Lingua aggiornata',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Lingua aggiornata',
  original: 'originale', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Fondi insufficienti', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -7632,7 +7647,7 @@ terms_prefix: 'Continuando, accetti i ',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'Produto próprio', deposit: 'Depósito', withdrawal: 'Levantamento',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Idioma atualizado',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Idioma atualizado',
  original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Fundos insuficientes', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -8185,7 +8200,7 @@ terms_prefix: 'Ao continuar, aceita o ',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'Produto próprio', deposit: 'Depósito', withdrawal: 'Levantamento',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Idioma atualizado',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Idioma atualizado',
  original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Saldo insuficiente', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -8741,7 +8756,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'Kendi ürünü', deposit: 'Yatırma', withdrawal: 'Çekme',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Dil güncellendi',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Dil güncellendi',
  original: 'orijinal', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Yetersiz bakiye', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -9297,7 +9312,7 @@ terms_prefix: 'Devam ederek ',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'Produk sendiri', deposit: 'Deposit', withdrawal: 'Penarikan',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'Bahasa diperbarui',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Bahasa diperbarui',
  original: 'asli', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Saldo tidak cukup', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -9853,7 +9868,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'منتج خاص', deposit: 'إيداع', withdrawal: 'سحب',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: 'تم تحديث اللغة',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'تم تحديث اللغة',
  original: 'أصلي', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'رصيد غير كافٍ', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -10409,7 +10424,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: '自社商品', deposit: '入金', withdrawal: '出金',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: '言語を更新しました',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: '言語を更新しました',
  original: 'オリジナル', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: '残高不足', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -10965,7 +10980,7 @@ terms_prefix: '続行すると',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: '자체 상품', deposit: '입금', withdrawal: '출금',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
- tx_pending: 'Processing', tx_rejected: 'Rejected', lang_changed: '언어가 변경되었습니다',
+ tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: '언어가 변경되었습니다',
  original: '원본', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: '잔액 부족', listings: 'Listings', transactions: 'Transactions'
  ,
@@ -15129,10 +15144,17 @@ async function loadRequests() {
  var txs = txData.transactions || [];
 
  var statusMap = {
- pending: ['Ожидает', 'badge-pending'], processing: ['В обработке', 'badge-processing'],
- completed: ['Выполнено', 'badge-completed'], cancelled: ['Отменена', 'badge-cancelled']
+ pending: [tBlock('status_awaiting') || tBlock('tx_pending') || 'Pending', 'badge-pending'],
+ processing: [tBlock('tx_pending') || 'Processing', 'badge-processing'],
+ completed: [tBlock('tx_done') || 'Completed', 'badge-completed'],
+ cancelled: [tBlock('status_cancelled') || tBlock('tx_rejected') || 'Cancelled', 'badge-cancelled']
  };
- var methodMap = { card: 'СБП', crypto: 'USDT', stars: 'Stars', order: 'Сделка' };
+ var methodMap = {
+ card: tBlock('sbp') || 'СБП',
+ crypto: 'USDT',
+ stars: tBlock('stars') || 'Stars',
+ order: tBlock('deal') || 'Deal'
+ };
  var typeLabel = {
  deposit: tBlock('deposit'), withdraw: tBlock('withdrawal'), refund: tBlock('refund_deal'),
  income: tBlock('income'), purchase_hold: tBlock('purchase_hold'), purchase_release: tBlock('sale'),
@@ -15153,13 +15175,10 @@ async function loadRequests() {
  } else if ((r.status === 'pending' || r.status === 'processing') && r.type === 'deposit' && r.method === 'stars') {
  actions = '<div class="subtitle" style="margin-top:6px;">Оплата в боте · Stars</div>';
  }
- var extra = '';
- if (r.recipient && r.type !== 'refund') extra += '<br>Получатель: ' + String(r.recipient).replace(/</g,'&lt;');
- if (r.comment) extra += '<br>' + String(r.comment).replace(/</g,'&lt;');
  return '<div class="list-item"><div class="top"><div class="title">' + typeName +
  ' #' + r.id + '</div><span class="badge ' + st[1] + '">' + st[0] +
- '</span></div><div class="subtitle">' + r.amount + '$ · ' + (methodMap[r.method]||r.method||'') +
- extra + '</div>' + actions + '</div>';
+ '</span></div><div class="subtitle">' + (methodMap[r.method]||r.method||'') +
+ ' · ' + r.amount + ' $</div>' + actions + '</div>';
  }).join('');
  }
  if (txs.length) {
