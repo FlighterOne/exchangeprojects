@@ -4,10 +4,6 @@
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange</title>
- <link rel="icon" href="favicon.ico" sizes="any">
- <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
- <link rel="icon" type="image/png" href="favicon-192x192.png" sizes="192x192">
- <link rel="apple-touch-icon" href="apple-touch-icon.png">
  <link rel="manifest" href="site.webmanifest">
  <meta name="theme-color" content="#0f0f0f">
  <meta name="application-name" content="ExChange">
@@ -355,15 +351,15 @@
  }
  .method-item.selected { border-color: var(--button); }
  .method-item .method-icon {
- width: 56px; height: 28px; flex-shrink: 0;
+ width: 40px; height: 40px; flex-shrink: 0;
  display: flex; align-items: center; justify-content: center;
- border-radius: 0; overflow: visible;
+ border-radius: 10px; overflow: hidden;
  background: transparent;
  }
  .method-item .method-icon img,
  .method-item .method-icon svg {
- width: 56px; height: 26px; object-fit: contain; display: block;
- background: transparent;
+ width: 36px; height: 36px; object-fit: contain; display: block;
+ background: transparent; border-radius: 8px;
  }
  .method-item .icon { font-size: 22px; }
  .method-item .title { font-weight: 600; font-size: 15px; }
@@ -1727,14 +1723,7 @@
  <label class="form-label" data-i18n="pay_method">Способ оплаты</label>
   <div class="method-list">
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'deposit')">
- <div class="method-icon"><svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
-  <!-- С -->
-  <path fill="#2E5BFF" d="M34.5 8.2c-12.2 0-21.2 8.4-21.2 19.8S22.3 47.8 34.5 47.8c7.4 0 13.6-3.2 17.2-8.6l-7.2-5.2c-2 2.8-5.2 4.6-9.6 4.6-6.6 0-11.2-4.6-11.2-10.6S28.7 17.4 35.3 17.4c4.2 0 7.4 1.8 9.4 4.6l7.2-5.2c-3.6-5.4-9.8-8.6-17.4-8.6z"/>
-  <!-- Б -->
-  <path fill="#E30613" d="M58 9h12.6c8.2 0 13.4 4.2 13.4 10.6 0 4.2-2.4 7.4-6.4 8.8 5 1.4 8 5 8 10.2 0 7-5.6 11.2-14.4 11.2H58V9zm10.4 15.2c3.4 0 5.4-1.6 5.4-4.2s-2-4.2-5.4-4.2h-5.2v8.4h5.2zm.6 16.4c4 0 6.4-1.8 6.4-4.8s-2.4-4.6-6.4-4.6h-5.8v9.4h5.8z"/>
-  <!-- П -->
-  <path fill="#FF9F1A" d="M92 9h11.2c12.4 0 20.2 7.6 20.2 19S115.6 47 103.2 47H92V9zm11 29.2c6.8 0 11-4 11-10.2S109.8 17.8 103 17.8H97.2v20.4H103z"/>
-</svg></div>
+ <div class="method-icon"><img src="data:image/png;base64,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" alt="СБП" style="width:36px;height:36px;object-fit:contain;border-radius:8px;background:transparent;"></div>
  <div class="title" data-i18n="sbp">СБП</div>
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'deposit')">
@@ -1785,14 +1774,7 @@
  <label class="form-label" data-i18n="withdraw_method">Способ вывода</label>
   <div class="method-list">
  <div class="method-item selected" data-method="card" onclick="selectMethod(this,'withdraw')">
- <div class="method-icon"><svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
-  <!-- С -->
-  <path fill="#2E5BFF" d="M34.5 8.2c-12.2 0-21.2 8.4-21.2 19.8S22.3 47.8 34.5 47.8c7.4 0 13.6-3.2 17.2-8.6l-7.2-5.2c-2 2.8-5.2 4.6-9.6 4.6-6.6 0-11.2-4.6-11.2-10.6S28.7 17.4 35.3 17.4c4.2 0 7.4 1.8 9.4 4.6l7.2-5.2c-3.6-5.4-9.8-8.6-17.4-8.6z"/>
-  <!-- Б -->
-  <path fill="#E30613" d="M58 9h12.6c8.2 0 13.4 4.2 13.4 10.6 0 4.2-2.4 7.4-6.4 8.8 5 1.4 8 5 8 10.2 0 7-5.6 11.2-14.4 11.2H58V9zm10.4 15.2c3.4 0 5.4-1.6 5.4-4.2s-2-4.2-5.4-4.2h-5.2v8.4h5.2zm.6 16.4c4 0 6.4-1.8 6.4-4.8s-2.4-4.6-6.4-4.6h-5.8v9.4h5.8z"/>
-  <!-- П -->
-  <path fill="#FF9F1A" d="M92 9h11.2c12.4 0 20.2 7.6 20.2 19S115.6 47 103.2 47H92V9zm11 29.2c6.8 0 11-4 11-10.2S109.8 17.8 103 17.8H97.2v20.4H103z"/>
-</svg></div>
+ <div class="method-icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABelBMVEUdE0YGmNb5tCnvgBlbV6IAhT94tyqPR5TkBlAyKmXXEUoBgElKNUBTTpdTUDvoKkjofBsdF0oHkc8cFkYiFkXcdh0Jh8QaIlcKf7sVPXQBfz8bGUUEc0AYJUWMTC69cCfKbyK1YiZBJj4vHUKARzHTcR8TS4FLKzw3IEEMdK8ZKl8oGUQPY51WMDoSUooVQXcrEkeNDEx0DUq7CE5bD0nHCE9mD0qZC0wQX5guG1JkNHdWLW1IJmN+P4heQYcZJ1sMVUIWK0UGa0EPSUMZIEYVMUQQQ0MTN0QJYUGUWDDZlytyPzTtqinDeytjNze/ZyOkWSnKhirhnSt0QDSaVCtCWZ4qYaFMEEhHWJ86EUeuCk2mLkWRC0zACE5hD0pIoaDWsEJzpYnpszUYmsqSqHIsnLywrFxlo5OEpnykqmY5nrHBrlHZsD9oTW1Gc7h+UZ1vWqNPq2hAqH5ttDsypJMroqBcr1QZg7ASPENXlzM4hTlppDBOkDY8ejq7Uf2eAAAJmklEQVR4nO2ciZ8UxRmGa2bWWRtCgEVAFjzwQPEEFGF2F0VQRMQrulFQc0iIV2JiSIi5/vdMT9f0dFfX8X3dPdtfb73PH1C/rudX9e5b3TWrFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGD38+6zXT+BcG4cePT5rp9BNMPHRoff6/ohJDO8eXg0evzFrh9DLsPh+6MpJ5/o+kGkMhwOH08NjT59sutHkclU0I2ZoNGBpx7q+mEkMhU0zemMpz/o+mkEkgq6eUAbGn34TNfPI45UUJbTGR+hOJaZCRo+vTCE4lgmE/TxqACKY5FMUJ7TGSiOC7SgXx0oGUJxzBlalxCKY85cUDGnURwL5II+NgWhOM7IBQ0/rBpCcSwKMnMaxXHGQlA1p3UUxV0cC4LSV2c24i6OBUG2nM6IuTgWBelXZzZORhtFJUE3rDmdRVGsZ9iSIEdO6yj6JMriWBbkyumMKItjWVDx1Zk1iuI7wxqCPDmdEd0Z1hR0IyAoujOsKcib0zFGUUWQP6czYjrDVgSFcjojnjNsVVAwp2dEUxwtgpxHsjKHP+n62XcEiyBCTmdEcYa1CbK/OrMRQXG0CSIvoVEExdEqyPp+2oHg4nj0YAuD2AX94oPKVyA3YotjcvpU80EcgtRDT5GDSGxxTLYHR441HcQlSKknP6Ubklkck5XTg8Hp55oN4hak1BMn6YYkFsdkZWVtMBi8cLTJID5BSr1IatUZ8j5+TAX9eiposPZSg7T2C1LqPcLZdY604jgVtPJwamhw5OXag4QEqecfZaS1rOKYCtoeZDxcN4qCgpR69iO6IVHFMRWU5nRGzSgiCFLqmX4Wx5mgz9fmhtYu1okikiClelkcZ4KynM44UqM4EgX1sjhmgnRO6yhiF0eqoD4WRy1oe1CEWxzpgvpXHLWgRU5nXGSlNUfQmbN76Fy41cokmzAXtMhpndac4sgQdG7Pg2Re+aytWTZgLqiY0wNucSQLevU8Xc/511qcZn1yQStHTEP0KCIKunWbrufBcy1PtC4LQZUlRC+OJEFnLjD0XDizhLnWYiHIzGlGFFEEnWPoud19NucUBH1uEUSLorCg1zjh8+rSZluDgqCVF6yGCMUxJOizV+h69kgJH01RkCWndVq/4R/EL+gWJ3zOigkfTUmQLacz/GdYn6AzZxl6JIWPpiSodCQz0tp3hvUI4hTDryQUQ5OyoG2noIHv44dTUA+LoUlZkCundRS5iqNDEKsYigsfjSFoZc1nyFUc7YK+YOiRUwxNTEHunM6iyFoc7YL2k/Xclhg+GlOQJ6d1FFmKYzNBsoqhSUWQL6czqh8/mgiSVgxNKoKsRzIDszg2EPSl2PDRVAWZr86slItjbUECi6FJVVAopzNKxbGmIJHF0MQiKJjTGYUzbC1BQouhiU1QOKcz8uJYR5DUYmhiE0TJ6QxdHPmCBHyuIGIVRMrpGVlx5AoS8bmCiFUQLacz0uLIE3T+N11PmoNd0L6XyGsoLY4cQdKLoYlDkDp6kW5o8NvfkQWJL4YmLkFKvUGO6im//5okqAfF0MQtSKljtEI0484fwoK+En0qdeATpNQp12t8C3f/6BfUt/DR+AWpgxcZaW1EUVlQX4qhSUCQUke9b2ENvvnaIag/xdAkKEip5xhpfefbmxZBfSqGJgRBSr3MiaLvTEE9OZU6IAlSBznF8fsfioJ6ms05NEGKWRz/lAuS+7mCCFUQL4pmxXF/L4uhCV0Quzjul/25gghHkFKcKLr75x2dyLLgCJpsrK7+yNhnTX+nJwKGoKmeKX9h7LOGv9MTAVnQ5uqcvzJaUaPf6YmAKGjr0mqBwBWHEg1+pycCkqBJSU/Kj6w3jt1MrR0IgiYbpp40ijhp3ecoCgvatOjhpnW93+mJICRoq7K7ClHESesW/sFDJ/gFVcOnzDYnihr/g4dO8Amyhk+DtA5dtxaJR5ArfIwo4qQ173d6InAK2iLpSWEVx1N9S2uHIF82m1za+ukuXVHz/zWzs9gFvU7Xs7qp1Hj8tzt0Rf06w9oF0dfPxkSlgsb3/k431KviaBVEXkCXJrNBxin3/0E31KMzrE3QPqqeLT3IOOM+J4r6coa1CSIuoM18kPEcThT1pDhaBNEW0EZhkFwQL4p6URwtgigJvTEpDjIucI8RRYHf6YmgKoiwwS5NyoOMS9z/nm5I/hm2Iii8wfJszhkb/MSIIunFsSIouIA2q4OYgnZTcTQFhRbQxsQySFXQ7imOpiB/Qpvho7EImkbRP+mGBBdHQ5B3g1XDR2MVNP7lMcYxX2xxLAvybjBL+GgcgpQ61f+PHwl1AVnDR+MUpA5ybs2ILI4JbQH59PgEMa9bCyyOJUGuhHaGj8YniHdrRl5xTMIbLKQnJIh3x1FacUyCG8ydzTkhQbw7jrKKYxJYQP7w0QQFMa9bSyqOiXcBOYqhCUEQ746joOK4EFRN6HD4aEiCpmndx+KYuDcYIXw0REG8KBJSHOeC9pkLiBQ+Gqog5nVrEVGU2BcQRw9HEK84Srg1k9gSmhw+Go6g45f30rn8VgtTbIYWtNFAD0fQoavrD5C58mYLE2xKUllA9GzOIQt65wRdz4mfm8+uBRLjTzwvfDREQW9eoetZv3qohdm1QFJKaGIxNCEJeus6Xc8DAsJHkxQ2GD98NARBx1nh80gLM2uJZLGAaoSPJizo5710PSfeaT6t9kjmC6hW+GhCgt5mZPP6tRZm1SJJltA1w0fjF/QIK3yOtzCpNknSDVY7fDQ+QccvM/RcF5PNOcm+JuGjcQs6dK1vxdAkeb2xHo8gTjHcK6MYmkwahY/GIaiXxXAp2AUx9AgqhkvB6udfdD0iw6dNrILI6SyrGC4Fm59/E/WsX9vN4aOx+PkP0Y+4YrgUam+w64JOpcukZkJfebvrB98pai0gocVwKdRI6PWrUYSPhr+ABJ5KlwnXz64vhia8P/ERFEMTQ5D39WoUxdCk7Oe/Pj9xFEMTcgLFUgxNiH5ORFMMTUgJvVfY54qdhJDQcRVDk3BCR1YMTUIJFF0xNFn4sR3CIiyGJr6E3t2fK4h4NlicxdBk7qfymizWYmjiWEDxFkMTa0JLu8fSJbaERvgUqG6wyIuhiZnQ0RdDk/ICiulzBZFiQqMYWpj6uacX0C6/x1KTfINJuuAsCf0nHqdSF7MFFOXnCiLpazIUQw/jdZxKvfwPxRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFgK/wdMGXcPyX+e1QAAAABJRU5ErkJggg==" alt="СБП" style="width:36px;height:36px;object-fit:contain;border-radius:8px;background:transparent;"></div>
  <div class="title" data-i18n="sbp_card">СБП / карта</div>
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'withdraw')">
