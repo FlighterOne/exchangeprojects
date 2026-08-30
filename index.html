@@ -44,7 +44,7 @@
  el.innerHTML = '<div class="empty" style="padding:24px;text-align:center;">' +
  '<div class="spinner" style="margin:0 auto 12px;"></div>' +
  '<div style="margin-bottom:8px;">' + tBlock('loading2') + '</div>' +
- '<button onclick="location.reload()" style="padding:10px 16px;border:none;border-radius:10px;background:#2ea6ff;color:#fff;font-weight:600;margin-top:12px;" data-i18n="refresh">Обновить</button></div>';
+ '<button onclick="location.reload()" style="padding:10px 16px;border:none;border-radius:10px;background:#2ea6ff;color:#fff;font-weight:600;margin-top:12px;" data-i18n="refresh">Refresh</button></div>';
  } catch (e) {}
  }, 10000);
  </script>
@@ -1170,14 +1170,14 @@
 <!-- TOP BAR -->
 <div class="topbar">
  <div class="topbar-left" style="display:flex;align-items:center;gap:2px;">
- <button class="icon-btn" onclick="openDrawer()" aria-label="Меню">☰</button>
+ <button class="icon-btn" onclick="openDrawer()" aria-label="Menu">☰</button>
  <button type="button" class="icon-btn top-side-btn" id="btn-top-side" onclick="onTopSideBtnClick()" title="">
   <svg class="dl-app-icon" id="top-side-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
    <path d="M12 3v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
    <path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
    <path d="M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
   </svg>
-  <span class="top-side-btn-text" id="top-side-btn-label">Скачать приложение</span>
+  <span class="top-side-btn-text" id="top-side-btn-label">Download app</span>
  </button>
  </div>
  <div class="topbar-right">
@@ -1196,36 +1196,36 @@
  </div>
  <div class="drawer-nav">
  <button class="drawer-item active" data-page="home" onclick="navTo('home')">
- <span class="di">🏠</span> <span data-i18n="home">Главная</span>
+ <span class="di">🏠</span> <span data-i18n="home">Home</span>
  </button>
  <button class="drawer-item" data-page="news" onclick="navTo('news')">
- <span class="di">📰</span> <span data-i18n="news">Новости</span>
+ <span class="di">📰</span> <span data-i18n="news">News</span>
  </button>
  <button class="drawer-item" data-page="exchange" onclick="navTo('exchange')">
- <span class="di">📊</span> <span data-i18n="exchange">Биржа</span>
+ <span class="di">📊</span> <span data-i18n="exchange">Exchange</span>
  </button>
  <button class="drawer-item" data-page="freelance" onclick="navTo('freelance')">
- <span class="di">🛠️</span> <span data-i18n="freelance">Фриланс</span>
+ <span class="di">🛠️</span> <span data-i18n="freelance">Freelance</span>
  </button>
  <button class="drawer-item" data-page="balance" onclick="navTo('balance')">
- <span class="di">💵</span> <span data-i18n="balance">Баланс</span>
+ <span class="di">💵</span> <span data-i18n="balance">Balance</span>
  </button>
  <button class="drawer-item" data-page="favorites" onclick="navTo('favorites')">
- <span class="di">⭐</span> <span data-i18n="favorites">Избранные</span>
+ <span class="di">⭐</span> <span data-i18n="favorites">Favorites</span>
  </button>
  <button class="drawer-item" data-page="my-listings" onclick="navTo('my-listings')">
- <span class="di">📋</span> <span data-i18n="my_listings">Мои объявления</span>
+ <span class="di">📋</span> <span data-i18n="my_listings">My listings</span>
  </button>
  <button class="drawer-item" data-page="orders" onclick="navTo('orders')">
- <span class="di">📦</span> <span data-i18n="orders">История заказов</span>
+ <span class="di">📦</span> <span data-i18n="orders">Order history</span>
  </button>
  </div>
  <div class="drawer-bottom">
  <button class="drawer-item" data-page="settings" onclick="navTo('settings')">
- <span class="di">⚙️</span> <span data-i18n="settings">Настройки</span>
+ <span class="di">⚙️</span> <span data-i18n="settings">Settings</span>
  </button>
  <button class="drawer-item" data-page="support" onclick="navTo('support')">
- <span class="di">💬</span> <span data-i18n="support">Поддержка</span>
+ <span class="di">💬</span> <span data-i18n="support">Support</span>
  </button>
  <button class="drawer-item" data-page="admin" id="drawer-admin" style="display:none;" onclick="navTo('admin')">
  <span class="di">🛡</span> Панель
@@ -1251,8 +1251,8 @@
  <!-- HOME -->
  <div id="page-home" class="page">
  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
- <div class="section-title" style="margin-bottom:0;"><span data-i18n="feed_title">Лента объявлений</span></div>
- <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()" data-i18n="create">+ Создать</button>
+ <div class="section-title" style="margin-bottom:0;"><span data-i18n="feed_title">Listings feed</span></div>
+ <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()" data-i18n="create">+ Create</button>
  </div>
  <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
  </div>
@@ -1260,25 +1260,25 @@
 
  <!-- APP INSTALL -->
  <div id="page-app-install" class="page">
-  <button type="button" class="back-link" onclick="showPage('home')" data-i18n="back">← Назад</button>
+  <button type="button" class="back-link" onclick="showPage('home')" data-i18n="back">← Back</button>
   <div class="section-title" id="app-install-main-title">Установка приложения</div>
   <div class="support-grid app-install-grid" style="margin-top:8px;">
    <button type="button" class="support-tile" onclick="openAppInstallDetail('android')">
     <div class="app-install-icon-wrap">
      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.48l1.84-3.18a.5.5 0 00-.86-.5l-1.86 3.22A7.97 7.97 0 0012 8c-1.48 0-2.85.4-4.02 1.1L6.1 5.8a.5.5 0 10-.86.5L7.1 9.48C5.2 10.8 4 12.97 4 15.4v.1c0 .28.22.5.5.5h15c.28 0 .5-.22.5-.5v-.1c0-2.43-1.2-4.6-3.4-5.92zM9.5 13.5a1 1 0 110-2 1 1 0 010 2zm5 0a1 1 0 110-2 1 1 0 010 2zM7 17.5h10v2H7v-2z"/></svg>
     </div>
-    <div class="support-tile-title" id="app-install-label-android">Скачать на Android</div>
+    <div class="support-tile-title" id="app-install-label-android">Download for Android</div>
    </button>
    <button type="button" class="support-tile" onclick="openAppInstallDetail('ios')">
     <div class="app-install-icon-wrap">
      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8s-1.6-.7-2.7-.7c-1.4 0-2.7.8-3.4 2.1-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7 1.9-1 2.6-2c.8-1.1 1.1-2.2 1.1-2.2s-2.2-.8-2.2-3.5zM14.5 6.8c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.6.6-1.1 1.6-1 2.6 1 .1 1.9-.5 2.6-1.2z"/></svg>
     </div>
-    <div class="support-tile-title" id="app-install-label-ios">Установить на iOS</div>
+    <div class="support-tile-title" id="app-install-label-ios">Install on iOS</div>
    </button>
   </div>
   <button type="button" class="btn btn-secondary app-install-expand-btn" id="btn-app-install-pc" onclick="toggleAppInstallPc()">
    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
-   <span id="app-install-label-pc">Установить на ПК</span>
+   <span id="app-install-label-pc">Install on PC</span>
   </button>
   <div id="app-install-pc-grid" class="support-grid app-install-grid" style="display:none;margin-top:12px;">
    <button type="button" class="support-tile" onclick="openAppInstallDetail('windows')">
@@ -1296,55 +1296,55 @@
   </div>
   <button type="button" class="btn btn-secondary app-install-expand-btn" id="btn-app-install-tg" onclick="toggleAppInstallTg()">
    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8.02c-.13.58-.47.72-.95.45l-2.62-1.93-1.26 1.21c-.14.14-.26.26-.53.26l.19-2.67 4.89-4.42c.21-.19-.05-.29-.33-.11l-6.04 3.8-2.6-.81c-.57-.18-.58-.57.12-.84l10.16-3.92c.47-.18.88.11.67.78z"/></svg>
-   <span id="app-install-label-tg">Мы в Telegram</span>
+   <span id="app-install-label-tg">We are on Telegram</span>
   </button>
   <div id="app-install-tg-grid" class="support-grid app-install-grid" style="display:none;margin-top:12px;">
    <button type="button" class="support-tile" onclick="openTelegramBotLink()">
     <div class="app-install-icon-wrap"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8.02c-.13.58-.47.72-.95.45l-2.62-1.93-1.26 1.21c-.14.14-.26.26-.53.26l.19-2.67 4.89-4.42c.21-.19-.05-.29-.33-.11l-6.04 3.8-2.6-.81c-.57-.18-.58-.57.12-.84l10.16-3.92c.47-.18.88.11.67.78z"/></svg></div>
-    <div class="support-tile-title" id="app-install-label-tg-bot">Бот</div>
+    <div class="support-tile-title" id="app-install-label-tg-bot">Bot</div>
     <div class="support-tile-sub">@exchangeprojectsbot</div>
    </button>
    <button type="button" class="support-tile" onclick="openTelegramMiniAppLink()">
     <div class="app-install-icon-wrap"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01" stroke-linecap="round"/></svg></div>
-    <div class="support-tile-title" id="app-install-label-tg-app">Мини-приложение</div>
-    <div class="support-tile-sub" id="app-install-tg-app-sub">Открыть</div>
+    <div class="support-tile-title" id="app-install-label-tg-app">Mini app</div>
+    <div class="support-tile-sub" id="app-install-tg-app-sub">Open</div>
    </button>
   </div>
  </div>
  <div id="page-app-install-detail" class="page">
-  <button type="button" class="back-link" onclick="showPage('app-install')" data-i18n="back">← Назад</button>
+  <button type="button" class="back-link" onclick="showPage('app-install')" data-i18n="back">← Back</button>
   <div class="section-title" id="app-install-detail-title">—</div>
   <div class="info-block" id="app-install-detail-guide" style="white-space:pre-line;line-height:1.55;"></div>
-  <button type="button" class="btn" id="app-install-detail-btn" style="margin-top:12px;display:none;" onclick="downloadAppInstallFile()">Скачать</button>
+  <button type="button" class="btn" id="app-install-detail-btn" style="margin-top:12px;display:none;" onclick="downloadAppInstallFile()">Download</button>
  </div>
 
  <!-- LISTING DETAIL -->
  <div id="page-listing-detail" class="page">
- <button class="btn btn-secondary btn-back" id="listing-detail-back" onclick="backFromListing()" data-i18n="back">← Назад</button>
+ <button class="btn btn-secondary btn-back" id="listing-detail-back" onclick="backFromListing()" data-i18n="back">← Back</button>
  <div id="listing-detail-content"></div>
  </div>
 
  <!-- CREATE LISTING -->
  <div id="page-listing-create" class="page">
  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;">
- <button class="btn btn-secondary btn-back" id="listing-step-back" onclick="listingCreateBack()" style="margin:0;" data-i18n="back">← Назад</button>
- <button class="btn btn-back" onclick="cancelListingCreate()" style="margin:0;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" data-i18n="cancel_btn">Отменить</button>
+ <button class="btn btn-secondary btn-back" id="listing-step-back" onclick="listingCreateBack()" style="margin:0;" data-i18n="back">← Back</button>
+ <button class="btn btn-back" onclick="cancelListingCreate()" style="margin:0;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" data-i18n="cancel_btn">Cancel</button>
  </div>
- <div class="section-title" id="listing-create-title" data-i18n="new_listing">Новое объявление</div>
+ <div class="section-title" id="listing-create-title" data-i18n="new_listing">New listing</div>
  <div id="listing-step-1">
  <div class="form-group">
- <label class="form-label" data-i18n="title">Название</label>
- <input class="form-input" type="text" id="listing-title" placeholder="Название товара" data-i18n-placeholder="title">
+ <label class="form-label" data-i18n="title">Title</label>
+ <input class="form-input" type="text" id="listing-title" placeholder="Product title" data-i18n-placeholder="title">
  </div>
  <div class="form-group">
- <label class="form-label" data-i18n="description">Описание</label>
- <textarea class="form-input" id="listing-desc" rows="4" style="resize:vertical;min-height:100px;" placeholder="Описание" data-i18n-placeholder="description"></textarea>
+ <label class="form-label" data-i18n="description">Description</label>
+ <textarea class="form-input" id="listing-desc" rows="4" style="resize:vertical;min-height:100px;" placeholder="Description" data-i18n-placeholder="description"></textarea>
  </div>
  <div class="form-group">
  <label class="form-label" data-i18n="product_type">Тип товара</label>
  <div class="type-toggle" style="display:flex;gap:8px;">
- <button type="button" class="btn btn-secondary type-toggle-btn" data-type="partner" onclick="selectListingType(this)" style="flex:1;" data-i18n="partner_xcod">Партнёр</button>
- <button type="button" class="btn btn-secondary type-toggle-btn" data-type="own" onclick="selectListingType(this)" style="flex:1;" data-i18n="own_product">Свой товар</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn" data-type="partner" onclick="selectListingType(this)" style="flex:1;" data-i18n="partner_xcod">Partner</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn" data-type="own" onclick="selectListingType(this)" style="flex:1;" data-i18n="own_product">Own product</button>
  </div>
  </div>
  <div id="fields-partner" style="display:none;">
@@ -1364,7 +1364,7 @@
  <input class="form-input" type="number" id="listing-earnings-month" placeholder="500" min="0" step="0.01">
  </div>
  <div class="form-group">
- <label class="form-label" data-i18n="product_type">Вид товара</label>
+ <label class="form-label" data-i18n="product_type">Product type</label>
  <input class="form-input" type="text" id="listing-product-type" placeholder="TG бот / Mini App + сайт / другое" data-i18n-placeholder="product_type_ph">
  </div>
  <div class="form-group" id="tgstat-group">
@@ -1384,7 +1384,7 @@
  <input type="checkbox" id="listing-analytics">
  <span id="listing-terms-label">Продолжая, вы даёте <a href="https://clossr.site/terms.html" target="_blank" rel="noopener" class="terms-link">пользовательское соглашение</a> с правилами сервиса</span>
  </label>
- <button class="btn" onclick="listingCreateNext()" data-i18n="continue">Далее</button>
+ <button class="btn" onclick="listingCreateNext()" data-i18n="continue">Continue</button>
  </div>
  <div id="listing-step-photos" style="display:none;">
  <div class="info-block" style="margin-bottom:14px;" data-i18n="photos_hint">
@@ -1400,7 +1400,7 @@
  <input type="file" id="listing-photos" accept="image/*" multiple style="display:none;" onchange="onListingPhotosPicked(this)">
  <div id="listing-photos-list" class="photo-grid"></div>
  </div>
- <button class="btn" onclick="listingPhotosNext()" data-i18n="continue">Далее</button>
+ <button class="btn" onclick="listingPhotosNext()" data-i18n="continue">Continue</button>
  </div>
  <div id="listing-step-2" style="display:none;">
  <div class="info-block" style="margin-bottom:14px;" data-i18n="guide_note_full">
@@ -1419,11 +1419,11 @@
  <div class="form-group">
  <label class="form-label" data-i18n="files_dm">Есть ли файлы, которые вы отправите покупателю в ЛС?</label>
  <div class="type-toggle" style="display:flex;gap:8px;">
- <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-yes" onclick="selectDmFiles(true)" style="flex:1;" data-i18n="yes">Да</button>
- <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-no" onclick="selectDmFiles(false)" style="flex:1;" data-i18n="no">Нет</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-yes" onclick="selectDmFiles(true)" style="flex:1;" data-i18n="yes">Yes</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn" id="dm-no" onclick="selectDmFiles(false)" style="flex:1;" data-i18n="no">No</button>
  </div>
  </div>
- <button class="btn" id="listing-create-btn" onclick="createListing()" data-i18n="send_mod">Отправить на модерацию</button>
+ <button class="btn" id="listing-create-btn" onclick="createListing()" data-i18n="send_mod">Submit for moderation</button>
  </div>
  </div>
 
@@ -1435,15 +1435,15 @@
 
  <!-- EDIT LISTING -->
  <div id="page-listing-edit" class="page">
- <button class="btn btn-secondary btn-back" onclick="showPage('home')" data-i18n="back">← Назад</button>
- <div class="section-title">Редактировать</div>
+ <button class="btn btn-secondary btn-back" onclick="showPage('home')" data-i18n="back">← Back</button>
+ <div class="section-title">Edit</div>
  <input type="hidden" id="edit-listing-id">
  <div class="form-group">
- <label class="form-label" data-i18n="title">Название</label>
+ <label class="form-label" data-i18n="title">Title</label>
  <input class="form-input" type="text" id="edit-listing-title">
  </div>
  <div class="form-group">
- <label class="form-label" data-i18n="description">Описание</label>
+ <label class="form-label" data-i18n="description">Description</label>
  <textarea class="form-input" id="edit-listing-desc" rows="4" style="resize:vertical;min-height:100px;"></textarea>
  </div>
  <div class="form-group">
@@ -1455,8 +1455,8 @@
  <input class="form-input" type="text" id="edit-listing-bot">
  </div>
  <div class="btn-stack">
- <button class="btn" id="listing-save-btn" onclick="saveListing()" data-i18n="save">Сохранить</button>
- <button class="btn btn-danger" onclick="deleteListing()">Удалить объявление</button>
+ <button class="btn" id="listing-save-btn" onclick="saveListing()" data-i18n="save">Save</button>
+ <button class="btn btn-danger" onclick="deleteListing()">Delete listing</button>
  </div>
  </div>
 
@@ -1464,12 +1464,12 @@
  <div id="page-news" class="page">
  <div class="section-title" data-i18n="news_title">Новости</div>
  <div id="news-pinned"><div class="loading"><div class="spinner"></div></div></div>
- <div class="section-title" style="font-size:16px;margin-top:8px;" data-i18n="news_feed_title">Лента новостей</div>
+ <div class="section-title" style="font-size:16px;margin-top:8px;" data-i18n="news_feed_title">News feed</div>
  <div id="news-feed"></div>
  </div>
 
  <div id="page-news-detail" class="page">
- <button class="back-link" onclick="showPage('news');loadNewsPinned();" data-i18n="back">← Назад</button>
+ <button class="back-link" onclick="showPage('news');loadNewsPinned();" data-i18n="back">← Back</button>
  <div id="news-detail-content"></div>
  </div>
 
@@ -1477,27 +1477,27 @@
  <div id="page-exchange" class="page">
  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
  <div class="section-title" style="margin:0;flex:1;min-width:0;" data-i18n="exchange">Биржа</div>
- <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startSaleCreate()" data-i18n="create">+ Создать</button>
+ <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startSaleCreate()" data-i18n="create">+ Create</button>
  </div>
  <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
  <input class="form-input" type="search" id="exchange-q" placeholder="Поиск по бирже..." data-i18n-placeholder="search_exchange" enterkeyhint="search">
  <button type="button" class="search-btn" onclick="runExchangeSearch()" title="Найти">🔍</button>
  </div>
  <div id="exchange-history-wrap" style="display:none;">
- <div class="form-label" style="margin-bottom:6px;" data-i18n="search_history">История поиска</div>
+ <div class="form-label" style="margin-bottom:6px;" data-i18n="search_history">Search history</div>
  <div class="search-history" id="exchange-history"></div>
  </div>
- <div class="filters-heading" data-i18n="filters" data-i18n="filters">Фильтры</div>
+ <div class="filters-heading" data-i18n="filters" data-i18n="filters">Filters</div>
  <div class="form-group">
  <label class="form-label" data-i18n="type">Тип</label>
  <div class="type-toggle" style="display:flex;gap:8px;">
- <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-all" data-v="" onclick="setExType(this)" style="flex:1;" data-i18n="all">Все</button>
- <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-partner" data-v="partner" onclick="setExType(this)" style="flex:1;" data-i18n="partner_xcod">Партнёр</button>
- <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-own" data-v="own" onclick="setExType(this)" style="flex:1;" data-i18n="own_product">Свой товар</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-all" data-v="" onclick="setExType(this)" style="flex:1;" data-i18n="all">All</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-partner" data-v="partner" onclick="setExType(this)" style="flex:1;" data-i18n="partner_xcod">Partner</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn" id="ex-type-own" data-v="own" onclick="setExType(this)" style="flex:1;" data-i18n="own_product">Own product</button>
  </div>
  </div>
  <div class="form-group">
- <label class="form-label" data-i18n="product_type">Вид товара</label>
+ <label class="form-label" data-i18n="product_type">Product type</label>
  <div class="ptype-wrap">
  <input class="form-input" type="text" id="ex-product-type" placeholder="Любой вид" data-i18n-placeholder="any_type" autocomplete="off">
  <button type="button" class="ptype-arrow" id="ex-product-type-btn" onclick="toggleProductTypeList()" aria-label="Список">▾</button>
@@ -1505,7 +1505,7 @@
  <div id="ex-product-type-list" class="inline-options" style="display:none;"></div>
  </div>
  <div class="form-group">
- <label class="form-label" data-i18n="rating_seller_from">Рейтинг продавца от</label>
+ <label class="form-label" data-i18n="rating_seller_from">Seller rating from</label>
  <div class="star-row" id="ex-star-row">
  <button type="button" class="star-btn" data-r="1" onclick="setExRating(1)">★1</button>
  <button type="button" class="star-btn" data-r="2" onclick="setExRating(2)">★2</button>
@@ -1523,21 +1523,21 @@
  </div>
  </div>
  <div class="range-block">
- <div class="form-label" data-i18n="users_month">Пользователей / мес</div>
+ <div class="form-label" data-i18n="users_month">Users / month</div>
  <div class="range-row">
  <input class="form-input" type="number" id="ex-users-from" placeholder="от" min="0">
  <input class="form-input" type="number" id="ex-users-to" placeholder="до" min="0">
  </div>
  </div>
  <div class="range-block">
- <div class="form-label" data-i18n="earn_month">Заработок / мес ($)</div>
+ <div class="form-label" data-i18n="earn_month">Earnings / month ($)</div>
  <div class="range-row">
  <input class="form-input" type="number" id="ex-earn-from" placeholder="от" min="0">
  <input class="form-input" type="number" id="ex-earn-to" placeholder="до" min="0">
  </div>
  </div>
-<button class="btn" style="margin-bottom:14px;" onclick="runExchangeSearch()" data-i18n="search_btn">Найти</button>
- <div id="exchange-results"><div class="empty"><div class="icon">🔍</div><span data-i18n="enter_query_or_filters">Введите запрос или задайте фильтры</span></div></div>
+<button class="btn" style="margin-bottom:14px;" onclick="runExchangeSearch()" data-i18n="search_btn">Search</button>
+ <div id="exchange-results"><div class="empty"><div class="icon">🔍</div><span data-i18n="enter_query_or_filters">Enter a query or set filters</span></div></div>
  </div>
 
  <!-- MY LISTINGS -->
@@ -1545,23 +1545,23 @@
  <div id="page-freelance" class="page">
  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
  <div class="section-title" style="margin:0;flex:1;min-width:0;" data-i18n="freelance">Фриланс</div>
- <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startFreelanceCreate()" data-i18n="create">+ Создать</button>
+ <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startFreelanceCreate()" data-i18n="create">+ Create</button>
  </div>
  <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
  <input class="form-input" type="search" id="fl-q" placeholder="Поиск по ключевым словам..." data-i18n-placeholder="search_keywords" enterkeyhint="search">
  <button type="button" class="search-btn" onclick="runFreelanceSearch()" title="Найти">🔍</button>
  </div>
- <div class="filters-heading" data-i18n="filters" data-i18n="filters">Фильтры</div>
+ <div class="filters-heading" data-i18n="filters" data-i18n="filters">Filters</div>
  <div class="form-group">
- <label class="form-label" data-i18n="service_type">Вид услуги</label>
+ <label class="form-label" data-i18n="service_type">Service type</label>
  <div class="type-toggle" style="display:flex;gap:8px;">
- <button type="button" class="btn btn-secondary type-toggle-btn active" id="fl-kind-all" data-v="" onclick="setFlKind(this)" style="flex:1;" data-i18n="all">Все</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn active" id="fl-kind-all" data-v="" onclick="setFlKind(this)" style="flex:1;" data-i18n="all">All</button>
  <button type="button" class="btn btn-secondary type-toggle-btn" id="fl-kind-order" data-v="order" onclick="setFlKind(this)" style="flex:1;">Заказать</button>
  <button type="button" class="btn btn-secondary type-toggle-btn" id="fl-kind-execute" data-v="execute" onclick="setFlKind(this)" style="flex:1;">Исполнять</button>
  </div>
  </div>
  <div class="form-group">
- <label class="form-label" data-i18n="product_type">Вид товара</label>
+ <label class="form-label" data-i18n="product_type">Product type</label>
  <div class="ptype-wrap">
  <input class="form-input" type="text" id="fl-product-type" placeholder="Любой вид" data-i18n-placeholder="any_type" autocomplete="off" oninput="filterFlProductSuggestions()">
  <button type="button" class="ptype-arrow" onclick="toggleFlProductTypeList()" aria-label="Список">▾</button>
@@ -1579,32 +1579,32 @@
  </div>
  </div>
  <div class="form-group">
- <label class="form-label" data-i18n="price">Цена</label>
+ <label class="form-label" data-i18n="price">Price</label>
  <div style="display:flex;gap:8px;">
  <input class="form-input" type="number" id="fl-price-from" placeholder="от" style="flex:1;">
  <input class="form-input" type="number" id="fl-price-to" placeholder="до" style="flex:1;">
  </div>
  </div>
- <div id="freelance-results" style="margin-top:14px;"><div class="empty"><div class="icon">🔍</div><span data-i18n="enter_query_or_filters">Введите запрос или задайте фильтры</span></div></div>
+ <div id="freelance-results" style="margin-top:14px;"><div class="empty"><div class="icon">🔍</div><span data-i18n="enter_query_or_filters">Enter a query or set filters</span></div></div>
  </div>
 
  <div id="page-create-freelance" class="page">
- <button class="back-link" onclick="cancelFreelanceCreate()" data-i18n="back">← Назад</button>
- <div class="section-title" id="fl-create-title" data-i18n="fl_create_title">Фриланс объявление</div>
+ <button class="back-link" onclick="cancelFreelanceCreate()" data-i18n="back">← Back</button>
+ <div class="section-title" id="fl-create-title" data-i18n="fl_create_title">Freelance listing</div>
  <div id="fl-step-1">
  <div class="form-group">
- <label class="form-label" data-i18n="title">Название</label>
+ <label class="form-label" data-i18n="title">Title</label>
  <input class="form-input" id="fl-title" placeholder="Название услуги / заказа" data-i18n-placeholder="fl_title_ph">
  </div>
  <div class="form-group">
- <label class="form-label" data-i18n="description">Описание</label>
- <textarea class="form-input" id="fl-desc" rows="4" placeholder="Описание" data-i18n-placeholder="description"></textarea>
+ <label class="form-label" data-i18n="description">Description</label>
+ <textarea class="form-input" id="fl-desc" rows="4" placeholder="Description" data-i18n-placeholder="description"></textarea>
  </div>
  <div class="form-group">
- <label class="form-label" data-i18n="service_type">Вид услуги</label>
+ <label class="form-label" data-i18n="service_type">Service type</label>
  <div class="type-toggle" style="display:flex;gap:8px;">
- <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-order" onclick="selectFlKind('order')" style="flex:1;" data-i18n="order">Заказ</button>
- <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-execute" onclick="selectFlKind('execute')" style="flex:1;" data-i18n="execute_svc">Исполнение</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-order" onclick="selectFlKind('order')" style="flex:1;" data-i18n="order">Order</button>
+ <button type="button" class="btn btn-secondary type-toggle-btn" id="flc-execute" onclick="selectFlKind('execute')" style="flex:1;" data-i18n="execute_svc">Execution</button>
  </div>
  </div>
  <div class="form-group">
@@ -1637,7 +1637,7 @@
  <label class="form-label" data-i18n="price_usd">Цена ($)</label>
  <input class="form-input" type="number" id="fl-price" placeholder="100" min="1">
  </div>
- <button class="btn" onclick="flCreateNextPhotos()" data-i18n="continue">Далее</button>
+ <button class="btn" onclick="flCreateNextPhotos()" data-i18n="continue">Continue</button>
  </div>
  <div id="fl-step-photos" style="display:none;">
  <div class="info-block" style="margin-bottom:14px;" data-i18n="photos_hint">От 1 до 5 фото. Первое — титульное. Можно менять порядок перетаскиванием.</div>
@@ -1648,7 +1648,7 @@
  </div>
  <input type="file" id="fl-photos" accept="image/*" multiple style="display:none;" onchange="onFlPhotosPicked(this)">
  <div id="fl-photos-list" class="photo-grid"></div>
- <button class="btn" style="margin-top:12px;" onclick="flCreateNextPay()" data-i18n="continue">Далее</button>
+ <button class="btn" style="margin-top:12px;" onclick="flCreateNextPay()" data-i18n="continue">Continue</button>
  </div>
  <div id="fl-step-pay" style="display:none;">
  <div class="info-block" style="margin-bottom:14px;" data-i18n="fl_pay_hint">Оплата публикации фриланс-объявления</div>
@@ -1680,20 +1680,20 @@
 
  <div id="page-my-listings" class="page">
  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
- <div class="section-title" style="margin-bottom:0;"><span data-i18n="my_listings">Мои объявления</span></div>
- <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()" data-i18n="create">+ Создать</button>
+ <div class="section-title" style="margin-bottom:0;"><span data-i18n="my_listings">My listings</span></div>
+ <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()" data-i18n="create">+ Create</button>
  </div>
  <div class="seg-toggle" id="my-listings-seg" style="grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;box-sizing:border-box;">
  <button type="button" class="active" id="my-seg-mod" onclick="setMyListingsTab('moderation')" style="font-size:12px;padding:8px 4px;min-width:0;overflow:hidden;">Модерация <span class="seg-count" id="my-cnt-mod">0</span></button>
- <button type="button" id="my-seg-active" onclick="setMyListingsTab('active')" style="font-size:12px;padding:8px 4px;min-width:0;overflow:hidden;">Активные <span class="seg-count" id="my-cnt-active">0</span></button>
+ <button type="button" id="my-seg-active" onclick="setMyListingsTab('active')" style="font-size:12px;padding:8px 4px;min-width:0;overflow:hidden;">Active <span class="seg-count" id="my-cnt-active">0</span></button>
  <button type="button" id="my-seg-done" onclick="setMyListingsTab('completed')" style="font-size:12px;padding:8px 4px;min-width:0;overflow:hidden;">Завершён. <span class="seg-count" id="my-cnt-done">0</span></button>
  </div>
  <div style="display:flex;flex-direction:row;gap:8px;margin:10px 0;align-items:stretch;">
  <button type="button" class="btn btn-secondary" id="my-cat-sheet-btn" onclick="openMyCatSheet()" style="flex:1;text-align:center;font-weight:400;">
- <span id="my-cat-sheet-label" data-i18n="all">Все</span> ▾
+ <span id="my-cat-sheet-label" data-i18n="all">All</span> ▾
  </button>
  <button type="button" class="btn btn-secondary" id="my-fl-sheet-btn" onclick="openMyFlKindSheet()" style="flex:1;text-align:center;font-weight:400;display:none;">
- <span id="my-fl-sheet-label" data-i18n="all">Все</span> ▾
+ <span id="my-fl-sheet-label" data-i18n="all">All</span> ▾
  </button>
  </div>
 
@@ -1718,11 +1718,11 @@
  <div class="wallet-actions">
  <button class="wallet-action" onclick="showPage('deposit')">
  <div class="wallet-action-icon plus">+</div>
- <div class="wallet-action-label" data-i18n="topup">Пополнить</div>
+ <div class="wallet-action-label" data-i18n="topup">Deposit</div>
  </button>
  <button class="wallet-action" onclick="showPage('withdraw')">
  <div class="wallet-action-icon minus">−</div>
- <div class="wallet-action-label" data-i18n="withdraw">Вывести</div>
+ <div class="wallet-action-label" data-i18n="withdraw">Withdraw</div>
  </button>
  </div>
  <button class="btn btn-secondary" style="margin-top:28px;" onclick="showPage('requests')" data-i18n="my_tx">📜 Мои транзакции</button>
@@ -1730,7 +1730,7 @@
 
  <!-- DEPOSIT -->
  <div id="page-deposit" class="page">
- <button class="back-link" onclick="showPage('balance')" data-i18n="back">← Назад</button>
+ <button class="back-link" onclick="showPage('balance')" data-i18n="back">← Back</button>
  <div class="section-title" data-i18n="deposit">Пополнение</div>
 
  <div class="min-hint" data-i18n="min_1">Минимум 1$</div>
@@ -1787,7 +1787,7 @@
 
  <!-- WITHDRAW -->
  <div id="page-withdraw" class="page">
- <button class="back-link" onclick="showPage('balance')" data-i18n="back">← Назад</button>
+ <button class="back-link" onclick="showPage('balance')" data-i18n="back">← Back</button>
  <div class="section-title" data-i18n="withdrawal">Вывод</div>
 
  <div class="min-hint" data-i18n="min_5">Минимум 5$</div>
@@ -1828,13 +1828,13 @@
  <input type="checkbox" id="withdraw-terms-agree">
  <span id="withdraw-terms-label">Продолжая, вы даёте <a href="https://clossr.site/terms.html" target="_blank" rel="noopener" class="terms-link">пользовательское соглашение</a> с правилами сервиса</span>
 </label>
-<button class="btn" id="withdraw-btn" onclick="startWithdraw()">Вывести</button>
+<button class="btn" id="withdraw-btn" onclick="startWithdraw()">Withdraw</button>
  </div>
 
  <!-- REQUESTS -->
  <div id="page-requests" class="page">
- <button class="btn btn-secondary btn-back" onclick="showPage('balance')" data-i18n="back">← Назад</button>
- <div class="section-title" data-i18n="my_tx">Мои транзакции</div>
+ <button class="btn btn-secondary btn-back" onclick="showPage('balance')" data-i18n="back">← Back</button>
+ <div class="section-title" data-i18n="my_tx">My transactions</div>
  <div id="requests-list"><div class="loading"><div class="spinner"></div></div></div>
  </div>
 
@@ -1844,20 +1844,20 @@
  <div class="support-grid">
  <button class="support-tile" onclick="showPage('settings-lang')">
  <div class="support-tile-icon">🌐</div>
- <div class="support-tile-title" data-i18n="language">Язык</div>
+ <div class="support-tile-title" data-i18n="language">Language</div>
  <div class="support-tile-sub" id="settings-lang-label"><img class="flag-img sm" src="https://flagcdn.com/w40/gb.png" alt="" width="18" height="13"> English</div>
  </button>
  <button class="support-tile" onclick="showPage('settings-theme')">
  <div class="support-tile-icon">🎨</div>
- <div class="support-tile-title" data-i18n="theme">Тема</div>
+ <div class="support-tile-title" data-i18n="theme">Theme</div>
  <div class="support-tile-sub" id="settings-theme-label">Как в Telegram</div>
  </button>
  </div>
  </div>
 
  <div id="page-settings-lang" class="page">
- <button class="back-link" onclick="showPage('settings')" data-i18n="back">← Назад</button>
- <div class="section-title" data-i18n="language">Язык</div>
+ <button class="back-link" onclick="showPage('settings')" data-i18n="back">← Back</button>
+ <div class="section-title" data-i18n="language">Language</div>
  <div class="btn-stack" id="lang-list">
  <button class="btn btn-secondary lang-btn" onclick="pickLanguage('ru')"><img class="flag-img" src="https://flagcdn.com/w40/ru.png" alt="" width="22" height="16"> Русский <span class="lang-tag lang-orig-tag">оригинал</span></button>
  <button class="btn btn-secondary lang-btn" onclick="pickLanguage('en')"><img class="flag-img" src="https://flagcdn.com/w40/gb.png" alt="" width="22" height="16"> English <span class="lang-tag lang-orig-tag">оригинал</span></button>
@@ -1878,8 +1878,8 @@
  </div>
 
  <div id="page-settings-theme" class="page">
- <button class="back-link" onclick="showPage('settings')" data-i18n="back">← Назад</button>
- <div class="section-title" data-i18n="theme">Тема</div>
+ <button class="back-link" onclick="showPage('settings')" data-i18n="back">← Back</button>
+ <div class="section-title" data-i18n="theme">Theme</div>
  <div class="btn-stack">
  <button class="btn btn-secondary theme-btn" id="theme-auto" onclick="setAppTheme('auto')">Как в Telegram</button>
  <button class="btn btn-secondary theme-btn" id="theme-light" onclick="setAppTheme('light')">Светлая</button>
@@ -1890,7 +1890,7 @@
  <!-- SUPPORT -->
  <div id="page-support" class="page">
  <div class="section-title" style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
- <span data-i18n="support">Поддержка</span>
+ <span data-i18n="support">Support</span>
  <span style="font-size:13px;font-weight:500;opacity:.55;letter-spacing:0.02em;">mellivora</span>
  </div>
  <div class="support-grid">
@@ -1926,17 +1926,17 @@
  </div>
  <button type="button" class="btn btn-secondary" style="margin-top:14px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="openPrivacyPolicy()">
  <span style="font-size:18px;line-height:1;">📄</span>
- <span data-i18n="support_privacy">Политика конфиденциальности</span>
+ <span data-i18n="support_privacy">Privacy Policy</span>
  </button>
  <button type="button" class="btn btn-secondary" style="margin-top:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="openTermsOfService()">
  <span style="font-size:18px;line-height:1;">📋</span>
- <span data-i18n="support_terms">Пользовательское соглашение</span>
+ <span data-i18n="support_terms">Terms of Service</span>
  </button>
  </div>
 
  <div id="page-support-chat" class="page chat-page">
  <div class="chat-header">
- <button class="back-link" onclick="showPage('support')" data-i18n="back">← Назад</button>
+ <button class="back-link" onclick="showPage('support')" data-i18n="back">← Back</button>
  <div class="section-title">Поддержка</div>
  </div>
  <div id="support-chat-messages" class="chat-messages"></div>
@@ -1951,7 +1951,7 @@
 
  <div id="page-admin-support-chat" class="page chat-page">
  <div class="chat-header">
- <button class="back-link" onclick="openAdminSection('complaints')" data-i18n="back">← Назад</button>
+ <button class="back-link" onclick="openAdminSection('complaints')" data-i18n="back">← Back</button>
  <div class="section-title" id="admin-support-chat-title">Чат</div>
  <div id="admin-support-chat-user" class="subtitle" style="margin-bottom:4px;"></div>
  </div>
@@ -1965,7 +1965,7 @@
  </div>
 
 <div id="page-collaborate" class="page">
- <button class="back-link" onclick="showPage('support')" data-i18n="back">← Назад</button>
+ <button class="back-link" onclick="showPage('support')" data-i18n="back">← Back</button>
  <div class="section-title">Сотрудничать</div>
  <div class="info-block" id="hire-info-block"></div>
  <div class="btn-stack">
@@ -1976,7 +1976,7 @@
 
  <!-- JOB APPLICATION FORM -->
  <div id="page-job-form" class="page">
- <button class="back-link" onclick="showPage('collaborate')" data-i18n="back">← Назад</button>
+ <button class="back-link" onclick="showPage('collaborate')" data-i18n="back">← Back</button>
  <div class="section-title" data-i18n="job_form_title">Анкета</div>
  <div class="form-group">
  <label class="form-label" data-i18n="fio">ФИО</label>
@@ -2014,8 +2014,8 @@
  <!-- PROFILE -->
  <div id="page-profile" class="page">
  <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
-  <button type="button" class="back-link" id="own-profile-back" onclick="showPage('home')" data-i18n="back" style="margin:0;">← Назад</button>
-  <button type="button" class="btn-logout-red" id="profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Выйти</button>
+  <button type="button" class="back-link" id="own-profile-back" onclick="showPage('home')" data-i18n="back" style="margin:0;">← Back</button>
+  <button type="button" class="btn-logout-red" id="profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Log out</button>
  </div>
  <div class="profile-header">
  <div class="profile-avatar-wrap" id="profile-avatar-wrap">
@@ -2033,8 +2033,8 @@
  </div>
  <div class="rating-row" id="profile-ratings"></div>
  <div class="seg-toggle" id="profile-seg">
- <button type="button" class="active" id="profile-seg-active" onclick="setOwnProfileStatus('active')">Активные <span class="seg-count" id="own-cnt-active">0</span></button>
- <button type="button" id="profile-seg-completed" onclick="setOwnProfileStatus('completed')">Завершённые <span class="seg-count" id="own-cnt-done">0</span></button>
+ <button type="button" class="active" id="profile-seg-active" onclick="setOwnProfileStatus('active')">Active <span class="seg-count" id="own-cnt-active">0</span></button>
+ <button type="button" id="profile-seg-completed" onclick="setOwnProfileStatus('completed')">Completed <span class="seg-count" id="own-cnt-done">0</span></button>
  </div>
  <div id="profile-listings"><div class="loading"><div class="spinner"></div></div></div>
  </div>
@@ -2049,7 +2049,7 @@
  <div class="support-grid" id="admin-tiles">
  <button class="support-tile" onclick="openAdminSection('workcenter')">
  <div class="support-tile-icon">🗓️</div>
- <div class="support-tile-title" data-i18n="workcenter">Рабочий центр</div>
+ <div class="support-tile-title" data-i18n="workcenter">Work center</div>
  </button>
  <button class="support-tile" onclick="openAdminSection('career')">
  <div class="support-tile-icon">📈</div>
@@ -2057,15 +2057,15 @@
  </button>
  <button class="support-tile" onclick="openAdminSection('listings')">
  <div class="support-tile-icon">📄</div>
- <div class="support-tile-title" data-i18n="mod_listings">Модерация объявлений</div>
+ <div class="support-tile-title" data-i18n="mod_listings">Listing moderation</div>
  </button>
  <button class="support-tile" onclick="openAdminSection('transactions')">
  <div class="support-tile-icon">💳</div>
- <div class="support-tile-title" data-i18n="mod_tx">Модерация транзакций</div>
+ <div class="support-tile-title" data-i18n="mod_tx">Transaction moderation</div>
  </button>
  <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
  <div class="support-tile-icon">💼</div>
- <div class="support-tile-title" data-i18n="mod_jobs">Модерация заявок на работу</div>
+ <div class="support-tile-title" data-i18n="mod_jobs">Job applications</div>
  </button>
  <button class="support-tile" onclick="openAdminSection('complaints')">
  <div class="support-tile-icon">⚠️</div>
@@ -2073,25 +2073,25 @@
  </button>
  <button class="support-tile" id="admin-staff-tile" style="display:none;" onclick="openAdminSection('staff')">
  <div class="support-tile-icon">👥</div>
- <div class="support-tile-title" data-i18n="staff_manage">Управление сотрудниками</div>
+ <div class="support-tile-title" data-i18n="staff_manage">Staff management</div>
  </button>
  <button class="support-tile" onclick="openAdminSection('analytics')">
  <div class="support-tile-icon">📊</div>
- <div class="support-tile-title" data-i18n="analytics">Аналитика</div>
+ <div class="support-tile-title" data-i18n="analytics">Analytics</div>
  </button>
  </div>
  </div>
 
  <!-- ADMIN SECTION LIST -->
  <div id="page-admin-section" class="page">
- <button class="back-link" id="admin-section-back" onclick="showPage('admin')" data-i18n="back">← Назад</button>
+ <button class="back-link" id="admin-section-back" onclick="showPage('admin')" data-i18n="back">← Back</button>
  <div class="section-title" id="admin-section-title">—</div>
  <div id="admin-content"></div>
  </div>
 
  <!-- ADMIN ITEM DETAIL -->
  <div id="page-admin-detail" class="page">
- <button class="back-link" id="admin-detail-back" onclick="showPage('admin-section')" data-i18n="back">← Назад</button>
+ <button class="back-link" id="admin-detail-back" onclick="showPage('admin-section')" data-i18n="back">← Back</button>
  <div class="section-title" id="admin-detail-title">Детали</div>
  <div id="admin-detail-content"></div>
  </div>
@@ -2105,9 +2105,9 @@
 
  <div id="page-user-profile" class="page">
  <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
- <button type="button" class="back-link" id="user-profile-back" onclick="backFromUserProfile()" data-i18n="back" style="margin:0;">← Назад</button>
+ <button type="button" class="back-link" id="user-profile-back" onclick="backFromUserProfile()" data-i18n="back" style="margin:0;">← Back</button>
  <div style="display:flex;align-items:center;gap:8px;">
-  <button type="button" class="btn-logout-red" id="user-profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Выйти</button>
+  <button type="button" class="btn-logout-red" id="user-profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Log out</button>
   <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
  </div>
  </div>
@@ -2116,7 +2116,7 @@
 
  <!-- ADD STAFF -->
  <div id="page-admin-add-staff" class="page">
- <button class="back-link" onclick="showPage('admin')" data-i18n="back">← Назад</button>
+ <button class="back-link" onclick="showPage('admin')" data-i18n="back">← Back</button>
  <div class="section-title" data-i18n="add_staff">Добавить сотрудника</div>
  <div class="form-group">
  <label class="form-label" data-i18n="tg_user_id">ID пользователя Telegram</label>
@@ -2125,7 +2125,7 @@
  <div class="form-group">
  <label class="form-label" data-i18n="role_label">Роль</label>
  <div class="method-list" id="add-staff-roles">
- <div class="method-item selected" data-role="1" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_partner">Партнёр</div></div>
+ <div class="method-item selected" data-role="1" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_partner">Partner</div></div>
  <div class="method-item" data-role="2" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_corp">Корпоративный</div></div>
  <div class="method-item" data-role="3" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_intern">Стажёр</div></div>
  <div class="method-item" data-role="4" onclick="selectStaffRole(this)"><div class="title" data-i18n="role_mod">Модератор</div></div>
@@ -2146,6 +2146,14 @@ window.addEventListener('unhandledrejection', function(ev) {
  window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
 });
 const API_URL = ("https://exchange-bot4.waw0.amvera.tech" || "").replace(/\/$/, "");
+
+try {
+  if (!localStorage.getItem('xcod_lang')) {
+    localStorage.setItem('xcod_lang', 'en');
+  }
+  document.documentElement.lang = (localStorage.getItem('xcod_lang') || 'en');
+} catch (e) {}
+
 var SUPPORT_MANAGER_URL = 'https://t.me/mediamanagering';
 var SUPPORT_BOT_URL = 'https://t.me/clossrsuppbot';
 var SUPPORT_BOT_USERNAME = 'clossrsuppbot';
@@ -2168,7 +2176,7 @@ var APP_INSTALL_FILES = {
 };
 var __appInstallPlatform = null;
 var APP_I18N = {
-  ru: { dl_app:'Скачать приложение', dl_to_site:'На сайт', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Скачать', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux', dl_tg:'Мы в Telegram', dl_tg_bot:'Бот', dl_tg_app:'Мини-приложение', dl_tg_app_sub:'Открыть',
+  ru: { dl_app:'Download app', dl_to_site:'На сайт', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Скачать', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux', dl_tg:'Мы в Telegram', dl_tg_bot:'Бот', dl_tg_app:'Мини-приложение', dl_tg_app_sub:'Открыть',
     dl_android_guide:'1. Нажмите «Скачать» и сохраните APK.\n2. Откройте файл.\n3. Разрешите установку.\n4. Установите Exchange.',
     dl_ios_guide:'Safari → Поделиться → На экран «Домой» → Добавить.',
     dl_windows_guide:'1. Скачайте .exe.\n2. Запустите установщик.\n3. Подтвердите SmartScreen.\n4. Завершите.',
@@ -2207,7 +2215,7 @@ function isNativeApp() {
 }
 function shouldShowOpenSiteBtn() {
   // Миниапп и нативное приложение → кнопка «На сайт»
-  // Сайт (браузер) → кнопка «Скачать приложение» / меню установки
+  // Сайт (браузер) → кнопка «Download app» / меню установки
   try {
     if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return true;
   } catch (e) {}
@@ -2430,8 +2438,11 @@ function isTelegramMiniApp() {
  return false;
 }
 
-/** Среда Telegram (миниапп), даже если initData ещё не пришёл */
+/** Среда Telegram Mini App (не обычный сайт и не Capacitor-приложение). */
 function isTelegramEnvironment() {
+ try {
+ if (typeof isNativeApp === 'function' && isNativeApp()) return false;
+ } catch (e0) {}
  try {
  if (isTelegramMiniApp()) return true;
  var wa = window.Telegram && Telegram.WebApp;
@@ -2439,17 +2450,18 @@ function isTelegramEnvironment() {
  try {
  if (wa.initDataUnsafe && wa.initDataUnsafe.user && wa.initDataUnsafe.user.id) return true;
  } catch (e1) {}
- try {
- if (wa.platform && String(wa.platform) !== '' && String(wa.platform) !== 'unknown') return true;
- } catch (e2) {}
  }
  var q = String(location.search || '') + String(location.hash || '');
- if (q.indexOf('tgWebApp') >= 0) return true;
- // Telegram WebView user agent hints
- var ua = navigator.userAgent || '';
- if (/Telegram/i.test(ua)) return true;
+ if (q.indexOf('tgWebAppData') >= 0 || q.indexOf('tgWebAppVersion') >= 0) return true;
  } catch (e) {}
  return false;
+}
+
+/** Сайт в браузере или нативное приложение — нужен Login Widget / сессия */
+function isWebOrNativeClient() {
+ try { if (typeof isNativeApp === 'function' && isNativeApp()) return true; } catch (e) {}
+ try { if (isTelegramMiniApp() || isTelegramEnvironment()) return false; } catch (e2) {}
+ return true;
 }
 
 function waitForTelegramInitData(maxMs) {
@@ -2523,6 +2535,16 @@ function showLoginOverlay() {
  var ov = document.getElementById('login-overlay');
  if (ov) ov.style.display = 'flex';
  try { document.body.style.overflow = 'hidden'; } catch (e) {}
+ try {
+   var box = document.getElementById('page-loading');
+   if (box) box.style.display = 'none';
+ } catch (e2) {}
+ try {
+   var title = document.getElementById('login-title');
+   if (title) title.textContent = 'ExChange';
+   var sub = document.getElementById('login-sub');
+   if (sub) sub.textContent = 'Sign in with Telegram to use the platform on the website. Same account, balance and settings as in the bot and mini app.';
+ } catch (e3) {}
  loadTelegramLoginWidget();
 }
 
@@ -2536,32 +2558,43 @@ function loadTelegramLoginWidget() {
  var wrap = document.getElementById('login-widget-wrap');
  if (!wrap) return;
  wrap.innerHTML = '<div class="spinner" style="margin:12px auto;"></div>';
- // config from API
+ window.onTelegramAuth = function(user) {
+   handleTelegramLogin(user);
+ };
+ function mountWidget(bot) {
+   if (!bot) {
+     wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Bot is not configured.</p>';
+     return;
+   }
+   wrap.innerHTML = '';
+   var s = document.createElement('script');
+   s.async = true;
+   s.src = 'https://telegram.org/js/telegram-widget.js?22';
+   s.setAttribute('data-telegram-login', bot);
+   s.setAttribute('data-size', 'large');
+   s.setAttribute('data-radius', '12');
+   s.setAttribute('data-onauth', 'onTelegramAuth(user)');
+   s.setAttribute('data-request-access', 'write');
+   s.onerror = function() {
+     wrap.innerHTML = '<p style="color:#f66;font-size:13px;margin-bottom:12px;">Telegram widget failed to load.</p>'
+       + '<a class="btn" style="display:inline-block;text-decoration:none;" href="https://t.me/' + bot + '" target="_blank" rel="noopener">Open @' + bot + '</a>';
+   };
+   wrap.appendChild(s);
+   // fallback hint
+   var hint = document.createElement('p');
+   hint.style.cssText = 'font-size:12px;opacity:.7;margin-top:14px;';
+   hint.textContent = 'Authorize via the Telegram button above';
+   wrap.appendChild(hint);
+ }
  fetch((typeof API_URL !== 'undefined' ? API_URL : '') + '/api/auth/config', { method: 'GET' })
  .then(function(r) { return r.json(); })
  .then(function(cfg) {
- var bot = (cfg && cfg.bot_username) ? cfg.bot_username : '';
- if (!bot) {
- wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Bot is not configured. Please open the mini app in Telegram.</p>';
- return;
- }
- wrap.innerHTML = '';
- // Telegram Login Widget
- window.onTelegramAuth = function(user) {
- handleTelegramLogin(user);
- };
- var s = document.createElement('script');
- s.async = true;
- s.src = 'https://telegram.org/js/telegram-widget.js?22';
- s.setAttribute('data-telegram-login', bot);
- s.setAttribute('data-size', 'large');
- s.setAttribute('data-radius', '12');
- s.setAttribute('data-onauth', 'onTelegramAuth(user)');
- s.setAttribute('data-request-access', 'write');
- wrap.appendChild(s);
+   var bot = (cfg && cfg.bot_username) ? String(cfg.bot_username).replace(/^@/, '') : 'exchangeprojectsbot';
+   mountWidget(bot);
  })
  .catch(function() {
- wrap.innerHTML = '<p style="color:#f66;font-size:13px;">Could not load sign-in. Check API connection.</p>';
+   // API недоступен — всё равно пробуем виджет с известным username
+   mountWidget('exchangeprojectsbot');
  });
 }
 
@@ -2636,7 +2669,7 @@ async function continueAfterAuth() {
  + '<div style="font-size:13px;color:var(--hint);margin-bottom:8px;">' + safe + '</div>'
  + '<div style="font-size:11px;color:var(--hint);word-break:break-all;margin-bottom:8px;">API: ' + apiLine + '</div>'
  + '<div id="boot-health-info" style="font-size:11px;color:var(--hint);margin-bottom:14px;"></div>'
- + '<button class="btn" style="margin-top:8px;" onclick="location.reload()">Обновить</button>'
+ + '<button class="btn" style="margin-top:8px;" onclick="location.reload()">Refresh</button>'
  + '<button class="btn btn-secondary" style="margin-top:8px;" id="btn-reset-session">Сбросить вход</button>'
  + '</div>';
  try {
@@ -2741,47 +2774,44 @@ async function init() {
  function setLoad() {
  try {
  var lab = box && box.querySelector('.load-msg');
- if (lab) lab.textContent = tBlock('loading');
+ if (lab) lab.textContent = (typeof tBlock === 'function' && (tBlock('loading') || tBlock('loading2'))) || 'Loading data from server...';
  } catch (e) {}
  }
- try { applyThemeFromStorage();
- try { applyI18n(); } catch (e) {} } catch (e) {}
+ try { applyThemeFromStorage(); } catch (e) {}
+ try { applyI18n(); } catch (e) {}
  setLoad();
 
  try {
- var tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tg;
- try { tgLocal.ready && tgLocal.ready(); tgLocal.expand && tgLocal.expand(); } catch (e) {}
+ var tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : (typeof tg !== 'undefined' ? tg : null);
+ try { if (tgLocal) { tgLocal.ready && tgLocal.ready(); tgLocal.expand && tgLocal.expand(); } } catch (e) {}
 
- // В Telegram (миниапп) — всегда ждём initData и входим автоматически
- var inTg = false;
- try { inTg = isTelegramEnvironment() || isTelegramMiniApp(); } catch (e) {}
+ // ——— 1) MINIAPP: аккаунт из профиля Telegram (initData), без экрана входа ———
+ var inMini = false;
+ try { inMini = isTelegramEnvironment() || isTelegramMiniApp(); } catch (e) {}
+ try { if (typeof isNativeApp === 'function' && isNativeApp()) inMini = false; } catch (eN) {}
 
- if (inTg) {
- if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">' + ((typeof tBlock==='function' && (tBlock('loading')||tBlock('loading2'))) || 'Loading data from server...') + '</div></div>';
+ if (inMini) {
+ if (box) {
+ box.style.display = '';
+ box.innerHTML = '<div class="empty"><div class="spinner"></div><div class="load-msg" style="margin-top:12px;">' + ((typeof tBlock==='function' && (tBlock('loading')||tBlock('loading2'))) || 'Loading data from server...') + '</div></div>';
+ }
  try { hideLoginOverlay(); } catch (eH) {}
- // ждём initData дольше — WebApp.js подгружается async
- if (!tgLocal.initData || String(tgLocal.initData).length < 10) {
- var waited = await waitForTelegramInitData(5500);
+ if (!tgLocal || !tgLocal.initData || String(tgLocal.initData).length < 10) {
+ var waited = await waitForTelegramInitData(6000);
  tgLocal = (window.Telegram && Telegram.WebApp) ? Telegram.WebApp : tgLocal;
- if (waited) {
- try { tgLocal.initData = waited; } catch (e) {}
+ if (waited) { try { tgLocal.initData = waited; } catch (e) {} }
  }
+ if ((!tgLocal || !tgLocal.initData || String(tgLocal.initData).length < 10)) {
+ var waited2 = await waitForTelegramInitData(3000);
+ if (waited2) { try { if (tgLocal) tgLocal.initData = waited2; } catch (e) {} }
  }
- try { if (typeof tg !== 'undefined') tg = tgLocal; } catch (e) {}
+ try { if (tgLocal) tg = tgLocal; } catch (e) {}
  __isMiniApp = !!(tgLocal && tgLocal.initData && String(tgLocal.initData).length > 10);
- if (!__isMiniApp) {
- // ещё одна попытка
- var waited2 = await waitForTelegramInitData(2500);
- if (waited2) {
- try { tgLocal.initData = waited2; tg = tgLocal; } catch (e) {}
- __isMiniApp = true;
- }
- }
  if (__isMiniApp) {
- // авто-вход по initData — без экрана логина
- try { hideLoginOverlay(); } catch (e) {}
+ // API возьмёт initData из Telegram.WebApp — пользователь = профиль TG
+ try { hideLoginOverlay(); } catch (eH2) {}
  } else {
- // Telegram WebView без initData (редко) — не показываем login widget, пробуем session или ждём
+ // нет initData — пробуем сохранённую сессию, иначе ждём (не виджет: внутри TG)
  var sessTg = loadWebSession();
  if (sessTg && sessTg.token) {
  __webSessionToken = sessTg.token;
@@ -2791,16 +2821,16 @@ async function init() {
  return;
  } catch (eSess) { clearWebSession(); }
  }
- // остаёмся на спиннере и пробуем ещё раз initData в конце
  }
  } else {
- // Сайт / приложение (браузер, Capacitor): сессия или экран входа
+ // ——— 2) САЙТ и ПРИЛОЖЕНИЕ: сессия или авторизация через Telegram Login Widget ———
  __isMiniApp = false;
+ try { if (typeof tg !== 'undefined' && tg) { try { tg.initData = ''; } catch (e) {} } } catch (e2) {}
  var sess = loadWebSession();
  if (sess && sess.token) {
  __webSessionToken = sess.token;
  try {
- await apiFetch('/api/auth/session', { method: 'GET', timeout: 8000 });
+ await apiFetch('/api/auth/session', { method: 'GET', timeout: 10000 });
  await continueAfterAuth();
  return;
  } catch (eSess) {
@@ -2812,7 +2842,7 @@ async function init() {
  return;
  }
 
- // health + user с повтором, без показа технических ошибок
+ // Загрузка /api/user (миниапп — по initData, сайт/апп — по session после continueAfterAuth)
  var ok = false;
  for (var attempt = 0; attempt < 3 && !ok; attempt++) {
  try {
@@ -2822,7 +2852,6 @@ async function init() {
  if (userData && !userData.privacy_miniapp) {
  showPrivacyOverlay(userData.privacy_policy_url || '');
  }
- // sync lang + theme from bot/server
  try {
  var srvLang = (userData && userData.lang) ? userData.lang : null;
  var srvTheme = (userData && userData.theme) ? userData.theme : null;
@@ -2855,9 +2884,11 @@ async function init() {
  }
  }
  if (!ok) {
+ if (box) {
  box.innerHTML = '<div class="empty"><div class="spinner"></div>' +
  '<div class="load-msg" style="margin-top:12px;">' + ((typeof tBlock==='function' && (tBlock('loading')||tBlock('loading2'))) || 'Loading data from server...') + '</div>' +
- '<button class="btn" style="margin-top:16px;" onclick="location.reload()" data-i18n="refresh">Обновить</button></div>';
+ '<button class="btn" style="margin-top:16px;" onclick="location.reload()" data-i18n="refresh">Refresh</button></div>';
+ }
  return;
  }
 
@@ -2866,9 +2897,12 @@ async function init() {
  window.__xcodBootOk = true;
  try { updateTopSideButton(); } catch (eTB) {}
  } catch (e) {
+ if (box) {
  box.innerHTML = '<div class="empty"><div class="spinner"></div>' +
  '<div class="load-msg" style="margin-top:12px;">' + ((typeof tBlock==='function' && (tBlock('loading')||tBlock('loading2'))) || 'Loading data from server...') + '</div>' +
- '<button class="btn" style="margin-top:16px;" onclick="location.reload()" data-i18n="refresh">Обновить</button></div>';
+ '<button class="btn" style="margin-top:16px;" onclick="location.reload()" data-i18n="refresh">Refresh</button></div>';
+ }
+ try { console.error('init', e); } catch (e2) {}
  }
 }
 
@@ -12402,7 +12436,9 @@ function applyI18n() {
  "Продавец передает данные": 'seller_transfer',
  "Завершен": 'status_completed',
  "Доступ к площадке ограничен из-за нарушений правил сообщества": 'ban_title'
-};
+}
+try { if (document.readyState !== "loading") applyI18n(); else document.addEventListener("DOMContentLoaded", function(){ try { applyI18n(); } catch(e){} }); } catch (eEarlyI18n) {}
+;
 
  function translateText(txt) {
  if (!txt) return null;
@@ -12958,7 +12994,7 @@ async function openModUserBanHistory(uid) {
  var items = data.actions || [];
  window._modBanHistCache = items;
  var html = '<div class="section-title" style="font-size:16px;margin:10px 0;">История блокировок</div>';
- if (!items.length) html += '<div class="empty">Пусто</div>';
+ if (!items.length) html += '<div class="empty">Empty</div>';
  items.forEach(function(a, idx) {
  html += '<div class="list-item" style="cursor:pointer;" onclick="openModUserBanHistoryDetail(' + idx + ')">';
  html += '<div class="title">' + String(a.action_label || a.action_type).replace(/</g,'&lt;') + '</div>';
@@ -13409,7 +13445,7 @@ async function openModUserHistory(uid, kind) {
  var items = data.items || [];
  window._modUserHistCache = { uid: uid, kind: kind, items: items };
  var html = '<div class="section-title" style="font-size:16px;margin:10px 0;">' + (titles[kind] || kind) + '</div>';
- if (!items.length) html += '<div class="empty">Пусто</div>';
+ if (!items.length) html += '<div class="empty">Empty</div>';
  items.forEach(function(it, idx) {
  html += '<div class="list-item" style="cursor:pointer;" onclick="openModUserHistoryDetail(' + idx + ')">';
  if (kind === 'transactions') {
@@ -13574,15 +13610,15 @@ async function renderUserProfile() {
 
  '<div class="rating-chip"><div class="rl">' + tBlock('buyer_rating') + '</div><div class="rv">★ ' + Number(p.rating_buyer).toFixed(2) + '</div></div>';
  if (p.rating_staff != null) {
- html += '<div class="rating-chip"><div class="rl">Рейтинг сотрудника</div><div class="rv">★ ' + Number(p.rating_staff).toFixed(2) + '</div></div>';
+ html += '<div class="rating-chip"><div class="rl">Staff rating</div><div class="rv">★ ' + Number(p.rating_staff).toFixed(2) + '</div></div>';
  }
  html += '</div>';
  // moderation actions
  var myRole = (userData && userData.role) || 0;
  var theirRole = p.role || 0;
  html += '<div class="seg-toggle">' +
- '<button class="' + (status==='active'?'active':'') + '" onclick="window._profileStatus=\'active\';renderUserProfile()">Активные <span class="seg-count">' + (p.count_active != null ? p.count_active : 0) + '</span></button>' +
- '<button class="' + (status==='completed'?'active':'') + '" onclick="window._profileStatus=\'completed\';renderUserProfile()">Завершённые <span class="seg-count">' + (p.count_completed != null ? p.count_completed : 0) + '</span></button>' +
+ '<button class="' + (status==='active'?'active':'') + '" onclick="window._profileStatus=\'active\';renderUserProfile()">Active <span class="seg-count">' + (p.count_active != null ? p.count_active : 0) + '</span></button>' +
+ '<button class="' + (status==='completed'?'active':'') + '" onclick="window._profileStatus=\'completed\';renderUserProfile()">Completed <span class="seg-count">' + (p.count_completed != null ? p.count_completed : 0) + '</span></button>' +
  '</div>';
  var items = p.listings || [];
  if (!items.length) {
@@ -14316,7 +14352,7 @@ function openCreateTypeSheet(prefer) {
  sheet.innerHTML =
  '<div style="width:100%;max-width:480px;background:var(--bg,#1c1c1e);border-radius:16px 16px 0 0;padding:16px 16px 28px;box-sizing:border-box;">' +
  '<div style="font-size:16px;font-weight:600;margin-bottom:12px;">' + tBlock('create_listing') + '</div>' +
- '<button type="button" class="btn" style="margin-bottom:8px;" onclick="document.getElementById(\'create-type-sheet\').remove();startSaleCreate()" data-i18n="sale">Продажа</button>' +
+ '<button type="button" class="btn" style="margin-bottom:8px;" onclick="document.getElementById(\'create-type-sheet\').remove();startSaleCreate()" data-i18n="sale">Sale</button>' +
  '<button type="button" class="btn btn-secondary" onclick="document.getElementById(\'create-type-sheet\').remove();startFreelanceCreate()" data-i18n="freelance">Фриланс</button>' +
  '</div>';
  document.body.appendChild(sheet);
@@ -14560,21 +14596,21 @@ async function openListing(id) {
  (isFav ? '★ В избранном' : '☆ В избранное') + '</button>';
 
  if (l.seller_username) {
- html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="openTgUser(\'' + String(l.seller_username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Написать</button>';
+ html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="openTgUser(\'' + String(l.seller_username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Message</button>';
  } else {
- html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="tg.showAlert(\'У продавца нет username в Telegram\')">Написать</button>';
+ html += '<button class="btn btn-secondary" style="margin-bottom:10px;" onclick="tg.showAlert(\'У продавца нет username в Telegram\')">Message</button>';
  }
  if (canBuy) {
- html += '<button class="btn" onclick="startBuyListing(' + l.id + ')">Купить</button>';
+ html += '<button class="btn" onclick="startBuyListing(' + l.id + ')">Buy</button>';
  }
  } else if (isOwner) {
  // владелец
  if (l.status === 'active') {
- html += '<button class="btn" style="margin-top:8px;" onclick="editRejectedListing(' + l.id + ')">Редактировать</button>';
- html += '<button class="btn" style="margin-top:8px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="unpublishListing(' + l.id + ')">Снять с публикации</button>';
+ html += '<button class="btn" style="margin-top:8px;" onclick="editRejectedListing(' + l.id + ')">Edit</button>';
+ html += '<button class="btn" style="margin-top:8px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="unpublishListing(' + l.id + ')">Unpublish</button>';
  } else if (l.status === 'rejected') {
  html += '<div class="btn-stack" style="margin-top:10px;">';
- html += '<button class="btn" onclick="editRejectedListing(' + l.id + ')">Редактировать</button>';
+ html += '<button class="btn" onclick="editRejectedListing(' + l.id + ')">Edit</button>';
  html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">' + tBlock('delete_from_history') + '</button>';
  html += '</div>';
  } else if (l.status === 'blocked') {
@@ -14583,11 +14619,11 @@ async function openListing(id) {
  html += '</div>';
  } else if (['unpublished','sold','completed','closed'].indexOf(l.status) >= 0) {
  html += '<div class="btn-stack" style="margin-top:10px;">';
- html += '<button class="btn" onclick="republishListing(' + l.id + ')">Опубликовать</button>';
+ html += '<button class="btn" onclick="republishListing(' + l.id + ')">Publish</button>';
  html += '<button class="btn" style="background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">' + tBlock('delete_from_history') + '</button>';
  html += '</div>';
  } else if (l.status === 'pending') {
- html += '<div class="info-block" style="margin-top:8px;">На модерации</div>';
+ html += '<div class="info-block" style="margin-top:8px;">Pending moderation</div>';
  html += '<button class="btn" style="margin-top:10px;background:transparent;border:1.5px solid var(--destructive);color:var(--destructive);" onclick="deleteListingHistory(' + l.id + ')">' + tBlock('delete_from_history') + '</button>';
  } else if (l.status === 'refund_moderation') {
  html += '<div class="info-block" style="margin-top:8px;">На модерации: возврат средств по сделке. Удаление недоступно до решения модерации.</div>';
@@ -14776,7 +14812,7 @@ function openOrderDetail(id) {
  var canCancel = (isBuyer || isSeller) && (o.status === 'awaiting_seller' || o.status === 'buyer_review');
 
  var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;">';
- head += '<button class="btn btn-secondary btn-back" style="margin:0;" onclick="showPage(\'orders\')" data-i18n="back">← Назад</button>';
+ head += '<button class="btn btn-secondary btn-back" style="margin:0;" onclick="showPage(\'orders\')" data-i18n="back">← Back</button>';
  if (o.status === 'buyer_review' && o.review_deadline) {
  head += '<div id="order-timer" style="font-weight:700;font-size:15px;">' + formatRemain(o.review_deadline) + '</div>';
  } else {
@@ -14831,9 +14867,9 @@ function openOrderDetail(id) {
  html += '<div class="info-block">Продавец указал, что часть файлов отправит в ЛС.</div>';
  var sellerU = o.seller_username || '';
  if (sellerU) {
- html += '<button class="btn btn-secondary" onclick="openTgUser(\'' + String(sellerU).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Написать</button>';
+ html += '<button class="btn btn-secondary" onclick="openTgUser(\'' + String(sellerU).replace(/[^a-zA-Z0-9_]/g,'') + '\')">Message</button>';
  } else {
- html += '<button class="btn btn-secondary" onclick="tg.showAlert(\'У продавца нет username\')">Написать</button>';
+ html += '<button class="btn btn-secondary" onclick="tg.showAlert(\'У продавца нет username\')">Message</button>';
  }
  }
  html += '<div class="btn-stack" style="margin-top:12px;">' +
@@ -16170,7 +16206,7 @@ async function openBlocksMenu() {
  '<label class="form-label">Поиск участника по ID</label>' +
  '<div style="display:flex;gap:8px;">' +
  '<input class="form-input" type="number" id="block-search-id" placeholder="Telegram ID" style="flex:1;">' +
- '<button type="button" class="btn" style="width:auto;padding:10px 14px;" onclick="searchBlockUser()" data-i18n="search_btn">Найти</button>' +
+ '<button type="button" class="btn" style="width:auto;padding:10px 14px;" onclick="searchBlockUser()" data-i18n="search_btn">Search</button>' +
  '</div></div>' +
  '<div id="block-search-result"></div>';
 }
@@ -16687,7 +16723,7 @@ async function openShiftSchedule(type, date) {
  var html = '';
  setAdminSectionBack(function(){ openMyShifts(); });
  if (mine && !mine.finished && !mine.in_progress) {
- html += '<div style="margin-bottom:12px;"><button type="button" class="btn btn-danger" onclick="cancelShift(\'' + date + '\',\'' + type + '\')">Отменить</button></div>';
+ html += '<div style="margin-bottom:12px;"><button type="button" class="btn btn-danger" onclick="cancelShift(\'' + date + '\',\'' + type + '\')">Cancel</button></div>';
  }
 
  html += '<div class="listing-card">';
@@ -16771,7 +16807,7 @@ async function openShiftControl(shiftDate, shiftType) {
 
  var timeLabel = data.shift_type === 'day' ? (tBlock('from') + ' 09:00 ' + tBlock('to') + ' 21:00') : (tBlock('from') + ' 21:00 ' + tBlock('to') + ' 09:00');
  html += '<div style="display:flex;gap:8px;margin:12px 0;">';
- html += '<button type="button" class="btn" style="flex:1;" onclick="shiftControlOpen(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Открыть</button>';
+ html += '<button type="button" class="btn" style="flex:1;" onclick="shiftControlOpen(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Open</button>';
  html += '<button type="button" class="btn btn-danger" style="flex:1;" onclick="shiftControlClose(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Закрыть</button>';
  html += '</div>';
 
