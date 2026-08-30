@@ -2104,16 +2104,21 @@
  </button>
  <button class="support-tile" onclick="openAdminSection('transactions')">
  <div class="support-tile-icon">💳</div>
- <div class="support-tile-title" data-i18n="mod_tx">Модерация транзакций</div>
+ <div class="support-tile-title" data-i18n="mod_tx">Transaction moderation</div>
  </button>
- <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
- <div class="support-tile-icon">💼</div>
- <div class="support-tile-title" data-i18n="mod_jobs">Модерация заявок на работу</div>
+ <button class="support-tile" onclick="openAdminSection('verification')">
+ <div class="support-tile-icon">🪪</div>
+ <div class="support-tile-title" data-i18n="mod_verify">Verification moderation</div>
  </button>
  <button class="support-tile" onclick="openAdminSection('complaints')">
  <div class="support-tile-icon">⚠️</div>
- <div class="support-tile-title" data-i18n="mod_tickets">Модерация обращений</div>
+ <div class="support-tile-title" data-i18n="mod_tickets">Complaints moderation</div>
  </button>
+ <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
+ <div class="support-tile-icon">💼</div>
+ <div class="support-tile-title" data-i18n="mod_jobs">Job applications</div>
+ </button>
+
  <button class="support-tile" id="admin-staff-tile" style="display:none;" onclick="openAdminSection('staff')">
  <div class="support-tile-icon">👥</div>
  <div class="support-tile-title" data-i18n="staff_manage">Управление сотрудниками</div>
@@ -2936,7 +2941,7 @@ function verifyBadgeHtml(level, clickable) {
   var onclick = clickable ? ' onclick="openVerifyPage()" ' : ' ';
   return '<span class="verify-badge ' + cls + '" title="' + String(title).replace(/"/g, '&quot;') + '"' + onclick + 'aria-label="' + String(title).replace(/"/g, '&quot;') + '">' + icon + '</span>';
 }
-var __verifyDraft = { step: 0, form: {}, photos: { selfie: '', passport: '', with_passport: '' }, camStream: null };
+var __verifyDraft = { step: 0, form: {}, photos: { selfie: '', passport: '', passport_reg: '', with_passport: '' }, camStream: null };
 function updateOwnVerifyBadge() {
   var el = document.getElementById('profile-verify-badge');
   if (!el) return;
@@ -3048,7 +3053,7 @@ function renderVerifyPage() {
 function startPassportWizard() {
   __verifyDraft.step = 1;
   if (!__verifyDraft.form) __verifyDraft.form = {};
-  if (!__verifyDraft.photos) __verifyDraft.photos = { selfie: '', passport: '', with_passport: '' };
+  if (!__verifyDraft.photos) __verifyDraft.photos = { selfie: '', passport: '', passport_reg: '', with_passport: '' };
   renderVerifyPage();
 }
 function renderVerifyWizard() {
@@ -3066,13 +3071,13 @@ function renderVerifyWizard() {
       '<div class="form-group"><label class="form-label">' + (tBlock('verify_full_name') || 'Full name (as in passport)') + '</label>' +
       '<input class="form-input" id="vf-name" type="text" value="' + String(f.full_name || '').replace(/"/g,'&quot;') + '" placeholder="' + (tBlock('verify_full_name_ph') || 'IVANOV IVAN IVANOVICH') + '"></div>' +
       '<div class="form-group"><label class="form-label">' + (tBlock('verify_dob') || 'Date of birth') + ' <span style="opacity:.7">(16+)</span></label>' +
-      '<input class="form-input" id="vf-dob" type="date" value="' + String(f.dob || '') + '"></div>' +
+      '<input class="form-input" id="vf-dob" type="text" inputmode="numeric" placeholder="' + (tBlock('verify_date_ph') || 'DD.MM.YYYY') + '" value="' + String(f.dob || f.dob_raw || '').replace(/"/g,'') + '"></div>' +
       '<div class="form-group"><label class="form-label">' + (tBlock('verify_series') || 'Passport series and number') + '</label>' +
       '<input class="form-input" id="vf-series" type="text" value="' + String(f.series_number || '').replace(/"/g,'&quot;') + '" placeholder="' + (tBlock('verify_series_ph') || '00 00 000000') + '"></div>' +
       '<div class="form-group"><label class="form-label">' + (tBlock('verify_issued_by') || 'Issued by') + '</label>' +
       '<input class="form-input" id="vf-issued" type="text" value="' + String(f.issued_by || '').replace(/"/g,'&quot;') + '"></div>' +
       '<div class="form-group"><label class="form-label">' + (tBlock('verify_issue_date') || 'Date of issue') + '</label>' +
-      '<input class="form-input" id="vf-issue-date" type="date" value="' + String(f.issue_date || '') + '"></div>' +
+      '<input class="form-input" id="vf-issue-date" type="text" inputmode="numeric" placeholder="' + (tBlock('verify_date_ph') || 'DD.MM.YYYY') + '" value="' + String(f.issue_date || '').replace(/"/g,'') + '"></div>' +
       '<label class="terms-check" style="display:flex;align-items:flex-start;gap:10px;margin:14px 0;">' +
       '<input type="checkbox" id="vf-terms" style="margin-top:3px;">' +
       '<span id="vf-terms-label"></span></label>' +
@@ -3086,20 +3091,46 @@ function renderVerifyWizard() {
   }
 
   if (step === 2 || step === 3 || step === 4) {
-    var key = step === 2 ? 'selfie' : (step === 3 ? 'passport' : 'with_passport');
-    var hintKey = step === 2 ? 'verify_selfie_hint' : (step === 3 ? 'verify_passport_photo_hint' : 'verify_with_passport_hint');
-    var titleKey = step === 2 ? 'verify_step_selfie' : (step === 3 ? 'verify_step_passport_photo' : 'verify_step_with_passport');
+    var key, hintKey, titleKey;
+    if (step === 2) {
+      key = 'selfie'; hintKey = 'verify_selfie_hint'; titleKey = 'verify_step_selfie';
+    } else if (step === 3) {
+      // passport: two photos — main page + registration
+      key = null;
+      titleKey = 'verify_step_passport_photo';
+    } else {
+      key = 'with_passport'; hintKey = 'verify_with_passport_hint'; titleKey = 'verify_step_with_passport';
+    }
+    var html = dots + '<div class="section-title" style="font-size:16px;">' + (tBlock(titleKey) || '') + '</div>';
+    if (step === 3) {
+      html += '<div class="info-block">' + (tBlock('verify_passport_two_hint') || 'Photograph the main passport page and the registration page in good lighting.') + '</div>';
+      ['passport', 'passport_reg'].forEach(function(pk) {
+        var label = pk === 'passport' ? (tBlock('verify_passport_main') || 'Main page') : (tBlock('verify_passport_reg') || 'Registration page');
+        var photo = (__verifyDraft.photos || {})[pk] || '';
+        html += '<div class="form-label" style="margin-top:12px;">' + label + '</div>';
+        if (photo) {
+          html += '<div class="verify-photo-box"><img src="' + photo + '" alt="">' +
+            '<button type="button" class="verify-photo-del" onclick="verifyClearPhoto(\'' + pk + '\')">×</button></div>';
+        } else {
+          html += '<button type="button" class="btn btn-secondary" style="margin-bottom:8px;" onclick="verifyOpenCamera(\'' + pk + '\')">' + (tBlock('verify_take_photo') || 'Take a photo') + '</button>';
+        }
+      });
+      var both = (__verifyDraft.photos.passport && __verifyDraft.photos.passport_reg);
+      if (both) {
+        html += '<button type="button" class="btn" style="margin-top:10px;" onclick="verifyWizardNextPhoto()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+      }
+      wiz.innerHTML = html;
+      return;
+    }
     var photo = (__verifyDraft.photos || {})[key] || '';
-    var html = dots + '<div class="section-title" style="font-size:16px;">' + (tBlock(titleKey) || '') + '</div>' +
-      '<div class="info-block">' + (tBlock(hintKey) || '') + '</div>';
+    html += '<div class="info-block">' + (tBlock(hintKey) || '') + '</div>';
     if (photo) {
       html += '<div class="verify-photo-box"><img src="' + photo + '" alt="">' +
         '<button type="button" class="verify-photo-del" onclick="verifyClearPhoto(\'' + key + '\')">×</button></div>' +
         '<button type="button" class="btn" onclick="verifyWizardNextPhoto()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
     } else {
       html += '<div id="verify-cam-wrap"></div>' +
-        '<button type="button" class="btn" id="verify-take-btn" onclick="verifyOpenCamera(\'' + key + '\')">' + (tBlock('verify_take_photo') || 'Take a photo') + '</button>' +
-        '<input type="file" id="verify-file-input" accept="image/*" capture="' + (step === 2 ? 'user' : 'environment') + '" style="display:none" onchange="verifyOnFile(event,\'' + key + '\')">';
+        '<button type="button" class="btn" id="verify-take-btn" onclick="verifyOpenCamera(\'' + key + '\')">' + (tBlock('verify_take_photo') || 'Take a photo') + '</button>';
     }
     wiz.innerHTML = html;
     return;
@@ -3119,6 +3150,7 @@ function renderVerifyWizard() {
       '</div>' +
       (ph.selfie ? '<div class="verify-photo-box"><img src="' + ph.selfie + '" alt=""></div>' : '') +
       (ph.passport ? '<div class="verify-photo-box"><img src="' + ph.passport + '" alt=""></div>' : '') +
+      (ph.passport_reg ? '<div class="verify-photo-box"><img src="' + ph.passport_reg + '" alt=""></div>' : '') +
       (ph.with_passport ? '<div class="verify-photo-box"><img src="' + ph.with_passport + '" alt=""></div>' : '') +
       '<button type="button" class="btn" onclick="submitPassportVerification()">' + (tBlock('verify_submit_moderation') || 'Submit for moderation') + '</button>';
   }
@@ -3130,34 +3162,71 @@ function verifyWizardNextFromForm() {
   var issued = (document.getElementById('vf-issued') || {}).value || '';
   var idate = (document.getElementById('vf-issue-date') || {}).value || '';
   var terms = document.getElementById('vf-terms');
-  if (!name.trim() || !dob || !series.trim() || !issued.trim() || !idate) {
+  if (!name.trim() || !dob.trim() || !series.trim() || !issued.trim() || !idate.trim()) {
     try { tg.showAlert(tBlock('verify_form_incomplete') || 'Please fill in all fields'); } catch(e){ alert('Fill all fields'); }
     return;
   }
-  // age 16+
+  // parse date DD.MM.YYYY or YYYY-MM-DD
+  function parseDob(s) {
+    s = String(s).trim();
+    var m = s.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if (m) return { y: +m[3], m: +m[2], d: +m[1], iso: m[3]+'-'+m[2]+'-'+m[1] };
+    m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) return { y: +m[1], m: +m[2], d: +m[3], iso: s };
+    return null;
+  }
+  var pd = parseDob(dob);
+  if (!pd) {
+    try { tg.showAlert(tBlock('verify_bad_date') || 'Use date format DD.MM.YYYY'); } catch(e){}
+    return;
+  }
+  var pi = parseDob(idate);
+  if (!pi) {
+    try { tg.showAlert(tBlock('verify_bad_date') || 'Use date format DD.MM.YYYY'); } catch(e){}
+    return;
+  }
   try {
-    var parts = dob.split('-');
-    var born = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+    var born = new Date(pd.y, pd.m - 1, pd.d);
     var now = new Date();
     var age = now.getFullYear() - born.getFullYear();
-    var m = now.getMonth() - born.getMonth();
-    if (m < 0 || (m === 0 && now.getDate() < born.getDate())) age--;
+    var mm = now.getMonth() - born.getMonth();
+    if (mm < 0 || (mm === 0 && now.getDate() < born.getDate())) age--;
     if (age < 16) {
-      try { tg.showAlert(tBlock('verify_age_16') || 'Service is 16+ only'); } catch(e){ alert('16+'); }
+      try { tg.showAlert(tBlock('verify_age_16') || 'Service is 16+ only'); } catch(e){}
       return;
     }
   } catch (e) {}
   if (!terms || !terms.checked) {
-    try { tg.showAlert(tBlock('verify_need_terms') || 'Accept the terms of service'); } catch(e){ alert('Terms'); }
+    try { tg.showAlert(tBlock('verify_need_terms') || 'Accept the terms of service'); } catch(e){}
     return;
   }
-  __verifyDraft.form = { full_name: name.trim(), dob: dob, series_number: series.trim(), issued_by: issued.trim(), issue_date: idate };
-  __verifyDraft.step = 2;
-  renderVerifyPage();
+  __verifyDraft.form = {
+    full_name: name.trim(),
+    dob: pd.iso,
+    dob_raw: dob.trim(),
+    series_number: series.trim(),
+    issued_by: issued.trim(),
+    issue_date: idate.trim()
+  };
+  // DB duplicate: FIO + series/number together
+  apiPost('/api/verify/check-passport', { form: __verifyDraft.form }).then(function() {
+    __verifyDraft.step = 2;
+    renderVerifyPage();
+  }).catch(function(e) {
+    var msg = (e && e.message) || 'Error';
+    if (msg === 'duplicate_passport' || (e && e.error === 'duplicate_passport')) {
+      msg = tBlock('verify_duplicate') || 'A user with these passport data is already registered';
+    }
+    try { tg.showAlert(msg); } catch (e2) { alert(msg); }
+  });
 }
 function verifyWizardNextPhoto() {
-  var key = __verifyDraft.step === 2 ? 'selfie' : (__verifyDraft.step === 3 ? 'passport' : 'with_passport');
-  if (!(__verifyDraft.photos || {})[key]) return;
+  if (__verifyDraft.step === 3) {
+    if (!__verifyDraft.photos.passport || !__verifyDraft.photos.passport_reg) return;
+  } else {
+    var key = __verifyDraft.step === 2 ? 'selfie' : 'with_passport';
+    if (!(__verifyDraft.photos || {})[key]) return;
+  }
   if (__verifyDraft.step === 4) __verifyDraft.step = 5;
   else __verifyDraft.step += 1;
   stopVerifyCamera();
@@ -3179,34 +3248,36 @@ function verifyOnFile(ev, key) {
   reader.readAsDataURL(file);
 }
 async function verifyOpenCamera(key) {
-  var inp = document.getElementById('verify-file-input');
-  // Prefer getUserMedia in browser / miniapp
   try {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      stopVerifyCamera();
-      var facing = key === 'selfie' ? 'user' : 'environment';
-      var stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: facing } });
-      __verifyDraft.camStream = stream;
-      var wrap = document.getElementById('verify-cam-wrap');
-      if (wrap) {
-        wrap.innerHTML = '<video id="verify-cam-video" class="verify-cam-video" autoplay playsinline muted></video>' +
-          '<div class="verify-cam-actions">' +
-          '<button type="button" class="btn" onclick="verifyCaptureFrame(\'' + key + '\')">' + (tBlock('verify_capture') || 'Capture') + '</button>' +
-          '<button type="button" class="btn btn-secondary" onclick="verifyUseFileInput()">' + (tBlock('verify_from_gallery') || 'Gallery') + '</button>' +
-          '</div>';
-        var vid = document.getElementById('verify-cam-video');
-        if (vid) { vid.srcObject = stream; try { vid.play(); } catch(e){} }
-      }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      try { tg.showAlert(tBlock('verify_camera_required') || 'Camera access is required'); } catch(e){ alert('Camera required'); }
       return;
+    }
+    stopVerifyCamera();
+    var facing = (key === 'selfie') ? 'user' : 'environment';
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: facing } } });
+    __verifyDraft.camStream = stream;
+    var wrap = document.getElementById('verify-cam-wrap');
+    if (!wrap) {
+      var wiz = document.getElementById('verify-wizard');
+      if (wiz) {
+        wrap = document.createElement('div');
+        wrap.id = 'verify-cam-wrap';
+        wiz.insertBefore(wrap, wiz.firstChild);
+      }
+    }
+    if (wrap) {
+      wrap.innerHTML = '<video id="verify-cam-video" class="verify-cam-video" autoplay playsinline muted></video>' +
+        '<div class="verify-cam-actions">' +
+        '<button type="button" class="btn" onclick="verifyCaptureFrame(\'' + key + '\')">' + (tBlock('verify_capture') || 'Capture') + '</button>' +
+        '</div>';
+      var vid = document.getElementById('verify-cam-video');
+      if (vid) { vid.srcObject = stream; try { await vid.play(); } catch(e){} }
     }
   } catch (e) {
     console.warn('camera', e);
+    try { tg.showAlert(tBlock('verify_camera_required') || 'Camera access is required'); } catch(e2){}
   }
-  if (inp) inp.click();
-}
-function verifyUseFileInput() {
-  var inp = document.getElementById('verify-file-input');
-  if (inp) inp.click();
 }
 function verifyCaptureFrame(key) {
   try {
@@ -3237,7 +3308,7 @@ async function submitPassportVerification() {
       if (res && typeof res.verify_level === 'number') userData.verify_level = res.verify_level;
     }
     __verifyDraft.step = 0;
-    __verifyDraft.photos = { selfie: '', passport: '', with_passport: '' };
+    __verifyDraft.photos = { selfie: '', passport: '', passport_reg: '', with_passport: '' };
     stopVerifyCamera();
     updateOwnVerifyBadge();
     showPage('profile');
@@ -3247,6 +3318,7 @@ async function submitPassportVerification() {
     if (msg === 'age_16') msg = tBlock('verify_age_16') || msg;
     if (msg === 'form_incomplete') msg = tBlock('verify_form_incomplete') || msg;
     if (msg === 'photos_required') msg = tBlock('verify_photos_required') || msg;
+    if (msg === 'duplicate_passport') msg = tBlock('verify_duplicate') || msg;
     try { tg.showAlert(msg); } catch (e2) { alert(msg); }
   }
 }
@@ -3670,6 +3742,18 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ verify_rejected: 'Верификация отклонена',
+ verify_approved: 'Верификация одобрена',
+ verify_photos_on_server: 'Фото сохранены на сервере',
+ verify_camera_required: 'Нужен доступ к камере (загрузка из галереи недоступна)',
+ verify_passport_reg: 'Страница с пропиской',
+ verify_passport_main: 'Главная страница',
+ verify_passport_two_hint: 'Сделайте фото главной страницы паспорта и страницы с пропиской при хорошем освещении и качестве.',
+ verify_duplicate: 'Пользователь с такими данными уже зарегистрирован',
+ verify_bad_date: 'Введите дату в формате ДД.ММ.ГГГГ',
+ verify_date_ph: 'ДД.ММ.ГГГГ',
+ mod_verify_empty: 'Нет заявок на верификацию',
+ mod_verify: 'Модерация верификации',
  verify_passport_pending: 'Паспорт на модерации',
  verify_step_form: 'Анкета',
  verify_full_name: 'ФИО (как в паспорте)',
@@ -3747,7 +3831,10 @@ var I18N = {
  salary: 'Зарплата', freelance_publish: 'Публикация фриланс', tx_done: 'Выполнено',
  tx_pending: 'В обработке', status_awaiting: 'Ожидает', sbp_card: 'СБП / карта', deal: 'Сделка', tx_rejected: 'Отклонено', lang_changed: 'Язык изменён',
  original: 'оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
- insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: 'Транзакции'
+ insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: tBlock('mod_tx') || 'Transaction moderation',
+ verification: tBlock('mod_verify') || 'Verification moderation',
+ complaints: tBlock('mod_tickets') || 'Complaints',
+ transactions_x: 'Транзакции'
  ,
  your_role: 'Ваша роль',
  workcenter: 'Рабочий центр',
@@ -4300,6 +4387,18 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
@@ -4930,6 +5029,18 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
@@ -5547,6 +5658,18 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -6164,6 +6287,18 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -6781,6 +6916,18 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -7383,6 +7530,18 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -8002,6 +8161,18 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -8619,6 +8790,18 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -9809,6 +9992,18 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -10426,6 +10621,18 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -11043,6 +11250,18 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -11660,6 +11879,18 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -12277,6 +12508,18 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ verify_rejected: 'Verification rejected',
+ verify_approved: 'Verification approved',
+ verify_photos_on_server: 'Photos are stored on the server',
+ verify_camera_required: 'Camera access is required (gallery is not available)',
+ verify_passport_reg: 'Registration page',
+ verify_passport_main: 'Main page',
+ verify_passport_two_hint: 'Photograph the main passport page and the registration page in good lighting and quality.',
+ verify_duplicate: 'A user with these passport data is already registered',
+ verify_bad_date: 'Use date format DD.MM.YYYY',
+ verify_date_ph: 'DD.MM.YYYY',
+ mod_verify_empty: 'No verification applications',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Passport under moderation',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -16910,12 +17153,13 @@ function openAdminSection(section) {
  _adminSection = section;
  setAdminSectionBack(function(){ showPage('admin'); });
  var titles = {
+ verification: (typeof tBlock==='function'&&tBlock('mod_verify'))||'Verification moderation',
  workcenter: tBlock('workcenter'),
  career: tBlock('career'),
  listings: tBlock('mod_listings'),
  transactions: tBlock('mod_tx'),
  jobs: tBlock('mod_jobs'),
- complaints: tBlock('mod_complaints'),
+ complaints: tBlock('mod_tickets') || tBlock('mod_complaints') || 'Complaints moderation',
  staff: tBlock('staff_manage'),
  analytics: tBlock('analytics')
  };
@@ -16932,6 +17176,8 @@ function openAdminSection(section) {
  else if (section === 'transactions') {
  if (role < 4) { tg.showAlert(tBlock('need_mod')); showPage('admin'); return; }
  loadAdminRequests();
+ } else if (section === 'verification') {
+ loadAdminVerification();
  }
  else if (section === 'jobs') {
  if (role < 5) { tg.showAlert(tBlock('need_admin')); showPage('admin'); return; }
@@ -18096,6 +18342,75 @@ async function adminRejectListing(id) {
  openAdminSection('listings');
  } catch (e) { tg.showAlert(e.message); }
 }
+
+
+async function loadAdminVerification() {
+  var box = document.getElementById('admin-section-list');
+  if (!box) return;
+  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var data = await apiGet('/api/admin/verify/passport');
+    var items = (data && data.items) || [];
+    if (!items.length) {
+      box.innerHTML = '<div class="empty"><div class="icon">🪪</div><div>' + (tBlock('mod_verify_empty') || 'No verification applications') + '</div></div>';
+      return;
+    }
+    box.innerHTML = items.map(function(it) {
+      var name = (it.form && it.form.full_name) || it.first_name || ('ID ' + it.user_id);
+      var series = (it.form && it.form.series_number) || '—';
+      return '<div class="list-item" onclick="openAdminVerifyDetail(' + it.user_id + ')">' +
+        '<div class="top"><div class="title">' + String(name).replace(/</g,'&lt;') + '</div>' +
+        '<span class="badge badge-moderation">' + (tBlock('status_pending') || 'Pending') + '</span></div>' +
+        '<div class="subtitle">ID ' + it.user_id + ' · ' + String(series).replace(/</g,'&lt;') + '</div></div>';
+    }).join('');
+    window._adminVerifyCache = items;
+  } catch (e) {
+    box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + (e.message || 'Error') + '</div>';
+  }
+}
+async function openAdminVerifyDetail(uid) {
+  var items = window._adminVerifyCache || [];
+  var it = items.find(function(x){ return x.user_id === uid; });
+  if (!it) {
+    try {
+      var data = await apiGet('/api/admin/verify/passport');
+      items = (data && data.items) || [];
+      it = items.find(function(x){ return x.user_id === uid; });
+    } catch (e) {}
+  }
+  if (!it) { try { tg.showAlert('Not found'); } catch(e){} return; }
+  var f = it.form || {};
+  var box = document.getElementById('admin-detail-content');
+  var title = document.getElementById('admin-detail-title');
+  if (title) title.textContent = (f.full_name || ('ID ' + uid));
+  if (box) {
+    box.innerHTML = '<div class="info-block">' +
+      '<b>ID:</b> ' + uid + '<br>' +
+      '<b>' + (tBlock('verify_full_name') || 'Full name') + ':</b> ' + String(f.full_name||'').replace(/</g,'&lt;') + '<br>' +
+      '<b>' + (tBlock('verify_dob') || 'DOB') + ':</b> ' + String(f.dob||f.dob_raw||'') + '<br>' +
+      '<b>' + (tBlock('verify_series') || 'Passport') + ':</b> ' + String(f.series_number||'').replace(/</g,'&lt;') + '<br>' +
+      '<b>' + (tBlock('verify_issued_by') || 'Issued by') + ':</b> ' + String(f.issued_by||'').replace(/</g,'&lt;') + '<br>' +
+      '<b>' + (tBlock('verify_issue_date') || 'Issue date') + ':</b> ' + String(f.issue_date||'') +
+      '</div>' +
+      '<div class="info-block" style="font-size:12px;">' + (tBlock('verify_photos_on_server') || 'Photos stored on server (selfie, passport main, registration page, with passport)') + '</div>' +
+      '<div class="btn-row">' +
+      '<button type="button" class="btn btn-success" onclick="adminDecideVerify(' + uid + ',\'approve\')">' + (tBlock('btn_approve') || 'Approve') + '</button>' +
+      '<button type="button" class="btn btn-danger" onclick="adminDecideVerify(' + uid + ',\'reject\')">' + (tBlock('btn_reject') || 'Reject') + '</button>' +
+      '</div>';
+  }
+  showPage('admin-detail');
+}
+async function adminDecideVerify(uid, decision) {
+  try {
+    await apiPost('/api/admin/verify/passport', { user_id: uid, decision: decision });
+    try { tg.showAlert(decision === 'approve' ? (tBlock('verify_approved') || 'Approved') : (tBlock('verify_rejected') || 'Rejected')); } catch(e){}
+    showPage('admin-section');
+    loadAdminVerification();
+  } catch (e) {
+    try { tg.showAlert(e.message || 'Error'); } catch(e2){}
+  }
+}
+
 
 async function loadAdminRequests() {
  var box = document.getElementById('admin-content');
