@@ -1162,6 +1162,8 @@
 .verify-line{flex:1;height:3px;background:var(--hint);opacity:.35;margin:0 2px;margin-bottom:22px;border-radius:2px;}
 .verify-line.filled{background:#2AABEE;opacity:1;}
 
+.verify-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.verify-photo-grid .verify-photo-box{margin:0;}
 .verify-photo-box{position:relative;margin:12px 0;border-radius:12px;overflow:hidden;background:var(--secondary-bg);min-height:120px;}
 .verify-photo-box img{width:100%;max-height:280px;object-fit:contain;display:block;background:#000;}
 .verify-photo-del{position:absolute;top:8px;right:8px;width:32px;height:32px;border:none;border-radius:50%;background:rgba(255,59,48,.9);color:#fff;font-size:18px;font-weight:700;cursor:pointer;line-height:1;}
@@ -2112,7 +2114,7 @@
  </button>
  <button class="support-tile" onclick="openAdminSection('complaints')">
  <div class="support-tile-icon">⚠️</div>
- <div class="support-tile-title" data-i18n="mod_tickets">Complaints moderation</div>
+ <div class="support-tile-title" data-i18n="mod_complaints">Complaints moderation</div>
  </button>
  <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
  <div class="support-tile-icon">💼</div>
@@ -2151,10 +2153,17 @@
  <div id="staff-detail-content"></div>
  </div>
 
- <div id="page-user-profile" class="page">
+ <div id="page-complaint" class="page">
+ <button type="button" class="back-link" onclick="showPage('user-profile')" data-i18n="back">← Back</button>
+ <div class="section-title" data-i18n="complaint_title">Report user</div>
+ <div id="complaint-content"></div>
+</div>
+
+<div id="page-user-profile" class="page">
  <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
  <button type="button" class="back-link" id="user-profile-back" onclick="backFromUserProfile()" data-i18n="back" style="margin:0;">← Назад</button>
  <div style="display:flex;align-items:center;gap:8px;">
+  <button type="button" class="profile-edit-btn" id="user-profile-complaint-btn" onclick="openComplaintMenu()" style="display:none;" data-i18n="complaint_btn">Report</button>
   <button type="button" class="btn-logout-red" id="user-profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Выйти</button>
   <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
  </div>
@@ -2955,6 +2964,57 @@ function updateOwnVerifyBadge() {
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 }
+
+function openComplaintMenu() {
+  var uid = window._profileUid;
+  if (!uid) return;
+  window._complaintTarget = uid;
+  window._complaintReason = '';
+  showPage('complaint');
+  renderComplaintStep1();
+}
+function renderComplaintStep1() {
+  var box = document.getElementById('complaint-content');
+  if (!box) return;
+  var reasons = [
+    { id: 'scam', key: 'complaint_reason_scam' },
+    { id: 'aggressive', key: 'complaint_reason_aggressive' },
+    { id: 'spam', key: 'complaint_reason_spam' },
+    { id: 'fake', key: 'complaint_reason_fake' },
+    { id: 'fraud_listing', key: 'complaint_reason_fraud_listing' },
+    { id: 'other', key: 'complaint_reason_other' }
+  ];
+  var html = '<div class="section-title" style="font-size:16px;">' + (tBlock('complaint_choose_reason') || 'Choose a reason') + '</div>';
+  reasons.forEach(function(r) {
+    html += '<button type="button" class="list-item" style="width:100%;text-align:left;cursor:pointer;border:1px solid var(--border);margin-bottom:8px;" onclick="complaintPickReason(\'' + r.id + '\')">' +
+      '<div class="title">' + (tBlock(r.key) || r.id) + '</div></button>';
+  });
+  box.innerHTML = html;
+}
+function complaintPickReason(id) {
+  window._complaintReason = id;
+  var box = document.getElementById('complaint-content');
+  if (!box) return;
+  box.innerHTML = '<div class="section-title" style="font-size:16px;">' + (tBlock('complaint_comment') || 'Comment') + '</div>' +
+    '<div class="form-group"><textarea class="form-input" id="complaint-comment" rows="4" placeholder="' + (tBlock('complaint_comment_ph') || 'Describe the issue') + '" style="min-height:100px;"></textarea></div>' +
+    '<button type="button" class="btn" onclick="submitComplaint()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+}
+async function submitComplaint() {
+  try {
+    var comment = (document.getElementById('complaint-comment') || {}).value || '';
+    await apiPost('/api/complaints', {
+      target_id: window._complaintTarget,
+      reason: window._complaintReason,
+      comment: comment
+    });
+    try { tg.showAlert(tBlock('complaint_sent') || 'Complaint submitted'); } catch(e){}
+    showPage('user-profile');
+  } catch (e) {
+    try { tg.showAlert(e.message || 'Error'); } catch(e2){}
+  }
+}
+
+
 function openVerifyPage() {
   __verifyDraft.step = 0;
   stopVerifyCamera();
@@ -3148,10 +3208,12 @@ function renderVerifyWizard() {
       '<b>' + (tBlock('verify_issued_by') || 'Issued by') + ':</b> ' + String(f.issued_by || '').replace(/</g,'&lt;') + '<br>' +
       '<b>' + (tBlock('verify_issue_date') || 'Date of issue') + ':</b> ' + String(f.issue_date || '') +
       '</div>' +
+      '<div class="verify-photo-grid">' +
       (ph.selfie ? '<div class="verify-photo-box"><img src="' + ph.selfie + '" alt=""></div>' : '') +
       (ph.passport ? '<div class="verify-photo-box"><img src="' + ph.passport + '" alt=""></div>' : '') +
       (ph.passport_reg ? '<div class="verify-photo-box"><img src="' + ph.passport_reg + '" alt=""></div>' : '') +
       (ph.with_passport ? '<div class="verify-photo-box"><img src="' + ph.with_passport + '" alt=""></div>' : '') +
+      '</div>' +
       '<button type="button" class="btn" onclick="submitPassportVerification()">' + (tBlock('verify_submit_moderation') || 'Submit for moderation') + '</button>';
   }
 }
@@ -3269,7 +3331,7 @@ async function verifyOpenCamera(key) {
     if (wrap) {
       wrap.innerHTML = '<video id="verify-cam-video" class="verify-cam-video" autoplay playsinline muted></video>' +
         '<div class="verify-cam-actions">' +
-        '<button type="button" class="btn" onclick="verifyCaptureFrame(\'' + key + '\')">' + (tBlock('verify_capture') || 'Capture') + '</button>' +
+        '<button type="button" class="btn" onclick="verifyCaptureFrame(\'' + key + '\')">' + (tBlock('verify_take_photo') || 'Take a photo') + '</button>' +
         '</div>';
       var vid = document.getElementById('verify-cam-video');
       if (vid) { vid.srcObject = stream; try { await vid.play(); } catch(e){} }
@@ -3742,6 +3804,25 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Верификация отклонена',
  verify_approved: 'Верификация одобрена',
  verify_photos_on_server: 'Фото сохранены на сервере',
@@ -3769,7 +3850,7 @@ var I18N = {
  verify_passport_photo_hint: 'Сделайте фото паспорта при хорошем освещении и качестве.',
  verify_step_with_passport: 'Фото с паспортом',
  verify_with_passport_hint: 'Сделайте фото себя рядом с паспортом при хорошем освещении и качестве.',
- verify_take_photo: 'Сделать фото',
+ verify_take_photo: 'Take a photo',
  verify_capture: 'Снять',
  verify_from_gallery: 'Галерея',
  verify_review: 'Финальная проверка',
@@ -4387,6 +4468,25 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -5029,6 +5129,25 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -5658,6 +5777,25 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -6287,6 +6425,25 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -7530,6 +7687,25 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -8161,6 +8337,25 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -8790,6 +8985,25 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -9992,6 +10206,25 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -10621,6 +10854,25 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -11250,6 +11502,25 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -11879,6 +12150,25 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -12508,6 +12798,25 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ btn_reject: 'Reject',
+ btn_approve: 'Accept',
+ btn_dismiss: 'Dismiss',
+ btn_resolve: 'Resolve',
+ mod_complaints_empty: 'No complaints',
+ complaint_target: 'Target user',
+ complaint_from: 'From',
+ complaint_sent: 'Complaint submitted',
+ complaint_comment_ph: 'Describe the issue',
+ complaint_comment: 'Comment',
+ complaint_reason_other: 'Other',
+ complaint_reason_fraud_listing: 'Fraudulent listing',
+ complaint_reason_fake: 'Fake identity / impersonation',
+ complaint_reason_spam: 'Spam / advertising',
+ complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
+ complaint_reason_scam: 'Scam (Fraud)',
+ complaint_choose_reason: 'Choose a reason',
+ complaint_title: 'Report user',
+ complaint_btn: 'Report',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -14798,6 +15107,19 @@ async function renderUserProfile() {
  }).join('');
  }
  box.innerHTML = html;
+ 
+ try {
+   var cbtn = document.getElementById('user-profile-complaint-btn');
+   var myId = userData && (userData.user_id || userData.id);
+   if (cbtn) {
+     if (myId && String(myId) !== String(uid) && !(p && p.banned_profile)) {
+       cbtn.style.display = 'inline-flex';
+       cbtn.textContent = tBlock('complaint_btn') || 'Report';
+     } else {
+       cbtn.style.display = 'none';
+     }
+   }
+ } catch (eC) {}
  } catch (e) {
  var m = e.message || '';
  box.innerHTML = (m.indexOf('не на смене') >= 0)
@@ -17185,7 +17507,7 @@ function openAdminSection(section) {
  }
  else if (section === 'complaints') {
  if (role < 3) { tg.showAlert(tBlock('need_intern')); showPage('admin'); return; }
- loadAdminSupportThreads();
+ loadAdminUserComplaints();
  }
  else if (section === 'staff') {
  if (role < 5) { tg.showAlert(tBlock('need_admin')); showPage('admin'); return; }
@@ -18344,13 +18666,15 @@ async function adminRejectListing(id) {
 }
 
 
+
 async function loadAdminVerification() {
-  var box = document.getElementById('admin-section-list');
+  var box = document.getElementById('admin-content') || document.getElementById('admin-section-list');
   if (!box) return;
   box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   try {
     var data = await apiGet('/api/admin/verify/passport');
     var items = (data && data.items) || [];
+    window._adminVerifyCache = items;
     if (!items.length) {
       box.innerHTML = '<div class="empty"><div class="icon">🪪</div><div>' + (tBlock('mod_verify_empty') || 'No verification applications') + '</div></div>';
       return;
@@ -18361,28 +18685,37 @@ async function loadAdminVerification() {
       return '<div class="list-item" onclick="openAdminVerifyDetail(' + it.user_id + ')">' +
         '<div class="top"><div class="title">' + String(name).replace(/</g,'&lt;') + '</div>' +
         '<span class="badge badge-moderation">' + (tBlock('status_pending') || 'Pending') + '</span></div>' +
-        '<div class="subtitle">ID ' + it.user_id + ' · ' + String(series).replace(/</g,'&lt;') + '</div></div>';
+        '<div class="subtitle">ID ' + it.user_id + ' · ' + String(series).replace(/</g,'&lt;') + '</div>' +
+        '<div class="btn-row" style="margin-top:10px;" onclick="event.stopPropagation();">' +
+        '<button type="button" class="btn btn-success" style="flex:1;" onclick="event.stopPropagation();adminDecideVerify(' + it.user_id + ',\'approve\')">' + (tBlock('btn_approve') || 'Accept') + '</button>' +
+        '<button type="button" class="btn btn-danger" style="flex:1;" onclick="event.stopPropagation();adminDecideVerify(' + it.user_id + ',\'reject\')">' + (tBlock('btn_reject') || 'Reject') + '</button>' +
+        '</div></div>';
     }).join('');
-    window._adminVerifyCache = items;
   } catch (e) {
     box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + (e.message || 'Error') + '</div>';
   }
 }
 async function openAdminVerifyDetail(uid) {
   var items = window._adminVerifyCache || [];
-  var it = items.find(function(x){ return x.user_id === uid; });
+  var it = items.find(function(x){ return Number(x.user_id) === Number(uid); });
   if (!it) {
     try {
       var data = await apiGet('/api/admin/verify/passport');
       items = (data && data.items) || [];
-      it = items.find(function(x){ return x.user_id === uid; });
+      window._adminVerifyCache = items;
+      it = items.find(function(x){ return Number(x.user_id) === Number(uid); });
     } catch (e) {}
   }
   if (!it) { try { tg.showAlert('Not found'); } catch(e){} return; }
   var f = it.form || {};
+  var ph = it.photos || {};
   var box = document.getElementById('admin-detail-content');
   var title = document.getElementById('admin-detail-title');
   if (title) title.textContent = (f.full_name || ('ID ' + uid));
+  function phBox(src, label) {
+    if (!src) return '';
+    return '<div class="verify-photo-box"><div style="font-size:11px;padding:4px 8px;opacity:.7;">' + (label||'') + '</div><img src="' + src + '" alt=""></div>';
+  }
   if (box) {
     box.innerHTML = '<div class="info-block">' +
       '<b>ID:</b> ' + uid + '<br>' +
@@ -18392,9 +18725,14 @@ async function openAdminVerifyDetail(uid) {
       '<b>' + (tBlock('verify_issued_by') || 'Issued by') + ':</b> ' + String(f.issued_by||'').replace(/</g,'&lt;') + '<br>' +
       '<b>' + (tBlock('verify_issue_date') || 'Issue date') + ':</b> ' + String(f.issue_date||'') +
       '</div>' +
-      '<div class="info-block" style="font-size:12px;">' + (tBlock('verify_photos_on_server') || 'Photos stored on server (selfie, passport main, registration page, with passport)') + '</div>' +
+      '<div class="verify-photo-grid">' +
+      phBox(ph.selfie, tBlock('verify_step_selfie') || 'Selfie') +
+      phBox(ph.passport, tBlock('verify_passport_main') || 'Main page') +
+      phBox(ph.passport_reg, tBlock('verify_passport_reg') || 'Registration') +
+      phBox(ph.with_passport, tBlock('verify_step_with_passport') || 'With passport') +
+      '</div>' +
       '<div class="btn-row">' +
-      '<button type="button" class="btn btn-success" onclick="adminDecideVerify(' + uid + ',\'approve\')">' + (tBlock('btn_approve') || 'Approve') + '</button>' +
+      '<button type="button" class="btn btn-success" onclick="adminDecideVerify(' + uid + ',\'approve\')">' + (tBlock('btn_approve') || 'Accept') + '</button>' +
       '<button type="button" class="btn btn-danger" onclick="adminDecideVerify(' + uid + ',\'reject\')">' + (tBlock('btn_reject') || 'Reject') + '</button>' +
       '</div>';
   }
@@ -18410,6 +18748,78 @@ async function adminDecideVerify(uid, decision) {
     try { tg.showAlert(e.message || 'Error'); } catch(e2){}
   }
 }
+async function loadAdminUserComplaints() {
+  var box = document.getElementById('admin-content') || document.getElementById('admin-section-list');
+  if (!box) return;
+  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var data = await apiGet('/api/admin/complaints');
+    var items = (data && data.items) || [];
+    window._adminComplaintsCache = items;
+    if (!items.length) {
+      box.innerHTML = '<div class="empty"><div class="icon">⚠️</div><div>' + (tBlock('mod_complaints_empty') || 'No complaints') + '</div></div>';
+      return;
+    }
+    var reasonMap = {
+      scam: tBlock('complaint_reason_scam') || 'Scam',
+      aggressive: tBlock('complaint_reason_aggressive') || 'Aggressive',
+      spam: tBlock('complaint_reason_spam') || 'Spam',
+      fake: tBlock('complaint_reason_fake') || 'Fake identity',
+      fraud_listing: tBlock('complaint_reason_fraud_listing') || 'Fraudulent listing',
+      other: tBlock('complaint_reason_other') || 'Other'
+    };
+    box.innerHTML = items.map(function(it) {
+      var tname = it.target_first || it.target_username || ('ID ' + it.target_id);
+      var rname = it.reporter_first || it.reporter_username || ('ID ' + it.reporter_id);
+      return '<div class="list-item" onclick="openAdminComplaintDetail(' + it.id + ')">' +
+        '<div class="top"><div class="title">' + String(tname).replace(/</g,'&lt;') + '</div>' +
+        '<span class="badge badge-moderation">' + (reasonMap[it.reason] || it.reason) + '</span></div>' +
+        '<div class="subtitle">' + (tBlock('complaint_from') || 'From') + ': ' + String(rname).replace(/</g,'&lt;') +
+        ' · #' + it.id + '</div></div>';
+    }).join('');
+  } catch (e) {
+    box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + (e.message || 'Error') + '</div>';
+  }
+}
+async function openAdminComplaintDetail(id) {
+  var items = window._adminComplaintsCache || [];
+  var it = items.find(function(x){ return Number(x.id) === Number(id); });
+  if (!it) return;
+  var box = document.getElementById('admin-detail-content');
+  var title = document.getElementById('admin-detail-title');
+  if (title) title.textContent = (tBlock('complaint_title') || 'Complaint') + ' #' + id;
+  var reasonMap = {
+    scam: tBlock('complaint_reason_scam') || 'Scam',
+    aggressive: tBlock('complaint_reason_aggressive') || 'Aggressive',
+    spam: tBlock('complaint_reason_spam') || 'Spam',
+    fake: tBlock('complaint_reason_fake') || 'Fake identity',
+    fraud_listing: tBlock('complaint_reason_fraud_listing') || 'Fraudulent listing',
+    other: tBlock('complaint_reason_other') || 'Other'
+  };
+  if (box) {
+    box.innerHTML = '<div class="info-block">' +
+      '<b>' + (tBlock('complaint_target') || 'Target') + ':</b> <span class="seller-link" onclick="goProfile(' + it.target_id + ')">' + it.target_id + '</span><br>' +
+      '<b>' + (tBlock('complaint_from') || 'From') + ':</b> <span class="seller-link" onclick="goProfile(' + it.reporter_id + ')">' + it.reporter_id + '</span><br>' +
+      '<b>' + (tBlock('complaint_choose_reason') || 'Reason') + ':</b> ' + (reasonMap[it.reason] || it.reason) + '<br>' +
+      '<b>' + (tBlock('complaint_comment') || 'Comment') + ':</b> ' + String(it.comment || '—').replace(/</g,'&lt;') +
+      '</div>' +
+      '<div class="btn-row">' +
+      '<button type="button" class="btn btn-success" onclick="adminDecideComplaint(' + id + ',\'resolve\')">' + (tBlock('btn_resolve') || 'Resolve') + '</button>' +
+      '<button type="button" class="btn btn-secondary" onclick="adminDecideComplaint(' + id + ',\'dismiss\')">' + (tBlock('btn_dismiss') || 'Dismiss') + '</button>' +
+      '</div>';
+  }
+  showPage('admin-detail');
+}
+async function adminDecideComplaint(id, decision) {
+  try {
+    await apiPost('/api/admin/complaints', { id: id, decision: decision });
+    showPage('admin-section');
+    loadAdminUserComplaints();
+  } catch (e) {
+    try { tg.showAlert(e.message || 'Error'); } catch(e2){}
+  }
+}
+
 
 
 async function loadAdminRequests() {
