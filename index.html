@@ -1144,6 +1144,25 @@
 
 .privacy-card .btn{width:100%;}
 
+
+.verify-badge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;margin-left:6px;vertical-align:middle;cursor:default;flex-shrink:0;border:1.5px solid transparent;box-sizing:border-box;}
+.verify-badge svg{width:11px;height:11px;display:block;}
+.verify-badge.v-none{background:#e53935;border-color:#e53935;color:#fff;}
+.verify-badge.v-partial{background:#f9a825;border-color:#f9a825;color:#111;}
+.verify-badge.v-full{background:#43a047;border-color:#43a047;color:#fff;}
+.verify-badge.v-clickable{cursor:pointer;}
+.verify-badge.v-clickable:active{opacity:.85;transform:scale(.96);}
+.profile-name-row{display:flex;align-items:center;gap:2px;flex-wrap:wrap;}
+.verify-path{display:flex;align-items:center;justify-content:center;gap:0;margin:20px 0 8px;padding:0 8px;}
+.verify-node{display:flex;flex-direction:column;align-items:center;width:78px;position:relative;z-index:1;}
+.verify-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:2px solid var(--hint);background:var(--secondary-bg,var(--secondary));color:var(--hint);}
+.verify-circle.done{background:#2AABEE;border-color:#2AABEE;color:#fff;}
+.verify-circle.current{background:#2AABEE;border-color:#2AABEE;color:#fff;box-shadow:0 0 0 4px rgba(42,171,238,.25);}
+.verify-circle.locked{opacity:.55;}
+.verify-line{flex:1;height:3px;background:var(--hint);opacity:.35;margin:0 2px;margin-bottom:22px;border-radius:2px;}
+.verify-line.filled{background:#2AABEE;opacity:1;}
+.verify-node-label{font-size:11px;text-align:center;margin-top:8px;color:var(--hint);line-height:1.25;max-width:86px;}
+
 </style>
 </head>
 <body>
@@ -2022,7 +2041,7 @@
  <img id="profile-avatar-img" class="profile-avatar-img" alt="" style="display:none;">
  <div class="profile-avatar-fallback" id="profile-avatar-fallback">?</div>
  </div>
- <div class="profile-fullname" id="profile-name">—</div>
+ <div class="profile-name-row"><div class="profile-fullname" id="profile-name">—</div><span id="profile-verify-badge" class="verify-badge v-none" title=""></span></div>
  <div class="profile-username" id="profile-username"></div>
  </div>
  <div class="list-item">
@@ -2040,7 +2059,22 @@
  </div>
 
  <!-- ADMIN -->
- <div id="page-admin" class="page">
+ 
+ <!-- VERIFY -->
+ <div id="page-verify" class="page">
+  <button type="button" class="back-link" onclick="showPage('profile')" data-i18n="back">← Back</button>
+  <div class="section-title" data-i18n="verify_title">Verification</div>
+  <div class="info-block" style="margin-bottom:8px;" data-i18n="verify_intro">Verification levels: no data → passport → 2FA and confirmed email/phone.</div>
+  <div class="verify-path" id="verify-path"></div>
+  <div id="verify-status-text" class="subtitle" style="text-align:center;margin:12px 0 16px;"></div>
+  <div class="card" id="verify-step-card" style="margin-top:8px;">
+    <div class="card-title" id="verify-step-title"></div>
+    <div class="subtitle" id="verify-step-desc" style="margin-top:8px;line-height:1.45;"></div>
+    <button type="button" class="btn" id="verify-action-btn" style="margin-top:14px;display:none;" onclick="requestVerifyUpgrade()"></button>
+  </div>
+ </div>
+
+<div id="page-admin" class="page">
  <div class="section-title" data-i18n="panel">Панель</div>
  <div class="card" style="margin-bottom:14px;">
  <div class="card-title" data-i18n="your_role">Ваша роль</div>
@@ -2872,6 +2906,102 @@ async function init() {
  }
 }
 
+
+function verifyLevelOf(u) {
+  if (!u) return 0;
+  try { return Math.max(0, Math.min(2, parseInt(u.verify_level, 10) || 0)); } catch (e) { return 0; }
+}
+function verifyTitle(level) {
+  if (level >= 2) return (typeof tBlock === 'function' && tBlock('verify_full')) || 'Verification passed';
+  if (level >= 1) return (typeof tBlock === 'function' && tBlock('verify_partial')) || 'Partial verification';
+  return (typeof tBlock === 'function' && tBlock('verify_none')) || 'No data';
+}
+function verifyBadgeHtml(level, clickable) {
+  level = parseInt(level, 10) || 0;
+  var cls = level >= 2 ? 'v-full' : (level >= 1 ? 'v-partial' : 'v-none');
+  if (clickable) cls += ' v-clickable';
+  var title = verifyTitle(level);
+  var icon = level >= 1
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  var onclick = clickable ? ' onclick="openVerifyPage()" ' : ' ';
+  return '<span class="verify-badge ' + cls + '" title="' + String(title).replace(/"/g, '&quot;') + '"' + onclick + 'aria-label="' + String(title).replace(/"/g, '&quot;') + '">' + icon + '</span>';
+}
+function updateOwnVerifyBadge() {
+  var el = document.getElementById('profile-verify-badge');
+  if (!el) return;
+  var level = verifyLevelOf(typeof userData !== 'undefined' ? userData : null);
+  var title = verifyTitle(level);
+  el.className = 'verify-badge ' + (level >= 2 ? 'v-full' : (level >= 1 ? 'v-partial' : 'v-none')) + ' v-clickable';
+  el.title = title;
+  el.setAttribute('aria-label', title);
+  el.onclick = function() { openVerifyPage(); };
+  el.innerHTML = level >= 1
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+}
+function openVerifyPage() {
+  if (typeof showPage === 'function') showPage('verify');
+  renderVerifyPage();
+}
+function renderVerifyPage() {
+  var level = verifyLevelOf(typeof userData !== 'undefined' ? userData : null);
+  var path = document.getElementById('verify-path');
+  if (path) {
+    var labels = [
+      (typeof tBlock === 'function' && tBlock('verify_lvl_none')) || 'No data',
+      (typeof tBlock === 'function' && tBlock('verify_lvl_partial')) || 'Passport',
+      (typeof tBlock === 'function' && tBlock('verify_lvl_full')) || 'Full'
+    ];
+    var nodes = '';
+    for (var i = 0; i < 3; i++) {
+      if (i > 0) nodes += '<div class="verify-line' + (level >= i ? ' filled' : '') + '"></div>';
+      var st = 'locked';
+      if (level > i) st = 'done';
+      else if (level === i) st = 'current';
+      else if (level === 0 && i === 0) st = 'current';
+      var mark = (level > i) ? '✓' : String(i + 1);
+      nodes += '<div class="verify-node"><div class="verify-circle ' + st + '">' + mark + '</div><div class="verify-node-label">' + labels[i] + '</div></div>';
+    }
+    path.innerHTML = nodes;
+  }
+  var st = document.getElementById('verify-status-text');
+  if (st) st.textContent = verifyTitle(level);
+  var title = document.getElementById('verify-step-title');
+  var desc = document.getElementById('verify-step-desc');
+  var btn = document.getElementById('verify-action-btn');
+  if (title) title.textContent = verifyTitle(level);
+  if (desc) desc.textContent = (typeof tBlock === 'function' && tBlock('verify_desc_' + level)) || '';
+  if (btn) {
+    if (level >= 2) {
+      btn.style.display = 'none';
+    } else {
+      btn.style.display = '';
+      btn.textContent = level <= 0
+        ? ((typeof tBlock === 'function' && tBlock('verify_btn_start')) || 'Submit passport verification')
+        : ((typeof tBlock === 'function' && tBlock('verify_btn_continue')) || 'Enable 2FA and confirm email/phone');
+    }
+  }
+  try { if (typeof applyI18n === 'function') applyI18n(); } catch (e) {}
+}
+async function requestVerifyUpgrade() {
+  try {
+    var level = verifyLevelOf(userData);
+    var target = level < 1 ? 1 : 2;
+    var res = await apiPost('/api/verify/request', { level: target });
+    if (res && typeof res.verify_level === 'number') userData.verify_level = res.verify_level;
+    if (res && res.pending_full) {
+      var msg = (typeof tBlock === 'function' && tBlock('verify_pending_full')) || 'Full verification pending review';
+      try { tg.showAlert(msg); } catch (e) { alert(msg); }
+    }
+    updateOwnVerifyBadge();
+    renderVerifyPage();
+  } catch (e) {
+    try { tg.showAlert(e.message || 'Error'); } catch (e2) { alert(e.message || 'Error'); }
+  }
+}
+
+
 function renderMain() {
  var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
  var first = tgUser.first_name || userData.first_name || '';
@@ -2891,6 +3021,7 @@ function renderMain() {
 
  // Profile page
  document.getElementById('profile-name').textContent = fullName;
+ try { updateOwnVerifyBadge(); } catch (eV) {}
  var pun = document.getElementById('profile-username');
  if (username) {
  pun.textContent = '@' + username;
@@ -3273,6 +3404,22 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ verify_none: 'Нет данных',
+ verify_partial: 'Частичная верификация',
+ verify_full: 'Верификация пройдена',
+ verify_title: 'Верификация',
+ verify_intro: 'Уровни: нет данных → паспорт → 2FA и подтверждённая почта/номер.',
+ verify_lvl_none: 'Нет данных',
+ verify_lvl_partial: 'Паспорт',
+ verify_lvl_full: 'Полная',
+ verify_desc_0: 'Нет данных о верификации. Документы не предоставлены.',
+ verify_desc_1: 'Частичная верификация: предоставлена только верификация по паспорту.',
+ verify_desc_2: 'Верификация пройдена: включена 2FA и подтверждена почта/номер.',
+ verify_btn_start: 'Пройти верификацию по паспорту',
+ verify_btn_continue: 'Включить 2FA и подтвердить почту/номер',
+ verify_btn_done: 'Верифицирован',
+ verify_pending_full: 'Полная верификация на проверке (2FA + почта/номер).',
+ verify_untrusted: 'Ненадёжный пользователь',
  privacy_title: 'Политика конфиденциальности',
  privacy_body: "Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp's)</a>.",
  privacy_accept: 'Принимаю и продолжаю',
@@ -3862,6 +4009,22 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ verify_none: 'No data',
+ verify_partial: 'Partial verification',
+ verify_full: 'Verification passed',
+ verify_title: 'Verification',
+ verify_intro: 'Levels: no data → passport → 2FA and confirmed email/phone.',
+ verify_lvl_none: 'No data',
+ verify_lvl_partial: 'Passport',
+ verify_lvl_full: 'Full',
+ verify_desc_0: 'No verification data. Identity documents have not been submitted.',
+ verify_desc_1: 'Partial verification: passport verification only has been provided.',
+ verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
+ verify_btn_start: 'Submit passport verification',
+ verify_btn_continue: 'Enable 2FA and confirm email/phone',
+ verify_btn_done: 'Verified',
+ verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
+ verify_untrusted: 'Untrusted user',
  privacy_title: 'Privacy policy',
  privacy_body: "By continuing, you agree to the <a href=\"{url}\">privacy and data collection policy (for MiniApp's)</a>.",
  privacy_accept: 'Accept and continue',
@@ -4451,6 +4614,22 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ verify_none: 'Keine Daten',
+ verify_partial: 'Teilweise Verifizierung',
+ verify_full: 'Verifizierung bestanden',
+ verify_title: 'Verifizierung',
+ verify_intro: 'Stufen: keine Daten → Reisepass → 2FA und E-Mail/Telefon.',
+ verify_lvl_none: 'Keine Daten',
+ verify_lvl_partial: 'Reisepass',
+ verify_lvl_full: 'Voll',
+ verify_desc_0: 'Keine Verifizierungsdaten.',
+ verify_desc_1: 'Nur Reisepass-Verifizierung.',
+ verify_desc_2: '2FA aktiv, E-Mail/Telefon bestätigt.',
+ verify_btn_start: 'Reisepass-Verifizierung',
+ verify_btn_continue: '2FA und Kontakt bestätigen',
+ verify_btn_done: 'Verifiziert',
+ verify_pending_full: 'Vollständige Verifizierung wird geprüft.',
+ verify_untrusted: 'Nicht vertrauenswürdiger Nutzer',
  privacy_title: 'Datenschutzrichtlinie',
  privacy_body: "Indem Sie fortfahren, stimmen Sie der <a href=\"{url}\">Datenschutzrichtlinie (for MiniApp's)</a> zu.",
  privacy_accept: 'Akzeptieren und fortfahren',
@@ -5027,6 +5206,22 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ verify_none: 'Aucune donnée',
+ verify_partial: 'Vérification partielle',
+ verify_full: 'Vérification réussie',
+ verify_title: 'Vérification',
+ verify_intro: 'Niveaux : aucune donnée → passeport → 2FA et e-mail/téléphone.',
+ verify_lvl_none: 'Aucune donnée',
+ verify_lvl_partial: 'Passeport',
+ verify_lvl_full: 'Complète',
+ verify_desc_0: 'Aucune donnée de vérification.',
+ verify_desc_1: 'Seule la vérification passeport.',
+ verify_desc_2: '2FA activée, e-mail/téléphone confirmés.',
+ verify_btn_start: 'Vérification passeport',
+ verify_btn_continue: 'Activer 2FA et confirmer le contact',
+ verify_btn_done: 'Vérifié',
+ verify_pending_full: 'Vérification complète en cours.',
+ verify_untrusted: 'Utilisateur non fiable',
  privacy_title: 'Politique de confidentialité',
  privacy_body: "En continuant, vous acceptez la <a href=\"{url}\">politique de confidentialité (for MiniApp's)</a>.",
  privacy_accept: 'Accepter et continuer',
@@ -5603,6 +5798,22 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ verify_none: 'Sin datos',
+ verify_partial: 'Verificación parcial',
+ verify_full: 'Verificación superada',
+ verify_title: 'Verificación',
+ verify_intro: 'Niveles: sin datos → pasaporte → 2FA y correo/teléfono.',
+ verify_lvl_none: 'Sin datos',
+ verify_lvl_partial: 'Pasaporte',
+ verify_lvl_full: 'Completa',
+ verify_desc_0: 'Sin datos de verificación.',
+ verify_desc_1: 'Solo verificación por pasaporte.',
+ verify_desc_2: '2FA activa y correo/teléfono confirmados.',
+ verify_btn_start: 'Verificación por pasaporte',
+ verify_btn_continue: 'Activar 2FA y confirmar contacto',
+ verify_btn_done: 'Verificado',
+ verify_pending_full: 'Verificación completa en revisión.',
+ verify_untrusted: 'Usuario no confiable',
  privacy_title: 'Política de privacidad',
  privacy_body: "Al continuar, acepta la <a href=\"{url}\">política de privacidad (for MiniApp's)</a>.",
  privacy_accept: 'Aceptar y continuar',
@@ -6755,6 +6966,22 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ verify_none: 'Немає даних',
+ verify_partial: 'Часткова верифікація',
+ verify_full: 'Верифікацію пройдено',
+ verify_title: 'Верифікація',
+ verify_intro: 'Рівні: немає даних → паспорт → 2FA та пошта/номер.',
+ verify_lvl_none: 'Немає даних',
+ verify_lvl_partial: 'Паспорт',
+ verify_lvl_full: 'Повна',
+ verify_desc_0: 'Немає даних про верифікацію.',
+ verify_desc_1: 'Лише верифікація за паспортом.',
+ verify_desc_2: '2FA увімкнено, пошту/номер підтверджено.',
+ verify_btn_start: 'Верифікація за паспортом',
+ verify_btn_continue: 'Увімкнути 2FA та підтвердити контакт',
+ verify_btn_done: 'Верифіковано',
+ verify_pending_full: 'Повна верифікація на перевірці.',
+ verify_untrusted: 'Ненадійний користувач',
  privacy_title: 'Політика конфіденційності',
  privacy_body: "Продовжуючи, ви погоджуєтесь з <a href=\"{url}\">політикою конфіденційності (for MiniApp's)</a>.",
  privacy_accept: 'Приймаю і продовжую',
@@ -7333,6 +7560,22 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ verify_none: 'No data',
+ verify_partial: 'Partial verification',
+ verify_full: 'Verification passed',
+ verify_title: 'Verification',
+ verify_intro: 'Levels: no data → passport → 2FA and confirmed email/phone.',
+ verify_lvl_none: 'No data',
+ verify_lvl_partial: 'Passport',
+ verify_lvl_full: 'Full',
+ verify_desc_0: 'No verification data. Identity documents have not been submitted.',
+ verify_desc_1: 'Partial verification: passport verification only has been provided.',
+ verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
+ verify_btn_start: 'Submit passport verification',
+ verify_btn_continue: 'Enable 2FA and confirm email/phone',
+ verify_btn_done: 'Verified',
+ verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
+ verify_untrusted: 'Untrusted user',
  privacy_title: 'Informativa sulla privacy',
  privacy_body: "Continuando, accetti l'<a href=\"{url}\">informativa sulla privacy (for MiniApp's)</a>.",
  privacy_accept: 'Accetta e continua',
@@ -7909,6 +8152,22 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ verify_none: 'No data',
+ verify_partial: 'Partial verification',
+ verify_full: 'Verification passed',
+ verify_title: 'Verification',
+ verify_intro: 'Levels: no data → passport → 2FA and confirmed email/phone.',
+ verify_lvl_none: 'No data',
+ verify_lvl_partial: 'Passport',
+ verify_lvl_full: 'Full',
+ verify_desc_0: 'No verification data. Identity documents have not been submitted.',
+ verify_desc_1: 'Partial verification: passport verification only has been provided.',
+ verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
+ verify_btn_start: 'Submit passport verification',
+ verify_btn_continue: 'Enable 2FA and confirm email/phone',
+ verify_btn_done: 'Verified',
+ verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
+ verify_untrusted: 'Untrusted user',
  privacy_title: 'Política de privacidade',
  privacy_body: "Ao continuar, aceita a <a href=\"{url}\">política de privacidade (for MiniApp's)</a>.",
  privacy_accept: 'Aceitar e continuar',
@@ -9058,6 +9317,22 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ verify_none: 'No data',
+ verify_partial: 'Partial verification',
+ verify_full: 'Verification passed',
+ verify_title: 'Verification',
+ verify_intro: 'Levels: no data → passport → 2FA and confirmed email/phone.',
+ verify_lvl_none: 'No data',
+ verify_lvl_partial: 'Passport',
+ verify_lvl_full: 'Full',
+ verify_desc_0: 'No verification data. Identity documents have not been submitted.',
+ verify_desc_1: 'Partial verification: passport verification only has been provided.',
+ verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
+ verify_btn_start: 'Submit passport verification',
+ verify_btn_continue: 'Enable 2FA and confirm email/phone',
+ verify_btn_done: 'Verified',
+ verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
+ verify_untrusted: 'Untrusted user',
  privacy_title: 'Gizlilik politikası',
  privacy_body: "Devam ederek <a href=\"{url}\">gizlilik politikasını (for MiniApp's)</a> kabul edersiniz.",
  privacy_accept: 'Kabul et ve devam et',
@@ -9634,6 +9909,22 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ verify_none: 'No data',
+ verify_partial: 'Partial verification',
+ verify_full: 'Verification passed',
+ verify_title: 'Verification',
+ verify_intro: 'Levels: no data → passport → 2FA and confirmed email/phone.',
+ verify_lvl_none: 'No data',
+ verify_lvl_partial: 'Passport',
+ verify_lvl_full: 'Full',
+ verify_desc_0: 'No verification data. Identity documents have not been submitted.',
+ verify_desc_1: 'Partial verification: passport verification only has been provided.',
+ verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
+ verify_btn_start: 'Submit passport verification',
+ verify_btn_continue: 'Enable 2FA and confirm email/phone',
+ verify_btn_done: 'Verified',
+ verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
+ verify_untrusted: 'Untrusted user',
  privacy_title: 'Kebijakan privasi',
  privacy_body: "Dengan melanjutkan, Anda menyetujui <a href=\"{url}\">kebijakan privasi (for MiniApp's)</a>.",
  privacy_accept: 'Terima dan lanjutkan',
@@ -10210,6 +10501,22 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ verify_none: 'No data',
+ verify_partial: 'Partial verification',
+ verify_full: 'Verification passed',
+ verify_title: 'Verification',
+ verify_intro: 'Levels: no data → passport → 2FA and confirmed email/phone.',
+ verify_lvl_none: 'No data',
+ verify_lvl_partial: 'Passport',
+ verify_lvl_full: 'Full',
+ verify_desc_0: 'No verification data. Identity documents have not been submitted.',
+ verify_desc_1: 'Partial verification: passport verification only has been provided.',
+ verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
+ verify_btn_start: 'Submit passport verification',
+ verify_btn_continue: 'Enable 2FA and confirm email/phone',
+ verify_btn_done: 'Verified',
+ verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
+ verify_untrusted: 'Untrusted user',
  privacy_title: 'سياسة الخصوصية',
  privacy_body: "بالمتابعة فإنك توافق على <a href=\"{url}\">سياسة الخصوصية (for MiniApp's)</a>.",
  privacy_accept: 'موافق ومتابعة',
@@ -10786,6 +11093,22 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ verify_none: 'No data',
+ verify_partial: 'Partial verification',
+ verify_full: 'Verification passed',
+ verify_title: 'Verification',
+ verify_intro: 'Levels: no data → passport → 2FA and confirmed email/phone.',
+ verify_lvl_none: 'No data',
+ verify_lvl_partial: 'Passport',
+ verify_lvl_full: 'Full',
+ verify_desc_0: 'No verification data. Identity documents have not been submitted.',
+ verify_desc_1: 'Partial verification: passport verification only has been provided.',
+ verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
+ verify_btn_start: 'Submit passport verification',
+ verify_btn_continue: 'Enable 2FA and confirm email/phone',
+ verify_btn_done: 'Verified',
+ verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
+ verify_untrusted: 'Untrusted user',
  privacy_title: 'プライバシーポリシー',
  privacy_body: "続行すると<a href=\"{url}\">プライバシーポリシー (for MiniApp's)</a>に同意したことになります。",
  privacy_accept: '同意して続ける',
@@ -11362,6 +11685,22 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ verify_none: 'No data',
+ verify_partial: 'Partial verification',
+ verify_full: 'Verification passed',
+ verify_title: 'Verification',
+ verify_intro: 'Levels: no data → passport → 2FA and confirmed email/phone.',
+ verify_lvl_none: 'No data',
+ verify_lvl_partial: 'Passport',
+ verify_lvl_full: 'Full',
+ verify_desc_0: 'No verification data. Identity documents have not been submitted.',
+ verify_desc_1: 'Partial verification: passport verification only has been provided.',
+ verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
+ verify_btn_start: 'Submit passport verification',
+ verify_btn_continue: 'Enable 2FA and confirm email/phone',
+ verify_btn_done: 'Verified',
+ verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
+ verify_untrusted: 'Untrusted user',
  privacy_title: '개인정보 처리방침',
  privacy_body: "계속하면 <a href=\"{url}\">개인정보 처리방침 (for MiniApp's)</a>에 동의하게 됩니다.",
  privacy_accept: '동의하고 계속',
@@ -12739,8 +13078,10 @@ function tBlock(key) {
    if (a && a !== key) return a;
   }
  } catch (e) {}
- var lang = getAppLang();
- var pack = I18N[lang] || I18N.en || I18N.ru;
+ if (typeof I18N === 'undefined' || !I18N) return key || '';
+ var lang = 'en';
+ try { lang = (typeof getAppLang === 'function' ? getAppLang() : 'en') || 'en'; } catch (e2) {}
+ var pack = I18N[lang] || I18N[String(lang).split('-')[0]] || I18N.en || I18N.ru || {};
  if (pack && pack[key] != null) return pack[key];
  if (I18N.en && I18N.en[key] != null) return I18N.en[key];
  if (I18N.ru && I18N.ru[key] != null) return I18N.ru[key];
@@ -13559,7 +13900,7 @@ async function renderUserProfile() {
  ? '<img class="profile-avatar-img" src="' + String(photo).replace(/"/g,'') + '" alt="" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;">'
  : '<div class="profile-avatar-fallback" style="display:flex;">' + initial + '</div>') +
  '</div>' +
- '<div class="profile-name">' + displayName.replace(/</g,'&lt;') + '</div>' +
+ '<div class="profile-name-row" style="justify-content:center;"><div class="profile-name">' + displayName.replace(/</g,'&lt;') + '</div>' + verifyBadgeHtml(verifyLevelOf(p), false) + '</div>' +
  (p.username
  ? ('<div class="profile-username" onclick="openTgUser(\'' + String(p.username).replace(/[^a-zA-Z0-9_]/g,'') + '\')">@' + String(p.username).replace(/</g,'&lt;') + '</div>')
  : '') +
