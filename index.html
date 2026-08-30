@@ -2145,7 +2145,7 @@ window.onerror = function(msg, src, line) {
 window.addEventListener('unhandledrejection', function(ev) {
  window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
 });
-const API_URL = "https://exchange-bot4.waw0.amvera.tech";
+const API_URL = ("https://exchange-bot4.waw0.amvera.tech" || "").replace(/\/$/, "");
 var SUPPORT_MANAGER_URL = 'https://t.me/mediamanagering';
 var SUPPORT_BOT_URL = 'https://t.me/clossrsuppbot';
 var SUPPORT_BOT_USERNAME = 'clossrsuppbot';
@@ -2634,10 +2634,18 @@ async function continueAfterAuth() {
  box.innerHTML = '<div class="empty" style="padding:20px;text-align:center;">'
  + '<div style="margin-bottom:10px;font-weight:600;">Не удалось загрузить данные</div>'
  + '<div style="font-size:13px;color:var(--hint);margin-bottom:8px;">' + safe + '</div>'
- + '<div style="font-size:11px;color:var(--hint);word-break:break-all;margin-bottom:14px;">API: ' + apiLine + '</div>'
+ + '<div style="font-size:11px;color:var(--hint);word-break:break-all;margin-bottom:8px;">API: ' + apiLine + '</div>'
+ + '<div id="boot-health-info" style="font-size:11px;color:var(--hint);margin-bottom:14px;"></div>'
  + '<button class="btn" style="margin-top:8px;" onclick="location.reload()">Обновить</button>'
  + '<button class="btn btn-secondary" style="margin-top:8px;" id="btn-reset-session">Сбросить вход</button>'
  + '</div>';
+ try {
+   fetch(apiLine + '/api/health').then(function(r){ return r.json(); }).then(function(h){
+     var el = document.getElementById('boot-health-info');
+     if (!el || !h) return;
+     el.textContent = 'DB: ' + (h.db||'?') + ' | users=' + (h.users!=null?h.users:'?') + ' listings=' + (h.listings!=null?h.listings:'?') + ' | ' + (h.db_path||'');
+   }).catch(function(){});
+ } catch (eH) {}
  var rb = document.getElementById('btn-reset-session');
  if (rb) rb.onclick = function() {
  try { localStorage.removeItem('clossr_web_session'); } catch (e1) {}
