@@ -3469,7 +3469,7 @@ var I18N = {
  topup: 'Пополнить', withdraw: 'Вывести', my_tx: 'Мои транзакции',
  sale: 'Продажа', all: 'Все', order: 'Заказ', execute: 'Исполнение',
  moderation: 'Модерация', active: 'Активные', completed_tab: 'Завершён.',
- loading: 'Loading data from server…', empty: 'Пусто', no_listings: 'Объявлений нет',
+ loading: 'Загрузка данных с сервера…', empty: 'Пусто', no_listings: 'Объявлений нет',
  no_news: 'Пока нет новостей', save: 'Сохранить', cancel: 'Отмена', next: 'Далее',
  pay: 'Оплатить', buy: 'Купить', write: 'Написать', profile: 'Профиль',
  price: 'Цена', from: 'с', to: 'до', type: 'Тип', product_type: 'Вид товара',
@@ -3585,7 +3585,7 @@ var I18N = {
  purchase: 'Покупка',
  not_on_shift_long: 'Вы не на смене, нет доступа к разделу',
  off_shift: 'не на смене',
- loading2: '' + ((typeof tBlock==='function' && (tBlock('loading')||tBlock('loading2'))) || 'Loading data from server...') + '',
+ loading2: 'Loading data from server...',
  creating: 'Создание...',
  min_1: 'Минимум 1$',
  min_5: 'Минимум 5$',
@@ -13115,7 +13115,7 @@ function localizeMonths(str) {
    return (typeof tBlock === 'function' ? tBlock('pinned') : null) || out;
  }
  var lang = getAppLang();
- var target = MONTHS_I18N[lang] || MONTHS_I18N.en;
+ var target = (MONTHS_I18N && (MONTHS_I18N[lang] || MONTHS_I18N.en || MONTHS_I18N.ru)) || [];
  var ru = MONTHS_I18N.ru;
  // ISO → "19 Aug. 2026 20:00"
  if (/^\d{4}-\d{2}-\d{2}/.test(out)) {
@@ -13150,7 +13150,7 @@ function formatDateTimeLocal(iso) {
  var d = new Date(iso);
  if (isNaN(d.getTime())) return localizeMonths(String(iso||''));
  var lang = getAppLang();
- var months = MONTHS_I18N[lang] || MONTHS_I18N.en;
+ var months = (MONTHS_I18N && (MONTHS_I18N[lang] || MONTHS_I18N.en || MONTHS_I18N.ru)) || [];
  var day = d.getDate(); day = day < 10 ? '0'+day : ''+day;
  var h = d.getHours(); h = h < 10 ? '0'+h : ''+h;
  var mi = d.getMinutes(); mi = mi < 10 ? '0'+mi : ''+mi;
@@ -13165,8 +13165,13 @@ function tBlock(key) {
    if (a && a !== key) return a;
   }
  } catch (e) {}
- var lang = getAppLang();
- var pack = I18N[lang] || I18N.en || I18N.ru;
+ if (typeof I18N === 'undefined' || !I18N) {
+   if (key === 'loading' || key === 'loading2') return 'Loading data from server...';
+   return key || '';
+ }
+ var lang = 'en';
+ try { lang = (typeof getAppLang === 'function' ? getAppLang() : 'en') || 'en'; } catch (e2) { lang = 'en'; }
+ var pack = I18N[lang] || I18N[String(lang).split('-')[0]] || I18N.en || I18N.ru || {};
  if (pack && pack[key] != null) return pack[key];
  if (I18N.en && I18N.en[key] != null) return I18N.en[key];
  if (I18N.ru && I18N.ru[key] != null) return I18N.ru[key];
