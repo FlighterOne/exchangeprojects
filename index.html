@@ -106,7 +106,50 @@
  border-radius: 14px; background: rgba(46,166,255,0.12); color: var(--button);
  }
  .app-install-icon-wrap svg { display: block; }
- .btn-logout-red {
+ 
+
+.btn-gear {
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;padding:0;margin:0;flex-shrink:0;
+  border-radius:10px;border:1px solid rgba(128,128,128,0.35);
+  background:var(--secondary-bg);color:var(--text);
+  font-size:16px;cursor:pointer;line-height:1;
+}
+.btn-gear:active{opacity:.75;}
+.verify-prompt-overlay{position:fixed;inset:0;z-index:99997;background:#0e0e0e;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
+.verify-prompt-card{max-width:420px;width:100%;background:#1c1c1e;border-radius:16px;padding:28px 24px;text-align:center;color:#fff;}
+.verify-prompt-card h2{font-size:18px;margin:0 0 10px;font-weight:600;}
+.verify-prompt-card p{font-size:14px;line-height:1.5;opacity:.9;margin:0 0 20px;color:#fff;}
+.verify-prompt-card .btn{width:100%;margin-top:8px;}
+.fa2-overlay{position:fixed;inset:0;z-index:99996;background:#0e0e0e;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
+.fa2-card{max-width:420px;width:100%;background:#1c1c1e;border-radius:16px;padding:28px 24px;text-align:center;color:#fff;}
+.fa2-card h2{font-size:18px;margin:0 0 12px;}
+.fa2-card .form-input{text-align:left;width:100%;box-sizing:border-box;margin-bottom:10px;}
+.fa2-link{color:#2aabee;font-size:13px;cursor:pointer;margin-top:14px;display:inline-block;background:none;border:none;font-family:inherit;}
+
+.btn-complaint {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 32px; padding: 0 12px; margin: 0; flex-shrink: 0;
+  border-radius: 10px; border: 1px solid rgba(255, 149, 0, 0.55);
+  background: rgba(255, 149, 0, 0.14); color: #ff9500;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  cursor: pointer; line-height: 1; white-space: nowrap;
+}
+.btn-complaint:active { opacity: 0.75; }
+.complaint-reason-item {
+  width: 100%; text-align: left; cursor: pointer;
+  border: 1px solid var(--border); margin-bottom: 8px;
+  padding: 12px 14px; border-radius: 12px;
+  background: var(--secondary-bg); color: var(--text);
+  font-size: 14px; font-weight: 500; font-family: inherit;
+}
+.complaint-reason-item.selected {
+  border-color: var(--button); background: rgba(42,171,238,0.12);
+  color: var(--text);
+}
+.complaint-reason-item .title { color: var(--text); font-size: 14px; font-weight: 600; }
+
+.btn-logout-red {
  background: #ff3b30 !important; color: #fff !important; border: none !important;
  width: auto !important; padding: 8px 14px !important; margin: 0 !important; flex-shrink: 0;
  border-radius: 10px !important; font-weight: 600 !important;
@@ -1178,11 +1221,25 @@
 </head>
 <body>
 
+<div id="verify-prompt-overlay" class="verify-prompt-overlay" style="display:none;">
+ <div class="verify-prompt-card">
+  <h2 id="verify-prompt-title">Complete verification</h2>
+  <p id="verify-prompt-text">Verify your account to unlock full access and higher trust.</p>
+  <button type="button" class="btn" id="verify-prompt-go" onclick="onVerifyPromptGo()">Complete verification</button>
+  <button type="button" class="btn btn-secondary" id="verify-prompt-later" onclick="onVerifyPromptLater()">Later</button>
+ </div>
+</div>
+<div id="fa2-overlay" class="fa2-overlay" style="display:none;">
+ <div class="fa2-card">
+  <h2 id="fa2-title">Enter password</h2>
+  <div id="fa2-body"></div>
+ </div>
+</div>
 <div id="privacy-overlay" class="privacy-overlay" style="display:none;">
  <div class="privacy-card">
  <h2 id="privacy-title">Privacy policy</h2>
  <p id="privacy-text"></p>
- <button type="button" class="btn" id="privacy-accept-btn">Accept and continue</button>
+ <button type="button" class="btn" id="privacy-accept-btn" onclick="acceptPrivacyAndContinue()">Accept and continue</button>
  </div>
 </div>
 
@@ -2042,10 +2099,28 @@
  </div>
 
  <!-- PROFILE -->
- <div id="page-profile" class="page">
+ <div id="page-profile-settings" class="page">
+ <button type="button" class="back-link" onclick="showPage('profile')" data-i18n="back">← Back</button>
+ <div class="section-title" data-i18n="profile_settings">Profile settings</div>
+ <div class="support-grid" style="margin-top:12px;">
+  <button class="support-tile" onclick="openChangePassword()">
+   <div class="support-tile-icon">🔑</div>
+   <div class="support-tile-title" data-i18n="change_password">Change password</div>
+  </button>
+  <button class="support-tile" onclick="openChangeEmail()">
+   <div class="support-tile-icon">✉️</div>
+   <div class="support-tile-title" data-i18n="change_email">Change email</div>
+  </button>
+ </div>
+ <div id="profile-settings-form" style="margin-top:16px;"></div>
+</div>
+<div id="page-profile" class="page">
  <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
   <button type="button" class="back-link" id="own-profile-back" onclick="showPage('home')" data-i18n="back" style="margin:0;">← Назад</button>
+  <div style="display:flex;align-items:center;gap:8px;">
+  <button type="button" class="btn-gear" id="profile-settings-btn" onclick="openProfileSettings()" style="display:none;" title="Settings">⚙️</button>
   <button type="button" class="btn-logout-red" id="profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Выйти</button>
+  </div>
  </div>
  <div class="profile-header">
  <div class="profile-avatar-wrap" id="profile-avatar-wrap">
@@ -2116,6 +2191,10 @@
  <div class="support-tile-icon">⚠️</div>
  <div class="support-tile-title" data-i18n="mod_complaints">Complaints moderation</div>
  </button>
+ <button class="support-tile" onclick="openAdminSection('tickets')">
+ <div class="support-tile-icon">💬</div>
+ <div class="support-tile-title" data-i18n="mod_tickets">Support tickets moderation</div>
+ </button>
  <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
  <div class="support-tile-icon">💼</div>
  <div class="support-tile-title" data-i18n="mod_jobs">Job applications</div>
@@ -2163,7 +2242,7 @@
  <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
  <button type="button" class="back-link" id="user-profile-back" onclick="backFromUserProfile()" data-i18n="back" style="margin:0;">← Назад</button>
  <div style="display:flex;align-items:center;gap:8px;">
-  <button type="button" class="profile-edit-btn" id="user-profile-complaint-btn" onclick="openComplaintMenu()" style="display:none;" data-i18n="complaint_btn">Report</button>
+  <button type="button" class="btn-complaint" id="user-profile-complaint-btn" onclick="openComplaintMenu()" style="display:none;" data-i18n="complaint_btn">Report</button>
   <button type="button" class="btn-logout-red" id="user-profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Выйти</button>
   <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
  </div>
@@ -2319,6 +2398,8 @@ function updateProfileLogoutVisibility() {
   var show = !mini;
   try {
     var a = document.getElementById('profile-logout-btn');
+    var gs = document.getElementById('profile-settings-btn');
+    if (gs) gs.style.display = show ? 'inline-flex' : 'none';
     if (a) { a.style.display = show ? 'inline-flex' : 'none'; a.textContent = (typeof tBlock === 'function' ? tBlock('logout') : 'Выйти'); }
     var b = document.getElementById('user-profile-logout-btn');
     if (b) {
@@ -2634,6 +2715,7 @@ async function handleTelegramLogin(user) {
  alert((data && data.error) || 'Sign-in failed');
  return;
  }
+ window.__xcodNeed2fa = true;
  saveWebSession(data.session_token, data.expires_at, {
  id: data.user_id,
  username: data.username,
@@ -2661,7 +2743,22 @@ async function continueAfterAuth() {
  if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
  if (userData && !userData.privacy_miniapp) {
  showPrivacyOverlay(userData.privacy_policy_url || '');
+ return;
  }
+ // 2FA gate for site (not miniapp): only if has_2fa and not yet verified this browser session
+ try {
+   var fa2ok = '';
+   try { fa2ok = sessionStorage.getItem('xcod_2fa_ok') || ''; } catch(e){}
+   var need2fa = !!window.__xcodNeed2fa;
+   if (userData.has_2fa && fa2ok !== '1' && need2fa && typeof isTelegramMiniApp === 'function' && !isTelegramMiniApp()) {
+     show2faGate('login');
+     return;
+   }
+   // miniapp uses Telegram as first factor
+   if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
+     try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
+   }
+ } catch (e2) {}
  // lang/theme sync
  try {
  var srvLang = (userData && userData.lang) ? userData.lang : null;
@@ -2878,7 +2975,22 @@ async function init() {
  if (userData && userData.banned) { showBannedScreen(userData.ban_info || {}); return; }
  if (userData && !userData.privacy_miniapp) {
  showPrivacyOverlay(userData.privacy_policy_url || '');
+ return;
  }
+ // 2FA gate for site (not miniapp): only if has_2fa and not yet verified this browser session
+ try {
+   var fa2ok = '';
+   try { fa2ok = sessionStorage.getItem('xcod_2fa_ok') || ''; } catch(e){}
+   var need2fa = !!window.__xcodNeed2fa;
+   if (userData.has_2fa && fa2ok !== '1' && need2fa && typeof isTelegramMiniApp === 'function' && !isTelegramMiniApp()) {
+     show2faGate('login');
+     return;
+   }
+   // miniapp uses Telegram as first factor
+   if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
+     try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
+   }
+ } catch (e2) {}
  // sync lang + theme from bot/server
  try {
  var srvLang = (userData && userData.lang) ? userData.lang : null;
@@ -2965,15 +3077,24 @@ function updateOwnVerifyBadge() {
     : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 }
 
+
 function openComplaintMenu() {
   var uid = window._profileUid;
   if (!uid) return;
+  // only users below intern (role < 3)
+  var myRole = Number((userData && userData.role) || 0);
+  if (myRole >= 3) {
+    try { tg.showAlert(tBlock('complaint_staff_denied') || 'Staff cannot file complaints'); } catch(e){}
+    return;
+  }
+  var myId = userData && (userData.user_id || userData.id);
+  if (myId && String(myId) === String(uid)) return;
   window._complaintTarget = uid;
   window._complaintReason = '';
   showPage('complaint');
-  renderComplaintStep1();
+  renderComplaintMenu();
 }
-function renderComplaintStep1() {
+function renderComplaintMenu() {
   var box = document.getElementById('complaint-content');
   if (!box) return;
   var reasons = [
@@ -2984,23 +3105,35 @@ function renderComplaintStep1() {
     { id: 'fraud_listing', key: 'complaint_reason_fraud_listing' },
     { id: 'other', key: 'complaint_reason_other' }
   ];
-  var html = '<div class="section-title" style="font-size:16px;">' + (tBlock('complaint_choose_reason') || 'Choose a reason') + '</div>';
+  var sel = window._complaintReason || '';
+  var html = '<div class="section-title" style="font-size:16px;color:var(--text);">' + (tBlock('complaint_choose_reason') || 'Choose a reason') + '</div>';
   reasons.forEach(function(r) {
-    html += '<button type="button" class="list-item" style="width:100%;text-align:left;cursor:pointer;border:1px solid var(--border);margin-bottom:8px;" onclick="complaintPickReason(\'' + r.id + '\')">' +
+    var on = sel === r.id ? ' selected' : '';
+    html += '<button type="button" class="complaint-reason-item' + on + '" onclick="complaintPickReason(\'' + r.id + '\')">' +
       '<div class="title">' + (tBlock(r.key) || r.id) + '</div></button>';
   });
+  if (sel) {
+    html += '<div class="form-group" style="margin-top:14px;">' +
+      '<label class="form-label" style="color:var(--text);">' + (tBlock('complaint_comment') || 'Comment') + '</label>' +
+      '<textarea class="form-input" id="complaint-comment" rows="4" placeholder="' + (tBlock('complaint_comment_ph') || 'Describe the issue') + '" style="min-height:100px;color:var(--text);"></textarea></div>' +
+      '<button type="button" class="btn" onclick="submitComplaint()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+  }
   box.innerHTML = html;
 }
 function complaintPickReason(id) {
   window._complaintReason = id;
-  var box = document.getElementById('complaint-content');
-  if (!box) return;
-  box.innerHTML = '<div class="section-title" style="font-size:16px;">' + (tBlock('complaint_comment') || 'Comment') + '</div>' +
-    '<div class="form-group"><textarea class="form-input" id="complaint-comment" rows="4" placeholder="' + (tBlock('complaint_comment_ph') || 'Describe the issue') + '" style="min-height:100px;"></textarea></div>' +
-    '<button type="button" class="btn" onclick="submitComplaint()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+  renderComplaintMenu();
+  try {
+    var ta = document.getElementById('complaint-comment');
+    if (ta) ta.focus();
+  } catch (e) {}
 }
 async function submitComplaint() {
   try {
+    if (!window._complaintReason) {
+      try { tg.showAlert(tBlock('complaint_choose_reason') || 'Choose a reason'); } catch(e){}
+      return;
+    }
     var comment = (document.getElementById('complaint-comment') || {}).value || '';
     await apiPost('/api/complaints', {
       target_id: window._complaintTarget,
@@ -3011,6 +3144,217 @@ async function submitComplaint() {
     showPage('user-profile');
   } catch (e) {
     try { tg.showAlert(e.message || 'Error'); } catch(e2){}
+  }
+}
+
+
+
+
+
+async function acceptPrivacyAndContinue() {
+  try {
+    await apiPost('/api/privacy/accept', {});
+    if (userData) userData.privacy_miniapp = true;
+    var ov = document.getElementById('privacy-overlay');
+    if (ov) ov.style.display = 'none';
+    maybeShowVerifyPrompt();
+  } catch (e) {
+    try { tg.showAlert(e.message || 'Error'); } catch(e2){}
+  }
+}
+
+function openProfileSettings() {
+  showPage('profile-settings');
+  var f = document.getElementById('profile-settings-form');
+  if (f) f.innerHTML = '';
+  try { if (typeof applyI18n === 'function') applyI18n(); } catch(e){}
+}
+function openChangePassword() {
+  var f = document.getElementById('profile-settings-form');
+  if (!f) return;
+  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('verify_series') || 'Passport series and number') + '</label>' +
+    '<input class="form-input" id="ch-pwd-series" type="text" autocomplete="off"></div>' +
+    '<div class="form-group"><label class="form-label">' + (tBlock('new_password') || 'New password') + '</label>' +
+    '<input class="form-input" id="ch-pwd-1" type="password" autocomplete="new-password"></div>' +
+    '<div class="form-group"><label class="form-label">' + (tBlock('repeat_password') || 'Repeat password') + '</label>' +
+    '<input class="form-input" id="ch-pwd-2" type="password" autocomplete="new-password"></div>' +
+    '<div class="subtitle" style="margin-bottom:10px;">' + (tBlock('password_rules') || 'Min 8 characters, 1 digit, 1 uppercase letter') + '</div>' +
+    '<button type="button" class="btn" onclick="submitChangePassword()">' + (tBlock('save') || 'Save') + '</button>';
+}
+function openChangeEmail() {
+  var f = document.getElementById('profile-settings-form');
+  if (!f) return;
+  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('verify_series') || 'Passport series and number') + '</label>' +
+    '<input class="form-input" id="ch-em-series" type="text" autocomplete="off"></div>' +
+    '<div class="form-group"><label class="form-label">' + (tBlock('verify_email') || 'Email') + '</label>' +
+    '<input class="form-input" id="ch-em-email" type="email" autocomplete="email"></div>' +
+    '<button type="button" class="btn" onclick="submitChangeEmail()">' + (tBlock('save') || 'Save') + '</button>';
+}
+async function submitChangePassword() {
+  try {
+    var series = (document.getElementById('ch-pwd-series') || {}).value || '';
+    var p1 = (document.getElementById('ch-pwd-1') || {}).value || '';
+    var p2 = (document.getElementById('ch-pwd-2') || {}).value || '';
+    await apiPost('/api/verify/2fa/change-password', { series_number: series, password: p1, password2: p2 });
+    try { tg.showAlert(tBlock('password_updated') || 'Password updated'); } catch(e){}
+    openProfileSettings();
+  } catch (e) {
+    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
+  }
+}
+async function submitChangeEmail() {
+  try {
+    var series = (document.getElementById('ch-em-series') || {}).value || '';
+    var email = (document.getElementById('ch-em-email') || {}).value || '';
+    await apiPost('/api/verify/2fa/change-email', { series_number: series, email: email });
+    if (userData) userData.verify_email = email;
+    try { tg.showAlert(tBlock('email_updated') || 'Email updated'); } catch(e){}
+    openProfileSettings();
+  } catch (e) {
+    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
+  }
+}
+function mapPwdError(msg) {
+  msg = String(msg || '');
+  var map = {
+    pwd_short: tBlock('pwd_short') || 'Password must be at least 8 characters',
+    pwd_digit: tBlock('pwd_digit') || 'Password must contain a digit',
+    pwd_upper: tBlock('pwd_upper') || 'Password must contain an uppercase letter',
+    pwd_mismatch: tBlock('pwd_mismatch') || 'Passwords do not match',
+    bad_email: tBlock('bad_email') || 'Invalid email',
+    passport_mismatch: tBlock('passport_mismatch') || 'Passport data does not match',
+    email_mismatch: tBlock('email_mismatch') || 'Email does not match',
+    wrong_password: tBlock('wrong_password') || 'Wrong password',
+    passport_required: tBlock('passport_required') || 'Complete passport verification first'
+  };
+  return map[msg] || msg;
+}
+function showVerifyPrompt() {
+  var ov = document.getElementById('verify-prompt-overlay');
+  if (!ov) return;
+  var title = document.getElementById('verify-prompt-title');
+  var text = document.getElementById('verify-prompt-text');
+  var go = document.getElementById('verify-prompt-go');
+  var later = document.getElementById('verify-prompt-later');
+  if (title) title.textContent = tBlock('verify_prompt_title') || 'Complete verification';
+  if (text) text.textContent = tBlock('verify_prompt_text') || 'Verify your account to unlock full access and higher trust.';
+  if (go) go.textContent = tBlock('verify_prompt_go') || 'Complete verification';
+  if (later) later.textContent = tBlock('verify_prompt_later') || 'Later';
+  ov.style.display = 'flex';
+}
+function hideVerifyPrompt() {
+  var ov = document.getElementById('verify-prompt-overlay');
+  if (ov) ov.style.display = 'none';
+}
+function onVerifyPromptGo() {
+  markVerifyPromptShown();
+  hideVerifyPrompt();
+  openVerifyPage();
+}
+function onVerifyPromptLater() {
+  markVerifyPromptShown();
+  hideVerifyPrompt();
+}
+
+
+function maybeShowVerifyPrompt() {
+  try {
+    if (!userData) return;
+    if (userData.banned) return;
+    if (!userData.privacy_miniapp) return;
+    var lvl = verifyLevelOf(userData);
+    if (lvl >= 2) return;
+    var shown = '';
+    try { shown = localStorage.getItem('xcod_verify_prompt_shown') || ''; } catch(e){}
+    // show once after privacy on first sessions until level 2 or dismissed - use per-user key
+    var key = 'xcod_verify_prompt_' + (userData.user_id || userData.id || '');
+    try { shown = localStorage.getItem(key) || shown; } catch(e){}
+    if (shown === '1') return;
+    showVerifyPrompt();
+  } catch (e) {}
+}
+function markVerifyPromptShown() {
+  try {
+    var key = 'xcod_verify_prompt_' + ((userData && (userData.user_id || userData.id)) || '');
+    localStorage.setItem(key, '1');
+    localStorage.setItem('xcod_verify_prompt_shown', '1');
+  } catch (e) {}
+}
+
+
+
+function show2faGate(mode) {
+  mode = mode || 'login';
+  window._fa2Mode = mode;
+  var ov = document.getElementById('fa2-overlay');
+  var body = document.getElementById('fa2-body');
+  var title = document.getElementById('fa2-title');
+  if (!ov || !body) return;
+  if (mode === 'login') {
+    if (title) title.textContent = tBlock('fa2_enter_password') || 'Enter password';
+    body.innerHTML = '<input class="form-input" id="fa2-pwd" type="password" placeholder="' + (tBlock('password') || 'Password') + '">' +
+      '<button type="button" class="btn" onclick="submit2faLogin()">' + (tBlock('continue_btn') || 'Continue') + '</button>' +
+      '<button type="button" class="fa2-link" onclick="show2faGate(\'forgot\')">' + (tBlock('forgot_password') || 'Forgot password?') + '</button>';
+  } else if (mode === 'forgot') {
+    if (title) title.textContent = tBlock('forgot_password') || 'Forgot password';
+    body.innerHTML = '<input class="form-input" id="fa2-email" type="email" placeholder="' + (tBlock('verify_email') || 'Email') + '">' +
+      '<input class="form-input" id="fa2-series" type="text" placeholder="' + (tBlock('verify_series') || 'Passport series and number') + '">' +
+      '<input class="form-input" id="fa2-pwd1" type="password" placeholder="' + (tBlock('new_password') || 'New password') + '">' +
+      '<input class="form-input" id="fa2-pwd2" type="password" placeholder="' + (tBlock('repeat_password') || 'Repeat password') + '">' +
+      '<div class="subtitle" style="margin:8px 0;opacity:.8;">' + (tBlock('password_rules') || '') + '</div>' +
+      '<button type="button" class="btn" onclick="submit2faForgot()">' + (tBlock('continue_btn') || 'Continue') + '</button>' +
+      '<button type="button" class="fa2-link" onclick="show2faGate(\'login\')">' + (tBlock('back') || 'Back') + '</button>';
+  }
+  ov.style.display = 'flex';
+}
+function hide2faGate() {
+  var ov = document.getElementById('fa2-overlay');
+  if (ov) ov.style.display = 'none';
+}
+async function submit2faLogin() {
+  try {
+    var pwd = (document.getElementById('fa2-pwd') || {}).value || '';
+    await apiPost('/api/auth/2fa', { password: pwd });
+    try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
+    window.__xcodNeed2fa = false;
+    hide2faGate();
+    await continueAfterAuth();
+  } catch (e) {
+    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
+  }
+}
+async function submit2faForgot() {
+  try {
+    await apiPost('/api/auth/2fa/forgot', {
+      email: (document.getElementById('fa2-email') || {}).value || '',
+      series_number: (document.getElementById('fa2-series') || {}).value || '',
+      password: (document.getElementById('fa2-pwd1') || {}).value || '',
+      password2: (document.getElementById('fa2-pwd2') || {}).value || ''
+    });
+    try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
+    hide2faGate();
+    try { tg.showAlert(tBlock('password_updated') || 'Password updated'); } catch(e){}
+    await continueAfterAuth();
+  } catch (e) {
+    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
+  }
+}
+async function submit2faSetup() {
+  try {
+    var p1 = (document.getElementById('v2-pwd1') || {}).value || '';
+    var p2 = (document.getElementById('v2-pwd2') || {}).value || '';
+    var email = (document.getElementById('v2-email') || {}).value || '';
+    var res = await apiPost('/api/verify/2fa/setup', { password: p1, password2: p2, email: email });
+    if (userData) {
+      userData.verify_level = (res && res.verify_level) || 2;
+      userData.has_2fa = true;
+      userData.verify_email = email;
+    }
+    try { tg.showAlert(tBlock('fa2_enabled') || '2FA enabled'); } catch(e){}
+    renderVerifyPage();
+    updateOwnVerifyBadge();
+  } catch (e) {
+    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
   }
 }
 
@@ -3087,11 +3431,18 @@ function renderVerifyPage() {
     if (level >= 2) {
       btn.style.display = 'none';
     } else if (level >= 1) {
-      btn.style.display = '';
-      btn.disabled = false;
-      btn.className = 'btn';
-      btn.textContent = (typeof tBlock === 'function' && tBlock('verify_btn_continue')) || 'Enable 2FA and confirm email/phone';
-      btn.onclick = function() { requestVerifyUpgrade(); };
+      btn.style.display = 'none';
+      if (title) title.textContent = (tBlock('fa2_setup_title') || 'Enable 2FA');
+      if (desc) {
+        desc.innerHTML = '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('password') || 'Password') + '</label>' +
+          '<input class="form-input" id="v2-pwd1" type="password" autocomplete="new-password"></div>' +
+          '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('repeat_password') || 'Repeat password') + '</label>' +
+          '<input class="form-input" id="v2-pwd2" type="password" autocomplete="new-password"></div>' +
+          '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('verify_email') || 'Email') + '</label>' +
+          '<input class="form-input" id="v2-email" type="email" autocomplete="email"></div>' +
+          '<div class="subtitle">' + (tBlock('password_rules') || 'Min 8 characters, 1 digit, 1 uppercase letter') + '</div>' +
+          '<button type="button" class="btn" style="margin-top:12px;" onclick="submit2faSetup()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+      }
     } else if (pst === 'pending') {
       btn.style.display = '';
       btn.disabled = true;
@@ -3804,6 +4155,17 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -3834,7 +4196,7 @@ var I18N = {
  verify_bad_date: 'Введите дату в формате ДД.ММ.ГГГГ',
  verify_date_ph: 'ДД.ММ.ГГГГ',
  mod_verify_empty: 'Нет заявок на верификацию',
- mod_verify: 'Модерация верификации',
+ mod_verify: 'Verification moderation',
  verify_passport_pending: 'Паспорт на модерации',
  verify_step_form: 'Анкета',
  verify_full_name: 'ФИО (как в паспорте)',
@@ -3904,7 +4266,7 @@ var I18N = {
  sale: 'Продажа', all: 'Все', order: 'Заказ', execute: 'Исполнение',
  moderation: 'Модерация', active: 'Активные', completed_tab: 'Завершён.',
  loading: 'Загрузка данных с сервера…', empty: 'Пусто', no_listings: 'Объявлений нет',
- no_news: 'Пока нет новостей', save: 'Сохранить', cancel: 'Отмена', next: 'Далее',
+ no_news: 'Пока нет новостей', save: 'Save', cancel: 'Отмена', next: 'Далее',
  pay: 'Оплатить', buy: 'Купить', write: 'Написать', profile: 'Профиль',
  price: 'Цена', from: 'с', to: 'до', type: 'Тип', product_type: 'Вид товара',
  rating_from: 'Рейтинг сотрудника от', service_type: 'Вид услуги', order_svc: 'Заказать', execute_svc: 'Исполнять',
@@ -3914,7 +4276,8 @@ var I18N = {
  original: 'оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
  insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: tBlock('mod_tx') || 'Transaction moderation',
  verification: tBlock('mod_verify') || 'Verification moderation',
- complaints: tBlock('mod_tickets') || 'Complaints',
+ complaints: tBlock('mod_complaints') || 'Complaints moderation',
+ tickets: tBlock('mod_tickets') || 'Support tickets moderation',
  transactions_x: 'Транзакции'
  ,
  your_role: 'Ваша роль',
@@ -3923,7 +4286,7 @@ var I18N = {
  mod_listings: 'Модерация объявлений',
  mod_tx: 'Модерация транзакций',
  mod_jobs: 'Модерация заявок на работу',
- mod_tickets: 'Модерация обращений',
+ mod_tickets: 'Support tickets moderation',
  staff_manage: 'Управление сотрудниками',
  analytics: 'Аналитика',
  new_listing: 'Новое объявление',
@@ -4078,7 +4441,7 @@ var I18N = {
  order_history: 'История заказов',
  my_ads: 'Мои объявления',
  restrict_pub: 'Ограничить публикацию',
- ban_user: 'Заблокировать',
+ ban_user: 'Block',
  unban: 'Разблокировать',
  end_punish: 'Завершить наказание досрочно',
  staff_rating: 'Рейтинг сотрудника',
@@ -4401,7 +4764,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  no_job_apps: 'Нет заявок на работу',
  violator_id: 'ID нарушителя',
  shifts_week_done: 'Отработано смен на неделе',
- mod_complaints: 'Модерация жалоб',
+ mod_complaints: 'Complaints moderation',
  shift_status_open: 'Открыта',
  shift_status_closed: 'Закрыта',
  tracker_staff_only: 'Трекер доступен только сотрудникам',
@@ -4468,6 +4831,43 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -5129,6 +5529,43 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -5777,6 +6214,43 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -6425,6 +6899,43 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -7687,6 +8198,43 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -8337,6 +8885,43 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -8985,6 +9570,43 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -10206,6 +10828,43 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -10854,6 +11513,43 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -11502,6 +12198,43 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -12150,6 +12883,43 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -12798,6 +13568,43 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ forgot_password: 'Forgot password?',
+ fa2_enabled: 'Two-factor authentication enabled',
+ fa2_setup_title: 'Enable 2FA',
+ fa2_enter_password: 'Enter password',
+ verify_prompt_later: 'Later',
+ verify_prompt_go: 'Complete verification',
+ verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
+ verify_prompt_title: 'Complete verification',
+ passport_required: 'Complete passport verification first',
+ wrong_password: 'Wrong password',
+ email_mismatch: 'Email does not match',
+ passport_mismatch: 'Passport data does not match',
+ bad_email: 'Invalid email',
+ pwd_mismatch: 'Passwords do not match',
+ pwd_upper: 'Password must contain an uppercase letter',
+ pwd_digit: 'Password must contain a digit',
+ pwd_short: 'Password must be at least 8 characters',
+ email_updated: 'Email updated',
+ password_updated: 'Password updated',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password: 'Password',
+ repeat_password: 'Repeat password',
+ new_password: 'New password',
+ change_email: 'Change email',
+ change_password: 'Change password',
+ profile_settings: 'Profile settings',
+ restrict_publish: 'Restrict publishing',
+ action_history: 'Action history',
+ verify_passport_status: 'Passport status',
+ verify_email: 'Email',
+ verify_phone: 'Phone (Telegram)',
+ verify_country: 'Country of residence',
+ admin_no_passport: 'No passport data submitted',
+ admin_passport_btn: 'Passport',
+ admin_verify_title: 'Verification data',
+ admin_verify_btn: 'Verification',
+ complaint_staff_denied: 'Staff cannot file complaints',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -14801,6 +15608,74 @@ async function sendAdminSupportMessage() {
  }
 }
 
+
+async function openAdminUserVerification(uid) {
+  uid = parseInt(uid, 10);
+  if ((userData.role || 0) < 5) {
+    try { tg.showAlert(tBlock('need_admin') || 'Admin only'); } catch(e){}
+    return;
+  }
+  setProfileBack(function(){ openProfileModMenu(); });
+  var box = document.getElementById('user-profile-content');
+  if (!box) return;
+  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  showPage('user-profile');
+  try {
+    var d = await apiGet('/api/admin/users/' + uid + '/verification');
+    var html = '<div class="section-title" style="font-size:16px;">' + (tBlock('admin_verify_title') || 'Verification data') + '</div>';
+    html += '<div class="info-block" style="color:var(--text);line-height:1.55;">';
+    html += '<div><b>' + (tBlock('verify_country') || 'Country of residence') + ':</b> ' + String(d.country || '—').replace(/</g,'&lt;') + '</div>';
+    html += '<div><b>' + (tBlock('verify_phone') || 'Phone (Telegram)') + ':</b> ' + String(d.phone || '—').replace(/</g,'&lt;') + '</div>';
+    html += '<div><b>' + (tBlock('verify_email') || 'Email') + ':</b> ' + String(d.email || '—').replace(/</g,'&lt;') + '</div>';
+    html += '<div style="margin-top:6px;"><b>' + (tBlock('verify_title') || 'Level') + ':</b> ' + (verifyTitle(d.verify_level || 0)) + '</div>';
+    if (d.passport_status) {
+      html += '<div><b>' + (tBlock('verify_passport_status') || 'Passport status') + ':</b> ' + String(d.passport_status).replace(/</g,'&lt;') + '</div>';
+    }
+    html += '</div>';
+    if (d.has_passport) {
+      html += '<button type="button" class="btn" style="margin-top:12px;" onclick="openAdminUserPassport(' + uid + ')">' + (tBlock('admin_passport_btn') || 'Passport') + '</button>';
+    } else {
+      html += '<div class="subtitle" style="margin-top:12px;">' + (tBlock('admin_no_passport') || 'No passport data submitted') + '</div>';
+    }
+    box.innerHTML = html;
+    window._adminVerifyDetail = d;
+  } catch (e) {
+    box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + (e.message || 'Error') + '</div>';
+  }
+}
+function openAdminUserPassport(uid) {
+  var d = window._adminVerifyDetail;
+  if (!d) {
+    openAdminUserVerification(uid);
+    return;
+  }
+  setProfileBack(function(){ openAdminUserVerification(uid); });
+  var box = document.getElementById('user-profile-content');
+  if (!box) return;
+  var f = d.form || {};
+  var ph = d.photos || {};
+  function phBox(src, label) {
+    if (!src) return '';
+    return '<div class="verify-photo-box"><div style="font-size:11px;padding:4px 8px;opacity:.7;color:var(--text);">' + (label||'') + '</div><img src="' + src + '" alt=""></div>';
+  }
+  var html = '<div class="section-title" style="font-size:16px;">' + (tBlock('admin_passport_btn') || 'Passport') + '</div>';
+  html += '<div class="info-block" style="color:var(--text);line-height:1.55;">';
+  html += '<div><b>' + (tBlock('verify_full_name') || 'Full name') + ':</b> ' + String(f.full_name||'—').replace(/</g,'&lt;') + '</div>';
+  html += '<div><b>' + (tBlock('verify_dob') || 'Date of birth') + ':</b> ' + String(f.dob||f.dob_raw||'—') + '</div>';
+  html += '<div><b>' + (tBlock('verify_series') || 'Series / number') + ':</b> ' + String(f.series_number||'—').replace(/</g,'&lt;') + '</div>';
+  html += '<div><b>' + (tBlock('verify_issued_by') || 'Issued by') + ':</b> ' + String(f.issued_by||'—').replace(/</g,'&lt;') + '</div>';
+  html += '<div><b>' + (tBlock('verify_issue_date') || 'Date of issue') + ':</b> ' + String(f.issue_date||'—') + '</div>';
+  html += '</div>';
+  html += '<div class="verify-photo-grid">';
+  html += phBox(ph.selfie, tBlock('verify_step_selfie') || 'Selfie');
+  html += phBox(ph.passport, tBlock('verify_passport_main') || 'Main page');
+  html += phBox(ph.passport_reg, tBlock('verify_passport_reg') || 'Registration');
+  html += phBox(ph.with_passport, tBlock('verify_step_with_passport') || 'With passport');
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+
 async function openProfileModMenu() {
  if (!notSelfTarget(uid)) return;
  if ((userData.role||0) < 4) { try { tg.showAlert(tBlock('need_mod')); } catch(e){} return; }
@@ -14877,7 +15752,10 @@ async function openProfileModMenu() {
  html += '</div></div>';
 
  html += '<div class="btn-stack" style="margin-top:16px;">';
- html += '<button type="button" class="btn btn-secondary" onclick="openProfileModHistoryMenu(' + p.user_id + ')">История действий</button>';
+ html += '<button type="button" class="btn btn-secondary" onclick="openProfileModHistoryMenu(' + p.user_id + ')">' + (tBlock('action_history') || 'Action history') + '</button>';
+ if (myRole >= 5) {
+   html += '<button type="button" class="btn btn-secondary" onclick="openAdminUserVerification(' + p.user_id + ')">' + (tBlock('admin_verify_btn') || 'Verification') + '</button>';
+ }
  html += '<div style="display:flex;gap:8px;width:100%;">';
  html += '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="openProfileRestrictForm(' + p.user_id + ',\'publish\')">Ограничить публикацию</button>';
  if (myRole >= 5) {
@@ -15111,12 +15989,23 @@ async function renderUserProfile() {
  try {
    var cbtn = document.getElementById('user-profile-complaint-btn');
    var myId = userData && (userData.user_id || userData.id);
+   var myRole = Number((userData && userData.role) || 0);
    if (cbtn) {
-     if (myId && String(myId) !== String(uid) && !(p && p.banned_profile)) {
+     // only regular users below intern (role < 3), not own profile
+     if (myId && String(myId) !== String(uid) && myRole < 3 && !(p && p.banned_profile)) {
        cbtn.style.display = 'inline-flex';
        cbtn.textContent = tBlock('complaint_btn') || 'Report';
      } else {
        cbtn.style.display = 'none';
+     }
+   }
+   // mod button: moderator+ on others
+   var mbtn = document.getElementById('user-profile-mod-btn');
+   if (mbtn) {
+     if (myId && String(myId) !== String(uid) && myRole >= 4 && !(p && p.banned_profile)) {
+       mbtn.style.display = 'inline-flex';
+     } else {
+       mbtn.style.display = 'none';
      }
    }
  } catch (eC) {}
@@ -17481,6 +18370,7 @@ function openAdminSection(section) {
  listings: tBlock('mod_listings'),
  transactions: tBlock('mod_tx'),
  jobs: tBlock('mod_jobs'),
+ tickets: tBlock('mod_tickets') || 'Support tickets moderation',
  complaints: tBlock('mod_tickets') || tBlock('mod_complaints') || 'Complaints moderation',
  staff: tBlock('staff_manage'),
  analytics: tBlock('analytics')
@@ -17508,6 +18398,10 @@ function openAdminSection(section) {
  else if (section === 'complaints') {
  if (role < 3) { tg.showAlert(tBlock('need_intern')); showPage('admin'); return; }
  loadAdminUserComplaints();
+ }
+ else if (section === 'tickets') {
+ if (role < 3) { tg.showAlert(tBlock('need_intern')); showPage('admin'); return; }
+ loadAdminSupportThreads();
  }
  else if (section === 'staff') {
  if (role < 5) { tg.showAlert(tBlock('need_admin')); showPage('admin'); return; }
@@ -19466,6 +20360,7 @@ async function acceptPrivacyMiniapp() {
  if (userData) userData.privacy_miniapp = true;
  hidePrivacyOverlay();
  try { if (typeof loadFeed === 'function') loadFeed(); } catch(e) {}
+ try { maybeShowVerifyPrompt(); } catch(e) {}
 }
 document.addEventListener('DOMContentLoaded', function() {
  var btn = document.getElementById('privacy-accept-btn');
