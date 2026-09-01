@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<!-- XCOD_BUILD 2026-09-01-v3 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -2807,7 +2808,10 @@ async function continueAfterAuth() {
  try {
  var srvLang = (userData && userData.lang) ? userData.lang : null;
  var srvTheme = (userData && userData.theme) ? userData.theme : null;
- if (srvLang && typeof setAppLang === 'function') setAppLang(srvLang, false);
+ if (srvLang && typeof setAppLang === 'function') {
+ var _loc = null; try { _loc = localStorage.getItem('xcod_lang'); } catch(e){}
+ if (_loc) setAppLang(_loc, false); else setAppLang(srvLang, false);
+ }
  if (srvTheme && typeof setAppTheme === 'function') {
  try { localStorage.setItem('xcod_theme', srvTheme); } catch (e) {}
  setAppTheme(srvTheme, true);
@@ -3228,31 +3232,20 @@ function openProfileSettings() {
   if (f) f.innerHTML = '';
   var tiles = document.querySelector('#page-profile-settings .support-grid');
   if (tiles) tiles.style.display = '';
-  var title = document.querySelector('#page-profile-settings .section-title');
-  if (title) title.textContent = tBlock('profile_settings') || 'Profile settings';
-  // force tile labels (data-i18n sometimes lagging)
-  try {
-    var page = document.getElementById('page-profile-settings');
-    if (page) {
-      page.querySelectorAll('.support-tile-title').forEach(function(el, idx) {
-        if (idx === 0) el.textContent = tBlock('change_password') || 'Change password';
-        if (idx === 1) el.textContent = tBlock('change_email') || 'Change email';
-      });
-    }
-  } catch (eT) {}
   window._settingsAction = '';
   window._settingsSeries = '';
-  try { if (typeof applyI18n === 'function') applyI18n(); } catch(e){}
-  try {
-    if (title) title.textContent = tBlock('profile_settings') || 'Profile settings';
-    var page2 = document.getElementById('page-profile-settings');
-    if (page2) {
-      page2.querySelectorAll('.support-tile-title').forEach(function(el, idx) {
-        if (idx === 0) el.textContent = tBlock('change_password') || 'Change password';
-        if (idx === 1) el.textContent = tBlock('change_email') || 'Change email';
-      });
-    }
-  } catch (e2) {}
+  function fillSettingsLabels() {
+    var title = document.querySelector('#page-profile-settings .section-title');
+    if (title) title.textContent = tBlock('profile_settings');
+    var page = document.getElementById('page-profile-settings');
+    if (!page) return;
+    var titles = page.querySelectorAll('.support-tile-title');
+    if (titles[0]) titles[0].textContent = tBlock('change_password');
+    if (titles[1]) titles[1].textContent = tBlock('change_email');
+  }
+  try { applyI18n(); } catch (e) {}
+  fillSettingsLabels();
+  setTimeout(fillSettingsLabels, 0);
 }
 function openChangePassword() {
   if (!userData || !userData.has_2fa) {
@@ -3578,14 +3571,14 @@ function renderVerifyPage() {
       btn.disabled = true;
       btn.className = 'btn btn-secondary';
       btn.style.opacity = '0.55';
-      btn.textContent = (typeof tBlock === 'function' ? tBlock('verify_passport_pending') : null) || 'Passport under moderation';
+      btn.textContent = tBlock('verify_passport_pending');
       btn.onclick = null;
     } else {
       btn.style.display = '';
       btn.disabled = false;
       btn.className = 'btn';
       btn.style.opacity = '';
-      btn.textContent = (typeof tBlock === 'function' ? tBlock('verify_btn_start') : null) || 'Verify passport';
+      btn.textContent = tBlock('verify_btn_start');
       btn.onclick = function() { startPassportWizard(); };
     }
   }
@@ -5666,7 +5659,7 @@ terms_prefix: 'By continuing, you accept the ',
  verify_job_required: 'Fur eine Bewerbung ist die vollstandige Verifizierung erforderlich.',
  settings_need_passport: 'Pass-Verifizierung ist erforderlich, bevor Passwort oder E-Mail geandert werden konnen.',
  confirm_identity: 'Identität bestätigen',
- pwd_email_not_set: 'Passwort und E-Mail sind nicht eingerichtet. Schliessen Sie zuerst die vollstandige Verifizierung ab.',
+ pwd_email_not_set: 'Passwort und E-Mail sind nicht eingerichtet.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
@@ -5738,7 +5731,7 @@ terms_prefix: 'By continuing, you accept the ',
  mod_verify_empty: 'No verification applications',
  mod_verify: 'Verification moderation',
  
- verify_passport_pending: 'Pass in Prüfung',
+ verify_passport_pending: 'Pass in Prufung',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
  verify_full_name_ph: 'As in passport',
@@ -6357,7 +6350,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  verify_job_required: 'La verification complete est requise pour postuler.',
  settings_need_passport: 'La verification du passeport est requise avant de changer le mot de passe ou l e-mail.',
  confirm_identity: 'Confirmer identite',
- pwd_email_not_set: 'Le mot de passe et l e-mail ne sont pas definis. Terminez d abord la verification complete.',
+ pwd_email_not_set: 'Mot de passe et e-mail non definis.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
@@ -7048,7 +7041,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  verify_job_required: 'Se requiere verificacion completa para postularse.',
  settings_need_passport: 'Se requiere verificacion de pasaporte antes de cambiar la contrasena o el correo.',
  confirm_identity: 'Confirmar identidad',
- pwd_email_not_set: 'La contrasena y el correo no estan configurados. Complete primero la verificacion completa.',
+ pwd_email_not_set: 'Contrasena y correo no configurados.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
@@ -7746,7 +7739,7 @@ terms_prefix: 'Al continuar, acepta el ',
  change_email: '更改邮箱',
  change_password: '更改密码',
  confirm_identity: '确认身份',
- pwd_email_not_set: '尚未设置密码和邮箱。请先完成完整验证。',
+ pwd_email_not_set: '尚未设置密码和邮箱。',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -9057,7 +9050,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  verify_job_required: 'Serve la verifica completa per candidarsi.',
  settings_need_passport: 'E necessaria la verifica del passaporto prima di cambiare password o e-mail.',
  confirm_identity: 'Conferma identità',
- pwd_email_not_set: 'Password ed e-mail non sono impostati. Completa prima la verifica completa.',
+ pwd_email_not_set: 'Password ed e-mail non impostati.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
@@ -9748,7 +9741,7 @@ terms_prefix: 'Continuando, accetti i ',
  verify_job_required: 'E necessaria verificacao completa para se candidatar.',
  settings_need_passport: 'E necessaria a verificacao do passaporte antes de alterar a senha ou o e-mail.',
  confirm_identity: 'Confirmar identidade',
- pwd_email_not_set: 'Senha e e-mail nao estao definidos. Conclua primeiro a verificacao completa.',
+ pwd_email_not_set: 'Senha e e-mail nao definidos.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
@@ -11012,7 +11005,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  verify_job_required: 'Is basvurusu icin tam dogrulama gerekir.',
  settings_need_passport: 'Sifre veya e-posta degistirmeden once pasaport dogrulamasi gerekir.',
  confirm_identity: 'Kimligi dogrula',
- pwd_email_not_set: 'Sifre ve e-posta ayarlanmamis. Once tam dogrulamayi tamamlayin.',
+ pwd_email_not_set: 'Sifre ve e-posta ayarlanmamis.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
@@ -11703,7 +11696,7 @@ terms_prefix: 'Devam ederek ',
  verify_job_required: 'Verifikasi penuh diperlukan untuk melamar pekerjaan.',
  settings_need_passport: 'Verifikasi paspor diperlukan sebelum mengubah kata sandi atau email.',
  confirm_identity: 'Konfirmasi identitas',
- pwd_email_not_set: 'Kata sandi dan email belum diatur. Selesaikan verifikasi penuh terlebih dahulu.',
+ pwd_email_not_set: 'Kata sandi dan email belum diatur.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
@@ -12394,7 +12387,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  verify_job_required: 'يلزم التحقق الكامل للتقديم على وظيفة.',
  settings_need_passport: 'يلزم التحقق من جواز السفر قبل تغيير كلمة المرور أو البريد.',
  confirm_identity: 'تأكيد الهوية',
- pwd_email_not_set: 'لم يتم تعيين كلمة المرور والبريد. اكمل التحقق الكامل اولا.',
+ pwd_email_not_set: 'لم يتم تعيين كلمة المرور والبريد.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
@@ -13085,7 +13078,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  verify_job_required: '応募には完全認証が必要です。',
  settings_need_passport: 'パスワードやメールを変更する前にパスポート認証が必要です。',
  confirm_identity: '本人確認',
- pwd_email_not_set: 'パスワードとメールが設定されていません。先に完全認証を完了してください。',
+ pwd_email_not_set: 'パスワードとメールが未設定です。',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
@@ -13776,7 +13769,7 @@ terms_prefix: '続行すると',
  verify_job_required: '지원하려면 전체 인증이 필요합니다.',
  settings_need_passport: '비밀번호 또는 이메일을 변경하기 전에 여권 인증이 필요합니다.',
  confirm_identity: '신원 확인',
- pwd_email_not_set: '비밀번호와 이메일이 설정되지 않았습니다. 먼저 전체 인증을 완료하세요.',
+ pwd_email_not_set: '비밀번호와 이메일이 설정되지 않았습니다.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
  forgot_password: 'Forgot password?',
