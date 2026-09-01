@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-01-v4 -->
+<!-- XCOD_BUILD 2026-09-01-v6 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -2306,21 +2306,23 @@ var APP_INSTALL_FILES = {
 var __appInstallPlatform = null;
 var APP_I18N = {
   ru: {
+ verify_full_required: 'Требуется полная верификация',
+ fa2_setup_hint: 'Установите пароль и укажите почту, чтобы завершить полную верификацию.',
  finish_verify: 'Завершить верификацию',
  bad_email: 'Неверный формат почты',
  pwd_mismatch: 'Пароли не совпадают',
  password_rules: 'Минимум 8 символов, 1 цифра, 1 заглавная буква',
- verify_job_required: 'Для подачи заявки на работу нужна полная верификация.',
+ verify_job_required: 'Для подачи заявки на работу нужна полная верификация',
  verify_desc_0: 'Нет данных о верификации. Документы не предоставлены.',
  verify_none: 'Нет данных',
  settings_need_passport: 'Сначала нужно пройти верификацию паспорта, чтобы сменить пароль или почту.',
- fa2_setup_title: 'Включить 2FA',
+ fa2_setup_title: 'Завершить верификацию',
  verify_btn_continue: 'Завершить верификацию',
  verify_passport_pending: 'Паспорт на модерации',
  verify_btn_start: 'Верифицировать паспорт',
  logout: 'Выйти',
- verify_freelance_required: 'Для фриланс-объявлений учётная запись должна быть верифицирована полностью',
- verify_sale_required: 'Для объявлений о продаже нужна частичная верификация (паспорт) и выше',
+ verify_freelance_required: 'Для фриланс-объявлений нужна полная верификация',
+ verify_sale_required: 'Для объявлений о продаже нужна верификация паспорта',
  profile_settings: 'Настройки профиля',
  change_email: 'Сменить почту',
  change_password: 'Сменить пароль',
@@ -2332,21 +2334,23 @@ var APP_I18N = {
     dl_macos_guide:'1. Скачайте .dmg.\n2. В «Программы».\n3. Разрешите при блоке.\n4. Запустите.',
     dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x\n3. Запустите.' },
   en: {
+ verify_full_required: 'Full verification required',
+ fa2_setup_hint: 'Set a password and email to complete full verification.',
  finish_verify: 'Complete verification',
  bad_email: 'Invalid email format',
  pwd_mismatch: 'Passwords do not match',
  password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
- verify_job_required: 'Full verification is required to apply for a job.',
+ verify_job_required: 'Full verification required to apply for a job',
  verify_desc_0: 'No verification data. Documents were not provided.',
  verify_none: 'No data',
  settings_need_passport: 'Passport verification is required before changing password or email.',
- fa2_setup_title: 'Enable 2FA',
+ fa2_setup_title: 'Complete verification',
  verify_btn_continue: 'Complete verification',
  verify_passport_pending: 'Passport under moderation',
  verify_btn_start: 'Verify passport',
  logout: 'Log out',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'Full verification required for freelance listings',
+ verify_sale_required: 'Passport verification required for sale listings',
  profile_settings: 'Profile settings',
  change_email: 'Change email',
  change_password: 'Change password',
@@ -3236,12 +3240,19 @@ function settingsNotReadyMsg() {
       return (typeof tBlock === 'function' && tBlock('settings_need_passport')) || tBlock('pwd_email_not_set') || 'Complete passport verification first.';
     }
     // passport ok but no 2FA / password+email
-    return (typeof tBlock === 'function' && tBlock('pwd_email_not_set')) || 'Password and email are not set. Complete full verification first.';
+    return (typeof tBlock === 'function' && tBlock('pwd_email_not_set')) || 'Пароль и почта не установлены. Сначала пройдите полную верификацию.';
   } catch (e) {
     try { return tBlock('pwd_email_not_set'); } catch (e2) { return 'Password and email are not set.'; }
   }
 }
 
+
+function mapApiError(msg) {
+  var m = String(msg || '');
+  if (m.indexOf('verify_full_required') >= 0) return tBlock('verify_full_required') || tBlock('verify_freelance_required') || tBlock('verify_full_required') || 'Требуется полная верификация';
+  if (m.indexOf('verify_partial_required') >= 0) return tBlock('verify_sale_required') || 'Для объявлений о продаже нужна верификация паспорта';
+  return m;
+}
 function openProfileSettings() {
   showPage('profile-settings');
   var f = document.getElementById('profile-settings-form');
@@ -3252,16 +3263,17 @@ function openProfileSettings() {
   window._settingsSeries = '';
   function fillSettingsLabels() {
     var title = document.querySelector('#page-profile-settings .section-title');
-    if (title) title.textContent = tBlock('profile_settings');
+    if (title) title.textContent = tBlock('profile_settings') || 'Настройки профиля';
     var page = document.getElementById('page-profile-settings');
     if (!page) return;
     var titles = page.querySelectorAll('.support-tile-title');
-    if (titles[0]) titles[0].textContent = tBlock('change_password');
-    if (titles[1]) titles[1].textContent = tBlock('change_email');
+    if (titles[0]) titles[0].textContent = tBlock('change_password') || 'Сменить пароль';
+    if (titles[1]) titles[1].textContent = tBlock('change_email') || 'Сменить почту';
   }
   try { applyI18n(); } catch (e) {}
   fillSettingsLabels();
-  setTimeout(fillSettingsLabels, 0);
+  setTimeout(fillSettingsLabels, 30);
+  setTimeout(fillSettingsLabels, 120);
 }
 function openChangePassword() {
   if (!userData || !userData.has_2fa) {
@@ -3348,7 +3360,7 @@ function validateChangePasswordFields() {
 function showChangeEmailStep2() {
   var f = document.getElementById('profile-settings-form');
   var title = document.querySelector('#page-profile-settings .section-title');
-  if (title) title.textContent = tBlock('change_email') || 'Change email';
+  if (title) title.textContent = tBlock('change_email') || 'Сменить почту';
   if (!f) return;
   f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('verify_email') || 'Email') + '</label>' +
     '<input class="form-input" id="ch-em-email" type="email" autocomplete="email"></div>' +
@@ -3382,7 +3394,7 @@ function mapPwdError(msg) {
     pwd_short: tBlock('pwd_short') || 'Password must be at least 8 characters',
     pwd_digit: tBlock('pwd_digit') || 'Password must contain a digit',
     pwd_upper: tBlock('pwd_upper') || 'Password must contain an uppercase letter',
-    pwd_mismatch: tBlock('pwd_mismatch') || 'Passwords do not match',
+    pwd_mismatch: tBlock('pwd_mismatch') || 'Пароли не совпадают',
     bad_email: tBlock('bad_email') || 'Invalid email',
     passport_mismatch: tBlock('passport_mismatch') || 'Passport data does not match',
     email_mismatch: tBlock('email_mismatch') || 'Email does not match',
@@ -3398,9 +3410,9 @@ function showVerifyPrompt() {
   var text = document.getElementById('verify-prompt-text');
   var go = document.getElementById('verify-prompt-go');
   var later = document.getElementById('verify-prompt-later');
-  if (title) title.textContent = tBlock('verify_prompt_title') || 'Complete verification';
+  if (title) title.textContent = tBlock('verify_prompt_title') || 'Завершить верификацию';
   if (text) text.textContent = tBlock('verify_prompt_text') || 'Verify your account to unlock full access and higher trust.';
-  if (go) go.textContent = tBlock('verify_prompt_go') || 'Complete verification';
+  if (go) go.textContent = tBlock('verify_prompt_go') || 'Завершить верификацию';
   if (later) later.textContent = tBlock('verify_prompt_later') || 'Later';
   ov.style.display = 'flex';
 }
@@ -3676,7 +3688,7 @@ function renderVerifyPage() {
       if (!window.__fa2Step) window.__fa2Step = 0;
       if (window.__fa2Step === 0) {
         if (title) title.textContent = tBlock('fa2_setup_title') || 'Завершить верификацию';
-        if (desc) desc.textContent = tBlock('fa2_setup_hint') || tBlock('verify_desc_1') || '';
+        if (desc) desc.textContent = tBlock('fa2_setup_hint') || 'Установите пароль и укажите почту, чтобы завершить полную верификацию.';
         btn.style.display = '';
         btn.disabled = false;
         btn.className = 'btn';
@@ -4003,7 +4015,7 @@ async function requestVerifyUpgrade() {
     var res = await apiPost('/api/verify/request', { action: 'request_full', level: 2 });
     if (res && typeof res.verify_level === 'number') userData.verify_level = res.verify_level;
     if (res && res.pending_full) {
-      var msg = (typeof tBlock === 'function' && tBlock('verify_pending_full')) || 'Full verification pending review';
+      var msg = (typeof tBlock === 'function' && tBlock('verify_pending_full')) || 'Полная верификация на проверке';
       try { tg.showAlert(msg); } catch (e) { alert(msg); }
     }
     updateOwnVerifyBadge();
@@ -5796,16 +5808,18 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ verify_full_required: 'Vollstandige Verifizierung erforderlich',
+ fa2_setup_hint: 'Legen Sie Passwort und E-Mail fest, um die vollstandige Verifizierung abzuschliessen.',
  finish_verify: 'Verifizierung abschliessen',
  verify_job_required: 'Fur eine Bewerbung ist die vollstandige Verifizierung erforderlich.',
  settings_need_passport: 'Pass-Verifizierung ist erforderlich, bevor Passwort oder E-Mail geandert werden konnen.',
  confirm_identity: 'Identität bestätigen',
  pwd_email_not_set: 'Passwort und E-Mail sind nicht eingerichtet.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'Vollstandige Verifizierung fur Freelance-Anzeigen erforderlich',
+ verify_sale_required: 'Pass-Verifizierung fur Verkaufsanzeigen erforderlich',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: '2FA aktivieren',
+ fa2_setup_title: 'Verifizierung abschliessen',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -6488,16 +6502,18 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ verify_full_required: 'Verification complete requise',
+ fa2_setup_hint: 'Definissez un mot de passe et un e-mail pour terminer la verification complete.',
  finish_verify: 'Terminer la verification',
  verify_job_required: 'La verification complete est requise pour postuler.',
  settings_need_passport: 'La verification du passeport est requise avant de changer le mot de passe ou l e-mail.',
  confirm_identity: 'Confirmer identite',
  pwd_email_not_set: 'Mot de passe et e-mail non definis.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'Verification complete requise pour les annonces freelance',
+ verify_sale_required: 'Verification du passeport requise pour les annonces de vente',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: 'Activer 2FA',
+ fa2_setup_title: 'Terminer la verification',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -7180,16 +7196,18 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ verify_full_required: 'Se requiere verificacion completa',
+ fa2_setup_hint: 'Establezca una contrasena y un correo para completar la verificacion.',
  finish_verify: 'Completar verificacion',
  verify_job_required: 'Se requiere verificacion completa para postularse.',
  settings_need_passport: 'Se requiere verificacion de pasaporte antes de cambiar la contrasena o el correo.',
  confirm_identity: 'Confirmar identidad',
  pwd_email_not_set: 'Contrasena y correo no configurados.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'Se requiere verificacion completa para anuncios freelance',
+ verify_sale_required: 'Se requiere verificacion de pasaporte para anuncios de venta',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: 'Activar 2FA',
+ fa2_setup_title: 'Completar verificacion',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -7872,6 +7890,10 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ verify_sale_required: '销售广告需要护照验证',
+ verify_freelance_required: '发布自由职业广告需要完整验证',
+ verify_full_required: '需要完整验证',
+ fa2_setup_hint: '设置密码并填写邮箱以完成完整验证。',
  finish_verify: '完成验证',
  bad_email: '邮箱格式无效',
  pwd_mismatch: '密码不匹配',
@@ -7880,7 +7902,7 @@ terms_prefix: 'Al continuar, acepta el ',
  verify_desc_0: '无验证数据。未提供文件。',
  verify_none: '无数据',
  settings_need_passport: '更改密码或邮箱前需要先完成护照验证。',
- fa2_setup_title: '启用双因素认证',
+ fa2_setup_title: '完成验证',
  verify_btn_continue: '完成验证',
  profile_settings: '个人设置',
  change_email: '更改邮箱',
@@ -8501,16 +8523,18 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ verify_full_required: 'Потрібна повна верифікація',
+ fa2_setup_hint: 'Встановіть пароль і вкажіть пошту, щоб завершити повну верифікацію.',
  finish_verify: 'Завершити верифікацію',
  verify_job_required: 'Для подання заявки на роботу потрібна повна верифікація.',
  settings_need_passport: 'Спочатку потрібно пройти верифікацію паспорта, щоб змінити пароль або пошту.',
  confirm_identity: 'Підтвердження особи',
  pwd_email_not_set: 'Пароль і пошта не встановлені. Спочатку пройдіть повну верифікацію.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'Для фриланс-оголошень потрібна повна верифікація',
+ verify_sale_required: 'Для оголошень про продаж потрібна верифікація паспорта',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: 'Увімкнути 2FA',
+ fa2_setup_title: 'Завершити верифікацію',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -9195,16 +9219,18 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ verify_full_required: 'Verifica completa richiesta',
+ fa2_setup_hint: 'Imposta password e e-mail per completare la verifica completa.',
  finish_verify: 'Completa verifica',
  verify_job_required: 'Serve la verifica completa per candidarsi.',
  settings_need_passport: 'E necessaria la verifica del passaporto prima di cambiare password o e-mail.',
  confirm_identity: 'Conferma identità',
  pwd_email_not_set: 'Password ed e-mail non impostati.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'Verifica completa richiesta per annunci freelance',
+ verify_sale_required: 'Verifica del passaporto richiesta per gli annunci di vendita',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: 'Abilita 2FA',
+ fa2_setup_title: 'Completa verifica',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -9887,16 +9913,18 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ verify_full_required: 'Verificacao completa necessaria',
+ fa2_setup_hint: 'Defina uma senha e um e-mail para concluir a verificacao completa.',
  finish_verify: 'Concluir verificacao',
  verify_job_required: 'E necessaria verificacao completa para se candidatar.',
  settings_need_passport: 'E necessaria a verificacao do passaporte antes de alterar a senha ou o e-mail.',
  confirm_identity: 'Confirmar identidade',
  pwd_email_not_set: 'Senha e e-mail nao definidos.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'Verificacao completa necessaria para anuncios freelance',
+ verify_sale_required: 'Verificacao de passaporte necessaria para anuncios de venda',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: 'Ativar 2FA',
+ fa2_setup_title: 'Concluir verificacao',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -11152,16 +11180,18 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ verify_full_required: 'Tam dogrulama gerekli',
+ fa2_setup_hint: 'Tam dogrulamayi tamamlamak icin sifre ve e-posta belirleyin.',
  finish_verify: 'Dogrulamayi tamamla',
  verify_job_required: 'Is basvurusu icin tam dogrulama gerekir.',
  settings_need_passport: 'Sifre veya e-posta degistirmeden once pasaport dogrulamasi gerekir.',
  confirm_identity: 'Kimligi dogrula',
  pwd_email_not_set: 'Sifre ve e-posta ayarlanmamis.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'Freelance ilanlar icin tam dogrulama gerekli',
+ verify_sale_required: 'Satis ilanlari icin pasaport dogrulamasi gerekli',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: '2FA ac',
+ fa2_setup_title: 'Dogrulamayi tamamla',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -11844,16 +11874,18 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ verify_full_required: 'Verifikasi penuh diperlukan',
+ fa2_setup_hint: 'Atur kata sandi dan email untuk menyelesaikan verifikasi penuh.',
  finish_verify: 'Selesaikan verifikasi',
  verify_job_required: 'Verifikasi penuh diperlukan untuk melamar pekerjaan.',
  settings_need_passport: 'Verifikasi paspor diperlukan sebelum mengubah kata sandi atau email.',
  confirm_identity: 'Konfirmasi identitas',
  pwd_email_not_set: 'Kata sandi dan email belum diatur.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'Verifikasi penuh diperlukan untuk listing freelance',
+ verify_sale_required: 'Verifikasi paspor diperlukan untuk listing penjualan',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: 'Aktifkan 2FA',
+ fa2_setup_title: 'Selesaikan verifikasi',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -12536,16 +12568,18 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ verify_full_required: 'يلزم التحقق الكامل',
+ fa2_setup_hint: 'عيّن كلمة المرور والبريد لإكمال التحقق الكامل.',
  finish_verify: 'إكمال التحقق',
  verify_job_required: 'يلزم التحقق الكامل للتقديم على وظيفة.',
  settings_need_passport: 'يلزم التحقق من جواز السفر قبل تغيير كلمة المرور أو البريد.',
  confirm_identity: 'تأكيد الهوية',
  pwd_email_not_set: 'لم يتم تعيين كلمة المرور والبريد.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'يلزم التحقق الكامل لإعلانات العمل الحر',
+ verify_sale_required: 'يلزم التحقق من جواز السفر لإعلانات البيع',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: 'تفعيل التحقق الثنائي',
+ fa2_setup_title: 'إكمال التحقق',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -13228,16 +13262,18 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ verify_full_required: '完全認証が必要です',
+ fa2_setup_hint: '完全認証を完了するにはパスワードとメールを設定してください。',
  finish_verify: '認証を完了',
  verify_job_required: '応募には完全認証が必要です。',
  settings_need_passport: 'パスワードやメールを変更する前にパスポート認証が必要です。',
  confirm_identity: '本人確認',
  pwd_email_not_set: 'パスワードとメールが未設定です。',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: 'フリーランス掲載には完全認証が必要です',
+ verify_sale_required: '販売掲載にはパスポート認証が必要です',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: '2FAを有効化',
+ fa2_setup_title: '認証を完了',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -13920,16 +13956,18 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ verify_full_required: '전체 인증이 필요합니다',
+ fa2_setup_hint: '전체 인증을 완료하려면 비밀번호와 이메일을 설정하세요.',
  finish_verify: '인증 완료',
  verify_job_required: '지원하려면 전체 인증이 필요합니다.',
  settings_need_passport: '비밀번호 또는 이메일을 변경하기 전에 여권 인증이 필요합니다.',
  confirm_identity: '신원 확인',
  pwd_email_not_set: '비밀번호와 이메일이 설정되지 않았습니다.',
- verify_freelance_required: 'Your account must be fully verified to create freelance listings',
- verify_sale_required: 'Passport verification is required to create sale listings',
+ verify_freelance_required: '프리랜스 등록에는 전체 인증이 필요합니다',
+ verify_sale_required: '판매 등록에는 여권 인증이 필요합니다',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
- fa2_setup_title: '2FA 활성화',
+ fa2_setup_title: '인증 완료',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
  verify_prompt_go: 'Complete verification',
@@ -15426,12 +15464,35 @@ function tBlock(key) {
   }
  } catch (e) {}
  if (typeof I18N === 'undefined' || !I18N) return key || '';
- var lang = 'en';
- try { lang = (typeof getAppLang === 'function' ? getAppLang() : 'en') || 'en'; } catch (e2) {}
- var pack = I18N[lang] || I18N[String(lang).split('-')[0]] || I18N.ru || I18N.en || {};
- if (pack && pack[key] != null) return pack[key];
- if (I18N.ru && I18N.ru[key] != null) return I18N.ru[key];
- if (I18N.en && I18N.en[key] != null) return I18N.en[key];
+ var lang = 'ru';
+ try { lang = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru'; } catch (e2) { lang = 'ru'; }
+ var pack = I18N[lang] || I18N[String(lang).split('-')[0]] || {};
+ if (pack && pack[key] != null && pack[key] !== '' && pack[key] !== key) return pack[key];
+ if (I18N.ru && I18N.ru[key] != null && I18N.ru[key] !== '') return I18N.ru[key];
+ if (I18N.en && I18N.en[key] != null && I18N.en[key] !== '') return I18N.en[key];
+ // last-resort Russian defaults for critical keys
+ var RU_FALLBACK = {
+   profile_settings: 'Настройки профиля',
+   change_password: 'Сменить пароль',
+   change_email: 'Сменить почту',
+   fa2_setup_hint: 'Установите пароль и укажите почту, чтобы завершить полную верификацию.',
+   fa2_setup_title: 'Завершить верификацию',
+   verify_btn_continue: 'Завершить верификацию',
+   finish_verify: 'Завершить верификацию',
+   verify_btn_start: 'Верифицировать паспорт',
+   verify_full_required: 'Требуется полная верификация',
+   verify_freelance_required: 'Для фриланс-объявлений нужна полная верификация',
+   verify_sale_required: 'Для объявлений о продаже нужна верификация паспорта',
+   verify_job_required: 'Для подачи заявки на работу нужна полная верификация',
+   password_rules: 'Минимум 8 символов, 1 цифра, 1 заглавная буква',
+   pwd_mismatch: 'Пароли не совпадают',
+   bad_email: 'Неверный формат почты',
+   pwd_email_not_set: 'Пароль и почта не установлены. Сначала пройдите полную верификацию.',
+   continue_btn: 'Продолжить',
+   save: 'Сохранить',
+   back: '← Назад'
+ };
+ if (RU_FALLBACK[key]) return RU_FALLBACK[key];
  return key;
 }
 
@@ -17107,7 +17168,7 @@ function openCreateTypeSheet(prefer) {
 function startSaleCreate() {
  var lvl = verifyLevelOf(userData);
  if (lvl < 1) {
-   try { tg.showAlert(tBlock('verify_sale_required') || 'Passport verification is required to create sale listings'); } catch(e){ alert('Verification required'); }
+   try { tg.showAlert(tBlock('verify_sale_required') || 'Для объявлений о продаже нужна верификация паспорта'); } catch(e){ alert('Verification required'); }
    return;
  }
  try { resetListingCreate(); } catch (e) {}
@@ -17135,7 +17196,7 @@ function startSaleCreate() {
 function startFreelanceCreate() {
  var lvl = verifyLevelOf(userData);
  if (lvl < 2) {
-   try { tg.showAlert(tBlock('verify_freelance_required') || 'Your account must be fully verified to create freelance listings'); } catch(e){ alert('Full verification required'); }
+   try { tg.showAlert(tBlock('verify_freelance_required') || tBlock('verify_full_required') || 'Требуется полная верификация'); } catch(e){ alert('Full verification required'); }
    return;
  }
  flCreate = { kind: '', type: '', plan: '' };
@@ -18937,7 +18998,7 @@ function selectEmployment(el) {
 function openJobForm() {
   var lvl = (typeof verifyLevelOf === 'function') ? verifyLevelOf(userData) : 0;
   if (lvl < 2) {
-    var msg = tBlock('verify_job_required') || tBlock('verify_freelance_required') || 'Full verification is required to apply for a job';
+    var msg = tBlock('verify_job_required') || tBlock('verify_full_required') || 'Требуется полная верификация';
     try { tg.showAlert(msg); } catch (e) { alert(msg); }
     return;
   }
@@ -18946,7 +19007,7 @@ function openJobForm() {
 async function submitJobApplication() {
  var lvl = (typeof verifyLevelOf === 'function') ? verifyLevelOf(userData) : 0;
  if (lvl < 2) {
-   var msg = tBlock('verify_job_required') || tBlock('verify_freelance_required') || 'Full verification is required to apply for a job';
+   var msg = tBlock('verify_job_required') || tBlock('verify_full_required') || 'Требуется полная верификация';
    try { tg.showAlert(msg); } catch (e) { alert(msg); }
    return;
  }
