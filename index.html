@@ -2102,15 +2102,15 @@
  <!-- PROFILE -->
  <div id="page-profile-settings" class="page">
  <button type="button" class="back-link" onclick="showPage('profile')" data-i18n="back">← Back</button>
- <div class="section-title" data-i18n="profile_settings">Profile settings</div>
+ <div class="section-title" data-i18n="profile_settings">Настройки профиля</div>
  <div class="support-grid" style="margin-top:12px;">
   <button class="support-tile" onclick="openChangePassword()">
    <div class="support-tile-icon">🔑</div>
-   <div class="support-tile-title" data-i18n="change_password">Change password</div>
+   <div class="support-tile-title" data-i18n="change_password">Сменить пароль</div>
   </button>
   <button class="support-tile" onclick="openChangeEmail()">
    <div class="support-tile-icon">✉️</div>
-   <div class="support-tile-title" data-i18n="change_email">Change email</div>
+   <div class="support-tile-title" data-i18n="change_email">Сменить почту</div>
   </button>
  </div>
  <div id="profile-settings-form" style="margin-top:16px;"></div>
@@ -2306,12 +2306,16 @@ var APP_INSTALL_FILES = {
 var __appInstallPlatform = null;
 var APP_I18N = {
   ru: {
+ finish_verify: 'Завершить верификацию',
+ bad_email: 'Неверный формат почты',
+ pwd_mismatch: 'Пароли не совпадают',
+ password_rules: 'Минимум 8 символов, 1 цифра, 1 заглавная буква',
  verify_job_required: 'Для подачи заявки на работу нужна полная верификация.',
  verify_desc_0: 'Нет данных о верификации. Документы не предоставлены.',
  verify_none: 'Нет данных',
  settings_need_passport: 'Сначала нужно пройти верификацию паспорта, чтобы сменить пароль или почту.',
  fa2_setup_title: 'Включить 2FA',
- verify_btn_continue: 'Включить 2FA и подтвердить почту',
+ verify_btn_continue: 'Завершить верификацию',
  verify_passport_pending: 'Паспорт на модерации',
  verify_btn_start: 'Верифицировать паспорт',
  logout: 'Выйти',
@@ -2328,12 +2332,16 @@ var APP_I18N = {
     dl_macos_guide:'1. Скачайте .dmg.\n2. В «Программы».\n3. Разрешите при блоке.\n4. Запустите.',
     dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x\n3. Запустите.' },
   en: {
+ finish_verify: 'Complete verification',
+ bad_email: 'Invalid email format',
+ pwd_mismatch: 'Passwords do not match',
+ password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
  verify_job_required: 'Full verification is required to apply for a job.',
  verify_desc_0: 'No verification data. Documents were not provided.',
  verify_none: 'No data',
  settings_need_passport: 'Passport verification is required before changing password or email.',
  fa2_setup_title: 'Enable 2FA',
- verify_btn_continue: 'Enable 2FA and confirm email',
+ verify_btn_continue: 'Complete verification',
  verify_passport_pending: 'Passport under moderation',
  verify_btn_start: 'Verify passport',
  logout: 'Log out',
@@ -3307,14 +3315,35 @@ async function submitIdentityForSettings() {
 function showChangePasswordStep2() {
   var f = document.getElementById('profile-settings-form');
   var title = document.querySelector('#page-profile-settings .section-title');
-  if (title) title.textContent = tBlock('change_password') || 'Change password';
+  if (title) title.textContent = tBlock('change_password') || 'Сменить пароль';
   if (!f) return;
-  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('new_password') || 'New password') + '</label>' +
-    '<input class="form-input" id="ch-pwd-1" type="password" autocomplete="new-password"></div>' +
-    '<div class="form-group"><label class="form-label">' + (tBlock('repeat_password') || 'Repeat password') + '</label>' +
-    '<input class="form-input" id="ch-pwd-2" type="password" autocomplete="new-password"></div>' +
-    '<div class="subtitle" style="margin-bottom:10px;">' + (tBlock('password_rules') || 'Min 8 characters, 1 digit, 1 uppercase letter') + '</div>' +
-    '<button type="button" class="btn" onclick="submitChangePassword()">' + (tBlock('save') || 'Save') + '</button>';
+  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('new_password') || 'Новый пароль') + '</label>' +
+    '<input class="form-input" id="ch-pwd-1" type="password" autocomplete="new-password" oninput="validateChangePasswordFields()"></div>' +
+    '<div class="form-group"><label class="form-label">' + (tBlock('repeat_password') || 'Повторите пароль') + '</label>' +
+    '<input class="form-input" id="ch-pwd-2" type="password" autocomplete="new-password" oninput="validateChangePasswordFields()"></div>' +
+    '<div id="ch-pwd-rules" style="display:none;color:#ff4d4f;font-size:12px;margin:6px 0;"></div>' +
+    '<div id="ch-pwd-mismatch" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
+    '<button type="button" class="btn" onclick="submitChangePassword()">' + (tBlock('save') || 'Сохранить') + '</button>';
+}
+function validateChangePasswordFields() {
+  var p1 = (document.getElementById('ch-pwd-1') || {}).value || '';
+  var p2 = (document.getElementById('ch-pwd-2') || {}).value || '';
+  var rulesEl = document.getElementById('ch-pwd-rules');
+  var misEl = document.getElementById('ch-pwd-mismatch');
+  if (rulesEl) {
+    if (p1 && !passwordMeetsRules(p1)) {
+      rulesEl.style.display = 'block';
+      rulesEl.style.color = '#ff4d4f';
+      rulesEl.textContent = tBlock('password_rules') || 'Минимум 8 символов, 1 цифра, 1 заглавная буква';
+    } else { rulesEl.style.display = 'none'; }
+  }
+  if (misEl) {
+    if (p2 && p1 !== p2) {
+      misEl.style.display = 'block';
+      misEl.style.color = '#ff4d4f';
+      misEl.textContent = tBlock('pwd_mismatch') || 'Пароли не совпадают';
+    } else { misEl.style.display = 'none'; }
+  }
 }
 function showChangeEmailStep2() {
   var f = document.getElementById('profile-settings-form');
@@ -3470,18 +3499,99 @@ async function submit2faForgot() {
     try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
   }
 }
+
+function passwordMeetsRules(p) {
+  p = String(p || '');
+  return p.length >= 8 && /[0-9]/.test(p) && /[A-ZА-ЯЁ]/.test(p);
+}
+function isValidEmailFormat(email) {
+  email = String(email || '').trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+function validateFa2PasswordFields() {
+  var p1 = (document.getElementById('v2-pwd1') || {}).value || '';
+  var p2 = (document.getElementById('v2-pwd2') || {}).value || '';
+  var rulesEl = document.getElementById('v2-pwd-rules');
+  var misEl = document.getElementById('v2-pwd-mismatch');
+  if (rulesEl) {
+    if (p1 && !passwordMeetsRules(p1)) {
+      rulesEl.style.display = 'block';
+      rulesEl.textContent = tBlock('password_rules') || 'Минимум 8 символов, 1 цифра, 1 заглавная буква';
+    } else {
+      rulesEl.style.display = 'none';
+      rulesEl.textContent = '';
+    }
+  }
+  if (misEl) {
+    if (p2 && p1 !== p2) {
+      misEl.style.display = 'block';
+      misEl.textContent = tBlock('pwd_mismatch') || 'Пароли не совпадают';
+    } else {
+      misEl.style.display = 'none';
+      misEl.textContent = '';
+    }
+  }
+}
+function validateFa2EmailField() {
+  var email = (document.getElementById('v2-email') || {}).value || '';
+  var err = document.getElementById('v2-email-err');
+  if (!err) return true;
+  if (email && !isValidEmailFormat(email)) {
+    err.style.display = 'block';
+    err.textContent = tBlock('bad_email') || 'Неверный формат почты';
+    return false;
+  }
+  err.style.display = 'none';
+  err.textContent = '';
+  return true;
+}
+function fa2PasswordContinue() {
+  var p1 = (document.getElementById('v2-pwd1') || {}).value || '';
+  var p2 = (document.getElementById('v2-pwd2') || {}).value || '';
+  validateFa2PasswordFields();
+  if (!passwordMeetsRules(p1)) {
+    var rulesEl = document.getElementById('v2-pwd-rules');
+    if (rulesEl) {
+      rulesEl.style.display = 'block';
+      rulesEl.textContent = tBlock('password_rules') || 'Минимум 8 символов, 1 цифра, 1 заглавная буква';
+    }
+    return;
+  }
+  if (p1 !== p2) {
+    var misEl = document.getElementById('v2-pwd-mismatch');
+    if (misEl) {
+      misEl.style.display = 'block';
+      misEl.textContent = tBlock('pwd_mismatch') || 'Пароли не совпадают';
+    }
+    return;
+  }
+  window.__fa2Pwd = p1;
+  window.__fa2Step = 2;
+  renderVerifyPage();
+}
+
 async function submit2faSetup() {
   try {
-    var p1 = (document.getElementById('v2-pwd1') || {}).value || '';
-    var p2 = (document.getElementById('v2-pwd2') || {}).value || '';
+    var p1 = window.__fa2Pwd || (document.getElementById('v2-pwd1') || {}).value || '';
+    var p2 = p1;
     var email = (document.getElementById('v2-email') || {}).value || '';
+    if (!validateFa2EmailField() || !isValidEmailFormat(email)) {
+      var err = document.getElementById('v2-email-err');
+      if (err) {
+        err.style.display = 'block';
+        err.textContent = tBlock('bad_email') || 'Неверный формат почты';
+      }
+      return;
+    }
     var res = await apiPost('/api/verify/2fa/setup', { password: p1, password2: p2, email: email });
     if (userData) {
       userData.verify_level = (res && res.verify_level) || 2;
       userData.has_2fa = true;
       userData.verify_email = email;
     }
-    try { tg.showAlert(tBlock('fa2_enabled') || '2FA enabled'); } catch(e){}
+    window.__fa2Step = 0;
+    window.__fa2Pwd = '';
+    try { tg.showAlert(tBlock('fa2_enabled') || '2FA включена'); } catch(e){}
     renderVerifyPage();
     updateOwnVerifyBadge();
   } catch (e) {
@@ -3563,16 +3673,37 @@ function renderVerifyPage() {
       btn.style.display = 'none';
     } else if (level >= 1) {
       btn.style.display = 'none';
-      if (title) title.textContent = (tBlock('fa2_setup_title') || 'Enable 2FA');
-      if (desc) {
-        desc.innerHTML = '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('password') || 'Password') + '</label>' +
-          '<input class="form-input" id="v2-pwd1" type="password" autocomplete="new-password"></div>' +
-          '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('repeat_password') || 'Repeat password') + '</label>' +
-          '<input class="form-input" id="v2-pwd2" type="password" autocomplete="new-password"></div>' +
-          '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('verify_email') || 'Email') + '</label>' +
-          '<input class="form-input" id="v2-email" type="email" autocomplete="email"></div>' +
-          '<div class="subtitle">' + (tBlock('password_rules') || 'Min 8 characters, 1 digit, 1 uppercase letter') + '</div>' +
-          '<button type="button" class="btn" style="margin-top:12px;" onclick="submit2faSetup()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+      if (!window.__fa2Step) window.__fa2Step = 0;
+      if (window.__fa2Step === 0) {
+        if (title) title.textContent = tBlock('fa2_setup_title') || 'Завершить верификацию';
+        if (desc) desc.textContent = tBlock('fa2_setup_hint') || tBlock('verify_desc_1') || '';
+        btn.style.display = '';
+        btn.disabled = false;
+        btn.className = 'btn';
+        btn.style.opacity = '';
+        btn.textContent = tBlock('verify_btn_continue') || 'Завершить верификацию';
+        btn.onclick = function() { window.__fa2Step = 1; renderVerifyPage(); };
+      } else if (window.__fa2Step === 1) {
+        if (title) title.textContent = tBlock('change_password') || tBlock('password') || 'Пароль';
+        if (desc) {
+          desc.innerHTML =
+            '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('new_password') || tBlock('password') || 'Пароль') + '</label>' +
+            '<input class="form-input" id="v2-pwd1" type="password" autocomplete="new-password" oninput="validateFa2PasswordFields()"></div>' +
+            '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('repeat_password') || 'Повторите пароль') + '</label>' +
+            '<input class="form-input" id="v2-pwd2" type="password" autocomplete="new-password" oninput="validateFa2PasswordFields()"></div>' +
+            '<div id="v2-pwd-rules" style="display:none;color:#ff4d4f;font-size:12px;line-height:1.35;margin:6px 0 4px;text-align:left;"></div>' +
+            '<div id="v2-pwd-mismatch" style="display:none;color:#ff4d4f;font-size:12px;line-height:1.35;margin:4px 0 8px;text-align:left;"></div>' +
+            '<button type="button" class="btn" style="margin-top:8px;" onclick="fa2PasswordContinue()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>';
+        }
+      } else if (window.__fa2Step === 2) {
+        if (title) title.textContent = tBlock('verify_email') || 'Email';
+        if (desc) {
+          desc.innerHTML =
+            '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('verify_email') || 'Email') + '</label>' +
+            '<input class="form-input" id="v2-email" type="email" autocomplete="email" oninput="validateFa2EmailField()"></div>' +
+            '<div id="v2-email-err" style="display:none;color:#ff4d4f;font-size:12px;line-height:1.35;margin:6px 0 8px;text-align:left;"></div>' +
+            '<button type="button" class="btn" style="margin-top:8px;" onclick="submit2faSetup()">' + (tBlock('finish_verify') || tBlock('verify_btn_continue') || 'Завершить верификацию') + '</button>';
+        }
       }
     } else if (pst === 'pending') {
       btn.style.display = '';
@@ -4238,12 +4369,12 @@ function backFromUserProfile() {
 
 function getAppLang() {
  try {
- var v = localStorage.getItem('xcod_lang') || window._serverLang || 'en';
- return v || 'en';
- } catch (e) { return 'en'; }
+ var v = localStorage.getItem('xcod_lang') || window._serverLang || 'ru';
+ return v || 'ru';
+ } catch (e) { return 'ru'; }
 }
 function setAppLang(code, syncServer) {
- code = (code || 'en').toString();
+ code = (code || 'ru').toString();
  try { localStorage.setItem('xcod_lang', code); } catch (e) {}
  window._serverLang = code;
  try { document.documentElement.lang = code; } catch (e) {}
@@ -5665,6 +5796,7 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ finish_verify: 'Verifizierung abschliessen',
  verify_job_required: 'Fur eine Bewerbung ist die vollstandige Verifizierung erforderlich.',
  settings_need_passport: 'Pass-Verifizierung ist erforderlich, bevor Passwort oder E-Mail geandert werden konnen.',
  confirm_identity: 'Identität bestätigen',
@@ -5683,14 +5815,14 @@ terms_prefix: 'By continuing, you accept the ',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'Ungueltiges E-Mail-Format',
+ pwd_mismatch: 'Passwoerter stimmen nicht ueberein',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: 'Mind. 8 Zeichen, 1 Ziffer, 1 Grossbuchstabe',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -5776,7 +5908,7 @@ terms_prefix: 'By continuing, you accept the ',
  verify_desc_1: 'Nur Reisepass-Verifizierung.',
  verify_desc_2: '2FA aktiv, E-Mail/Telefon bestätigt.',
  verify_btn_start: 'Pass verifizieren',
- verify_btn_continue: '2FA aktivieren und E-Mail bestätigen',
+ verify_btn_continue: 'Verifizierung abschliessen',
  verify_btn_done: 'Verifiziert',
  verify_pending_full: 'Vollständige Verifizierung wird geprüft.',
  verify_untrusted: 'Nicht vertrauenswürdiger Nutzer',
@@ -6356,6 +6488,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ finish_verify: 'Terminer la verification',
  verify_job_required: 'La verification complete est requise pour postuler.',
  settings_need_passport: 'La verification du passeport est requise avant de changer le mot de passe ou l e-mail.',
  confirm_identity: 'Confirmer identite',
@@ -6374,14 +6507,14 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'Format e-mail invalide',
+ pwd_mismatch: 'Les mots de passe ne correspondent pas',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: 'Min. 8 caracteres, 1 chiffre, 1 majuscule',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -6467,7 +6600,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  verify_desc_1: 'Seule la vérification passeport.',
  verify_desc_2: '2FA activée, e-mail/téléphone confirmés.',
  verify_btn_start: 'Verifier le passeport',
- verify_btn_continue: 'Activer 2FA et confirmer e-mail',
+ verify_btn_continue: 'Terminer la verification',
  verify_btn_done: 'Vérifié',
  verify_pending_full: 'Vérification complète en cours.',
  verify_untrusted: 'Utilisateur non fiable',
@@ -7047,6 +7180,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ finish_verify: 'Completar verificacion',
  verify_job_required: 'Se requiere verificacion completa para postularse.',
  settings_need_passport: 'Se requiere verificacion de pasaporte antes de cambiar la contrasena o el correo.',
  confirm_identity: 'Confirmar identidad',
@@ -7065,14 +7199,14 @@ terms_prefix: 'En continuant, vous acceptez les ',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'Formato de correo invalido',
+ pwd_mismatch: 'Las contrasenas no coinciden',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: 'Min. 8 caracteres, 1 digito, 1 mayuscula',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -7158,7 +7292,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  verify_desc_1: 'Solo verificación por pasaporte.',
  verify_desc_2: '2FA activa y correo/teléfono confirmados.',
  verify_btn_start: 'Verificar pasaporte',
- verify_btn_continue: 'Activar 2FA y confirmar correo',
+ verify_btn_continue: 'Completar verificacion',
  verify_btn_done: 'Verificado',
  verify_pending_full: 'Verificación completa en revisión.',
  verify_untrusted: 'Usuario no confiable',
@@ -7738,12 +7872,16 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ finish_verify: '完成验证',
+ bad_email: '邮箱格式无效',
+ pwd_mismatch: '密码不匹配',
+ password_rules: '至少8个字符，1个数字，1个大写字母',
  verify_job_required: '申请工作需要完成完整验证。',
  verify_desc_0: '无验证数据。未提供文件。',
  verify_none: '无数据',
  settings_need_passport: '更改密码或邮箱前需要先完成护照验证。',
  fa2_setup_title: '启用双因素认证',
- verify_btn_continue: '启用双因素并确认邮箱',
+ verify_btn_continue: '完成验证',
  profile_settings: '个人设置',
  change_email: '更改邮箱',
  change_password: '更改密码',
@@ -8363,6 +8501,7 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ finish_verify: 'Завершити верифікацію',
  verify_job_required: 'Для подання заявки на роботу потрібна повна верифікація.',
  settings_need_passport: 'Спочатку потрібно пройти верифікацію паспорта, щоб змінити пароль або пошту.',
  confirm_identity: 'Підтвердження особи',
@@ -8381,14 +8520,14 @@ terms_prefix: '继续即表示您同意',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'Невірний формат пошти',
+ pwd_mismatch: 'Паролі не збігаються',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: 'Мінімум 8 символів, 1 цифра, 1 велика літера',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -8474,7 +8613,7 @@ terms_prefix: '继续即表示您同意',
  verify_desc_1: 'Лише верифікація за паспортом.',
  verify_desc_2: '2FA увімкнено, пошту/номер підтверджено.',
  verify_btn_start: 'Верифікувати паспорт',
- verify_btn_continue: 'Увімкнути 2FA і підтвердити пошту',
+ verify_btn_continue: 'Завершити верифікацію',
  verify_btn_done: 'Верифіковано',
  verify_pending_full: 'Повна верифікація на перевірці.',
  verify_untrusted: 'Ненадійний користувач',
@@ -9056,6 +9195,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ finish_verify: 'Completa verifica',
  verify_job_required: 'Serve la verifica completa per candidarsi.',
  settings_need_passport: 'E necessaria la verifica del passaporto prima di cambiare password o e-mail.',
  confirm_identity: 'Conferma identità',
@@ -9074,14 +9214,14 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'Formato e-mail non valido',
+ pwd_mismatch: 'Le password non coincidono',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: 'Min. 8 caratteri, 1 cifra, 1 maiuscola',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -9167,7 +9307,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  verify_desc_1: 'Partial verification: passport verification only has been provided.',
  verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
  verify_btn_start: 'Verifica passaporto',
- verify_btn_continue: 'Abilita 2FA e conferma e-mail',
+ verify_btn_continue: 'Completa verifica',
  verify_btn_done: 'Verified',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
@@ -9747,6 +9887,7 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ finish_verify: 'Concluir verificacao',
  verify_job_required: 'E necessaria verificacao completa para se candidatar.',
  settings_need_passport: 'E necessaria a verificacao do passaporte antes de alterar a senha ou o e-mail.',
  confirm_identity: 'Confirmar identidade',
@@ -9765,14 +9906,14 @@ terms_prefix: 'Continuando, accetti i ',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'Formato de e-mail invalido',
+ pwd_mismatch: 'As senhas nao coincidem',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: 'Min. 8 caracteres, 1 digito, 1 maiuscula',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -9858,7 +9999,7 @@ terms_prefix: 'Continuando, accetti i ',
  verify_desc_1: 'Partial verification: passport verification only has been provided.',
  verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
  verify_btn_start: 'Verificar passaporte',
- verify_btn_continue: 'Ativar 2FA e confirmar e-mail',
+ verify_btn_continue: 'Concluir verificacao',
  verify_btn_done: 'Verified',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
@@ -11011,6 +11152,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ finish_verify: 'Dogrulamayi tamamla',
  verify_job_required: 'Is basvurusu icin tam dogrulama gerekir.',
  settings_need_passport: 'Sifre veya e-posta degistirmeden once pasaport dogrulamasi gerekir.',
  confirm_identity: 'Kimligi dogrula',
@@ -11029,14 +11171,14 @@ terms_prefix: 'Ao continuar, você aceita o ',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'Gecersiz e-posta formati',
+ pwd_mismatch: 'Sifreler eslesmiyor',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: 'En az 8 karakter, 1 rakam, 1 buyuk harf',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -11122,7 +11264,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  verify_desc_1: 'Partial verification: passport verification only has been provided.',
  verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
  verify_btn_start: 'Pasaportu dogrula',
- verify_btn_continue: '2FA ac ve e-posta onayla',
+ verify_btn_continue: 'Dogrulamayi tamamla',
  verify_btn_done: 'Verified',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
@@ -11702,6 +11844,7 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ finish_verify: 'Selesaikan verifikasi',
  verify_job_required: 'Verifikasi penuh diperlukan untuk melamar pekerjaan.',
  settings_need_passport: 'Verifikasi paspor diperlukan sebelum mengubah kata sandi atau email.',
  confirm_identity: 'Konfirmasi identitas',
@@ -11720,14 +11863,14 @@ terms_prefix: 'Devam ederek ',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'Format email tidak valid',
+ pwd_mismatch: 'Kata sandi tidak cocok',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: 'Min. 8 karakter, 1 angka, 1 huruf besar',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -11813,7 +11956,7 @@ terms_prefix: 'Devam ederek ',
  verify_desc_1: 'Partial verification: passport verification only has been provided.',
  verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
  verify_btn_start: 'Verifikasi paspor',
- verify_btn_continue: 'Aktifkan 2FA dan konfirmasi email',
+ verify_btn_continue: 'Selesaikan verifikasi',
  verify_btn_done: 'Verified',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
@@ -12393,6 +12536,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ finish_verify: 'إكمال التحقق',
  verify_job_required: 'يلزم التحقق الكامل للتقديم على وظيفة.',
  settings_need_passport: 'يلزم التحقق من جواز السفر قبل تغيير كلمة المرور أو البريد.',
  confirm_identity: 'تأكيد الهوية',
@@ -12411,14 +12555,14 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'صيغة البريد غير صحيحة',
+ pwd_mismatch: 'كلمتا المرور غير متطابقتين',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: 'حد أدنى 8 أحرف، رقم واحد، حرف كبير واحد',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -12504,7 +12648,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  verify_desc_1: 'Partial verification: passport verification only has been provided.',
  verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
  verify_btn_start: 'التحقق من جواز السفر',
- verify_btn_continue: 'تفعيل التحقق الثنائي وتأكيد البريد',
+ verify_btn_continue: 'إكمال التحقق',
  verify_btn_done: 'Verified',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
@@ -13084,6 +13228,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ finish_verify: '認証を完了',
  verify_job_required: '応募には完全認証が必要です。',
  settings_need_passport: 'パスワードやメールを変更する前にパスポート認証が必要です。',
  confirm_identity: '本人確認',
@@ -13102,14 +13247,14 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: 'メール形式が正しくありません',
+ pwd_mismatch: 'パスワードが一致しません',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: '8文字以上、数字1つ、大文字1つ',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -13195,7 +13340,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  verify_desc_1: 'Partial verification: passport verification only has been provided.',
  verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
  verify_btn_start: 'パスポート認証',
- verify_btn_continue: '2FAを有効にしてメールを確認',
+ verify_btn_continue: '認証を完了',
  verify_btn_done: 'Verified',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
@@ -13775,6 +13920,7 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ finish_verify: '인증 완료',
  verify_job_required: '지원하려면 전체 인증이 필요합니다.',
  settings_need_passport: '비밀번호 또는 이메일을 변경하기 전에 여권 인증이 필요합니다.',
  confirm_identity: '신원 확인',
@@ -13793,14 +13939,14 @@ terms_prefix: '続行すると',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
  passport_mismatch: 'Passport data does not match',
- bad_email: 'Invalid email',
- pwd_mismatch: 'Passwords do not match',
+ bad_email: '잘못된 이메일 형식',
+ pwd_mismatch: '비밀번호가 일치하지 않습니다',
  pwd_upper: 'Password must contain an uppercase letter',
  pwd_digit: 'Password must contain a digit',
  pwd_short: 'Password must be at least 8 characters',
  email_updated: 'Email updated',
  password_updated: 'Password updated',
- password_rules: 'Min 8 characters, 1 digit, 1 uppercase letter',
+ password_rules: '최소 8자, 숫자 1개, 대문자 1개',
  password: 'Password',
  repeat_password: 'Repeat password',
  new_password: 'New password',
@@ -13886,7 +14032,7 @@ terms_prefix: '続行すると',
  verify_desc_1: 'Partial verification: passport verification only has been provided.',
  verify_desc_2: 'Verification passed: two-factor authentication is enabled and email/phone is confirmed.',
  verify_btn_start: '여권 인증',
- verify_btn_continue: '2FA 활성화 및 이메일 확인',
+ verify_btn_continue: '인증 완료',
  verify_btn_done: 'Verified',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
@@ -15282,10 +15428,10 @@ function tBlock(key) {
  if (typeof I18N === 'undefined' || !I18N) return key || '';
  var lang = 'en';
  try { lang = (typeof getAppLang === 'function' ? getAppLang() : 'en') || 'en'; } catch (e2) {}
- var pack = I18N[lang] || I18N[String(lang).split('-')[0]] || I18N.en || I18N.ru || {};
+ var pack = I18N[lang] || I18N[String(lang).split('-')[0]] || I18N.ru || I18N.en || {};
  if (pack && pack[key] != null) return pack[key];
- if (I18N.en && I18N.en[key] != null) return I18N.en[key];
  if (I18N.ru && I18N.ru[key] != null) return I18N.ru[key];
+ if (I18N.en && I18N.en[key] != null) return I18N.en[key];
  return key;
 }
 
