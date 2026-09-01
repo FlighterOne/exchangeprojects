@@ -1807,9 +1807,9 @@
  <div class="wallet-action-icon plus">+</div>
  <div class="wallet-action-label" data-i18n="topup">Пополнить</div>
  </button>
- <button class="wallet-action" onclick="showPage('withdraw')">
+ <button class="wallet-action" id="balance-withdraw-btn" onclick="showPage('withdraw')" style="display:none !important;" aria-hidden="true">
  <div class="wallet-action-icon minus">−</div>
- <div class="wallet-action-label" data-i18n="withdraw">Вывести</div>
+ <div class="wallet-action-label" data-i18n="withdraw">Withdraw</div>
  </button>
  </div>
  <button class="btn btn-secondary" style="margin-top:28px;" onclick="showPage('requests')" data-i18n="my_tx">📜 Мои транзакции</button>
@@ -2305,6 +2305,9 @@ var APP_INSTALL_FILES = {
 var __appInstallPlatform = null;
 var APP_I18N = {
   ru: {
+ logout: 'Выйти',
+ verify_freelance_required: 'Для фриланс-объявлений учётная запись должна быть верифицирована полностью',
+ verify_sale_required: 'Для объявлений о продаже нужна частичная верификация (паспорт) и выше',
  profile_settings: 'Настройки профиля',
  change_email: 'Сменить почту',
  change_password: 'Сменить пароль',
@@ -2316,6 +2319,9 @@ var APP_I18N = {
     dl_macos_guide:'1. Скачайте .dmg.\n2. В «Программы».\n3. Разрешите при блоке.\n4. Запустите.',
     dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x\n3. Запустите.' },
   en: {
+ logout: 'Log out',
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
  profile_settings: 'Profile settings',
  change_email: 'Change email',
  change_password: 'Change password',
@@ -2405,17 +2411,29 @@ function webLogout() {
 function updateProfileLogoutVisibility() {
   var mini = false;
   try { mini = typeof isTelegramMiniApp === 'function' && isTelegramMiniApp(); } catch (e) {}
-  var show = !mini;
+  // Logout: only website / app (not miniapp)
+  var showLogout = !mini;
   try {
     var a = document.getElementById('profile-logout-btn');
     var gs = document.getElementById('profile-settings-btn');
-    if (gs) gs.style.display = show ? 'inline-flex' : 'none';
-    if (a) { a.style.display = show ? 'inline-flex' : 'none'; a.textContent = (typeof tBlock === 'function' ? tBlock('logout') : 'Выйти'); }
+    // Settings gear: always on own profile (including miniapp)
+    if (gs) {
+      var ownProfile = true;
+      try {
+        if (window._profileUid && userData) ownProfile = Number(window._profileUid) === Number(userData.user_id || userData.id);
+      } catch (eO) {}
+      // on page-profile (own) gear is for own; always show when on profile page
+      gs.style.display = 'inline-flex';
+    }
+    if (a) {
+      a.style.display = showLogout ? 'inline-flex' : 'none';
+      a.textContent = (typeof tBlock === 'function' ? tBlock('logout') : 'Log out');
+    }
     var b = document.getElementById('user-profile-logout-btn');
     if (b) {
-      var own = userData && window._profileUid && Number(window._profileUid) === Number(userData.user_id);
-      b.style.display = (show && own) ? 'inline-flex' : 'none';
-      b.textContent = (typeof tBlock === 'function' ? tBlock('logout') : 'Выйти');
+      var own = userData && window._profileUid && Number(window._profileUid) === Number(userData.user_id || userData.id);
+      b.style.display = (showLogout && own) ? 'inline-flex' : 'none';
+      b.textContent = (typeof tBlock === 'function' ? tBlock('logout') : 'Log out');
     }
   } catch (e2) {}
 }
@@ -4165,12 +4183,12 @@ function backFromUserProfile() {
 
 function getAppLang() {
  try {
- var v = localStorage.getItem('xcod_lang') || window._serverLang || 'ru';
- return v || 'ru';
- } catch (e) { return 'ru'; }
+ var v = localStorage.getItem('xcod_lang') || window._serverLang || 'en';
+ return v || 'en';
+ } catch (e) { return 'en'; }
 }
 function setAppLang(code, syncServer) {
- code = (code || 'ru').toString();
+ code = (code || 'en').toString();
  try { localStorage.setItem('xcod_lang', code); } catch (e) {}
  window._serverLang = code;
  try { document.documentElement.lang = code; } catch (e) {}
@@ -4191,7 +4209,7 @@ function updateLangLabels() {
  };
  var flags = { ru: 'ru', en: 'gb', uk: 'ua', de: 'de', fr: 'fr', es: 'es', it: 'it', pt: 'pt', 'pt-BR': 'br', tr: 'tr', id: 'id', ar: 'sa', zh: 'cn', ja: 'jp', ko: 'kr' };
  var name = names[code] || code;
- var fl = flags[code] || 'ru';
+ var fl = flags[code] || 'gb';
  var label = document.getElementById('settings-lang-label');
  if (label) {
  label.innerHTML = '<img class="flag-img sm" src="https://flagcdn.com/w40/' + fl + '.png" alt="" width="18" height="13"> ' + name;
