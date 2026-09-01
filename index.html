@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-01-v3 -->
+<!-- XCOD_BUILD 2026-09-01-v4 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -3091,8 +3091,16 @@ async function init() {
 
 
 function verifyLevelOf(u) {
-  if (!u) return 0;
-  try { return Math.max(0, Math.min(2, parseInt(u.verify_level, 10) || 0)); } catch (e) { return 0; }
+  try {
+    if (!u) return 0;
+    var lvl = Math.max(0, Math.min(2, parseInt(u.verify_level, 10) || 0));
+    // founders / owners without stored level still show passport verified
+    try {
+      var role = parseInt(u.role, 10) || 0;
+      if (role >= 6 && lvl < 1) lvl = 1;
+    } catch (e2) {}
+    return lvl;
+  } catch (e) { return 0; }
 }
 function verifyTitle(level) {
   if (level >= 2) return (typeof tBlock === 'function' && tBlock('verify_full')) || 'Verification passed';
@@ -4158,7 +4166,8 @@ function showPage(name) {
  if (name === 'listing-create' || name === 'listing-edit' || name === 'create-freelance') { try { applyTermsLabels(); applyI18n(); } catch (eLc) {} }
  if (name === 'deposit' || name === 'withdraw') { try { ensureUsdRate(true).then(function(){ if(name==='deposit') updateDepositTotals(); else updateWithdrawTotals(); }); } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
  if (name === 'home') loadListings();
- if (name === 'profile') { loadOwnProfileListings(); try { updateProfileLogoutVisibility(); } catch (e) {} }
+ if (name === 'profile') { loadOwnProfileListings(); try { updateProfileLogoutVisibility(); } catch (e) {}
+ try { fillProfileSettingsI18n(); } catch (e) {} }
  if (name === 'my-listings') loadMyListings();
  if (name === 'favorites') loadFavorites();
  if (name === 'news') loadNewsPinned();
@@ -14463,6 +14472,17 @@ function t(key) {
  return tBlock(key);
 }
 
+function fillProfileSettingsI18n() {
+  try {
+    var page = document.getElementById('page-profile-settings');
+    if (!page || !page.classList.contains('active')) return;
+    var title = page.querySelector('.section-title');
+    if (title) title.textContent = tBlock('profile_settings');
+    var titles = page.querySelectorAll('.support-tile-title');
+    if (titles[0]) titles[0].textContent = tBlock('change_password');
+    if (titles[1]) titles[1].textContent = tBlock('change_email');
+  } catch (e) {}
+}
 function applyI18n() {
  var lang = getAppLang();
  try {
@@ -14478,6 +14498,7 @@ function applyI18n() {
  try { applyAppInstallI18n(); } catch (e) {}
  try { updateTopSideButton(); } catch (e) {}
  try { updateProfileLogoutVisibility(); } catch (e) {}
+ try { fillProfileSettingsI18n(); } catch (e) {}
 
  document.querySelectorAll('[data-i18n]').forEach(function(el) {
  var key = el.getAttribute('data-i18n');
