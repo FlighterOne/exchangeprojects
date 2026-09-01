@@ -3167,35 +3167,79 @@ function openProfileSettings() {
   showPage('profile-settings');
   var f = document.getElementById('profile-settings-form');
   if (f) f.innerHTML = '';
+  var tiles = document.querySelector('#page-profile-settings .support-grid');
+  if (tiles) tiles.style.display = '';
+  var title = document.querySelector('#page-profile-settings .section-title');
+  if (title) title.textContent = tBlock('profile_settings') || 'Profile settings';
+  window._settingsAction = '';
+  window._settingsSeries = '';
   try { if (typeof applyI18n === 'function') applyI18n(); } catch(e){}
 }
 function openChangePassword() {
+  window._settingsAction = 'password';
+  window._settingsSeries = '';
+  showPage('profile-settings');
   var f = document.getElementById('profile-settings-form');
+  var tiles = document.querySelector('#page-profile-settings .support-grid');
+  if (tiles) tiles.style.display = 'none';
+  var title = document.querySelector('#page-profile-settings .section-title');
+  if (title) title.textContent = tBlock('confirm_identity') || 'Confirm identity';
   if (!f) return;
   f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('verify_series') || 'Passport series and number') + '</label>' +
-    '<input class="form-input" id="ch-pwd-series" type="text" autocomplete="off"></div>' +
-    '<div class="form-group"><label class="form-label">' + (tBlock('new_password') || 'New password') + '</label>' +
+    '<input class="form-input" id="ch-series-only" type="text" autocomplete="off" placeholder="' + (tBlock('verify_series_ph') || '') + '"></div>' +
+    '<button type="button" class="btn" onclick="submitIdentityForSettings()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+}
+function openChangeEmail() {
+  window._settingsAction = 'email';
+  window._settingsSeries = '';
+  showPage('profile-settings');
+  var f = document.getElementById('profile-settings-form');
+  var tiles = document.querySelector('#page-profile-settings .support-grid');
+  if (tiles) tiles.style.display = 'none';
+  var title = document.querySelector('#page-profile-settings .section-title');
+  if (title) title.textContent = tBlock('confirm_identity') || 'Confirm identity';
+  if (!f) return;
+  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('verify_series') || 'Passport series and number') + '</label>' +
+    '<input class="form-input" id="ch-series-only" type="text" autocomplete="off" placeholder="' + (tBlock('verify_series_ph') || '') + '"></div>' +
+    '<button type="button" class="btn" onclick="submitIdentityForSettings()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+}
+async function submitIdentityForSettings() {
+  try {
+    var series = (document.getElementById('ch-series-only') || {}).value || '';
+    await apiPost('/api/verify/2fa/check-passport', { series_number: series });
+    window._settingsSeries = series;
+    if (window._settingsAction === 'password') showChangePasswordStep2();
+    else showChangeEmailStep2();
+  } catch (e) {
+    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
+  }
+}
+function showChangePasswordStep2() {
+  var f = document.getElementById('profile-settings-form');
+  var title = document.querySelector('#page-profile-settings .section-title');
+  if (title) title.textContent = tBlock('change_password') || 'Change password';
+  if (!f) return;
+  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('new_password') || 'New password') + '</label>' +
     '<input class="form-input" id="ch-pwd-1" type="password" autocomplete="new-password"></div>' +
     '<div class="form-group"><label class="form-label">' + (tBlock('repeat_password') || 'Repeat password') + '</label>' +
     '<input class="form-input" id="ch-pwd-2" type="password" autocomplete="new-password"></div>' +
     '<div class="subtitle" style="margin-bottom:10px;">' + (tBlock('password_rules') || 'Min 8 characters, 1 digit, 1 uppercase letter') + '</div>' +
     '<button type="button" class="btn" onclick="submitChangePassword()">' + (tBlock('save') || 'Save') + '</button>';
 }
-function openChangeEmail() {
+function showChangeEmailStep2() {
   var f = document.getElementById('profile-settings-form');
+  var title = document.querySelector('#page-profile-settings .section-title');
+  if (title) title.textContent = tBlock('change_email') || 'Change email';
   if (!f) return;
-  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('verify_series') || 'Passport series and number') + '</label>' +
-    '<input class="form-input" id="ch-em-series" type="text" autocomplete="off"></div>' +
-    '<div class="form-group"><label class="form-label">' + (tBlock('verify_email') || 'Email') + '</label>' +
+  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('verify_email') || 'Email') + '</label>' +
     '<input class="form-input" id="ch-em-email" type="email" autocomplete="email"></div>' +
     '<button type="button" class="btn" onclick="submitChangeEmail()">' + (tBlock('save') || 'Save') + '</button>';
 }
 async function submitChangePassword() {
   try {
-    var series = (document.getElementById('ch-pwd-series') || {}).value || '';
     var p1 = (document.getElementById('ch-pwd-1') || {}).value || '';
     var p2 = (document.getElementById('ch-pwd-2') || {}).value || '';
-    await apiPost('/api/verify/2fa/change-password', { series_number: series, password: p1, password2: p2 });
+    await apiPost('/api/verify/2fa/change-password', { series_number: window._settingsSeries || '', password: p1, password2: p2 });
     try { tg.showAlert(tBlock('password_updated') || 'Password updated'); } catch(e){}
     openProfileSettings();
   } catch (e) {
@@ -3204,9 +3248,8 @@ async function submitChangePassword() {
 }
 async function submitChangeEmail() {
   try {
-    var series = (document.getElementById('ch-em-series') || {}).value || '';
     var email = (document.getElementById('ch-em-email') || {}).value || '';
-    await apiPost('/api/verify/2fa/change-email', { series_number: series, email: email });
+    await apiPost('/api/verify/2fa/change-email', { series_number: window._settingsSeries || '', email: email });
     if (userData) userData.verify_email = email;
     try { tg.showAlert(tBlock('email_updated') || 'Email updated'); } catch(e){}
     openProfileSettings();
@@ -3264,11 +3307,9 @@ function maybeShowVerifyPrompt() {
     if (!userData.privacy_miniapp) return;
     var lvl = verifyLevelOf(userData);
     if (lvl >= 2) return;
-    var shown = '';
-    try { shown = localStorage.getItem('xcod_verify_prompt_shown') || ''; } catch(e){}
-    // show once after privacy on first sessions until level 2 or dismissed - use per-user key
     var key = 'xcod_verify_prompt_' + (userData.user_id || userData.id || '');
-    try { shown = localStorage.getItem(key) || shown; } catch(e){}
+    var shown = '';
+    try { shown = localStorage.getItem(key) || ''; } catch(e){}
     if (shown === '1') return;
     showVerifyPrompt();
   } catch (e) {}
@@ -4831,6 +4872,9 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -5529,6 +5573,9 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -6214,6 +6261,9 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -6899,6 +6949,9 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -8198,6 +8251,9 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -8885,6 +8941,9 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -9570,6 +9629,9 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -10828,6 +10890,9 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -11513,6 +11578,9 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -12198,6 +12266,9 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -12883,6 +12954,9 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -13568,6 +13642,9 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ verify_freelance_required: 'Your account must be fully verified to create freelance listings',
+ verify_sale_required: 'Passport verification is required to create sale listings',
+ confirm_identity: 'Confirm identity',
  forgot_password: 'Forgot password?',
  fa2_enabled: 'Two-factor authentication enabled',
  fa2_setup_title: 'Enable 2FA',
@@ -16734,6 +16811,11 @@ function openCreateTypeSheet(prefer) {
  document.body.appendChild(sheet);
 }
 function startSaleCreate() {
+ var lvl = verifyLevelOf(userData);
+ if (lvl < 1) {
+   try { tg.showAlert(tBlock('verify_sale_required') || 'Passport verification is required to create sale listings'); } catch(e){ alert('Verification required'); }
+   return;
+ }
  try { resetListingCreate(); } catch (e) {}
  listingCreateStep = 1;
  listingPickedPhotos = [];
@@ -16757,6 +16839,11 @@ function startSaleCreate() {
  try { setTimeout(function(){ applyI18n(); applyTermsLabels(); }, 0); } catch (e) {}
 }
 function startFreelanceCreate() {
+ var lvl = verifyLevelOf(userData);
+ if (lvl < 2) {
+   try { tg.showAlert(tBlock('verify_freelance_required') || 'Your account must be fully verified to create freelance listings'); } catch(e){ alert('Full verification required'); }
+   return;
+ }
  flCreate = { kind: '', type: '', plan: '' };
  flPickedPhotos = [];
  ['fl-title','fl-desc','fl-contract','fl-portfolio','fl-product-type','fl-price'].forEach(function(id){
