@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-01-v6 -->
+<!-- XCOD_BUILD 2026-09-02-v9 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -2306,9 +2306,28 @@ var APP_INSTALL_FILES = {
 var __appInstallPlatform = null;
 var APP_I18N = {
   ru: {
+ fa2_enabled: 'Верификация завершена',
+ fa2_ready_hint: 'Почта подтверждена. Нажмите кнопку, чтобы завершить верификацию.',
+ forgot_password: 'Забыли пароль?',
+ tg_code_sent: 'Код отправлен в Telegram',
+ tg_code_hint: 'Код подтверждения будет отправлен в Telegram',
+ tg_code: 'Код из Telegram',
+ send_tg_code: 'Отправить код в Telegram',
+ send_failed: 'Не удалось отправить код',
+ bad_code: 'Неверный или просроченный код',
+ code_required: 'Введите код из письма',
+ code_sent_tg: 'Код отправлен в Telegram (отправка на почту временно недоступна)',
+ code_sent_email: 'Код отправлен на почту',
+ email_code: 'Код подтверждения',
+ send_tg_code: 'Отправить код в Telegram',
+   tg_code: 'Код из Telegram',
+   tg_code_hint: 'Код подтверждения будет отправлен в Telegram',
+   tg_code_sent: 'Код отправлен в Telegram',
+   send_email_code: 'Отправить код',
  verify_full_required: 'Требуется полная верификация',
  fa2_setup_hint: 'Установите пароль и укажите почту, чтобы завершить полную верификацию.',
- finish_verify: 'Завершить верификацию',
+ fa2_ready_hint: 'Почта подтверждена. Нажмите кнопку, чтобы завершить верификацию.',
+   finish_verify: 'Завершить верификацию',
  bad_email: 'Неверный формат почты',
  pwd_mismatch: 'Пароли не совпадают',
  password_rules: 'Минимум 8 символов, 1 цифра, 1 заглавная буква',
@@ -2326,7 +2345,13 @@ var APP_I18N = {
  profile_settings: 'Настройки профиля',
  change_email: 'Сменить почту',
  change_password: 'Сменить пароль',
- pwd_email_not_set: 'Пароль и почта не установлены. Сначала пройдите полную верификацию.',
+ send_email_code: 'Отправить код',
+   email_code: 'Код из письма',
+   code_sent_email: 'Код отправлен на почту',
+   code_sent_tg: 'Код отправлен в Telegram',
+   code_required: 'Введите код из письма',
+   bad_code: 'Неверный или просроченный код',
+   pwd_email_not_set: 'Пароль и почта не установлены. Сначала пройдите полную верификацию.',
  confirm_identity: 'Подтверждение личности', dl_app:'Скачать приложение', dl_to_site:'На сайт', dl_app_title:'Установка приложения', dl_android:'Скачать на Android', dl_ios:'Установить на iOS', dl_pc:'Установить на ПК', dl_windows:'Windows', dl_macos:'macOS', dl_linux:'Linux', dl_download:'Скачать', dl_android_title:'Android', dl_ios_title:'iOS', dl_windows_title:'Windows', dl_macos_title:'macOS', dl_linux_title:'Linux', dl_tg:'Мы в Telegram', dl_tg_bot:'Бот', dl_tg_app:'Мини-приложение', dl_tg_app_sub:'Открыть',
     dl_android_guide:'1. Нажмите «Скачать» и сохраните APK.\n2. Откройте файл.\n3. Разрешите установку.\n4. Установите Exchange.',
     dl_ios_guide:'Safari → Поделиться → На экран «Домой» → Добавить.',
@@ -2334,6 +2359,20 @@ var APP_I18N = {
     dl_macos_guide:'1. Скачайте .dmg.\n2. В «Программы».\n3. Разрешите при блоке.\n4. Запустите.',
     dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x\n3. Запустите.' },
   en: {
+ fa2_enabled: 'Verification completed',
+ fa2_ready_hint: 'Email confirmed. Tap the button to complete verification.',
+ forgot_password: 'Forgot password?',
+ tg_code_sent: 'Code sent to Telegram',
+ tg_code_hint: 'A confirmation code will be sent to Telegram',
+ tg_code: 'Code from Telegram',
+ send_tg_code: 'Send code to Telegram',
+ send_failed: 'Could not send code',
+ bad_code: 'Invalid or expired code',
+ code_required: 'Enter the code from email',
+ code_sent_tg: 'Code sent to Telegram (email sending temporarily unavailable)',
+ code_sent_email: 'Code sent to email',
+ email_code: 'Verification code',
+ send_email_code: 'Send code',
  verify_full_required: 'Full verification required',
  fa2_setup_hint: 'Set a password and email to complete full verification.',
  finish_verify: 'Complete verification',
@@ -3282,17 +3321,21 @@ function openChangePassword() {
     return;
   }
   window._settingsAction = 'password';
-  window._settingsSeries = '';
+  window._settingsTgOk = false;
   showPage('profile-settings');
   var f = document.getElementById('profile-settings-form');
   var tiles = document.querySelector('#page-profile-settings .support-grid');
   if (tiles) tiles.style.display = 'none';
   var title = document.querySelector('#page-profile-settings .section-title');
-  if (title) title.textContent = tBlock('confirm_identity') || 'Confirm identity';
+  if (title) title.textContent = tBlock('change_password') || 'Сменить пароль';
   if (!f) return;
-  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('verify_series') || 'Passport series and number') + '</label>' +
-    '<input class="form-input" id="ch-series-only" type="text" autocomplete="off" placeholder="' + (tBlock('verify_series_ph') || '') + '"></div>' +
-    '<button type="button" class="btn" onclick="submitIdentityForSettings()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+  f.innerHTML =
+    '<div class="form-group"><label class="form-label">' + (tBlock('tg_code_hint') || 'Код подтверждения будет отправлен в Telegram') + '</label></div>' +
+    '<button type="button" class="btn" id="settings-send-tg-btn" onclick="sendSettingsTgCode()">' + (tBlock('send_tg_code') || 'Отправить код в Telegram') + '</button>' +
+    '<div class="form-group" style="margin-top:14px;"><label class="form-label">' + (tBlock('tg_code') || 'Код из Telegram') + '</label>' +
+    '<input class="form-input" id="ch-tg-code" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
+    '<div id="ch-tg-err" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
+    '<button type="button" class="btn" onclick="submitSettingsTgCode()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>';
 }
 function openChangeEmail() {
   if (!userData || !userData.has_2fa) {
@@ -3301,29 +3344,48 @@ function openChangeEmail() {
     return;
   }
   window._settingsAction = 'email';
-  window._settingsSeries = '';
+  window._settingsTgOk = false;
   showPage('profile-settings');
   var f = document.getElementById('profile-settings-form');
   var tiles = document.querySelector('#page-profile-settings .support-grid');
   if (tiles) tiles.style.display = 'none';
   var title = document.querySelector('#page-profile-settings .section-title');
-  if (title) title.textContent = tBlock('confirm_identity') || 'Confirm identity';
+  if (title) title.textContent = tBlock('change_email') || 'Сменить почту';
   if (!f) return;
-  f.innerHTML = '<div class="form-group"><label class="form-label">' + (tBlock('verify_series') || 'Passport series and number') + '</label>' +
-    '<input class="form-input" id="ch-series-only" type="text" autocomplete="off" placeholder="' + (tBlock('verify_series_ph') || '') + '"></div>' +
-    '<button type="button" class="btn" onclick="submitIdentityForSettings()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
+  f.innerHTML =
+    '<div class="form-group"><label class="form-label">' + (tBlock('tg_code_hint') || 'Код подтверждения будет отправлен в Telegram') + '</label></div>' +
+    '<button type="button" class="btn" id="settings-send-tg-btn" onclick="sendSettingsTgCode()">' + (tBlock('send_tg_code') || 'Отправить код в Telegram') + '</button>' +
+    '<div class="form-group" style="margin-top:14px;"><label class="form-label">' + (tBlock('tg_code') || 'Код из Telegram') + '</label>' +
+    '<input class="form-input" id="ch-tg-code" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
+    '<div id="ch-tg-err" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
+    '<button type="button" class="btn" onclick="submitSettingsTgCode()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>';
 }
-async function submitIdentityForSettings() {
+async function sendSettingsTgCode() {
   try {
-    var series = (document.getElementById('ch-series-only') || {}).value || '';
-    await apiPost('/api/verify/2fa/check-passport', { series_number: series });
-    window._settingsSeries = series;
-    if (window._settingsAction === 'password') showChangePasswordStep2();
-    else showChangeEmailStep2();
+    var purpose = window._settingsAction === 'email' ? 'change_email' : 'change_password';
+    var btn = document.getElementById('settings-send-tg-btn');
+    if (btn) { btn.disabled = true; btn.textContent = tBlock('wait') || 'Подождите...'; }
+    await apiPost('/api/verify/tg-code/send', { purpose: purpose });
+    try { tg.showAlert(tBlock('tg_code_sent') || 'Код отправлен в Telegram'); } catch(e){}
+    if (btn) { btn.disabled = false; btn.textContent = tBlock('send_tg_code') || 'Отправить код в Telegram'; }
   } catch (e) {
+    var btn2 = document.getElementById('settings-send-tg-btn');
+    if (btn2) { btn2.disabled = false; btn2.textContent = tBlock('send_tg_code') || 'Отправить код в Telegram'; }
     try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
   }
 }
+async function submitSettingsTgCode() {
+  var code = ((document.getElementById('ch-tg-code') || {}).value || '').trim();
+  if (!code) {
+    var err = document.getElementById('ch-tg-err');
+    if (err) { err.style.display = 'block'; err.textContent = tBlock('code_required') || 'Введите код'; }
+    return;
+  }
+  window._settingsTgCode = code;
+  if (window._settingsAction === 'password') showChangePasswordStep2();
+  else showChangeEmailStep2();
+}
+
 function showChangePasswordStep2() {
   var f = document.getElementById('profile-settings-form');
   var title = document.querySelector('#page-profile-settings .section-title');
@@ -3370,7 +3432,7 @@ async function submitChangePassword() {
   try {
     var p1 = (document.getElementById('ch-pwd-1') || {}).value || '';
     var p2 = (document.getElementById('ch-pwd-2') || {}).value || '';
-    await apiPost('/api/verify/2fa/change-password', { series_number: window._settingsSeries || '', password: p1, password2: p2 });
+    await apiPost('/api/verify/2fa/change-password', { code: window._settingsTgCode || '', password: p1, password2: p2 });
     try { tg.showAlert(tBlock('password_updated') || 'Password updated'); } catch(e){}
     openProfileSettings();
   } catch (e) {
@@ -3380,7 +3442,7 @@ async function submitChangePassword() {
 async function submitChangeEmail() {
   try {
     var email = (document.getElementById('ch-em-email') || {}).value || '';
-    await apiPost('/api/verify/2fa/change-email', { series_number: window._settingsSeries || '', email: email });
+    await apiPost('/api/verify/2fa/change-email', { code: window._settingsTgCode || '', email: email });
     if (userData) userData.verify_email = email;
     try { tg.showAlert(tBlock('email_updated') || 'Email updated'); } catch(e){}
     openProfileSettings();
@@ -3389,6 +3451,11 @@ async function submitChangeEmail() {
   }
 }
 function mapPwdError(msg) {
+  var s = String(msg || '');
+  if (s.indexOf('bad_code') >= 0) return tBlock('bad_code') || 'Неверный или просроченный код';
+  if (s.indexOf('code_required') >= 0) return tBlock('code_required') || 'Введите код из письма';
+  if (s.indexOf('send_failed') >= 0) return tBlock('send_failed') || 'Не удалось отправить код';
+
   msg = String(msg || '');
   var map = {
     pwd_short: tBlock('pwd_short') || 'Password must be at least 8 characters',
@@ -3463,21 +3530,34 @@ function show2faGate(mode) {
   var title = document.getElementById('fa2-title');
   if (!ov || !body) return;
   if (mode === 'login') {
-    if (title) title.textContent = tBlock('fa2_enter_password') || 'Enter password';
-    body.innerHTML = '<input class="form-input" id="fa2-pwd" type="password" placeholder="' + (tBlock('password') || 'Password') + '">' +
-      '<button type="button" class="btn" onclick="submit2faLogin()">' + (tBlock('continue_btn') || 'Continue') + '</button>' +
-      '<button type="button" class="fa2-link" onclick="show2faGate(\'forgot\')">' + (tBlock('forgot_password') || 'Forgot password?') + '</button>';
+    if (title) title.textContent = tBlock('fa2_enter_password') || 'Введите пароль';
+    body.innerHTML = '<input class="form-input" id="fa2-pwd" type="password" placeholder="' + (tBlock('password') || 'Пароль') + '">' +
+      '<button type="button" class="btn" onclick="submit2faLogin()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>' +
+      '<button type="button" class="fa2-link" id="fa2-forgot-link">' + (tBlock('forgot_password') || 'Забыли пароль?') + '</button>';
   } else if (mode === 'forgot') {
-    if (title) title.textContent = tBlock('forgot_password') || 'Forgot password';
-    body.innerHTML = '<input class="form-input" id="fa2-email" type="email" placeholder="' + (tBlock('verify_email') || 'Email') + '">' +
-      '<input class="form-input" id="fa2-series" type="text" placeholder="' + (tBlock('verify_series') || 'Passport series and number') + '">' +
-      '<input class="form-input" id="fa2-pwd1" type="password" placeholder="' + (tBlock('new_password') || 'New password') + '">' +
-      '<input class="form-input" id="fa2-pwd2" type="password" placeholder="' + (tBlock('repeat_password') || 'Repeat password') + '">' +
-      '<div class="subtitle" style="margin:8px 0;opacity:.8;">' + (tBlock('password_rules') || '') + '</div>' +
-      '<button type="button" class="btn" onclick="submit2faForgot()">' + (tBlock('continue_btn') || 'Continue') + '</button>' +
-      '<button type="button" class="fa2-link" onclick="show2faGate(\'login\')">' + (tBlock('back') || 'Back') + '</button>';
+    if (title) title.textContent = tBlock('forgot_password') || 'Забыли пароль';
+    body.innerHTML =
+      '<div class="subtitle" style="margin-bottom:10px;text-align:left;">' + (tBlock('tg_code_hint') || 'Код подтверждения будет отправлен в Telegram') + '</div>' +
+      '<button type="button" class="btn btn-secondary" id="fa2-send-tg-btn">' + (tBlock('send_tg_code') || 'Отправить код в Telegram') + '</button>' +
+      '<input class="form-input" id="fa2-tg-code" type="text" inputmode="numeric" maxlength="8" placeholder="' + (tBlock('tg_code') || 'Код из Telegram') + '" style="margin-top:10px;">' +
+      '<input class="form-input" id="fa2-pwd1" type="password" placeholder="' + (tBlock('new_password') || 'Новый пароль') + '">' +
+      '<input class="form-input" id="fa2-pwd2" type="password" placeholder="' + (tBlock('repeat_password') || 'Повторите пароль') + '">' +
+      '<div id="fa2-forgot-rules" style="display:none;color:#ff4d4f;font-size:12px;margin:6px 0;text-align:left;"></div>' +
+      '<div id="fa2-forgot-mismatch" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0;text-align:left;"></div>' +
+      '<button type="button" class="btn" id="fa2-forgot-submit">' + (tBlock('continue_btn') || 'Продолжить') + '</button>' +
+      '<button type="button" class="fa2-link" id="fa2-back-login">' + (tBlock('back') || 'Назад') + '</button>';
   }
   ov.style.display = 'flex';
+  try {
+    var fl = document.getElementById('fa2-forgot-link');
+    if (fl) fl.onclick = function() { show2faGate('forgot'); };
+    var st = document.getElementById('fa2-send-tg-btn');
+    if (st) st.onclick = function() { sendForgotTgCode(); };
+    var fs = document.getElementById('fa2-forgot-submit');
+    if (fs) fs.onclick = function() { submit2faForgot(); };
+    var bl = document.getElementById('fa2-back-login');
+    if (bl) bl.onclick = function() { show2faGate('login'); };
+  } catch (eBind) {}
 }
 function hide2faGate() {
   var ov = document.getElementById('fa2-overlay');
@@ -3495,17 +3575,39 @@ async function submit2faLogin() {
     try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
   }
 }
+async function sendForgotTgCode() {
+  try {
+    var btn = document.getElementById('fa2-send-tg-btn');
+    if (btn) { btn.disabled = true; btn.textContent = tBlock('wait') || 'Подождите...'; }
+    await apiPost('/api/verify/tg-code/send', { purpose: 'forgot' });
+    try { tg.showAlert(tBlock('tg_code_sent') || 'Код отправлен в Telegram'); } catch(e){}
+    if (btn) { btn.disabled = false; btn.textContent = tBlock('send_tg_code') || 'Отправить код в Telegram'; }
+  } catch (e) {
+    var btn2 = document.getElementById('fa2-send-tg-btn');
+    if (btn2) { btn2.disabled = false; btn2.textContent = tBlock('send_tg_code') || 'Отправить код в Telegram'; }
+    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
+  }
+}
 async function submit2faForgot() {
   try {
-    await apiPost('/api/auth/2fa/forgot', {
-      email: (document.getElementById('fa2-email') || {}).value || '',
-      series_number: (document.getElementById('fa2-series') || {}).value || '',
-      password: (document.getElementById('fa2-pwd1') || {}).value || '',
-      password2: (document.getElementById('fa2-pwd2') || {}).value || ''
-    });
+    var p1 = (document.getElementById('fa2-pwd1') || {}).value || '';
+    var p2 = (document.getElementById('fa2-pwd2') || {}).value || '';
+    var code = ((document.getElementById('fa2-tg-code') || {}).value || '').trim();
+    var rulesEl = document.getElementById('fa2-forgot-rules');
+    var misEl = document.getElementById('fa2-forgot-mismatch');
+    if (!code) { try { tg.showAlert(tBlock('code_required') || 'Введите код'); } catch(e){} return; }
+    if (!passwordMeetsRules(p1)) {
+      if (rulesEl) { rulesEl.style.display = 'block'; rulesEl.textContent = tBlock('password_rules') || 'Минимум 8 символов, 1 цифра, 1 заглавная буква'; }
+      return;
+    }
+    if (p1 !== p2) {
+      if (misEl) { misEl.style.display = 'block'; misEl.textContent = tBlock('pwd_mismatch') || 'Пароли не совпадают'; }
+      return;
+    }
+    await apiPost('/api/auth/2fa/forgot', { code: code, password: p1, password2: p2 });
     try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
     hide2faGate();
-    try { tg.showAlert(tBlock('password_updated') || 'Password updated'); } catch(e){}
+    try { tg.showAlert(tBlock('password_updated') || 'Пароль обновлён'); } catch(e){}
     await continueAfterAuth();
   } catch (e) {
     try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
@@ -3582,34 +3684,107 @@ function fa2PasswordContinue() {
   renderVerifyPage();
 }
 
-async function submit2faSetup() {
+
+async function confirmFa2EmailCode() {
   try {
-    var p1 = window.__fa2Pwd || (document.getElementById('v2-pwd1') || {}).value || '';
-    var p2 = p1;
-    var email = (document.getElementById('v2-email') || {}).value || '';
-    if (!validateFa2EmailField() || !isValidEmailFormat(email)) {
+    var email = ((document.getElementById('v2-email') || {}).value || window.__fa2Email || '').trim();
+    var code = ((document.getElementById('v2-email-code') || {}).value || '').trim();
+    if (!isValidEmailFormat(email)) {
       var err = document.getElementById('v2-email-err');
-      if (err) {
-        err.style.display = 'block';
-        err.textContent = tBlock('bad_email') || 'Неверный формат почты';
-      }
+      if (err) { err.style.display = 'block'; err.textContent = tBlock('bad_email') || 'Неверный формат почты'; }
       return;
     }
-    var res = await apiPost('/api/verify/2fa/setup', { password: p1, password2: p2, email: email });
+    if (!code) {
+      var cerr = document.getElementById('v2-code-err');
+      if (cerr) { cerr.style.display = 'block'; cerr.textContent = tBlock('code_required') || 'Введите код'; }
+      return;
+    }
+    await apiPost('/api/verify/2fa/check-email-code', { email: email, code: code });
+    window.__fa2Email = email;
+    window.__fa2EmailCode = code;
+    window.__fa2Step = 3;
+    renderVerifyPage();
+  } catch (e) {
+    var cerr2 = document.getElementById('v2-code-err');
+    var msg = mapPwdError(e.message);
+    if (String(e.message || '').indexOf('bad_code') >= 0) msg = tBlock('bad_code') || 'Неверный или просроченный код';
+    if (cerr2) { cerr2.style.display = 'block'; cerr2.textContent = msg; }
+    else { try { tg.showAlert(msg); } catch (e2) {} }
+  }
+}
+async function sendFa2EmailCode() {
+  try {
+    var email = ((document.getElementById('v2-email') || {}).value || '').trim();
+    if (!isValidEmailFormat(email)) {
+      var err = document.getElementById('v2-email-err');
+      if (err) { err.style.display = 'block'; err.textContent = tBlock('bad_email') || 'Неверный формат почты'; }
+      return;
+    }
+    window.__fa2Email = email;
+    var btn = document.getElementById('v2-send-code-btn');
+    if (btn) { btn.disabled = true; btn.textContent = tBlock('wait') || 'Подождите...'; }
+    var res = await apiPost('/api/verify/2fa/send-email-code', { email: email });
+    var hint = document.getElementById('v2-code-hint');
+    if (hint) {
+      hint.style.display = 'block';
+      if (res && res.sent_email) hint.textContent = tBlock('code_sent_email') || 'Код отправлен на почту';
+      else if (res && res.sent_telegram) hint.textContent = tBlock('code_sent_tg') || 'Код отправлен в Telegram (письмо временно недоступно)';
+      else hint.textContent = tBlock('code_sent_email') || 'Код отправлен';
+    }
+    if (btn) { btn.disabled = false; btn.textContent = tBlock('send_email_code') || 'Отправить код'; }
+  } catch (e) {
+    var btn2 = document.getElementById('v2-send-code-btn');
+    if (btn2) { btn2.disabled = false; btn2.textContent = tBlock('send_email_code') || 'Отправить код'; }
+    try { tg.showAlert(mapPwdError(e.message) || (tBlock('send_failed') || 'Не удалось отправить код')); } catch (e2) {}
+  }
+}
+async function submit2faSetup() {
+  try {
+    var p1 = window.__fa2Pwd || '';
+    if (!p1) {
+      try { tg.showAlert(tBlock('password_rules') || 'Введите пароль заново'); } catch (e) {}
+      window.__fa2Step = 1;
+      renderVerifyPage();
+      return;
+    }
+    var email = (window.__fa2Email || '').trim();
+    var code = (window.__fa2EmailCode || '').trim();
+    if (!email || !code) {
+      window.__fa2Step = 2;
+      renderVerifyPage();
+      return;
+    }
+    var res = await apiPost('/api/verify/2fa/setup', { password: p1, password2: p1, email: email, code: code });
     if (userData) {
-      userData.verify_level = (res && res.verify_level) || 2;
+      userData.verify_level = 2;
       userData.has_2fa = true;
-      userData.verify_email = email;
+      userData.verify_email = (res && (res.verify_email || res.email)) || email;
+      userData.email = userData.verify_email;
     }
     window.__fa2Step = 0;
     window.__fa2Pwd = '';
-    try { tg.showAlert(tBlock('fa2_enabled') || '2FA включена'); } catch(e){}
+    window.__fa2Email = '';
+    window.__fa2EmailCode = '';
+    try {
+      var fresh = await apiGet('/api/user');
+      if (fresh) {
+        userData = Object.assign(userData || {}, fresh);
+        if (fresh.verify_email) userData.verify_email = fresh.verify_email;
+        if (fresh.email) userData.email = fresh.email;
+        userData.verify_level = fresh.verify_level != null ? fresh.verify_level : 2;
+        userData.has_2fa = true;
+      }
+    } catch (eU) {}
+    try { tg.showAlert(tBlock('fa2_enabled') || 'Верификация завершена'); } catch(e){}
     renderVerifyPage();
-    updateOwnVerifyBadge();
+    try { updateOwnVerifyBadge(); } catch (e3) {}
   } catch (e) {
-    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
+    var msg = mapPwdError(e.message);
+    if (String(e.message || '').indexOf('bad_code') >= 0) msg = tBlock('bad_code') || 'Неверный или просроченный код';
+    try { tg.showAlert(msg); } catch(e2){}
   }
 }
+
 
 
 function openVerifyPage() {
@@ -3696,10 +3871,10 @@ function renderVerifyPage() {
         btn.textContent = tBlock('verify_btn_continue') || 'Завершить верификацию';
         btn.onclick = function() { window.__fa2Step = 1; renderVerifyPage(); };
       } else if (window.__fa2Step === 1) {
-        if (title) title.textContent = tBlock('change_password') || tBlock('password') || 'Пароль';
+        if (title) title.textContent = tBlock('new_password') || tBlock('password') || 'Пароль';
         if (desc) {
           desc.innerHTML =
-            '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('new_password') || tBlock('password') || 'Пароль') + '</label>' +
+            '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('new_password') || 'Новый пароль') + '</label>' +
             '<input class="form-input" id="v2-pwd1" type="password" autocomplete="new-password" oninput="validateFa2PasswordFields()"></div>' +
             '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('repeat_password') || 'Повторите пароль') + '</label>' +
             '<input class="form-input" id="v2-pwd2" type="password" autocomplete="new-password" oninput="validateFa2PasswordFields()"></div>' +
@@ -3709,12 +3884,27 @@ function renderVerifyPage() {
         }
       } else if (window.__fa2Step === 2) {
         if (title) title.textContent = tBlock('verify_email') || 'Email';
+        var savedEmail = window.__fa2Email || '';
         if (desc) {
           desc.innerHTML =
             '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('verify_email') || 'Email') + '</label>' +
-            '<input class="form-input" id="v2-email" type="email" autocomplete="email" oninput="validateFa2EmailField()"></div>' +
-            '<div id="v2-email-err" style="display:none;color:#ff4d4f;font-size:12px;line-height:1.35;margin:6px 0 8px;text-align:left;"></div>' +
-            '<button type="button" class="btn" style="margin-top:8px;" onclick="submit2faSetup()">' + (tBlock('finish_verify') || tBlock('verify_btn_continue') || 'Завершить верификацию') + '</button>';
+            '<input class="form-input" id="v2-email" type="email" autocomplete="email" value="' + String(savedEmail).replace(/"/g,'&quot;') + '" oninput="validateFa2EmailField()"></div>' +
+            '<div id="v2-email-err" style="display:none;color:#ff4d4f;font-size:12px;line-height:1.35;margin:6px 0 4px;text-align:left;"></div>' +
+            '<button type="button" class="btn" style="margin-top:10px;" id="v2-send-code-btn" onclick="sendFa2EmailCode()">' + (tBlock('send_email_code') || 'Отправить код') + '</button>' +
+            '<div id="v2-code-hint" class="field-hint" style="display:none;margin-top:8px;text-align:left;"></div>' +
+            '<div class="form-group" style="text-align:left;margin-top:14px;"><label class="form-label">' + (tBlock('email_code') || 'Код подтверждения') + '</label>' +
+            '<input class="form-input" id="v2-email-code" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
+            '<div id="v2-code-err" style="display:none;color:#ff4d4f;font-size:12px;line-height:1.35;margin:6px 0 8px;text-align:left;"></div>' +
+            '<button type="button" class="btn" style="margin-top:8px;" onclick="confirmFa2EmailCode()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>';
+        }
+      } else if (window.__fa2Step === 3) {
+        if (title) title.textContent = tBlock('finish_verify') || 'Завершить верификацию';
+        if (desc) {
+          desc.innerHTML =
+            '<div class="info-block" style="text-align:left;margin-bottom:14px;">' +
+            (tBlock('fa2_ready_hint') || 'Почта подтверждена. Нажмите кнопку, чтобы завершить верификацию.') +
+            '<div style="margin-top:8px;opacity:.85;font-size:13px;">' + (window.__fa2Email || '') + '</div></div>' +
+            '<button type="button" class="btn" onclick="submit2faSetup()">' + (tBlock('finish_verify') || 'Завершить верификацию') + '</button>';
         }
       }
     } else if (pst === 'pending') {
@@ -5808,6 +5998,15 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ code_sent_tg: 'Code an Telegram gesendet (E-Mail voruebergehend nicht verfuegbar)',
+ code_sent_email: 'Code an E-Mail gesendet',
+ tg_code_sent: 'Code an Telegram gesendet',
+ tg_code_hint: 'Ein Bestaetigungscode wird an Telegram gesendet',
+ tg_code: 'Code aus Telegram',
+ send_tg_code: 'Code an Telegram senden',
+ fa2_ready_hint: 'E-Mail bestaetigt. Tippen Sie auf die Schaltflaeche, um abzuschliessen.',
+ email_code: 'Bestaetigungscode',
+ send_email_code: 'Code senden',
  verify_full_required: 'Vollstandige Verifizierung erforderlich',
  fa2_setup_hint: 'Legen Sie Passwort und E-Mail fest, um die vollstandige Verifizierung abzuschliessen.',
  finish_verify: 'Verifizierung abschliessen',
@@ -5818,7 +6017,7 @@ terms_prefix: 'By continuing, you accept the ',
  verify_freelance_required: 'Vollstandige Verifizierung fur Freelance-Anzeigen erforderlich',
  verify_sale_required: 'Pass-Verifizierung fur Verkaufsanzeigen erforderlich',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: 'Verifizierung abgeschlossen',
  fa2_setup_title: 'Verifizierung abschliessen',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -6502,6 +6701,15 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ code_sent_tg: 'Code envoye sur Telegram (e-mail temporairement indisponible)',
+ code_sent_email: 'Code envoye par e-mail',
+ tg_code_sent: 'Code envoye sur Telegram',
+ tg_code_hint: 'Un code de confirmation sera envoye sur Telegram',
+ tg_code: 'Code Telegram',
+ send_tg_code: 'Envoyer le code sur Telegram',
+ fa2_ready_hint: 'E-mail confirme. Appuyez pour terminer la verification.',
+ email_code: 'Code de verification',
+ send_email_code: 'Envoyer le code',
  verify_full_required: 'Verification complete requise',
  fa2_setup_hint: 'Definissez un mot de passe et un e-mail pour terminer la verification complete.',
  finish_verify: 'Terminer la verification',
@@ -6512,7 +6720,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  verify_freelance_required: 'Verification complete requise pour les annonces freelance',
  verify_sale_required: 'Verification du passeport requise pour les annonces de vente',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: 'Verification terminee',
  fa2_setup_title: 'Terminer la verification',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -7196,6 +7404,15 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ code_sent_tg: 'Codigo enviado a Telegram (correo temporalmente no disponible)',
+ code_sent_email: 'Codigo enviado al correo',
+ tg_code_sent: 'Codigo enviado a Telegram',
+ tg_code_hint: 'Se enviara un codigo de confirmacion a Telegram',
+ tg_code: 'Codigo de Telegram',
+ send_tg_code: 'Enviar codigo a Telegram',
+ fa2_ready_hint: 'Correo confirmado. Pulse para completar la verificacion.',
+ email_code: 'Codigo de verificacion',
+ send_email_code: 'Enviar codigo',
  verify_full_required: 'Se requiere verificacion completa',
  fa2_setup_hint: 'Establezca una contrasena y un correo para completar la verificacion.',
  finish_verify: 'Completar verificacion',
@@ -7206,7 +7423,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  verify_freelance_required: 'Se requiere verificacion completa para anuncios freelance',
  verify_sale_required: 'Se requiere verificacion de pasaporte para anuncios de venta',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: 'Verificacion completada',
  fa2_setup_title: 'Completar verificacion',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -7890,6 +8107,16 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ fa2_enabled: '验证已完成',
+ code_sent_tg: '验证码已发送到 Telegram（邮箱暂时不可用）',
+ code_sent_email: '验证码已发送到邮箱',
+ tg_code_sent: '验证码已发送到 Telegram',
+ tg_code_hint: '确认码将发送到 Telegram',
+ tg_code: 'Telegram 验证码',
+ send_tg_code: '发送验证码到 Telegram',
+ fa2_ready_hint: '邮箱已确认。点击按钮完成验证。',
+ email_code: '验证码',
+ send_email_code: '发送验证码',
  verify_sale_required: '销售广告需要护照验证',
  verify_freelance_required: '发布自由职业广告需要完整验证',
  verify_full_required: '需要完整验证',
@@ -8523,6 +8750,15 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ code_sent_tg: 'Код надіслано в Telegram (надсилання на пошту тимчасово недоступне)',
+ code_sent_email: 'Код надіслано на пошту',
+ tg_code_sent: 'Код надіслано в Telegram',
+ tg_code_hint: 'Код підтвердження буде надіслано в Telegram',
+ tg_code: 'Код з Telegram',
+ send_tg_code: 'Надіслати код в Telegram',
+ fa2_ready_hint: 'Пошту підтверджено. Натисніть кнопку, щоб завершити верифікацію.',
+ email_code: 'Код підтвердження',
+ send_email_code: 'Надіслати код',
  verify_full_required: 'Потрібна повна верифікація',
  fa2_setup_hint: 'Встановіть пароль і вкажіть пошту, щоб завершити повну верифікацію.',
  finish_verify: 'Завершити верифікацію',
@@ -8533,7 +8769,7 @@ terms_prefix: '继续即表示您同意',
  verify_freelance_required: 'Для фриланс-оголошень потрібна повна верифікація',
  verify_sale_required: 'Для оголошень про продаж потрібна верифікація паспорта',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: 'Верифікацію завершено',
  fa2_setup_title: 'Завершити верифікацію',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -9219,6 +9455,15 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ code_sent_tg: 'Codice inviato su Telegram (email non disponibile)',
+ code_sent_email: 'Codice inviato via e-mail',
+ tg_code_sent: 'Codice inviato su Telegram',
+ tg_code_hint: 'Un codice di conferma sara inviato su Telegram',
+ tg_code: 'Codice da Telegram',
+ send_tg_code: 'Invia codice su Telegram',
+ fa2_ready_hint: 'Email confermata. Tocca per completare.',
+ email_code: 'Codice di verifica',
+ send_email_code: 'Invia codice',
  verify_full_required: 'Verifica completa richiesta',
  fa2_setup_hint: 'Imposta password e e-mail per completare la verifica completa.',
  finish_verify: 'Completa verifica',
@@ -9229,7 +9474,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  verify_freelance_required: 'Verifica completa richiesta per annunci freelance',
  verify_sale_required: 'Verifica del passaporto richiesta per gli annunci di vendita',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: 'Verifica completata',
  fa2_setup_title: 'Completa verifica',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -9913,6 +10158,15 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ code_sent_tg: 'Codigo enviado no Telegram (e-mail temporariamente indisponivel)',
+ code_sent_email: 'Codigo enviado por e-mail',
+ tg_code_sent: 'Codigo enviado no Telegram',
+ tg_code_hint: 'Um codigo de confirmacao sera enviado no Telegram',
+ tg_code: 'Codigo do Telegram',
+ send_tg_code: 'Enviar codigo no Telegram',
+ fa2_ready_hint: 'E-mail confirmado. Toque para concluir.',
+ email_code: 'Codigo de verificacao',
+ send_email_code: 'Enviar codigo',
  verify_full_required: 'Verificacao completa necessaria',
  fa2_setup_hint: 'Defina uma senha e um e-mail para concluir a verificacao completa.',
  finish_verify: 'Concluir verificacao',
@@ -9923,7 +10177,7 @@ terms_prefix: 'Continuando, accetti i ',
  verify_freelance_required: 'Verificacao completa necessaria para anuncios freelance',
  verify_sale_required: 'Verificacao de passaporte necessaria para anuncios de venda',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: 'Verificacao concluida',
  fa2_setup_title: 'Concluir verificacao',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -11180,6 +11434,15 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ code_sent_tg: 'Kod Telegrame gonderildi (e-posta gecici olarak kapali)',
+ code_sent_email: 'Kod e-postaya gonderildi',
+ tg_code_sent: 'Kod Telegrame gonderildi',
+ tg_code_hint: 'Onay kodu Telegrame gonderilecek',
+ tg_code: 'Telegram kodu',
+ send_tg_code: 'Telegrama kod gonder',
+ fa2_ready_hint: 'E-posta onaylandi. Tamamlamak icin dokunun.',
+ email_code: 'Dogrulama kodu',
+ send_email_code: 'Kod gonder',
  verify_full_required: 'Tam dogrulama gerekli',
  fa2_setup_hint: 'Tam dogrulamayi tamamlamak icin sifre ve e-posta belirleyin.',
  finish_verify: 'Dogrulamayi tamamla',
@@ -11190,7 +11453,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  verify_freelance_required: 'Freelance ilanlar icin tam dogrulama gerekli',
  verify_sale_required: 'Satis ilanlari icin pasaport dogrulamasi gerekli',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: 'Dogrulama tamamlandi',
  fa2_setup_title: 'Dogrulamayi tamamla',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -11874,6 +12137,15 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ code_sent_tg: 'Kode dikirim ke Telegram (email sementara tidak tersedia)',
+ code_sent_email: 'Kode dikirim ke email',
+ tg_code_sent: 'Kode dikirim ke Telegram',
+ tg_code_hint: 'Kode konfirmasi akan dikirim ke Telegram',
+ tg_code: 'Kode dari Telegram',
+ send_tg_code: 'Kirim kode ke Telegram',
+ fa2_ready_hint: 'Email dikonfirmasi. Ketuk untuk menyelesaikan.',
+ email_code: 'Kode verifikasi',
+ send_email_code: 'Kirim kode',
  verify_full_required: 'Verifikasi penuh diperlukan',
  fa2_setup_hint: 'Atur kata sandi dan email untuk menyelesaikan verifikasi penuh.',
  finish_verify: 'Selesaikan verifikasi',
@@ -11884,7 +12156,7 @@ terms_prefix: 'Devam ederek ',
  verify_freelance_required: 'Verifikasi penuh diperlukan untuk listing freelance',
  verify_sale_required: 'Verifikasi paspor diperlukan untuk listing penjualan',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: 'Verifikasi selesai',
  fa2_setup_title: 'Selesaikan verifikasi',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -12568,6 +12840,15 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ code_sent_tg: 'تم إرسال الرمز إلى تيليجرام (البريد غير متاح مؤقتاً)',
+ code_sent_email: 'تم إرسال الرمز إلى البريد',
+ tg_code_sent: 'تم إرسال الرمز إلى تيليجرام',
+ tg_code_hint: 'سيتم إرسال رمز التأكيد إلى تيليجرام',
+ tg_code: 'رمز تيليجرام',
+ send_tg_code: 'إرسال الرمز إلى تيليجرام',
+ fa2_ready_hint: 'تم تأكيد البريد. اضغط لإكمال التحقق.',
+ email_code: 'رمز التحقق',
+ send_email_code: 'إرسال الرمز',
  verify_full_required: 'يلزم التحقق الكامل',
  fa2_setup_hint: 'عيّن كلمة المرور والبريد لإكمال التحقق الكامل.',
  finish_verify: 'إكمال التحقق',
@@ -12578,7 +12859,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  verify_freelance_required: 'يلزم التحقق الكامل لإعلانات العمل الحر',
  verify_sale_required: 'يلزم التحقق من جواز السفر لإعلانات البيع',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: 'اكتمل التحقق',
  fa2_setup_title: 'إكمال التحقق',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -13262,6 +13543,15 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ code_sent_tg: 'コードをTelegramに送信しました（メールは一時利用不可）',
+ code_sent_email: 'コードをメールに送信しました',
+ tg_code_sent: 'コードをTelegramに送信しました',
+ tg_code_hint: '確認コードはTelegramに送信されます',
+ tg_code: 'Telegramのコード',
+ send_tg_code: 'Telegramにコードを送信',
+ fa2_ready_hint: 'メールが確認されました。ボタンで認証を完了してください。',
+ email_code: '確認コード',
+ send_email_code: 'コードを送信',
  verify_full_required: '完全認証が必要です',
  fa2_setup_hint: '完全認証を完了するにはパスワードとメールを設定してください。',
  finish_verify: '認証を完了',
@@ -13272,7 +13562,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  verify_freelance_required: 'フリーランス掲載には完全認証が必要です',
  verify_sale_required: '販売掲載にはパスポート認証が必要です',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: '認証が完了しました',
  fa2_setup_title: '認証を完了',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
@@ -13956,6 +14246,15 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ code_sent_tg: '텔레그램으로 코드를 보냈습니다 (이메일 일시 불가)',
+ code_sent_email: '이메일로 코드를 보냈습니다',
+ tg_code_sent: '텔레그램으로 코드를 보냈습니다',
+ tg_code_hint: '확인 코드가 텔레그램으로 전송됩니다',
+ tg_code: '텔레그램 코드',
+ send_tg_code: '텔레그램으로 코드 보내기',
+ fa2_ready_hint: '이메일이 확인되었습니다. 버튼을 눌러 인증을 완료하세요.',
+ email_code: '인증 코드',
+ send_email_code: '코드 보내기',
  verify_full_required: '전체 인증이 필요합니다',
  fa2_setup_hint: '전체 인증을 완료하려면 비밀번호와 이메일을 설정하세요.',
  finish_verify: '인증 완료',
@@ -13966,7 +14265,7 @@ terms_prefix: '続行すると',
  verify_freelance_required: '프리랜스 등록에는 전체 인증이 필요합니다',
  verify_sale_required: '판매 등록에는 여권 인증이 필요합니다',
  forgot_password: 'Forgot password?',
- fa2_enabled: 'Two-factor authentication enabled',
+ fa2_enabled: '인증이 완료되었습니다',
  fa2_setup_title: '인증 완료',
  fa2_enter_password: 'Enter password',
  verify_prompt_later: 'Later',
