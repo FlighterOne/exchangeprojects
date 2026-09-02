@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-02-v9 -->
+<!-- XCOD_BUILD 2026-09-02-v10 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -2306,6 +2306,8 @@ var APP_INSTALL_FILES = {
 var __appInstallPlatform = null;
 var APP_I18N = {
   ru: {
+ verify_email: 'Почта',
+ code_sent_to: 'Код отправлен на',
  fa2_enabled: 'Верификация завершена',
  fa2_ready_hint: 'Почта подтверждена. Нажмите кнопку, чтобы завершить верификацию.',
  forgot_password: 'Забыли пароль?',
@@ -2359,6 +2361,8 @@ var APP_I18N = {
     dl_macos_guide:'1. Скачайте .dmg.\n2. В «Программы».\n3. Разрешите при блоке.\n4. Запустите.',
     dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x\n3. Запустите.' },
   en: {
+ verify_email: 'Email',
+ code_sent_to: 'Code sent to',
  fa2_enabled: 'Verification completed',
  fa2_ready_hint: 'Email confirmed. Tap the button to complete verification.',
  forgot_password: 'Forgot password?',
@@ -3276,12 +3280,12 @@ function settingsNotReadyMsg() {
     var lvl = (typeof verifyLevelOf === 'function') ? verifyLevelOf(userData) : 0;
     // no passport yet
     if (lvl < 1) {
-      return (typeof tBlock === 'function' && tBlock('settings_need_passport')) || tBlock('pwd_email_not_set') || 'Complete passport verification first.';
+      return (typeof tBlock === 'function' && tBlock('settings_need_passport')) || tBlock('pwd_email_not_set') || 'Сначала нужно пройти верификацию паспорта.';
     }
     // passport ok but no 2FA / password+email
     return (typeof tBlock === 'function' && tBlock('pwd_email_not_set')) || 'Пароль и почта не установлены. Сначала пройдите полную верификацию.';
   } catch (e) {
-    try { return tBlock('pwd_email_not_set'); } catch (e2) { return 'Password and email are not set.'; }
+    try { return tBlock('pwd_email_not_set'); } catch (e2) { return 'Пароль и почта не установлены.'; }
   }
 }
 
@@ -3689,9 +3693,11 @@ async function confirmFa2EmailCode() {
   try {
     var email = ((document.getElementById('v2-email') || {}).value || window.__fa2Email || '').trim();
     var code = ((document.getElementById('v2-email-code') || {}).value || '').trim();
+    if (!email) email = (window.__fa2Email || '').trim();
     if (!isValidEmailFormat(email)) {
-      var err = document.getElementById('v2-email-err');
-      if (err) { err.style.display = 'block'; err.textContent = tBlock('bad_email') || 'Неверный формат почты'; }
+      try { tg.showAlert(tBlock('bad_email') || 'Неверный формат почты'); } catch(e){}
+      window.__fa2Step = 2;
+      renderVerifyPage();
       return;
     }
     if (!code) {
@@ -3702,7 +3708,7 @@ async function confirmFa2EmailCode() {
     await apiPost('/api/verify/2fa/check-email-code', { email: email, code: code });
     window.__fa2Email = email;
     window.__fa2EmailCode = code;
-    window.__fa2Step = 3;
+    window.__fa2Step = 4;
     renderVerifyPage();
   } catch (e) {
     var cerr2 = document.getElementById('v2-code-err');
@@ -3714,26 +3720,29 @@ async function confirmFa2EmailCode() {
 }
 async function sendFa2EmailCode() {
   try {
-    var email = ((document.getElementById('v2-email') || {}).value || '').trim();
+    var email = ((document.getElementById('v2-email') || {}).value || window.__fa2Email || '').trim();
     if (!isValidEmailFormat(email)) {
       var err = document.getElementById('v2-email-err');
       if (err) { err.style.display = 'block'; err.textContent = tBlock('bad_email') || 'Неверный формат почты'; }
+      else { try { tg.showAlert(tBlock('bad_email') || 'Неверный формат почты'); } catch(e){} }
       return;
     }
     window.__fa2Email = email;
-    var btn = document.getElementById('v2-send-code-btn');
+    var btn = document.getElementById('v2-send-code-btn') || document.getElementById('v2-resend-code-btn');
     if (btn) { btn.disabled = true; btn.textContent = tBlock('wait') || 'Подождите...'; }
     var res = await apiPost('/api/verify/2fa/send-email-code', { email: email });
-    var hint = document.getElementById('v2-code-hint');
-    if (hint) {
-      hint.style.display = 'block';
-      if (res && res.sent_email) hint.textContent = tBlock('code_sent_email') || 'Код отправлен на почту';
-      else if (res && res.sent_telegram) hint.textContent = tBlock('code_sent_tg') || 'Код отправлен в Telegram (письмо временно недоступно)';
-      else hint.textContent = tBlock('code_sent_email') || 'Код отправлен';
-    }
+    var hintMsg = tBlock('code_sent_email') || 'Код отправлен на почту';
+    if (res && res.sent_telegram && !res.sent_email) hintMsg = tBlock('code_sent_tg') || 'Код отправлен в Telegram (отправка на почту временно недоступна)';
+    else if (res && res.sent_email) hintMsg = tBlock('code_sent_email') || 'Код отправлен на почту';
+    try { tg.showAlert(hintMsg); } catch(e){}
     if (btn) { btn.disabled = false; btn.textContent = tBlock('send_email_code') || 'Отправить код'; }
+    /* после отправки — отдельное меню ввода кода */
+    if (window.__fa2Step === 2) {
+      window.__fa2Step = 3;
+      renderVerifyPage();
+    }
   } catch (e) {
-    var btn2 = document.getElementById('v2-send-code-btn');
+    var btn2 = document.getElementById('v2-send-code-btn') || document.getElementById('v2-resend-code-btn');
     if (btn2) { btn2.disabled = false; btn2.textContent = tBlock('send_email_code') || 'Отправить код'; }
     try { tg.showAlert(mapPwdError(e.message) || (tBlock('send_failed') || 'Не удалось отправить код')); } catch (e2) {}
   }
@@ -3883,27 +3892,37 @@ function renderVerifyPage() {
             '<button type="button" class="btn" style="margin-top:8px;" onclick="fa2PasswordContinue()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>';
         }
       } else if (window.__fa2Step === 2) {
-        if (title) title.textContent = tBlock('verify_email') || 'Email';
+        /* меню 1: только почта + отправить код */
+        if (title) title.textContent = tBlock('verify_email') || 'Почта';
         var savedEmail = window.__fa2Email || '';
         if (desc) {
           desc.innerHTML =
-            '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('verify_email') || 'Email') + '</label>' +
-            '<input class="form-input" id="v2-email" type="email" autocomplete="email" value="' + String(savedEmail).replace(/"/g,'&quot;') + '" oninput="validateFa2EmailField()"></div>' +
+            '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('verify_email') || 'Почта') + '</label>' +
+            '<input class="form-input" id="v2-email" type="email" autocomplete="email" value="' + String(savedEmail).replace(/"/g,'&quot;') + '" oninput="validateFa2EmailField()" placeholder="name@example.com"></div>' +
             '<div id="v2-email-err" style="display:none;color:#ff4d4f;font-size:12px;line-height:1.35;margin:6px 0 4px;text-align:left;"></div>' +
-            '<button type="button" class="btn" style="margin-top:10px;" id="v2-send-code-btn" onclick="sendFa2EmailCode()">' + (tBlock('send_email_code') || 'Отправить код') + '</button>' +
             '<div id="v2-code-hint" class="field-hint" style="display:none;margin-top:8px;text-align:left;"></div>' +
-            '<div class="form-group" style="text-align:left;margin-top:14px;"><label class="form-label">' + (tBlock('email_code') || 'Код подтверждения') + '</label>' +
-            '<input class="form-input" id="v2-email-code" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
-            '<div id="v2-code-err" style="display:none;color:#ff4d4f;font-size:12px;line-height:1.35;margin:6px 0 8px;text-align:left;"></div>' +
-            '<button type="button" class="btn" style="margin-top:8px;" onclick="confirmFa2EmailCode()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>';
+            '<button type="button" class="btn" style="margin-top:12px;" id="v2-send-code-btn" onclick="sendFa2EmailCode()">' + (tBlock('send_email_code') || 'Отправить код') + '</button>';
         }
       } else if (window.__fa2Step === 3) {
+        /* меню 2: только ввод кода */
+        if (title) title.textContent = tBlock('email_code') || 'Код подтверждения';
+        if (desc) {
+          desc.innerHTML =
+            '<div class="info-block" style="text-align:left;margin-bottom:12px;font-size:13px;opacity:.9;">' +
+            (tBlock('code_sent_to') || 'Код отправлен на') + ' <b>' + String(window.__fa2Email || '').replace(/</g,'') + '</b></div>' +
+            '<div class="form-group" style="text-align:left;"><label class="form-label">' + (tBlock('email_code') || 'Код подтверждения') + '</label>' +
+            '<input class="form-input" id="v2-email-code" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
+            '<div id="v2-code-err" style="display:none;color:#ff4d4f;font-size:12px;line-height:1.35;margin:6px 0 8px;text-align:left;"></div>' +
+            '<button type="button" class="btn" style="margin-top:8px;" onclick="confirmFa2EmailCode()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>' +
+            '<button type="button" class="btn btn-secondary" style="margin-top:8px;" id="v2-resend-code-btn" onclick="sendFa2EmailCode()">' + (tBlock('send_email_code') || 'Отправить код') + '</button>';
+        }
+      } else if (window.__fa2Step === 4) {
         if (title) title.textContent = tBlock('finish_verify') || 'Завершить верификацию';
         if (desc) {
           desc.innerHTML =
             '<div class="info-block" style="text-align:left;margin-bottom:14px;">' +
             (tBlock('fa2_ready_hint') || 'Почта подтверждена. Нажмите кнопку, чтобы завершить верификацию.') +
-            '<div style="margin-top:8px;opacity:.85;font-size:13px;">' + (window.__fa2Email || '') + '</div></div>' +
+            '<div style="margin-top:8px;opacity:.85;font-size:13px;">' + String(window.__fa2Email || '').replace(/</g,'') + '</div></div>' +
             '<button type="button" class="btn" onclick="submit2faSetup()">' + (tBlock('finish_verify') || 'Завершить верификацию') + '</button>';
         }
       }
@@ -5998,6 +6017,7 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ code_sent_to: 'Code gesendet an',
  code_sent_tg: 'Code an Telegram gesendet (E-Mail voruebergehend nicht verfuegbar)',
  code_sent_email: 'Code an E-Mail gesendet',
  tg_code_sent: 'Code an Telegram gesendet',
@@ -6013,7 +6033,7 @@ terms_prefix: 'By continuing, you accept the ',
  verify_job_required: 'Fur eine Bewerbung ist die vollstandige Verifizierung erforderlich.',
  settings_need_passport: 'Pass-Verifizierung ist erforderlich, bevor Passwort oder E-Mail geandert werden konnen.',
  confirm_identity: 'Identität bestätigen',
- pwd_email_not_set: 'Passwort und E-Mail sind nicht eingerichtet.',
+ pwd_email_not_set: 'Passwort und E-Mail sind nicht eingerichtet. Zuerst vollstandige Verifizierung abschliessen.',
  verify_freelance_required: 'Vollstandige Verifizierung fur Freelance-Anzeigen erforderlich',
  verify_sale_required: 'Pass-Verifizierung fur Verkaufsanzeigen erforderlich',
  forgot_password: 'Forgot password?',
@@ -6045,7 +6065,7 @@ terms_prefix: 'By continuing, you accept the ',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'E-Mail',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -6701,6 +6721,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ code_sent_to: 'Code envoye a',
  code_sent_tg: 'Code envoye sur Telegram (e-mail temporairement indisponible)',
  code_sent_email: 'Code envoye par e-mail',
  tg_code_sent: 'Code envoye sur Telegram',
@@ -6716,7 +6737,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  verify_job_required: 'La verification complete est requise pour postuler.',
  settings_need_passport: 'La verification du passeport est requise avant de changer le mot de passe ou l e-mail.',
  confirm_identity: 'Confirmer identite',
- pwd_email_not_set: 'Mot de passe et e-mail non definis.',
+ pwd_email_not_set: 'Mot de passe et e-mail non definis. Terminez d abord la verification complete.',
  verify_freelance_required: 'Verification complete requise pour les annonces freelance',
  verify_sale_required: 'Verification du passeport requise pour les annonces de vente',
  forgot_password: 'Forgot password?',
@@ -6748,7 +6769,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'E-mail',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -7404,6 +7425,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ code_sent_to: 'Codigo enviado a',
  code_sent_tg: 'Codigo enviado a Telegram (correo temporalmente no disponible)',
  code_sent_email: 'Codigo enviado al correo',
  tg_code_sent: 'Codigo enviado a Telegram',
@@ -7419,7 +7441,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  verify_job_required: 'Se requiere verificacion completa para postularse.',
  settings_need_passport: 'Se requiere verificacion de pasaporte antes de cambiar la contrasena o el correo.',
  confirm_identity: 'Confirmar identidad',
- pwd_email_not_set: 'Contrasena y correo no configurados.',
+ pwd_email_not_set: 'Contrasena y correo no configurados. Complete primero la verificacion completa.',
  verify_freelance_required: 'Se requiere verificacion completa para anuncios freelance',
  verify_sale_required: 'Se requiere verificacion de pasaporte para anuncios de venta',
  forgot_password: 'Forgot password?',
@@ -7451,7 +7473,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'Correo',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -8107,6 +8129,8 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ verify_email: '邮箱',
+ code_sent_to: '验证码已发送至',
  fa2_enabled: '验证已完成',
  code_sent_tg: '验证码已发送到 Telegram（邮箱暂时不可用）',
  code_sent_email: '验证码已发送到邮箱',
@@ -8135,7 +8159,7 @@ terms_prefix: 'Al continuar, acepta el ',
  change_email: '更改邮箱',
  change_password: '更改密码',
  confirm_identity: '确认身份',
- pwd_email_not_set: '尚未设置密码和邮箱。',
+ pwd_email_not_set: '尚未设置密码和邮箱。请先完成完整验证。',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -8750,6 +8774,7 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ code_sent_to: 'Код надіслано на',
  code_sent_tg: 'Код надіслано в Telegram (надсилання на пошту тимчасово недоступне)',
  code_sent_email: 'Код надіслано на пошту',
  tg_code_sent: 'Код надіслано в Telegram',
@@ -8797,7 +8822,7 @@ terms_prefix: '继续即表示您同意',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'Пошта',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -9455,6 +9480,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ code_sent_to: 'Codice inviato a',
  code_sent_tg: 'Codice inviato su Telegram (email non disponibile)',
  code_sent_email: 'Codice inviato via e-mail',
  tg_code_sent: 'Codice inviato su Telegram',
@@ -9468,9 +9494,9 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  fa2_setup_hint: 'Imposta password e e-mail per completare la verifica completa.',
  finish_verify: 'Completa verifica',
  verify_job_required: 'Serve la verifica completa per candidarsi.',
- settings_need_passport: 'E necessaria la verifica del passaporto prima di cambiare password o e-mail.',
+ settings_need_passport: 'Serve la verifica del passaporto prima di cambiare password o e-mail.',
  confirm_identity: 'Conferma identità',
- pwd_email_not_set: 'Password ed e-mail non impostati.',
+ pwd_email_not_set: 'Password ed e-mail non impostati. Completa prima la verifica.',
  verify_freelance_required: 'Verifica completa richiesta per annunci freelance',
  verify_sale_required: 'Verifica del passaporto richiesta per gli annunci di vendita',
  forgot_password: 'Forgot password?',
@@ -9502,7 +9528,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'E-mail',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -10158,6 +10184,7 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ code_sent_to: 'Codigo enviado para',
  code_sent_tg: 'Codigo enviado no Telegram (e-mail temporariamente indisponivel)',
  code_sent_email: 'Codigo enviado por e-mail',
  tg_code_sent: 'Codigo enviado no Telegram',
@@ -10171,9 +10198,9 @@ terms_prefix: 'Continuando, accetti i ',
  fa2_setup_hint: 'Defina uma senha e um e-mail para concluir a verificacao completa.',
  finish_verify: 'Concluir verificacao',
  verify_job_required: 'E necessaria verificacao completa para se candidatar.',
- settings_need_passport: 'E necessaria a verificacao do passaporte antes de alterar a senha ou o e-mail.',
+ settings_need_passport: 'E necessaria a verificacao do passaporte antes de alterar senha ou e-mail.',
  confirm_identity: 'Confirmar identidade',
- pwd_email_not_set: 'Senha e e-mail nao definidos.',
+ pwd_email_not_set: 'Senha e e-mail nao definidos. Conclua primeiro a verificacao completa.',
  verify_freelance_required: 'Verificacao completa necessaria para anuncios freelance',
  verify_sale_required: 'Verificacao de passaporte necessaria para anuncios de venda',
  forgot_password: 'Forgot password?',
@@ -10205,7 +10232,7 @@ terms_prefix: 'Continuando, accetti i ',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'E-mail',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -11434,6 +11461,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ code_sent_to: 'Kod gonderildi:',
  code_sent_tg: 'Kod Telegrame gonderildi (e-posta gecici olarak kapali)',
  code_sent_email: 'Kod e-postaya gonderildi',
  tg_code_sent: 'Kod Telegrame gonderildi',
@@ -11449,7 +11477,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  verify_job_required: 'Is basvurusu icin tam dogrulama gerekir.',
  settings_need_passport: 'Sifre veya e-posta degistirmeden once pasaport dogrulamasi gerekir.',
  confirm_identity: 'Kimligi dogrula',
- pwd_email_not_set: 'Sifre ve e-posta ayarlanmamis.',
+ pwd_email_not_set: 'Sifre ve e-posta ayarlanmamis. Once tam dogrulamayi tamamlayin.',
  verify_freelance_required: 'Freelance ilanlar icin tam dogrulama gerekli',
  verify_sale_required: 'Satis ilanlari icin pasaport dogrulamasi gerekli',
  forgot_password: 'Forgot password?',
@@ -11481,7 +11509,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'E-posta',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -12137,6 +12165,7 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ code_sent_to: 'Kode dikirim ke',
  code_sent_tg: 'Kode dikirim ke Telegram (email sementara tidak tersedia)',
  code_sent_email: 'Kode dikirim ke email',
  tg_code_sent: 'Kode dikirim ke Telegram',
@@ -12152,7 +12181,7 @@ terms_prefix: 'Devam ederek ',
  verify_job_required: 'Verifikasi penuh diperlukan untuk melamar pekerjaan.',
  settings_need_passport: 'Verifikasi paspor diperlukan sebelum mengubah kata sandi atau email.',
  confirm_identity: 'Konfirmasi identitas',
- pwd_email_not_set: 'Kata sandi dan email belum diatur.',
+ pwd_email_not_set: 'Kata sandi dan email belum diatur. Selesaikan verifikasi penuh dulu.',
  verify_freelance_required: 'Verifikasi penuh diperlukan untuk listing freelance',
  verify_sale_required: 'Verifikasi paspor diperlukan untuk listing penjualan',
  forgot_password: 'Forgot password?',
@@ -12840,6 +12869,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ code_sent_to: 'تم إرسال الرمز إلى',
  code_sent_tg: 'تم إرسال الرمز إلى تيليجرام (البريد غير متاح مؤقتاً)',
  code_sent_email: 'تم إرسال الرمز إلى البريد',
  tg_code_sent: 'تم إرسال الرمز إلى تيليجرام',
@@ -12855,7 +12885,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  verify_job_required: 'يلزم التحقق الكامل للتقديم على وظيفة.',
  settings_need_passport: 'يلزم التحقق من جواز السفر قبل تغيير كلمة المرور أو البريد.',
  confirm_identity: 'تأكيد الهوية',
- pwd_email_not_set: 'لم يتم تعيين كلمة المرور والبريد.',
+ pwd_email_not_set: 'لم يتم تعيين كلمة المرور والبريد. أكمل التحقق الكامل أولاً.',
  verify_freelance_required: 'يلزم التحقق الكامل لإعلانات العمل الحر',
  verify_sale_required: 'يلزم التحقق من جواز السفر لإعلانات البيع',
  forgot_password: 'Forgot password?',
@@ -12887,7 +12917,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'البريد',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -13543,6 +13573,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ code_sent_to: 'コードの送信先',
  code_sent_tg: 'コードをTelegramに送信しました（メールは一時利用不可）',
  code_sent_email: 'コードをメールに送信しました',
  tg_code_sent: 'コードをTelegramに送信しました',
@@ -13556,9 +13587,9 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  fa2_setup_hint: '完全認証を完了するにはパスワードとメールを設定してください。',
  finish_verify: '認証を完了',
  verify_job_required: '応募には完全認証が必要です。',
- settings_need_passport: 'パスワードやメールを変更する前にパスポート認証が必要です。',
+ settings_need_passport: 'パスワードやメール変更の前にパスポート認証が必要です。',
  confirm_identity: '本人確認',
- pwd_email_not_set: 'パスワードとメールが未設定です。',
+ pwd_email_not_set: 'パスワードとメールが未設定です。先に完全認証を完了してください。',
  verify_freelance_required: 'フリーランス掲載には完全認証が必要です',
  verify_sale_required: '販売掲載にはパスポート認証が必要です',
  forgot_password: 'Forgot password?',
@@ -13590,7 +13621,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'メール',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -14246,6 +14277,7 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ code_sent_to: '코드 전송됨',
  code_sent_tg: '텔레그램으로 코드를 보냈습니다 (이메일 일시 불가)',
  code_sent_email: '이메일로 코드를 보냈습니다',
  tg_code_sent: '텔레그램으로 코드를 보냈습니다',
@@ -14259,9 +14291,9 @@ terms_prefix: '続行すると',
  fa2_setup_hint: '전체 인증을 완료하려면 비밀번호와 이메일을 설정하세요.',
  finish_verify: '인증 완료',
  verify_job_required: '지원하려면 전체 인증이 필요합니다.',
- settings_need_passport: '비밀번호 또는 이메일을 변경하기 전에 여권 인증이 필요합니다.',
+ settings_need_passport: '비밀번호 또는 이메일 변경 전에 여권 인증이 필요합니다.',
  confirm_identity: '신원 확인',
- pwd_email_not_set: '비밀번호와 이메일이 설정되지 않았습니다.',
+ pwd_email_not_set: '비밀번호와 이메일이 설정되지 않았습니다. 먼저 전체 인증을 완료하세요.',
  verify_freelance_required: '프리랜스 등록에는 전체 인증이 필요합니다',
  verify_sale_required: '판매 등록에는 여권 인증이 필요합니다',
  forgot_password: 'Forgot password?',
@@ -14293,7 +14325,7 @@ terms_prefix: '続行すると',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: '이메일',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -15778,6 +15810,7 @@ function tBlock(key) {
    fa2_setup_title: 'Завершить верификацию',
    verify_btn_continue: 'Завершить верификацию',
    finish_verify: 'Завершить верификацию',
+   fa2_ready_hint: 'Почта подтверждена. Нажмите кнопку, чтобы завершить верификацию.',
    verify_btn_start: 'Верифицировать паспорт',
    verify_full_required: 'Требуется полная верификация',
    verify_freelance_required: 'Для фриланс-объявлений нужна полная верификация',
@@ -15787,9 +15820,24 @@ function tBlock(key) {
    pwd_mismatch: 'Пароли не совпадают',
    bad_email: 'Неверный формат почты',
    pwd_email_not_set: 'Пароль и почта не установлены. Сначала пройдите полную верификацию.',
+   settings_need_passport: 'Сначала нужно пройти верификацию паспорта, чтобы сменить пароль или почту.',
+   send_email_code: 'Отправить код',
+   email_code: 'Код подтверждения',
+   code_sent_to: 'Код отправлен на',
+   code_sent_email: 'Код отправлен на почту',
+   code_sent_tg: 'Код отправлен в Telegram (отправка на почту временно недоступна)',
+   code_required: 'Введите код',
+   bad_code: 'Неверный или просроченный код',
+   send_failed: 'Не удалось отправить код',
+   send_tg_code: 'Отправить код в Telegram',
+   tg_code: 'Код из Telegram',
+   tg_code_hint: 'Код подтверждения будет отправлен в Telegram',
+   tg_code_sent: 'Код отправлен в Telegram',
    continue_btn: 'Продолжить',
    save: 'Сохранить',
-   back: '← Назад'
+   back: '← Назад',
+   verify_email: 'Почта',
+   fa2_enabled: 'Верификация завершена'
  };
  if (RU_FALLBACK[key]) return RU_FALLBACK[key];
  return key;
