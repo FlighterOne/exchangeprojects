@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-02-v10 -->
+<!-- XCOD_BUILD 2026-09-02-v11 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -2306,6 +2306,11 @@ var APP_INSTALL_FILES = {
 var __appInstallPlatform = null;
 var APP_I18N = {
   ru: {
+ password_updated: 'Пароль обновлён',
+ email_updated: 'Почта обновлена',
+ wrong_password: 'Неверный пароль',
+ no_email_linked: 'К аккаунту не привязана почта',
+ code_sent_to_linked: 'Код будет отправлен на почту, привязанную к аккаунту',
  verify_email: 'Почта',
  code_sent_to: 'Код отправлен на',
  fa2_enabled: 'Верификация завершена',
@@ -2325,6 +2330,11 @@ var APP_I18N = {
    tg_code: 'Код из Telegram',
    tg_code_hint: 'Код подтверждения будет отправлен в Telegram',
    tg_code_sent: 'Код отправлен в Telegram',
+   code_sent_to_linked: 'Код будет отправлен на почту, привязанную к аккаунту',
+   no_email_linked: 'К аккаунту не привязана почта',
+   wrong_password: 'Неверный пароль',
+   email_updated: 'Почта обновлена',
+   password_updated: 'Пароль обновлён',
    send_email_code: 'Отправить код',
  verify_full_required: 'Требуется полная верификация',
  fa2_setup_hint: 'Установите пароль и укажите почту, чтобы завершить полную верификацию.',
@@ -2361,6 +2371,11 @@ var APP_I18N = {
     dl_macos_guide:'1. Скачайте .dmg.\n2. В «Программы».\n3. Разрешите при блоке.\n4. Запустите.',
     dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x\n3. Запустите.' },
   en: {
+ password_updated: 'Password updated',
+ email_updated: 'Email updated',
+ wrong_password: 'Wrong password',
+ no_email_linked: 'No email linked to this account',
+ code_sent_to_linked: 'A code will be sent to the email linked to this account',
  verify_email: 'Email',
  code_sent_to: 'Code sent to',
  fa2_enabled: 'Verification completed',
@@ -3325,7 +3340,6 @@ function openChangePassword() {
     return;
   }
   window._settingsAction = 'password';
-  window._settingsTgOk = false;
   showPage('profile-settings');
   var f = document.getElementById('profile-settings-form');
   var tiles = document.querySelector('#page-profile-settings .support-grid');
@@ -3334,12 +3348,13 @@ function openChangePassword() {
   if (title) title.textContent = tBlock('change_password') || 'Сменить пароль';
   if (!f) return;
   f.innerHTML =
-    '<div class="form-group"><label class="form-label">' + (tBlock('tg_code_hint') || 'Код подтверждения будет отправлен в Telegram') + '</label></div>' +
-    '<button type="button" class="btn" id="settings-send-tg-btn" onclick="sendSettingsTgCode()">' + (tBlock('send_tg_code') || 'Отправить код в Telegram') + '</button>' +
-    '<div class="form-group" style="margin-top:14px;"><label class="form-label">' + (tBlock('tg_code') || 'Код из Telegram') + '</label>' +
-    '<input class="form-input" id="ch-tg-code" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
-    '<div id="ch-tg-err" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
-    '<button type="button" class="btn" onclick="submitSettingsTgCode()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>';
+    '<div class="form-group"><label class="form-label">' + (tBlock('code_sent_to_linked') || 'Код будет отправлен на почту, привязанную к аккаунту') + '</label></div>' +
+    '<button type="button" class="btn" id="settings-send-email-btn" onclick="sendSettingsEmailCode()">' + (tBlock('send_email_code') || 'Отправить код') + '</button>' +
+    '<div id="settings-send-hint" class="field-hint" style="display:none;margin-top:8px;"></div>' +
+    '<div class="form-group" style="margin-top:14px;"><label class="form-label">' + (tBlock('email_code') || 'Код подтверждения') + '</label>' +
+    '<input class="form-input" id="ch-email-code" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
+    '<div id="ch-code-err" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
+    '<button type="button" class="btn" onclick="submitSettingsEmailCode()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>';
 }
 function openChangeEmail() {
   if (!userData || !userData.has_2fa) {
@@ -3348,7 +3363,6 @@ function openChangeEmail() {
     return;
   }
   window._settingsAction = 'email';
-  window._settingsTgOk = false;
   showPage('profile-settings');
   var f = document.getElementById('profile-settings-form');
   var tiles = document.querySelector('#page-profile-settings .support-grid');
@@ -3357,12 +3371,73 @@ function openChangeEmail() {
   if (title) title.textContent = tBlock('change_email') || 'Сменить почту';
   if (!f) return;
   f.innerHTML =
-    '<div class="form-group"><label class="form-label">' + (tBlock('tg_code_hint') || 'Код подтверждения будет отправлен в Telegram') + '</label></div>' +
-    '<button type="button" class="btn" id="settings-send-tg-btn" onclick="sendSettingsTgCode()">' + (tBlock('send_tg_code') || 'Отправить код в Telegram') + '</button>' +
-    '<div class="form-group" style="margin-top:14px;"><label class="form-label">' + (tBlock('tg_code') || 'Код из Telegram') + '</label>' +
-    '<input class="form-input" id="ch-tg-code" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
-    '<div id="ch-tg-err" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
-    '<button type="button" class="btn" onclick="submitSettingsTgCode()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>';
+    '<div class="form-group"><label class="form-label">' + (tBlock('password') || 'Пароль аккаунта') + '</label>' +
+    '<input class="form-input" id="ch-acc-pwd" type="password" autocomplete="current-password"></div>' +
+    '<div class="form-group"><label class="form-label">' + (tBlock('verify_email') || 'Новая почта') + '</label>' +
+    '<input class="form-input" id="ch-new-email" type="email" autocomplete="email" placeholder="name@example.com"></div>' +
+    '<div id="ch-email-err" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
+    '<button type="button" class="btn" onclick="submitChangeEmailWithPassword()">' + (tBlock('save') || 'Сохранить') + '</button>';
+}
+async function sendSettingsEmailCode() {
+  try {
+    var btn = document.getElementById('settings-send-email-btn');
+    if (btn) { btn.disabled = true; btn.textContent = tBlock('wait') || 'Подождите...'; }
+    var res = await apiPost('/api/verify/2fa/send-email-code', { purpose: 'change_password' });
+    var hint = document.getElementById('settings-send-hint');
+    if (hint) {
+      hint.style.display = 'block';
+      var masked = (res && res.email_masked) || '';
+      hint.textContent = (tBlock('code_sent_email') || 'Код отправлен на почту') + (masked ? (' (' + masked + ')') : '');
+    }
+    if (btn) { btn.disabled = false; btn.textContent = tBlock('send_email_code') || 'Отправить код'; }
+  } catch (e) {
+    var btn2 = document.getElementById('settings-send-email-btn');
+    if (btn2) { btn2.disabled = false; btn2.textContent = tBlock('send_email_code') || 'Отправить код'; }
+    var msg = mapPwdError(e.message);
+    if (String(e.message||'').indexOf('no_email') >= 0) msg = tBlock('no_email_linked') || 'К аккаунту не привязана почта';
+    try { tg.showAlert(msg); } catch (e2) {}
+  }
+}
+async function submitSettingsEmailCode() {
+  try {
+    var code = ((document.getElementById('ch-email-code') || {}).value || '').trim();
+    if (!code) {
+      var err = document.getElementById('ch-code-err');
+      if (err) { err.style.display = 'block'; err.textContent = tBlock('code_required') || 'Введите код'; }
+      return;
+    }
+    await apiPost('/api/verify/2fa/check-email-code', { email: '', code: code, use_linked: true });
+    window._settingsEmailCode = code;
+    showChangePasswordStep2();
+  } catch (e) {
+    var err2 = document.getElementById('ch-code-err');
+    var msg = tBlock('bad_code') || 'Неверный или просроченный код';
+    if (err2) { err2.style.display = 'block'; err2.textContent = msg; }
+    else { try { tg.showAlert(msg); } catch (e2) {} }
+  }
+}
+async function submitChangeEmailWithPassword() {
+  try {
+    var pwd = ((document.getElementById('ch-acc-pwd') || {}).value || '');
+    var email = ((document.getElementById('ch-new-email') || {}).value || '').trim();
+    if (!pwd) { try { tg.showAlert(tBlock('password') || 'Введите пароль'); } catch(e){} return; }
+    if (!isValidEmailFormat(email)) {
+      var err = document.getElementById('ch-email-err');
+      if (err) { err.style.display = 'block'; err.textContent = tBlock('bad_email') || 'Неверный формат почты'; }
+      return;
+    }
+    var res = await apiPost('/api/verify/2fa/change-email', { password: pwd, email: email });
+    if (userData) {
+      userData.verify_email = (res && res.verify_email) || email;
+      userData.email = userData.verify_email;
+    }
+    try { tg.showAlert(tBlock('email_updated') || 'Почта обновлена'); } catch(e){}
+    openProfileSettings();
+  } catch (e) {
+    var msg = mapPwdError(e.message);
+    if (String(e.message||'').indexOf('wrong_password') >= 0) msg = tBlock('wrong_password') || 'Неверный пароль';
+    try { tg.showAlert(msg); } catch(e2){}
+  }
 }
 async function sendSettingsTgCode() {
   try {
@@ -3436,7 +3511,7 @@ async function submitChangePassword() {
   try {
     var p1 = (document.getElementById('ch-pwd-1') || {}).value || '';
     var p2 = (document.getElementById('ch-pwd-2') || {}).value || '';
-    await apiPost('/api/verify/2fa/change-password', { code: window._settingsTgCode || '', password: p1, password2: p2 });
+    await apiPost('/api/verify/2fa/change-password', { code: window._settingsEmailCode || window._settingsTgCode || '', password: p1, password2: p2 });
     try { tg.showAlert(tBlock('password_updated') || 'Password updated'); } catch(e){}
     openProfileSettings();
   } catch (e) {
@@ -3455,6 +3530,10 @@ async function submitChangeEmail() {
   }
 }
 function mapPwdError(msg) {
+  var s = String(msg || '');
+  if (s.indexOf('wrong_password') >= 0) return tBlock('wrong_password') || 'Неверный пароль';
+  if (s.indexOf('no_email') >= 0) return tBlock('no_email_linked') || 'К аккаунту не привязана почта';
+
   var s = String(msg || '');
   if (s.indexOf('bad_code') >= 0) return tBlock('bad_code') || 'Неверный или просроченный код';
   if (s.indexOf('code_required') >= 0) return tBlock('code_required') || 'Введите код из письма';
@@ -3535,28 +3614,43 @@ function show2faGate(mode) {
   if (!ov || !body) return;
   if (mode === 'login') {
     if (title) title.textContent = tBlock('fa2_enter_password') || 'Введите пароль';
-    body.innerHTML = '<input class="form-input" id="fa2-pwd" type="password" placeholder="' + (tBlock('password') || 'Пароль') + '">' +
-      '<button type="button" class="btn" onclick="submit2faLogin()">' + (tBlock('continue_btn') || 'Продолжить') + '</button>' +
+    body.innerHTML = '<div class="form-group"><input class="form-input" id="fa2-pwd" type="password" placeholder="' + (tBlock('password') || 'Пароль') + '"></div>' +
+      '<button type="button" class="btn" id="fa2-login-btn">' + (tBlock('continue_btn') || 'Продолжить') + '</button>' +
       '<button type="button" class="fa2-link" id="fa2-forgot-link">' + (tBlock('forgot_password') || 'Забыли пароль?') + '</button>';
   } else if (mode === 'forgot') {
+    /* шаг 1: отправка кода на привязанную почту + ввод кода */
     if (title) title.textContent = tBlock('forgot_password') || 'Забыли пароль';
     body.innerHTML =
-      '<div class="subtitle" style="margin-bottom:10px;text-align:left;">' + (tBlock('tg_code_hint') || 'Код подтверждения будет отправлен в Telegram') + '</div>' +
-      '<button type="button" class="btn btn-secondary" id="fa2-send-tg-btn">' + (tBlock('send_tg_code') || 'Отправить код в Telegram') + '</button>' +
-      '<input class="form-input" id="fa2-tg-code" type="text" inputmode="numeric" maxlength="8" placeholder="' + (tBlock('tg_code') || 'Код из Telegram') + '" style="margin-top:10px;">' +
-      '<input class="form-input" id="fa2-pwd1" type="password" placeholder="' + (tBlock('new_password') || 'Новый пароль') + '">' +
-      '<input class="form-input" id="fa2-pwd2" type="password" placeholder="' + (tBlock('repeat_password') || 'Повторите пароль') + '">' +
-      '<div id="fa2-forgot-rules" style="display:none;color:#ff4d4f;font-size:12px;margin:6px 0;text-align:left;"></div>' +
-      '<div id="fa2-forgot-mismatch" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0;text-align:left;"></div>' +
+      '<div class="form-group"><label class="form-label">' + (tBlock('code_sent_to_linked') || 'Код будет отправлен на почту, привязанную к аккаунту') + '</label></div>' +
+      '<button type="button" class="btn" id="fa2-send-email-btn">' + (tBlock('send_email_code') || 'Отправить код') + '</button>' +
+      '<div id="fa2-send-hint" class="field-hint" style="display:none;margin-top:8px;"></div>' +
+      '<div class="form-group" style="margin-top:14px;"><label class="form-label">' + (tBlock('email_code') || 'Код подтверждения') + '</label>' +
+      '<input class="form-input" id="fa2-email-code" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
+      '<div id="fa2-code-err" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
+      '<button type="button" class="btn" id="fa2-forgot-check">' + (tBlock('continue_btn') || 'Продолжить') + '</button>' +
+      '<button type="button" class="fa2-link" id="fa2-back-login">' + (tBlock('back') || 'Назад') + '</button>';
+  } else if (mode === 'forgot_newpwd') {
+    if (title) title.textContent = tBlock('new_password') || 'Новый пароль';
+    body.innerHTML =
+      '<div class="form-group"><label class="form-label">' + (tBlock('new_password') || 'Новый пароль') + '</label>' +
+      '<input class="form-input" id="fa2-pwd1" type="password" autocomplete="new-password"></div>' +
+      '<div class="form-group"><label class="form-label">' + (tBlock('repeat_password') || 'Повторите пароль') + '</label>' +
+      '<input class="form-input" id="fa2-pwd2" type="password" autocomplete="new-password"></div>' +
+      '<div id="fa2-forgot-rules" style="display:none;color:#ff4d4f;font-size:12px;margin:6px 0;"></div>' +
+      '<div id="fa2-forgot-mismatch" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0;"></div>' +
       '<button type="button" class="btn" id="fa2-forgot-submit">' + (tBlock('continue_btn') || 'Продолжить') + '</button>' +
       '<button type="button" class="fa2-link" id="fa2-back-login">' + (tBlock('back') || 'Назад') + '</button>';
   }
   ov.style.display = 'flex';
   try {
+    var lb = document.getElementById('fa2-login-btn');
+    if (lb) lb.onclick = function() { submit2faLogin(); };
     var fl = document.getElementById('fa2-forgot-link');
     if (fl) fl.onclick = function() { show2faGate('forgot'); };
-    var st = document.getElementById('fa2-send-tg-btn');
-    if (st) st.onclick = function() { sendForgotTgCode(); };
+    var se = document.getElementById('fa2-send-email-btn');
+    if (se) se.onclick = function() { sendForgotEmailCode(); };
+    var fc = document.getElementById('fa2-forgot-check');
+    if (fc) fc.onclick = function() { checkForgotEmailCode(); };
     var fs = document.getElementById('fa2-forgot-submit');
     if (fs) fs.onclick = function() { submit2faForgot(); };
     var bl = document.getElementById('fa2-back-login');
@@ -3579,27 +3673,53 @@ async function submit2faLogin() {
     try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
   }
 }
-async function sendForgotTgCode() {
+async function sendForgotEmailCode() {
   try {
-    var btn = document.getElementById('fa2-send-tg-btn');
+    var btn = document.getElementById('fa2-send-email-btn');
     if (btn) { btn.disabled = true; btn.textContent = tBlock('wait') || 'Подождите...'; }
-    await apiPost('/api/verify/tg-code/send', { purpose: 'forgot' });
-    try { tg.showAlert(tBlock('tg_code_sent') || 'Код отправлен в Telegram'); } catch(e){}
-    if (btn) { btn.disabled = false; btn.textContent = tBlock('send_tg_code') || 'Отправить код в Telegram'; }
+    var res = await apiPost('/api/verify/2fa/send-email-code', { purpose: 'forgot' });
+    var hint = document.getElementById('fa2-send-hint');
+    if (hint) {
+      hint.style.display = 'block';
+      var masked = (res && res.email_masked) || '';
+      if (res && res.sent_email) hint.textContent = (tBlock('code_sent_email') || 'Код отправлен на почту') + (masked ? (' (' + masked + ')') : '');
+      else hint.textContent = tBlock('code_sent_tg') || 'Код отправлен в Telegram';
+    }
+    if (btn) { btn.disabled = false; btn.textContent = tBlock('send_email_code') || 'Отправить код'; }
   } catch (e) {
-    var btn2 = document.getElementById('fa2-send-tg-btn');
-    if (btn2) { btn2.disabled = false; btn2.textContent = tBlock('send_tg_code') || 'Отправить код в Telegram'; }
-    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
+    var btn2 = document.getElementById('fa2-send-email-btn');
+    if (btn2) { btn2.disabled = false; btn2.textContent = tBlock('send_email_code') || 'Отправить код'; }
+    var msg = mapPwdError(e.message);
+    if (String(e.message||'').indexOf('no_email') >= 0) msg = tBlock('no_email_linked') || 'К аккаунту не привязана почта';
+    try { tg.showAlert(msg); } catch (e2) {}
+  }
+}
+async function checkForgotEmailCode() {
+  try {
+    var code = ((document.getElementById('fa2-email-code') || {}).value || '').trim();
+    if (!code) {
+      var err = document.getElementById('fa2-code-err');
+      if (err) { err.style.display = 'block'; err.textContent = tBlock('code_required') || 'Введите код'; }
+      return;
+    }
+    await apiPost('/api/verify/2fa/check-email-code', { email: '', code: code, use_linked: true });
+    window.__forgotEmailCode = code;
+    show2faGate('forgot_newpwd');
+  } catch (e) {
+    var err2 = document.getElementById('fa2-code-err');
+    var msg = tBlock('bad_code') || 'Неверный или просроченный код';
+    if (err2) { err2.style.display = 'block'; err2.textContent = msg; }
+    else { try { tg.showAlert(msg); } catch (e2) {} }
   }
 }
 async function submit2faForgot() {
   try {
     var p1 = (document.getElementById('fa2-pwd1') || {}).value || '';
     var p2 = (document.getElementById('fa2-pwd2') || {}).value || '';
-    var code = ((document.getElementById('fa2-tg-code') || {}).value || '').trim();
+    var code = window.__forgotEmailCode || '';
     var rulesEl = document.getElementById('fa2-forgot-rules');
     var misEl = document.getElementById('fa2-forgot-mismatch');
-    if (!code) { try { tg.showAlert(tBlock('code_required') || 'Введите код'); } catch(e){} return; }
+    if (!code) { show2faGate('forgot'); return; }
     if (!passwordMeetsRules(p1)) {
       if (rulesEl) { rulesEl.style.display = 'block'; rulesEl.textContent = tBlock('password_rules') || 'Минимум 8 символов, 1 цифра, 1 заглавная буква'; }
       return;
@@ -3610,6 +3730,7 @@ async function submit2faForgot() {
     }
     await apiPost('/api/auth/2fa/forgot', { code: code, password: p1, password2: p2 });
     try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
+    window.__forgotEmailCode = '';
     hide2faGate();
     try { tg.showAlert(tBlock('password_updated') || 'Пароль обновлён'); } catch(e){}
     await continueAfterAuth();
@@ -3617,6 +3738,7 @@ async function submit2faForgot() {
     try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
   }
 }
+
 
 function passwordMeetsRules(p) {
   p = String(p || '');
