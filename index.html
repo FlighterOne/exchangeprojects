@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-03-v18 -->
+<!-- XCOD_BUILD 2026-09-03-v19-referral -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -2031,6 +2031,10 @@
  <span style="font-size:18px;line-height:1;">📋</span>
  <span data-i18n="support_terms">Пользовательское соглашение</span>
  </button>
+ <button type="button" class="btn btn-secondary" style="margin-top:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="openOtherInfo()">
+ <span style="font-size:18px;line-height:1;">ℹ️</span>
+ <span data-i18n="support_other_info">Другая информация</span>
+ </button>
  </div>
 
  <div id="page-support-chat" class="page chat-page">
@@ -2065,13 +2069,22 @@
 
 <div id="page-collaborate" class="page">
  <button class="back-link" onclick="showPage('support')" data-i18n="back">← Назад</button>
- <div class="section-title">Сотрудничать</div>
- <div class="info-block" id="hire-info-block"></div>
- <div class="btn-stack">
- <button class="btn" onclick="openJobForm()" data-i18n="application_form">Составить анкету</button>
- <button class="btn btn-secondary" onclick="openSupportManager()" data-i18n="write_manager">Написать менеджеру</button>
+ <div class="section-title" data-i18n="support_hire">Сотрудничать</div>
+ <div class="seg-toggle" id="collab-seg" style="grid-template-columns:1fr 1fr;gap:6px;width:100%;box-sizing:border-box;margin-bottom:12px;">
+  <button type="button" id="collab-seg-ads" class="active" onclick="setCollabTab('ads')" data-i18n="collab_ads">Реклама</button>
+  <button type="button" id="collab-seg-work" onclick="setCollabTab('work')" data-i18n="collab_work">Работа</button>
  </div>
+ <div id="collab-ads-panel">
+  <div id="referral-panel"><div class="loading"><div class="spinner"></div></div></div>
  </div>
+ <div id="collab-work-panel" style="display:none;">
+  <div class="info-block" id="hire-info-block"></div>
+  <div class="btn-stack">
+   <button class="btn" onclick="openJobForm()" data-i18n="application_form">Составить анкету</button>
+   <button class="btn btn-secondary" onclick="openSupportManager()" data-i18n="write_manager">Написать менеджеру</button>
+  </div>
+ </div>
+</div>
 
  <!-- JOB APPLICATION FORM -->
  <div id="page-job-form" class="page">
@@ -4671,7 +4684,7 @@ function showPage(name) {
   }
  } catch (eH) {}
  try { applyI18n(); } catch (e) {}
- if (name === 'collaborate' || name === 'support-hire') { try { renderHireInfo(); } catch (e) {} }
+ if (name === 'collaborate' || name === 'support-hire') { try { setCollabTab('ads'); } catch (e) { try { renderHireInfo(); } catch(e2){} } }
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
  if (name === 'listing-create' || name === 'listing-edit' || name === 'create-freelance') { try { applyTermsLabels(); applyI18n(); } catch (eLc) {} }
  if (name === 'deposit' || name === 'withdraw') { try { ensureUsdRate(true).then(function(){ if(name==='deposit') updateDepositTotals(); else updateWithdrawTotals(); }); } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
@@ -4797,6 +4810,33 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ ads_no_partners: 'Партнёров пока нет',
+ ads_spend_2: 'Траты со 2-х пополнений',
+ ads_spend_1: 'Траты с 1-х пополнений',
+ ads_spend_total: 'Потрачено на рекламу всего',
+ ads_l2_10d: 'Партнёров 2+ уровня приглашено за 10 дней',
+ ads_invited: 'Приглашено партнёрами',
+ ads_tab_partners: 'Партнёры',
+ ads_tab_stats: 'Статистика',
+ analytics_ads: 'Реклама',
+ ref_code_required: 'Введите код',
+ ref_earned_2: 'Со 2-х пополнений',
+ ref_earned_1: 'С 1-х пополнений',
+ ref_earned_total: 'Заработано всего',
+ ref_retained: 'Рефералов 2+ пополнений',
+ ref_total: 'Рефералов всего',
+ ref_10d: 'Рефералов за 10 дней',
+ ref_stats: 'Статистика',
+ ref_invitee_disc: 'Скидка приглашённому с 1 пополнения',
+ ref_you_earn: 'Вы получаете с 1 / 2 пополнения',
+ ref_your_code: 'Реферальный код',
+ ref_code_hint: '3–24 символа, латиница и цифры. Код нельзя изменить.',
+ ref_code_placeholder: 'Ваш код',
+ ref_register_label: 'Регистрация индивидуального кода',
+ collab_work: 'Работа',
+ collab_ads: 'Реклама',
+ support_other_info_empty: 'Раздел в разработке',
+ support_other_info: 'Другая информация',
  view_only_hint: 'Режим просмотра: открытие смены и начисление ЗП доступны админам',
  duty_analytics_list: 'Аналитика объявлений',
  duty_control_full: 'Контроль смены (открыть/закрыть, ЗП)',
@@ -5521,6 +5561,33 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  hire_duties: 'Responsibilities',
  stat_online_now: 'Users online now',
  stat_sales_all: 'Sales all time',
@@ -6242,6 +6309,33 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  files_escrow_note: 'Der Käufer erhält diese Dateien erst nach der Zahlung. Bis zur Bestätigung hält die Börse die Mittel.',
  previous_price: 'Vorheriger Preis',
  code_sent_to_linked: 'Ein Code wird an die mit dem Konto verknüpfte E-Mail gesendet',
@@ -6951,6 +7045,33 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  verify_done_desc: 'Verification complete activee. Mot de passe et e-mail enregistres.',
  verify_done_title: 'Verification terminee',
  code_sent_to: 'Code envoye a',
@@ -7657,6 +7778,33 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  verify_done_desc: 'Verificacion completa activada. Contrasena y correo guardados.',
  verify_done_title: 'Verificacion completada',
  code_sent_to: 'Codigo enviado a',
@@ -8363,6 +8511,33 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  verify_partial: '部分验证',
  verify_full: '验证已通过',
  complaint_staff_denied: '员工不能提交投诉',
@@ -9029,6 +9204,33 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  files_escrow_note: 'Покупець отримає ці файли лише після оплати. До підтвердження угоди кошти у біржі.',
  previous_price: 'Минула ціна',
  code_sent_to_linked: 'Код буде надіслано на пошту, привʼязану до акаунта',
@@ -9740,6 +9942,33 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  code_sent_to: 'Codice inviato a',
  code_sent_tg: 'Codice inviato su Telegram (email non disponibile)',
  code_sent_email: 'Codice inviato via e-mail',
@@ -10444,6 +10673,33 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  code_sent_to: 'Codigo enviado para',
  code_sent_tg: 'Codigo enviado no Telegram (e-mail temporariamente indisponivel)',
  code_sent_email: 'Codigo enviado por e-mail',
@@ -11721,6 +11977,33 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  code_sent_to: 'Kod gonderildi:',
  code_sent_tg: 'Kod Telegrame gonderildi (e-posta gecici olarak kapali)',
  code_sent_email: 'Kod e-postaya gonderildi',
@@ -12425,6 +12708,33 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  code_sent_to: 'Kode dikirim ke',
  code_sent_tg: 'Kode dikirim ke Telegram (email sementara tidak tersedia)',
  code_sent_email: 'Kode dikirim ke email',
@@ -13129,6 +13439,33 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  code_sent_to: 'تم إرسال الرمز إلى',
  code_sent_tg: 'تم إرسال الرمز إلى تيليجرام (البريد غير متاح مؤقتاً)',
  code_sent_email: 'تم إرسال الرمز إلى البريد',
@@ -13833,6 +14170,33 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  code_sent_to: 'コードの送信先',
  code_sent_tg: 'コードをTelegramに送信しました（メールは一時利用不可）',
  code_sent_email: 'コードをメールに送信しました',
@@ -14537,6 +14901,33 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ ads_no_partners: 'No partners yet',
+ ads_spend_2: 'Spend from 2nd deposits',
+ ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_total: 'Total ad spend',
+ ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_invited: 'Invited by partners',
+ ads_tab_partners: 'Partners',
+ ads_tab_stats: 'Statistics',
+ analytics_ads: 'Advertising',
+ ref_code_required: 'Enter a code',
+ ref_earned_2: 'From 2nd deposits',
+ ref_earned_1: 'From 1st deposits',
+ ref_earned_total: 'Earned total',
+ ref_retained: 'Referrals with 2+ deposits',
+ ref_total: 'Referrals total',
+ ref_10d: 'Referrals in last 10 days',
+ ref_stats: 'Statistics',
+ ref_invitee_disc: 'Invitee discount on 1st deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_your_code: 'Referral code',
+ ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_placeholder: 'Your code',
+ ref_register_label: 'Register your referral code',
+ collab_work: 'Jobs',
+ collab_ads: 'Advertising',
+ support_other_info_empty: 'Section under development',
+ support_other_info: 'Other information',
  verify_done_desc: '전체 인증이 설정되었습니다. 비밀번호와 이메일이 저장되었습니다.',
  verify_done_title: '인증 완료',
  code_sent_to: '코드 전송됨',
@@ -15812,6 +16203,149 @@ function applyI18n() {
 }
 
 
+
+function openOtherInfo() {
+  try {
+    tg.showAlert(tBlock('support_other_info_empty') || 'Раздел в разработке');
+  } catch (e) {
+    alert(tBlock('support_other_info_empty') || 'Раздел в разработке');
+  }
+}
+
+var _collabTab = 'ads';
+function setCollabTab(tab) {
+  _collabTab = tab || 'ads';
+  var a = document.getElementById('collab-seg-ads');
+  var w = document.getElementById('collab-seg-work');
+  var pa = document.getElementById('collab-ads-panel');
+  var pw = document.getElementById('collab-work-panel');
+  if (a) a.classList.toggle('active', _collabTab === 'ads');
+  if (w) w.classList.toggle('active', _collabTab === 'work');
+  if (pa) pa.style.display = (_collabTab === 'ads') ? '' : 'none';
+  if (pw) pw.style.display = (_collabTab === 'work') ? '' : 'none';
+  if (_collabTab === 'work') {
+    try { renderHireInfo(); } catch (e) {}
+  } else {
+    try { loadReferralPanel(); } catch (e) {}
+  }
+}
+
+async function loadReferralPanel() {
+  var box = document.getElementById('referral-panel');
+  if (!box) return;
+  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var d = await apiGet('/api/referral/me');
+    var code = (d.ref_code || '').trim();
+    var rates = d.rates || {};
+    var stats = d.stats || {};
+    var html = '';
+    if (!code) {
+      html += '<div class="form-group"><label class="form-label">' + (tBlock('ref_register_label') || 'Регистрация индивидуального кода') + '</label>';
+      html += '<div style="display:flex;gap:8px;align-items:center;">';
+      html += '<input class="form-input" id="ref-code-input" placeholder="' + (tBlock('ref_code_placeholder') || 'Ваш код') + '" style="flex:1;text-transform:uppercase;">';
+      html += '<button type="button" class="btn" style="white-space:nowrap;" onclick="submitRefCode()">' + (tBlock('apply') || 'Применить') + '</button>';
+      html += '</div></div>';
+      html += '<div class="subtitle" style="font-size:12px;margin-top:6px;">' + (tBlock('ref_code_hint') || '3–24 символа, латиница и цифры. Код нельзя изменить.') + '</div>';
+    } else {
+      html += '<div class="list-item" style="margin-bottom:10px;">';
+      html += '<div class="top"><div class="title">' + (tBlock('ref_your_code') || 'Реферальный код') + ': <b>' + code.replace(/</g,'&lt;') + '</b></div>';
+      html += '<div style="color:#34c759;font-weight:700;font-size:13px;">' + Number(rates.partner_1||0) + '% / ' + Number(rates.partner_2||0) + '%</div></div>';
+      html += '<div class="subtitle">' + (tBlock('ref_you_earn') || 'Вы получаете с 1 / 2 пополнения') + '</div>';
+      html += '<div class="subtitle" style="margin-top:4px;">' + (tBlock('ref_invitee_disc') || 'Скидка приглашённому с 1 пополнения') + ': <b>' + Number(rates.discount_1||0) + '%</b>';
+      if (Number(rates.discount_2||0) > 0) html += ' · 2: <b>' + Number(rates.discount_2||0) + '%</b>';
+      html += '</div></div>';
+      html += '<div class="section-title" style="font-size:15px;margin:14px 0 8px;">' + (tBlock('ref_stats') || 'Статистика') + '</div>';
+      html += refStatRow(tBlock('ref_10d') || 'Рефералов за 10 дней', stats.refs_10d);
+      html += refStatRow(tBlock('ref_total') || 'Рефералов всего', stats.refs_total);
+      html += refStatRow(tBlock('ref_retained') || 'Рефералов 2+ пополнений', stats.refs_retained);
+      html += '<div style="height:10px;"></div>';
+      html += refStatRow(tBlock('ref_earned_total') || 'Заработано всего', Number(stats.earned_total||0).toFixed(2) + ' $');
+      html += refStatRow(tBlock('ref_earned_1') || 'С 1-х пополнений', Number(stats.earned_1||0).toFixed(2) + ' $');
+      html += refStatRow(tBlock('ref_earned_2') || 'Со 2-х пополнений', Number(stats.earned_2||0).toFixed(2) + ' $');
+    }
+    box.innerHTML = html;
+  } catch (e) {
+    box.innerHTML = '<div class="empty">' + (e.message || tBlock('error')) + '</div>';
+  }
+}
+function refStatRow(label, val) {
+  return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + label + '</div><div style="font-weight:600;">' + val + '</div></div></div>';
+}
+async function submitRefCode() {
+  var el = document.getElementById('ref-code-input');
+  var code = (el && el.value || '').trim();
+  if (!code) { try { tg.showAlert(tBlock('ref_code_required') || 'Введите код'); } catch(e){} return; }
+  try {
+    await apiPost('/api/referral/register', { code: code });
+    await loadReferralPanel();
+  } catch (e) {
+    try { tg.showAlert(e.message || tBlock('error')); } catch (e2) {}
+  }
+}
+
+async function openAdsAnalytics() {
+  document.getElementById('admin-section-title').textContent = tBlock('analytics_ads') || 'Реклама';
+  setAdminSectionBack(function(){ openAdminSection('analytics'); });
+  window._adsAnalyticsTab = 'stats';
+  renderAdsAnalytics();
+}
+async function renderAdsAnalytics() {
+  var box = document.getElementById('admin-content');
+  var tab = window._adsAnalyticsTab || 'stats';
+  var html = '<div class="seg-toggle" style="grid-template-columns:1fr 1fr;margin-bottom:12px;">';
+  html += '<button type="button" class="' + (tab==='stats'?'active':'') + '" onclick="window._adsAnalyticsTab=\'stats\';renderAdsAnalytics()">' + (tBlock('ads_tab_stats') || 'Статистика') + '</button>';
+  html += '<button type="button" class="' + (tab==='partners'?'active':'') + '" onclick="window._adsAnalyticsTab=\'partners\';renderAdsAnalytics()">' + (tBlock('ads_tab_partners') || 'Партнёры') + '</button>';
+  html += '</div><div id="ads-analytics-body"><div class="loading"><div class="spinner"></div></div></div>';
+  box.innerHTML = html;
+  var body = document.getElementById('ads-analytics-body');
+  try {
+    if (tab === 'stats') {
+      var d = await apiGet('/api/admin/referral/stats');
+      function row(l,v){ return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + l + '</div><div style="font-weight:600;">' + v + '</div></div></div>'; }
+      var h = '';
+      h += row(tBlock('ads_invited') || 'Приглашено партнёрами', d.invited_by_partners);
+      h += row(tBlock('ads_l2_10d') || 'Партнёров 2+ уровня приглашено за 10 дней', d.l2_invited_10d);
+      h += '<div style="height:8px;"></div>';
+      h += row(tBlock('ads_spend_total') || 'Потрачено на рекламу всего', Number(d.spend_total||0).toFixed(2) + ' $');
+      h += row(tBlock('ads_spend_1') || 'Траты с 1-х пополнений', Number(d.spend_1||0).toFixed(2) + ' $');
+      h += row(tBlock('ads_spend_2') || 'Траты со 2-х пополнений', Number(d.spend_2||0).toFixed(2) + ' $');
+      body.innerHTML = h;
+    } else {
+      var d = await apiGet('/api/admin/referral/partners');
+      var items = d.partners || [];
+      if (!items.length) { body.innerHTML = '<div class="empty">' + (tBlock('ads_no_partners') || 'Партнёров пока нет') + '</div>'; return; }
+      var h = '';
+      items.forEach(function(p) {
+        h += '<div class="list-item">';
+        h += '<div class="top">';
+        h += '<div class="title"><span class="seller-link" data-uid="' + p.user_id + '" onclick="return goProfile(' + p.user_id + ', event)">' + String(p.name||p.user_id).replace(/</g,'&lt;') + '</span></div>';
+        h += '<div style="font-family:monospace;font-size:13px;opacity:.9;">' + String(p.ref_code||'').replace(/</g,'&lt;') + '</div>';
+        h += '</div>';
+        h += '<div class="subtitle">' + (p.refs_10d||0) + ' / ' + (p.refs_total||0) + ' / ' + (p.refs_retained||0) + '</div>';
+        h += '<div style="display:flex;gap:6px;margin-top:8px;">';
+        for (var lv=1; lv<=3; lv++) {
+          var sel = Number(p.ref_level) === lv ? ' selected' : '';
+          h += '<button type="button" class="sheet-select' + sel + '" style="flex:1;padding:6px;font-size:12px;" onclick="setPartnerLevel(' + p.user_id + ',' + lv + ')">' + lv + '</button>';
+        }
+        h += '</div></div>';
+      });
+      body.innerHTML = h;
+      bindProfileLinks(body);
+    }
+  } catch (e) {
+    body.innerHTML = '<div class="empty">' + (e.message || tBlock('error')) + '</div>';
+  }
+}
+async function setPartnerLevel(uid, level) {
+  try {
+    await apiPost('/api/admin/referral/set-level', { user_id: uid, level: level });
+    renderAdsAnalytics();
+  } catch (e) {
+    try { tg.showAlert(e.message); } catch (e2) {}
+  }
+}
+
 function renderHireInfo() {
  var box = document.getElementById('hire-info-block');
  if (!box) return;
@@ -17046,9 +17580,13 @@ async function renderUserProfile() {
  html += '<div class="empty">' + tBlock('no_listings') + '</div>';
  } else {
  html += items.map(function(l) {
+ var cover = l.cover_photo || (l.photos && l.photos[0] && (l.photos[0].content || l.photos[0].url)) || '';
+ var desc = (l.description||'').replace(/</g,'&lt;');
+ if (desc.length > 140) desc = desc.slice(0,140) + '…';
  return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+ (cover ? ('<img class="listing-cover" src="' + cover + '" alt="">') : '') +
  '<div class="ltitle">' + (l.title||'').replace(/</g,'&lt;') + '</div>' +
- '<div class="ldesc">' + (l.description||'').replace(/</g,'&lt;') + '</div>' +
+ '<div class="ldesc">' + desc + '</div>' +
  '<div class="meta"><div class="price">' + Number(l.price).toLocaleString('ru-RU') +
  ' <small>$</small></div><span class="badge ' + listingStatusBadge(l.status)[1] + '">' + listingStatusBadge(l.status)[0] + '</span></div></div>';
  }).join('');
@@ -17116,9 +17654,13 @@ async function loadOwnProfileListings() {
  return;
  }
  box.innerHTML = items.map(function(l) {
+ var cover = l.cover_photo || (l.photos && l.photos[0] && (l.photos[0].content || l.photos[0].url)) || '';
+ var desc = (l.description||'').replace(/</g,'&lt;');
+ if (desc.length > 140) desc = desc.slice(0,140) + '…';
  return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+ (cover ? ('<img class="listing-cover" src="' + cover + '" alt="">') : '') +
  '<div class="ltitle">' + (l.title||'').replace(/</g,'&lt;') + '</div>' +
- '<div class="ldesc">' + (l.description||'').replace(/</g,'&lt;') + '</div>' +
+ '<div class="ldesc">' + desc + '</div>' +
  '<div class="meta"><div class="price">' + Number(l.price).toLocaleString('ru-RU') +
  ' <small>$</small></div><span class="badge ' + listingStatusBadge(l.status)[1] + '">' + listingStatusBadge(l.status)[0] + '</span></div></div>';
  }).join('');
@@ -19508,6 +20050,7 @@ function loadAnalyticsMenu() {
  '<button class="support-tile" onclick="openAnalytics(\'income\')"><div class="support-tile-icon">📥</div><div class="support-tile-title">' + (tBlock('analytics_inc') || 'Аналитика доходов') + '</div></button>' +
  listingsTile +
  '<button class="support-tile" onclick="openVisitsAnalytics()"><div class="support-tile-icon">👁</div><div class="support-tile-title">' + (tBlock('analytics_visits') || 'Аналитика посещений') + '</div></button>' +
+ '<button class="support-tile" onclick="openAdsAnalytics()"><div class="support-tile-icon">📣</div><div class="support-tile-title">' + (tBlock('analytics_ads') || 'Реклама') + '</div></button>' +
  '</div>';
 }
 async function openVisitsAnalytics() {
