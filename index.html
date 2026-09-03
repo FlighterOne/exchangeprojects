@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-03-v16 -->
+<!-- XCOD_BUILD 2026-09-03-v18 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -1111,7 +1111,17 @@
  background: #34c759; color: #fff; font-size: 10px; line-height: 16px;
  text-align: center; border: 2px solid var(--bg);
  }
- .career-node.current {
+ .career-tip {
+  display:none; position:absolute; z-index:50; left:50%; transform:translateX(-50%);
+  top: calc(100% + 8px); min-width:220px; max-width:280px;
+  background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:12px;
+  padding:10px 12px; box-shadow:0 8px 24px rgba(0,0,0,.35); pointer-events:none;
+}
+.career-node-wrap { position:relative; display:inline-flex; flex-direction:column; align-items:center; }
+.career-node-wrap:hover .career-tip, .career-node-wrap:focus-within .career-tip { display:block; }
+.career-tip-title { font-weight:600; font-size:12px; margin-bottom:6px; color:#fff; }
+.career-tip-list { margin:0; padding-left:16px; font-size:11px; line-height:1.45; color:rgba(255,255,255,.85); text-align:left; }
+.career-node.current {
  background: #2aabee; border-color: #2aabee; color: #fff;
  box-shadow: 0 0 0 4px rgba(42,171,238,0.28);
  }
@@ -1491,6 +1501,7 @@
  <button class="btn" onclick="listingPhotosNext()" data-i18n="continue">Далее</button>
  </div>
  <div id="listing-step-2" style="display:none;">
+ <div class="info-block" style="margin-bottom:10px;border-color:var(--accent,#2aabee);" data-i18n="files_escrow_note">Покупатель получит эти файлы и данные только после оплаты. До подтверждения сделки средства находятся у биржи.</div>
  <div class="info-block" style="margin-bottom:14px;" data-i18n="guide_note_full">
  Обязательно должен быть файл guide.txt — инструкция. Без него объявление отклонит модерация. Неполная инструкция — риск отказа покупателя. Токен можно опубликовать (apitoken.txt) или отправить в ЛС.
  </div>
@@ -2186,15 +2197,15 @@
  </button>
  <button class="support-tile" onclick="openAdminSection('verification')">
  <div class="support-tile-icon">🪪</div>
- <div class="support-tile-title" data-i18n="mod_verify">Verification moderation</div>
+ <div class="support-tile-title" data-i18n="mod_verify">Модерация верификации</div>
  </button>
  <button class="support-tile" onclick="openAdminSection('complaints')">
  <div class="support-tile-icon">⚠️</div>
- <div class="support-tile-title" data-i18n="mod_complaints">Complaints moderation</div>
+ <div class="support-tile-title" data-i18n="mod_complaints">Модерация жалоб</div>
  </button>
  <button class="support-tile" onclick="openAdminSection('tickets')">
  <div class="support-tile-icon">💬</div>
- <div class="support-tile-title" data-i18n="mod_tickets">Support tickets moderation</div>
+ <div class="support-tile-title" data-i18n="mod_tickets">Модерация обращений</div>
  </button>
  <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
  <div class="support-tile-icon">💼</div>
@@ -4449,6 +4460,7 @@ function renderMain() {
  var listTile = document.querySelector("button[onclick*=\"openAdminSection('listings')\"]");
  if (listTile) listTile.style.display = (userData.role >= 3) ? '' : 'none';
  var compTile = document.querySelector("button[onclick*=\"openAdminSection('complaints')\"]");
+ try { updateAdminModTiles(); } catch(e){}
  if (compTile) compTile.style.display = (userData.role >= 3) ? '' : 'none';
  var anTile = document.querySelector("button[onclick*=\"openAdminSection('analytics')\"]");
  if (anTile) anTile.style.display = (userData.role >= 3) ? '' : 'none';
@@ -4674,7 +4686,7 @@ function showPage(name) {
  if (name === 'orders') loadOrders();
  if (name === 'balance' || name === 'withdraw') refreshBalance();
  if (name === 'requests') loadRequests();
- if (name === 'admin') { document.getElementById('admin-content').innerHTML = ''; }
+ if (name === 'admin') { try { updateAdminModTiles(); } catch(e){} } { document.getElementById('admin-content').innerHTML = ''; }
  if (name === 'job-form') {
  try {
  var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
@@ -4785,6 +4797,36 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ view_only_hint: 'Режим просмотра: открытие смены и начисление ЗП доступны админам',
+ duty_analytics_list: 'Аналитика объявлений',
+ duty_control_full: 'Контроль смены (открыть/закрыть, ЗП)',
+ duty_staff: 'Управление сотрудниками',
+ duty_mod_jobs: 'Модерация вакансий',
+ duty_mod_verify: 'Модерация верификации',
+ duty_all_mod: 'Всё из модератора',
+ duty_lift_blocks: 'Снятие ограничений',
+ duty_mod_tx: 'Модерация транзакций',
+ duty_all_intern: 'Всё из стажёра',
+ duty_control_view: 'Контроль смены (только просмотр)',
+ duty_analytics: 'Аналитика (просмотр)',
+ duty_mod_tickets: 'Модерация обращений',
+ duty_mod_complaints: 'Модерация жалоб',
+ duty_mod_listings: 'Модерация объявлений',
+ duty_workcenter: 'Рабочий центр / смены',
+ duty_panel: 'Вход в панель',
+ hire_duties: 'Обязанности',
+ stat_online_now: 'Пользователей онлайн сейчас',
+ stat_sales_all: 'Продаж за всё время',
+ stat_listings_active: 'Объявлений сейчас активно',
+ stat_listings_all: 'Объявлений за всё время',
+ stat_active_10d: 'В сети за последние 10 дней',
+ stat_full_verify: 'Верифицировано полностью',
+ stat_passport: 'Верифицировано паспортов',
+ stat_registered: 'Зарегистрировано людей',
+ analytics_live: 'Данные обновляются в реальном времени из БД',
+ analytics_visits: 'Аналитика посещений',
+ files_escrow_note: 'Покупатель получит эти файлы и данные только после оплаты. До подтверждения сделки средства находятся у биржи.',
+ previous_price: 'Прошлая цена',
  verify_prompt_later: 'Позже',
  verify_prompt_go: 'Пройти верификацию',
  verify_prompt_text: 'Пройдите верификацию аккаунта, чтобы получить полный доступ и повысить доверие на платформе.',
@@ -4818,7 +4860,7 @@ var I18N = {
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
  btn_resolve: 'Resolve',
- mod_complaints_empty: 'No complaints',
+ mod_complaints_empty: 'Нет жалоб',
  complaint_target: 'Target user',
  complaint_from: 'From',
  complaint_sent: 'Жалоба отправлена',
@@ -4844,7 +4886,7 @@ var I18N = {
  verify_bad_date: 'Введите дату в формате ДД.ММ.ГГГГ',
  verify_date_ph: 'ДД.ММ.ГГГГ',
  mod_verify_empty: 'Нет заявок на верификацию',
- mod_verify: 'Verification moderation',
+ mod_verify: 'Модерация верификации',
  verify_passport_pending: 'Паспорт на модерации',
  verify_step_form: 'Анкета',
  verify_full_name: 'ФИО (как в паспорте)',
@@ -4923,9 +4965,9 @@ var I18N = {
  tx_pending: 'В обработке', status_awaiting: 'Ожидает', sbp_card: 'СБП / карта', deal: 'Сделка', tx_rejected: 'Отклонено', lang_changed: 'Язык изменён',
  original: 'оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
  insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: tBlock('mod_tx') || 'Transaction moderation',
- verification: tBlock('mod_verify') || 'Verification moderation',
- complaints: tBlock('mod_complaints') || 'Complaints moderation',
- tickets: tBlock('mod_tickets') || 'Support tickets moderation',
+ verification: tBlock('mod_verify') || 'Модерация верификации',
+ complaints: tBlock('mod_complaints') || 'Модерация жалоб',
+ tickets: tBlock('mod_tickets') || 'Модерация обращений',
  transactions_x: 'Транзакции'
  ,
  your_role: 'Ваша роль',
@@ -4934,7 +4976,7 @@ var I18N = {
  mod_listings: 'Модерация объявлений',
  mod_tx: 'Модерация транзакций',
  mod_jobs: 'Модерация заявок на работу',
- mod_tickets: 'Support tickets moderation',
+ mod_tickets: 'Модерация обращений',
  staff_manage: 'Управление сотрудниками',
  analytics: 'Аналитика',
  new_listing: 'Новое объявление',
@@ -5247,7 +5289,7 @@ total_to_pay: 'Итого к оплате',
  method_fee_stars: '0%',
  approve_set_price: 'Одобрить (указать цену)',
  approve: 'Одобрить',
- enter_partner_price: 'Укажите цену для партнёрского товара ($)',
+ enter_partner_price: 'Укажите цену для партнёрского объявления ($)',
  listing_approved: 'Объявление одобрено',
  listing_rejected: 'Объявление отклонено',
 terms_prefix: 'Продолжая, вы даёте ',
@@ -5412,7 +5454,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  no_job_apps: 'Нет заявок на работу',
  violator_id: 'ID нарушителя',
  shifts_week_done: 'Отработано смен на неделе',
- mod_complaints: 'Complaints moderation',
+ mod_complaints: 'Модерация жалоб',
  shift_status_open: 'Открыта',
  shift_status_closed: 'Закрыта',
  tracker_staff_only: 'Трекер доступен только сотрудникам',
@@ -5479,6 +5521,19 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ hire_duties: 'Responsibilities',
+ stat_online_now: 'Users online now',
+ stat_sales_all: 'Sales all time',
+ stat_listings_active: 'Active listings now',
+ stat_listings_all: 'Listings all time',
+ stat_active_10d: 'Online in last 10 days',
+ stat_full_verify: 'Fully verified users',
+ stat_passport: 'Passport verified',
+ stat_registered: 'Registered users',
+ analytics_live: 'Data is live from the database',
+ analytics_visits: 'Visits analytics',
+ files_escrow_note: 'The buyer will receive these files and data only after payment. Until the deal is confirmed, funds are held by the exchange.',
+ previous_price: 'Previous price',
  verify_full_required: 'Full verification required',
  code_sent_email: 'Code sent to email',
  email_code: 'Verification code',
@@ -5642,7 +5697,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  mod_listings: 'Listings moderation',
  mod_tx: 'Transactions moderation',
  mod_jobs: 'Job applications',
- mod_tickets: 'Support tickets',
+ mod_tickets: 'Support tickets moderation',
  staff_manage: 'Staff management',
  analytics: 'Analytics',
  new_listing: 'New listing',
@@ -6187,6 +6242,8 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ files_escrow_note: 'Der Käufer erhält diese Dateien erst nach der Zahlung. Bis zur Bestätigung hält die Börse die Mittel.',
+ previous_price: 'Vorheriger Preis',
  code_sent_to_linked: 'Ein Code wird an die mit dem Konto verknüpfte E-Mail gesendet',
  verify_done_desc: 'Vollständige Verifizierung eingerichtet. Passwort und E-Mail gespeichert.',
  verify_done_title: 'Verifizierung abgeschlossen',
@@ -6276,7 +6333,7 @@ terms_prefix: 'By continuing, you accept the ',
  verify_bad_date: 'Use date format DD.MM.YYYY',
  verify_date_ph: 'DD.MM.YYYY',
  mod_verify_empty: 'No verification applications',
- mod_verify: 'Verification moderation',
+ mod_verify: 'Verifizierungs-Moderation',
  
  verify_passport_pending: 'Pass in Prufung',
  verify_step_form: 'Application',
@@ -6362,7 +6419,7 @@ terms_prefix: 'By continuing, you accept the ',
  mod_listings: 'Anzeigen-Moderation',
  mod_tx: 'Transaktions-Moderation',
  mod_jobs: 'Stellenbewerbungen',
- mod_tickets: 'Support-Tickets',
+ mod_tickets: 'Support-Tickets-Moderation',
  staff_manage: 'Mitarbeiterverwaltung',
  analytics: 'Analytik',
  new_listing: 'New listing',
@@ -8972,6 +9029,8 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ files_escrow_note: 'Покупець отримає ці файли лише після оплати. До підтвердження угоди кошти у біржі.',
+ previous_price: 'Минула ціна',
  code_sent_to_linked: 'Код буде надіслано на пошту, привʼязану до акаунта',
  verify_done_desc: 'Повну верифікацію встановлено. Пароль і пошту збережено.',
  verify_done_title: 'Верифікацію пройдено',
@@ -9061,7 +9120,7 @@ terms_prefix: '继续即表示您同意',
  verify_bad_date: 'Use date format DD.MM.YYYY',
  verify_date_ph: 'DD.MM.YYYY',
  mod_verify_empty: 'No verification applications',
- mod_verify: 'Verification moderation',
+ mod_verify: 'Модерація верифікації',
  verify_passport_pending: 'Паспорт на модерації',
  verify_step_form: 'Application',
  verify_full_name: 'Full name (as in passport)',
@@ -15763,7 +15822,14 @@ function renderHireInfo() {
  '<b>' + tBlock('internship') + '</b><br><br>' +
  '• ' + tBlock('period') + ': <b>1 ' + tBlock('month') + '</b><br>' +
  '• ' + tBlock('intern_shift') + ': <b>6 ' + tBlock('hours') + '</b><br>' +
- '• ' + tBlock('intern_pay') + ': <b>10$</b>';
+ '• ' + tBlock('intern_pay') + ': <b>10$</b><br><br>' +
+'<b>' + (tBlock('hire_duties') || 'Обязанности') + '</b><br><br>' +
+'• ' + (tBlock('duty_mod_listings') || 'Модерация объявлений') + '<br>' +
+'• ' + (tBlock('duty_mod_complaints') || 'Модерация жалоб') + '<br>' +
+'• ' + (tBlock('duty_mod_tickets') || 'Модерация обращений') + '<br>' +
+'• ' + (tBlock('duty_analytics') || 'Аналитика (просмотр)') + '<br>' +
+'• ' + (tBlock('duty_workcenter') || 'Рабочий центр / смены') + '<br>' +
+'• ' + (tBlock('duty_control_view') || 'Контроль смены (просмотр)');
 }
 
 function trUi(text) {
@@ -19318,7 +19384,9 @@ function renderMyListings() {
  var st = statusMap[l.status] || [l.status, 'badge-pending'];
  var date = (l.created_at || '').slice(0, 10);
  var priceText = (l.listing_type === 'partner' && !l.price) ? 'Цена по аналитике' : (Number(l.price).toLocaleString('ru-RU') + ' $');
+ var cover = l.cover_photo || (l.photos && l.photos[0] && (l.photos[0].content || l.photos[0].url)) || '';
  return '<div class="listing-card" onclick="openListing(' + l.id + ')">' +
+ (cover ? ('<img class="listing-cover" src="' + String(cover).replace(/"/g,'&quot;') + '" alt="" loading="lazy">') : '') +
  '<div class="ltitle-row">' +
  '<div class="ltitle">' + (l.title || '').replace(/</g, '&lt;') + '</div>' +
  '<span class="badge ' + st[1] + '">' + st[0] + '</span></div>' +
@@ -19374,17 +19442,19 @@ var _adminSection = '';
 var _adminCache = { listings: [], transactions: [], jobs: [], staff: [] };
 
 function openAdminSection(section) {
+ try { if (typeof updateAdminModTiles === 'function') updateAdminModTiles(); } catch(e){}
+
  _adminSection = section;
  setAdminSectionBack(function(){ showPage('admin'); });
  var titles = {
- verification: (typeof tBlock==='function'&&tBlock('mod_verify'))||'Verification moderation',
+ verification: (typeof tBlock==='function'&&tBlock('mod_verify'))||'Модерация верификации',
  workcenter: tBlock('workcenter'),
  career: tBlock('career'),
  listings: tBlock('mod_listings'),
  transactions: tBlock('mod_tx'),
  jobs: tBlock('mod_jobs'),
- tickets: tBlock('mod_tickets') || 'Support tickets moderation',
- complaints: tBlock('mod_tickets') || tBlock('mod_complaints') || 'Complaints moderation',
+ tickets: tBlock('mod_tickets') || 'Модерация обращений',
+ complaints: tBlock('mod_complaints') || 'Модерация жалоб',
  staff: tBlock('staff_manage'),
  analytics: tBlock('analytics')
  };
@@ -19402,6 +19472,7 @@ function openAdminSection(section) {
  if (role < 4) { tg.showAlert(tBlock('need_mod')); showPage('admin'); return; }
  loadAdminRequests();
  } else if (section === 'verification') {
+ if (role < 5) { tg.showAlert(tBlock('need_admin') || 'Недостаточно прав'); showPage('admin'); return; }
  loadAdminVerification();
  }
  else if (section === 'jobs') {
@@ -19429,14 +19500,43 @@ function openAdminSection(section) {
 function loadAnalyticsMenu() {
  var box = document.getElementById('admin-content');
  var listingsTile = (userData && userData.role >= 5)
- ? '<button class="support-tile" onclick="openAnalytics(\'listings\')"><div class="support-tile-icon">🥧</div><div class="support-tile-title">Аналитика объявлений</div></button>'
+ ? '<button class="support-tile" onclick="openAnalytics(\'listings\')"><div class="support-tile-icon">🥧</div><div class="support-tile-title">' + (tBlock('analytics_list') || 'Аналитика объявлений') + '</div></button>'
  : '';
  box.innerHTML =
  '<div class="support-grid">' +
- '<button class="support-tile" onclick="openAnalytics(\'expenses\')"><div class="support-tile-icon">📤</div><div class="support-tile-title">Аналитика расходов</div></button>' +
- '<button class="support-tile" onclick="openAnalytics(\'income\')"><div class="support-tile-icon">📥</div><div class="support-tile-title">Аналитика доходов</div></button>' +
+ '<button class="support-tile" onclick="openAnalytics(\'expenses\')"><div class="support-tile-icon">📤</div><div class="support-tile-title">' + (tBlock('analytics_exp') || 'Аналитика расходов') + '</div></button>' +
+ '<button class="support-tile" onclick="openAnalytics(\'income\')"><div class="support-tile-icon">📥</div><div class="support-tile-title">' + (tBlock('analytics_inc') || 'Аналитика доходов') + '</div></button>' +
  listingsTile +
+ '<button class="support-tile" onclick="openVisitsAnalytics()"><div class="support-tile-icon">👁</div><div class="support-tile-title">' + (tBlock('analytics_visits') || 'Аналитика посещений') + '</div></button>' +
  '</div>';
+}
+async function openVisitsAnalytics() {
+ document.getElementById('admin-section-title').textContent = tBlock('analytics_visits') || 'Аналитика посещений';
+ setAdminSectionBack(function(){ openAdminSection('analytics'); });
+ var box = document.getElementById('admin-content');
+ box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+ try {
+ var d = await apiGet('/api/admin/analytics/visits');
+ function row(label, val) {
+ return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + label + '</div>' +
+ '<div style="font-weight:600;font-size:14px;">' + val + '</div></div></div>';
+ }
+ var html = '<div class="info-block" style="margin-bottom:10px;font-size:12px;opacity:.8;">' + (tBlock('analytics_live') || 'Данные обновляются в реальном времени из БД') + '</div>';
+ html += row(tBlock('stat_registered') || 'Зарегистрировано людей', d.registered);
+ html += row(tBlock('stat_passport') || 'Верифицировано паспортов', d.passport_verified);
+ html += row(tBlock('stat_full_verify') || 'Верифицировано полностью', d.full_verified);
+ html += row(tBlock('stat_active_10d') || 'В сети за последние 10 дней', d.active_10d);
+ html += row(tBlock('stat_listings_all') || 'Объявлений за всё время',
+   d.listings_total + ' <span style="font-weight:400;opacity:.75;font-size:12px;">(' + (tBlock('sale')||'продажа') + ': ' + d.listings_sale + ', ' + (tBlock('freelance')||'фриланс') + ': ' + d.listings_freelance + ')</span>');
+ html += row(tBlock('stat_listings_active') || 'Объявлений сейчас активно',
+   d.active_total + ' <span style="font-weight:400;opacity:.75;font-size:12px;">(' + (tBlock('sale')||'продажа') + ': ' + d.active_sale + ', ' + (tBlock('freelance')||'фриланс') + ': ' + d.active_freelance + ')</span>');
+ html += row(tBlock('stat_sales_all') || 'Продаж за всё время',
+   d.sales_count + ' <span style="font-weight:400;opacity:.75;font-size:12px;">(' + Number(d.sales_sum||0).toLocaleString('ru-RU') + ' $)</span>');
+ html += row(tBlock('stat_online_now') || 'Пользователей онлайн сейчас', d.online_now);
+ box.innerHTML = html;
+ } catch (e) {
+ box.innerHTML = '<div class="empty">' + (e.message || tBlock('error')) + '</div>';
+ }
 }
 function defaultPeriod() {
  var to = new Date();
@@ -19702,7 +19802,7 @@ function loadWorkCenter() {
  '<button class="support-tile" onclick="openShiftSignup()"><div class="support-tile-icon">📝</div><div class="support-tile-title">' + tBlock('sign_up_shift') + '</div></button>' +
  '<button class="support-tile" onclick="openMyShifts()"><div class="support-tile-icon">✅</div><div class="support-tile-title">' + tBlock('my_shifts') + '</div></button>' +
  '<button class="support-tile" onclick="openShiftHistory()"><div class="support-tile-icon">📜</div><div class="support-tile-title">' + tBlock('shift_history') + '</div></button>';
- if (userData && userData.role >= 5) {
+ if (userData && userData.role >= 3) {
  html += '<button class="support-tile" onclick="openShiftControl()"><div class="support-tile-icon">👥</div><div class="support-tile-title">' + tBlock('staff_control') + '</div></button>';
  }
  html += '<button class="support-tile" onclick="openBlocksPanel()"><div class="support-tile-icon">🚫</div><div class="support-tile-title">' + tBlock('blocks') + '</div></button>';
@@ -20218,10 +20318,16 @@ async function openShiftControl(shiftDate, shiftType) {
  }
 
  var timeLabel = data.shift_type === 'day' ? (tBlock('from') + ' 09:00 ' + tBlock('to') + ' 21:00') : (tBlock('from') + ' 21:00 ' + tBlock('to') + ' 09:00');
+ var canManage = !!(data.can_manage) && (userData && Number(userData.role) >= 5);
+ if (userData && Number(userData.role) < 5) canManage = false;
+ if (data.view_only) canManage = false;
+ setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+ if (canManage) {
  html += '<div style="display:flex;gap:8px;margin:12px 0;">';
- html += '<button type="button" class="btn" style="flex:1;" onclick="shiftControlOpen(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Открыть</button>';
- html += '<button type="button" class="btn btn-danger" style="flex:1;" onclick="shiftControlClose(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">Закрыть</button>';
+ html += '<button type="button" class="btn" style="flex:1;" onclick="shiftControlOpen(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">' + (tBlock('open_shift') || 'Открыть') + '</button>';
+ html += '<button type="button" class="btn btn-danger" style="flex:1;" onclick="shiftControlClose(\'' + data.shift_date + '\',\'' + data.shift_type + '\')">' + (tBlock('close_shift') || 'Закрыть') + '</button>';
  html += '</div>';
+ }
 
  html += '<div class="listing-card">';
  html += '<div style="font-size:12px;color:var(--hint);margin-bottom:4px;">' + tBlock('current_shift') + '</div>';
@@ -20235,6 +20341,7 @@ async function openShiftControl(shiftDate, shiftType) {
  html += '<div class="subtitle" style="margin-top:6px;">' + tBlock('status') + ': ' + tBlock('shift_not_open') + '</div>';
  }
  html += '</div>';
+ if (!canManage) html += '<div class="info-block" style="margin:10px 0;font-size:12px;opacity:.85;">' + (tBlock('view_only_hint') || 'Режим просмотра: открытие смены и начисление ЗП доступны админам') + '</div>';
 
 html += '<div class="form-label">' + tBlock('staff_label') + '</div>';
  if (!(data.staff || []).length) {
@@ -20256,12 +20363,12 @@ html += '<div class="form-label">' + tBlock('staff_label') + '</div>';
  }
  html += '</div>';
 
- if (!marked) {
+ if (canManage && !marked) {
  html += '<div style="display:flex;gap:8px;margin-top:8px;">';
  html += '<button type="button" class="btn" style="flex:1;padding:8px;font-size:13px;" onclick="event.stopPropagation();shiftMarkPresent(\'' + data.shift_date + '\',\'' + data.shift_type + '\',' + s.user_id + ',true)">Начать смену</button>';
  html += '<button type="button" class="btn btn-secondary" style="flex:1;padding:8px;font-size:13px;" onclick="event.stopPropagation();shiftMarkPresent(\'' + data.shift_date + '\',\'' + data.shift_type + '\',' + s.user_id + ',false)">Отсутствует</button>';
  html += '</div>';
- } else {
+ } else if (canManage) {
  html += '<div style="display:flex;gap:8px;margin-top:8px;">';
  var creditLabel = 'Засчитать ▾';
  if (s.credit === 'full') creditLabel = 'Засчитано 12ч';
@@ -20347,10 +20454,44 @@ async function shiftControlClose(date, type) {
  } catch (e) { tg.showAlert(e.message); }
 }
 
+
+function careerDutiesHtml(idx) {
+  // 0 intern, 1 mod, 2 admin
+  var items = [];
+  if (idx === 0) {
+    items = [
+      tBlock('duty_panel') || 'Вход в панель',
+      tBlock('duty_workcenter') || 'Рабочий центр (запись на смены)',
+      tBlock('duty_mod_listings') || 'Модерация объявлений',
+      tBlock('duty_mod_complaints') || 'Модерация жалоб',
+      tBlock('duty_mod_tickets') || 'Модерация обращений',
+      tBlock('duty_analytics') || 'Аналитика (просмотр)',
+      tBlock('duty_control_view') || 'Контроль смены (только просмотр)'
+    ];
+  } else if (idx === 1) {
+    items = [
+      tBlock('duty_all_intern') || 'Всё из стажёра',
+      tBlock('duty_mod_tx') || 'Модерация транзакций',
+      tBlock('duty_lift_blocks') || 'Снятие ограничений (модер+)'
+    ];
+  } else {
+    items = [
+      tBlock('duty_all_mod') || 'Всё из модератора',
+      tBlock('duty_mod_verify') || 'Модерация верификации',
+      tBlock('duty_mod_jobs') || 'Модерация вакансий',
+      tBlock('duty_staff') || 'Управление сотрудниками',
+      tBlock('duty_control_full') || 'Контроль смены (открыть/закрыть, ЗП)',
+      tBlock('duty_analytics_list') || 'Аналитика объявлений'
+    ];
+  }
+  return '<div class="career-tip-title">' + ([tBlock('role_intern'), tBlock('role_mod'), tBlock('role_admin')][idx] || '') + '</div><ul class="career-tip-list">' +
+    items.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul>';
+}
+
 async function loadCareerTracker() {
  var box = document.getElementById('admin-content');
  document.getElementById('admin-section-title').textContent = tBlock('career');
- setAdminSectionBack(function(){ openAdminSection('workcenter'); });
+ setAdminSectionBack(function(){ showPage('admin'); try { if (typeof updateAdminModTiles==='function') updateAdminModTiles(); } catch(e){} });
  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
  try {
  var d = await apiGet('/api/career');
@@ -20375,7 +20516,10 @@ async function loadCareerTracker() {
  cls += ' locked';
  inner = '<span class="lock">🔒</span>';
  }
+ html += '<div class="career-node-wrap">';
  html += '<div class="' + cls + '" title="' + stages[i] + '">' + inner + '</div>';
+ html += '<div class="career-tip">' + careerDutiesHtml(i) + '</div>';
+ html += '</div>';
  if (i < 2) {
  var fill = 0;
  if (i < stage) fill = 100;
@@ -20465,6 +20609,21 @@ function adminNotOnShiftHtml(msg) {
  (msg || 'Вы не на смене, нет доступа к разделу') + '</div>';
 }
 
+
+function updateAdminModTiles() {
+  try {
+    var role = (userData && (userData.role != null)) ? Number(userData.role) : 0;
+    var vTile = document.querySelector("button[onclick*=\"openAdminSection('verification')\"]");
+    var cTile = document.querySelector("button[onclick*=\"openAdminSection('complaints')\"]");
+    var tTile = document.querySelector("button[onclick*=\"openAdminSection('tickets')\"]");
+    // verification: admin+ (5+)
+    if (vTile) vTile.style.display = (role >= 5) ? '' : 'none';
+    // complaints & tickets: intern+ (3+)
+    if (cTile) cTile.style.display = (role >= 3) ? '' : 'none';
+    if (tTile) tTile.style.display = (role >= 3) ? '' : 'none';
+  } catch (e) {}
+}
+
 async function loadAdminListings() {
  var box = document.getElementById('admin-content');
  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -20476,6 +20635,13 @@ async function loadAdminListings() {
  box.innerHTML = '<div class="empty"><div class="icon">✅</div>' + tBlock('no_listings_mod') + '</div>';
  return;
  }
+ try {
+ items.sort(function(a,b){
+ var ca = a.created_at || ''; var cb = b.created_at || '';
+ if (ca !== cb) return ca < cb ? -1 : 1;
+ return (Number(a.id)||0) - (Number(b.id)||0);
+ });
+ } catch(eS){}
  box.innerHTML = items.map(function(l) {
  var typeLabel = l.listing_type === 'partner' ? tBlock('partner_xcod') : tBlock('own_product');
  if ((l.category || '') === 'freelance') {
@@ -20484,7 +20650,9 @@ async function loadAdminListings() {
  typeLabel = 'Продажа · ' + typeLabel;
  }
  var nick = l.seller_username ? ('@' + l.seller_username) : ('ID ' + l.seller_id);
+ var cover = l.cover_photo || (l.photos && l.photos[0] && (l.photos[0].content || l.photos[0].url)) || '';
  return '<div class="list-item" style="cursor:pointer;" onclick="openAdminListingDetail(' + l.id + ')">' +
+ (cover ? ('<img src="' + String(cover).replace(/"/g,'&quot;') + '" alt="" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:8px;display:block;">') : '') +
  '<div class="top"><div class="title">' + (l.title || '').replace(/</g, '&lt;') +
  ' #' + l.id + '</div></div>' +
  '<div class="subtitle">' + typeLabel + ' · <span class="seller-link" data-uid="' + l.seller_id + '" onclick="return goProfile(' + l.seller_id + ', event)">' + nick.replace(/</g,'&lt;') + '</span>' +
@@ -20564,7 +20732,13 @@ async function adminApproveListing(id, needPrice) {
 
  var price = null;
  if (needPrice) {
- var p = prompt(tBlock('enter_partner_price') || 'Set price for partner listing ($)');
+ var l = (_adminCache.listings || []).find(function(x){ return Number(x.id) === Number(id); }) || {};
+ var prev = Number(l.previous_price || l.price || 0) || 0;
+ var promptMsg = tBlock('enter_partner_price') || 'Укажите цену для партнёрского объявления ($)';
+ if (prev > 0) {
+ promptMsg = (tBlock('previous_price') || 'Прошлая цена') + ': ' + prev + '$\n\n' + promptMsg;
+ }
+ var p = prompt(promptMsg, prev > 0 ? String(prev) : '');
  if (p === null) return;
  price = parseFloat(p);
  if (!price || price < 1) { tg.showAlert(tBlock('err_bad_price')); return; }
