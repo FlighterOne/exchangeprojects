@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-03-v19-referral -->
+<!-- XCOD_BUILD 2026-09-03-v20-promo -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -1865,9 +1865,10 @@
  </div>
  </div>
 
- <div class="form-group">
- <label class="form-label" data-i18n="comment">Комментарий</label>
- <input class="form-input" type="text" id="deposit-comment" placeholder="Необязательно" data-i18n-placeholder="optional">
+ <div class="form-group" id="deposit-promo-wrap">
+ <label class="form-label" data-i18n="promo_code">Промокод</label>
+ <input class="form-input" type="text" id="deposit-promo" placeholder="" data-i18n-placeholder="promo_placeholder" oninput="onDepositPromoInput()" style="text-transform:uppercase;">
+ <div id="deposit-promo-status" style="margin-top:6px;font-size:12px;line-height:1.4;"></div>
  </div>
 
  <label class="check-row" id="deposit-terms-row" style="margin:12px 0;">
@@ -4810,11 +4811,17 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ promo_max_uses: 'Промокод использован максимальное количество раз',
+ promo_not_found: 'Промокод не найден',
+ promo_discount: 'Скидка',
+ promo_activated: 'Активировано',
+ promo_placeholder: 'Введите промокод',
+ promo_code: 'Промокод',
  ads_no_partners: 'Партнёров пока нет',
- ads_spend_2: 'Траты со 2-х пополнений',
- ads_spend_1: 'Траты с 1-х пополнений',
+ ads_spend_2: 'Траты на второстепенные платежи',
+ ads_spend_1: 'Траты на первостепенные платежи',
  ads_spend_total: 'Потрачено на рекламу всего',
- ads_l2_10d: 'Партнёров 2+ уровня приглашено за 10 дней',
+ ads_l2_10d: 'Партнёров 2 уровня приглашено за последние 10 дней',
  ads_invited: 'Приглашено партнёрами',
  ads_tab_partners: 'Партнёры',
  ads_tab_stats: 'Статистика',
@@ -4830,7 +4837,7 @@ var I18N = {
  ref_invitee_disc: 'Скидка приглашённому с 1 пополнения',
  ref_you_earn: 'Вы получаете с 1 / 2 пополнения',
  ref_your_code: 'Реферальный код',
- ref_code_hint: '3–24 символа, латиница и цифры. Код нельзя изменить.',
+ ref_code_hint: '3–24 символа, латиница и цифры',
  ref_code_placeholder: 'Ваш код',
  ref_register_label: 'Регистрация индивидуального кода',
  collab_work: 'Работа',
@@ -4996,7 +5003,7 @@ var I18N = {
  sale: 'Продажа', all: 'Все', order: 'Заказ', execute: 'Исполнение',
  moderation: 'Модерация', active: 'Активные', completed_tab: 'Завершён.',
  loading: 'Загрузка данных с сервера…', empty: 'Пусто', no_listings: 'Объявлений нет',
- no_news: 'Пока нет новостей', save: 'Save', cancel: 'Отмена', next: 'Далее',
+ no_news: 'Пока нет новостей', save: 'Сохранить', cancel: 'Отмена', next: 'Далее',
  pay: 'Оплатить', buy: 'Купить', write: 'Написать', profile: 'Профиль',
  price: 'Цена', from: 'с', to: 'до', type: 'Тип', product_type: 'Вид товара',
  rating_from: 'Рейтинг сотрудника от', service_type: 'Вид услуги', order_svc: 'Заказать', execute_svc: 'Исполнять',
@@ -5067,7 +5074,7 @@ var I18N = {
  analytics_list: 'Аналитика объявлений',
  accept: 'Принять',
  reject: 'Отклонить',
- edit: 'Редактировать',
+ edit: 'Изменить',
  delete: 'Удалить',
  unpublish: 'Снять с публикации',
  logout: 'Выйти',
@@ -5561,11 +5568,17 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -5581,7 +5594,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -6309,11 +6322,17 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -6329,7 +6348,7 @@ terms_prefix: 'By continuing, you accept the ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -6556,7 +6575,7 @@ terms_prefix: 'By continuing, you accept the ',
  analytics_list: 'Anzeigenanalyse',
  accept: 'Annehmen',
  reject: 'Ablehnen',
- edit: 'Bearbeiten',
+ edit: 'Edit',
  delete: 'Löschen',
  unpublish: 'Zurückziehen',
  logout: 'Abmelden',
@@ -7045,11 +7064,17 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -7065,7 +7090,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -7289,7 +7314,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  analytics_list: 'Analyse des annonces',
  accept: 'Accepter',
  reject: 'Refuser',
- edit: 'Modifier',
+ edit: 'Edit',
  delete: 'Supprimer',
  unpublish: 'Retirer',
  logout: 'Déconnexion',
@@ -7778,11 +7803,17 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -7798,7 +7829,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -8022,7 +8053,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  analytics_list: 'Análisis de anuncios',
  accept: 'Aceptar',
  reject: 'Rechazar',
- edit: 'Editar',
+ edit: 'Edit',
  delete: 'Eliminar',
  unpublish: 'Retirar',
  logout: 'Cerrar sesión',
@@ -8511,11 +8542,17 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -8531,7 +8568,7 @@ terms_prefix: 'Al continuar, acepta el ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -8715,7 +8752,7 @@ terms_prefix: 'Al continuar, acepta el ',
  analytics_list: '广告分析',
  accept: '通过',
  reject: '拒绝',
- edit: '编辑',
+ edit: 'Edit',
  delete: '删除',
  unpublish: '下架',
  logout: '退出',
@@ -9204,11 +9241,17 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -9224,7 +9267,7 @@ terms_prefix: '继续即表示您同意',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -9451,7 +9494,7 @@ terms_prefix: '继续即表示您同意',
  analytics_list: 'Listings analytics',
  accept: 'Прийняти',
  reject: 'Відхилити',
- edit: 'Редагувати',
+ edit: 'Edit',
  delete: 'Видалити',
  unpublish: 'Зняти з публікації',
  logout: 'Вийти',
@@ -9942,11 +9985,17 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -9962,7 +10011,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -10184,7 +10233,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  analytics_list: 'Listings analytics',
  accept: 'Accetta',
  reject: 'Rifiuta',
- edit: 'Modifica',
+ edit: 'Edit',
  delete: 'Elimina',
  unpublish: 'Ritira',
  logout: 'Esci',
@@ -10673,11 +10722,17 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -10693,7 +10748,7 @@ terms_prefix: 'Continuando, accetti i ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -10915,7 +10970,7 @@ terms_prefix: 'Continuando, accetti i ',
  analytics_list: 'Listings analytics',
  accept: 'Aceitar',
  reject: 'Rejeitar',
- edit: 'Editar',
+ edit: 'Edit',
  delete: 'Eliminar',
  unpublish: 'Retirar',
  logout: 'Sair',
@@ -11977,11 +12032,17 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -11997,7 +12058,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -12219,7 +12280,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  analytics_list: 'Listings analytics',
  accept: 'Kabul',
  reject: 'Reddet',
- edit: 'Düzenle',
+ edit: 'Edit',
  delete: 'Sil',
  unpublish: 'Yayından kaldır',
  logout: 'Çıkış yap',
@@ -12708,11 +12769,17 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -12728,7 +12795,7 @@ terms_prefix: 'Devam ederek ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -13439,11 +13506,17 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -13459,7 +13532,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -13681,7 +13754,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  analytics_list: 'Listings analytics',
  accept: 'قبول',
  reject: 'رفض',
- edit: 'تعديل',
+ edit: 'Edit',
  delete: 'حذف',
  unpublish: 'إلغاء النشر',
  logout: 'تسجيل الخروج',
@@ -14170,11 +14243,17 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -14190,7 +14269,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -14412,7 +14491,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  analytics_list: 'Listings analytics',
  accept: '承認',
  reject: '却下',
- edit: '編集',
+ edit: 'Edit',
  delete: '削除',
  unpublish: '非公開',
  logout: 'ログアウト',
@@ -14901,11 +14980,17 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ promo_max_uses: 'Promo code used maximum times',
+ promo_not_found: 'Promo code not found',
+ promo_discount: 'Discount',
+ promo_activated: 'Activated',
+ promo_placeholder: 'Enter promo code',
+ promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
- ads_spend_2: 'Spend from 2nd deposits',
- ads_spend_1: 'Spend from 1st deposits',
+ ads_spend_2: 'Spend on secondary deposits',
+ ads_spend_1: 'Spend on primary deposits',
  ads_spend_total: 'Total ad spend',
- ads_l2_10d: 'L2+ partners invited in 10 days',
+ ads_l2_10d: 'Level-2 partners invited in last 10 days',
  ads_invited: 'Invited by partners',
  ads_tab_partners: 'Partners',
  ads_tab_stats: 'Statistics',
@@ -14921,7 +15006,7 @@ terms_prefix: '続行すると',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposit',
  ref_your_code: 'Referral code',
- ref_code_hint: '3–24 chars, Latin letters and digits. Cannot be changed later.',
+ ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
  collab_work: 'Jobs',
@@ -15145,7 +15230,7 @@ terms_prefix: '続行すると',
  analytics_list: 'Listings analytics',
  accept: '승인',
  reject: '거절',
- edit: '수정',
+ edit: 'Edit',
  delete: '삭제',
  unpublish: '게시 취소',
  logout: '로그아웃',
@@ -16230,6 +16315,7 @@ function setCollabTab(tab) {
   }
 }
 
+
 async function loadReferralPanel() {
   var box = document.getElementById('referral-panel');
   if (!box) return;
@@ -16242,15 +16328,24 @@ async function loadReferralPanel() {
     var html = '';
     if (!code) {
       html += '<div class="form-group"><label class="form-label">' + (tBlock('ref_register_label') || 'Регистрация индивидуального кода') + '</label>';
-      html += '<div style="display:flex;gap:8px;align-items:center;">';
-      html += '<input class="form-input" id="ref-code-input" placeholder="' + (tBlock('ref_code_placeholder') || 'Ваш код') + '" style="flex:1;text-transform:uppercase;">';
-      html += '<button type="button" class="btn" style="white-space:nowrap;" onclick="submitRefCode()">' + (tBlock('apply') || 'Применить') + '</button>';
+      html += '<div style="display:flex;gap:8px;align-items:stretch;">';
+      html += '<input class="form-input" id="ref-code-input" placeholder="' + (tBlock('ref_code_placeholder') || 'Ваш код') + '" style="flex:1 1 auto;min-width:0;text-transform:uppercase;font-size:15px;padding:12px 14px;">';
+      html += '<button type="button" class="btn" style="flex:0 0 auto;padding:10px 12px;font-size:13px;white-space:nowrap;min-width:0;" onclick="submitRefCode()">' + (tBlock('apply') || 'Применить') + '</button>';
       html += '</div></div>';
-      html += '<div class="subtitle" style="font-size:12px;margin-top:6px;">' + (tBlock('ref_code_hint') || '3–24 символа, латиница и цифры. Код нельзя изменить.') + '</div>';
+      html += '<div class="subtitle" style="font-size:12px;margin-top:6px;">' + (tBlock('ref_code_hint') || '3–24 символа, латиница и цифры') + '</div>';
     } else {
       html += '<div class="list-item" style="margin-bottom:10px;">';
-      html += '<div class="top"><div class="title">' + (tBlock('ref_your_code') || 'Реферальный код') + ': <b>' + code.replace(/</g,'&lt;') + '</b></div>';
-      html += '<div style="color:#34c759;font-weight:700;font-size:13px;">' + Number(rates.partner_1||0) + '% / ' + Number(rates.partner_2||0) + '%</div></div>';
+      html += '<div class="top" style="align-items:center;gap:8px;">';
+      html += '<div class="title" style="flex:1;min-width:0;">' + (tBlock('ref_your_code') || 'Реферальный код') + ': <b id="ref-code-display">' + code.replace(/</g,'&lt;') + '</b>';
+      html += ' <button type="button" onclick="startEditRefCode()" title="' + (tBlock('edit') || 'Изменить') + '" style="border:none;background:transparent;color:var(--accent,#2aabee);font-size:16px;cursor:pointer;padding:2px 6px;vertical-align:middle;">✏️</button>';
+      html += '</div>';
+      html += '<div style="color:#34c759;font-weight:700;font-size:13px;flex-shrink:0;">' + Number(rates.partner_1||0) + '% / ' + Number(rates.partner_2||0) + '%</div>';
+      html += '</div>';
+      html += '<div id="ref-code-edit-row" style="display:none;margin-top:10px;">';
+      html += '<div style="display:flex;gap:8px;align-items:stretch;">';
+      html += '<input class="form-input" id="ref-code-edit-input" value="' + code.replace(/"/g,'&quot;') + '" style="flex:1;text-transform:uppercase;font-size:15px;padding:12px 14px;">';
+      html += '<button type="button" class="btn" style="padding:10px 12px;font-size:13px;" onclick="saveEditRefCode()">' + (tBlock('save') || 'Сохранить') + '</button>';
+      html += '</div></div>';
       html += '<div class="subtitle">' + (tBlock('ref_you_earn') || 'Вы получаете с 1 / 2 пополнения') + '</div>';
       html += '<div class="subtitle" style="margin-top:4px;">' + (tBlock('ref_invitee_disc') || 'Скидка приглашённому с 1 пополнения') + ': <b>' + Number(rates.discount_1||0) + '%</b>';
       if (Number(rates.discount_2||0) > 0) html += ' · 2: <b>' + Number(rates.discount_2||0) + '%</b>';
@@ -16283,6 +16378,21 @@ async function submitRefCode() {
     try { tg.showAlert(e.message || tBlock('error')); } catch (e2) {}
   }
 }
+function startEditRefCode() {
+  var row = document.getElementById('ref-code-edit-row');
+  if (row) row.style.display = row.style.display === 'none' ? '' : 'none';
+}
+async function saveEditRefCode() {
+  var el = document.getElementById('ref-code-edit-input');
+  var code = (el && el.value || '').trim();
+  if (!code) { try { tg.showAlert(tBlock('ref_code_required') || 'Введите код'); } catch(e){} return; }
+  try {
+    await apiPost('/api/referral/change-code', { code: code });
+    await loadReferralPanel();
+  } catch (e) {
+    try { tg.showAlert(e.message || tBlock('error')); } catch (e2) {}
+  }
+}
 
 async function openAdsAnalytics() {
   document.getElementById('admin-section-title').textContent = tBlock('analytics_ads') || 'Реклама';
@@ -16293,7 +16403,8 @@ async function openAdsAnalytics() {
 async function renderAdsAnalytics() {
   var box = document.getElementById('admin-content');
   var tab = window._adsAnalyticsTab || 'stats';
-  var html = '<div class="seg-toggle" style="grid-template-columns:1fr 1fr;margin-bottom:12px;">';
+  // switcher like collaborate
+  var html = '<div class="seg-toggle" id="ads-seg" style="grid-template-columns:1fr 1fr;gap:6px;width:100%;box-sizing:border-box;margin-bottom:12px;">';
   html += '<button type="button" class="' + (tab==='stats'?'active':'') + '" onclick="window._adsAnalyticsTab=\'stats\';renderAdsAnalytics()">' + (tBlock('ads_tab_stats') || 'Статистика') + '</button>';
   html += '<button type="button" class="' + (tab==='partners'?'active':'') + '" onclick="window._adsAnalyticsTab=\'partners\';renderAdsAnalytics()">' + (tBlock('ads_tab_partners') || 'Партнёры') + '</button>';
   html += '</div><div id="ads-analytics-body"><div class="loading"><div class="spinner"></div></div></div>';
@@ -16305,11 +16416,11 @@ async function renderAdsAnalytics() {
       function row(l,v){ return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + l + '</div><div style="font-weight:600;">' + v + '</div></div></div>'; }
       var h = '';
       h += row(tBlock('ads_invited') || 'Приглашено партнёрами', d.invited_by_partners);
-      h += row(tBlock('ads_l2_10d') || 'Партнёров 2+ уровня приглашено за 10 дней', d.l2_invited_10d);
-      h += '<div style="height:8px;"></div>';
+      h += row(tBlock('ads_l2_10d') || 'Партнёров 2 уровня приглашено за последние 10 дней', d.l2_invited_10d);
+      h += '<div style="height:12px;"></div>';
       h += row(tBlock('ads_spend_total') || 'Потрачено на рекламу всего', Number(d.spend_total||0).toFixed(2) + ' $');
-      h += row(tBlock('ads_spend_1') || 'Траты с 1-х пополнений', Number(d.spend_1||0).toFixed(2) + ' $');
-      h += row(tBlock('ads_spend_2') || 'Траты со 2-х пополнений', Number(d.spend_2||0).toFixed(2) + ' $');
+      h += row(tBlock('ads_spend_1') || 'Траты на первостепенные платежи', Number(d.spend_1||0).toFixed(2) + ' $');
+      h += row(tBlock('ads_spend_2') || 'Траты на второстепенные платежи', Number(d.spend_2||0).toFixed(2) + ' $');
       body.innerHTML = h;
     } else {
       var d = await apiGet('/api/admin/referral/partners');
@@ -16317,18 +16428,17 @@ async function renderAdsAnalytics() {
       if (!items.length) { body.innerHTML = '<div class="empty">' + (tBlock('ads_no_partners') || 'Партнёров пока нет') + '</div>'; return; }
       var h = '';
       items.forEach(function(p) {
-        h += '<div class="list-item">';
-        h += '<div class="top">';
-        h += '<div class="title"><span class="seller-link" data-uid="' + p.user_id + '" onclick="return goProfile(' + p.user_id + ', event)">' + String(p.name||p.user_id).replace(/</g,'&lt;') + '</span></div>';
-        h += '<div style="font-family:monospace;font-size:13px;opacity:.9;">' + String(p.ref_code||'').replace(/</g,'&lt;') + '</div>';
-        h += '</div>';
-        h += '<div class="subtitle">' + (p.refs_10d||0) + ' / ' + (p.refs_total||0) + ' / ' + (p.refs_retained||0) + '</div>';
-        h += '<div style="display:flex;gap:6px;margin-top:8px;">';
+        h += '<div class="list-item" style="padding:12px;">';
+        h += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
+        h += '<div style="flex:1;min-width:90px;"><span class="seller-link" data-uid="' + p.user_id + '" onclick="return goProfile(' + p.user_id + ', event)" style="color:var(--accent,#2aabee);font-weight:600;">' + String(p.name||p.user_id).replace(/</g,'&lt;') + '</span></div>';
+        h += '<div style="flex:1;text-align:center;font-family:monospace;font-size:13px;letter-spacing:.02em;">' + String(p.ref_code||'').replace(/</g,'&lt;') + '</div>';
+        h += '<div style="flex:0 0 auto;font-size:13px;font-variant-numeric:tabular-nums;opacity:.95;">' + (p.refs_10d||0) + '/' + (p.refs_total||0) + '/' + (p.refs_retained||0) + '</div>';
+        h += '<div style="display:flex;gap:4px;flex-shrink:0;">';
         for (var lv=1; lv<=3; lv++) {
-          var sel = Number(p.ref_level) === lv ? ' selected' : '';
-          h += '<button type="button" class="sheet-select' + sel + '" style="flex:1;padding:6px;font-size:12px;" onclick="setPartnerLevel(' + p.user_id + ',' + lv + ')">' + lv + '</button>';
+          var sel = Number(p.ref_level) === lv;
+          h += '<button type="button" class="' + (sel ? 'btn' : 'btn btn-secondary') + '" style="padding:6px 10px;font-size:12px;min-width:36px;' + (sel ? 'background:var(--accent,#2aabee);border-color:var(--accent,#2aabee);' : '') + '" onclick="setPartnerLevel(' + p.user_id + ',' + lv + ')">' + lv + '</button>';
         }
-        h += '</div></div>';
+        h += '</div></div></div>';
       });
       body.innerHTML = h;
       bindProfileLinks(body);
@@ -16345,6 +16455,73 @@ async function setPartnerLevel(uid, level) {
     try { tg.showAlert(e.message); } catch (e2) {}
   }
 }
+
+var _depositPromo = { valid: false, pct: 0, original: 0, total: 0, code: '' };
+var _promoTimer = null;
+
+async function initDepositPromoField() {
+  var wrap = document.getElementById('deposit-promo-wrap');
+  if (!wrap) return;
+  try {
+    var st = await apiGet('/api/referral/promo-status');
+    if (!st.show_promo) {
+      wrap.style.display = 'none';
+      _depositPromo = { valid: false, pct: 0, original: 0, total: 0, code: '' };
+      return;
+    }
+    wrap.style.display = '';
+    var inp = document.getElementById('deposit-promo');
+    if (inp && st.promo_code) {
+      inp.value = st.promo_code;
+      onDepositPromoInput();
+    }
+  } catch (e) {
+    wrap.style.display = '';
+  }
+}
+
+function onDepositPromoInput() {
+  if (_promoTimer) clearTimeout(_promoTimer);
+  _promoTimer = setTimeout(validateDepositPromo, 400);
+}
+
+async function validateDepositPromo() {
+  var inp = document.getElementById('deposit-promo');
+  var st = document.getElementById('deposit-promo-status');
+  var code = (inp && inp.value || '').trim().toUpperCase();
+  if (!st) return;
+  if (!code) {
+    st.innerHTML = '';
+    _depositPromo = { valid: false, pct: 0, original: 0, total: 0, code: '' };
+    updateDepositTotals();
+    return;
+  }
+  var amount = parseFloat((document.getElementById('deposit-amount') || {}).value || '0') || 0;
+  var method = (typeof selectedDepositMethod !== 'undefined' ? selectedDepositMethod : 'card') || 'card';
+  try {
+    var d = await apiPost('/api/referral/validate-promo', { code: code, amount: amount || 1, method: method });
+    if (d.valid) {
+      _depositPromo = { valid: true, pct: Number(d.discount_pct||0), original: Number(d.original_total||0), total: Number(d.new_total||0), code: code };
+      st.innerHTML = '<div style="color:#34c759;font-weight:600;">' + (tBlock('promo_activated') || 'Активировано') + '</div>' +
+        '<div style="color:#34c759;font-size:11px;">' + (tBlock('promo_discount') || 'Скидка') + ' ' + Number(d.discount_pct||0) + '%</div>';
+    } else {
+      _depositPromo = { valid: false, pct: 0, original: 0, total: 0, code: '' };
+      var err = d.error || '';
+      if (err === 'max_uses') {
+        st.innerHTML = '<div style="color:#ffcc00;">' + (d.message || tBlock('promo_max_uses') || 'Промокод использован максимальное количество раз') + '</div>';
+      } else if (err === 'not_found') {
+        st.innerHTML = '<div style="color:#ff3b30;">' + (d.message || tBlock('promo_not_found') || 'Промокод не найден') + '</div>';
+      } else {
+        st.innerHTML = '<div style="color:#ff3b30;">' + (d.message || tBlock('promo_not_found') || 'Промокод не найден') + '</div>';
+      }
+    }
+  } catch (e) {
+    _depositPromo = { valid: false, pct: 0, original: 0, total: 0, code: '' };
+    st.innerHTML = '<div style="color:#ff3b30;">' + (e.message || tBlock('promo_not_found') || 'Промокод не найден') + '</div>';
+  }
+  updateDepositTotals();
+}
+
 
 function renderHireInfo() {
  var box = document.getElementById('hire-info-block');
@@ -19567,18 +19744,40 @@ function calcFee(amount, method, kind) {
 }
 
 function updateDepositTotals() {
-  try {
-    var amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
-    var method = selectedDepositMethod || null;
-    var rubEl = document.getElementById('deposit-amount-rub');
-    if (rubEl) rubEl.textContent = amount > 0 ? ('~' + fmtRub(rubOf(amount)) + ' ₽') : '~0 ₽';
-    var line = document.getElementById('deposit-total-line');
-    if (!line) return;
-    var info = calcFee(amount, method, 'deposit');
-    var pay = method ? info.total : amount;
-    var txt = (typeof tBlock === 'function' ? (tBlock('total_to_pay') || 'Итого к оплате') : 'Итого к оплате');
-    line.textContent = txt + ': ' + fmtUsd(pay) + '$ (~' + fmtRub(rubOf(pay)) + ' ₽)';
-  } catch (e) {}
+  var amountEl = document.getElementById('deposit-amount');
+  var amount = parseFloat((amountEl && amountEl.value) || '0') || 0;
+  var method = (typeof selectedDepositMethod !== 'undefined' ? selectedDepositMethod : 'card') || 'card';
+  var feeInfo = (typeof calcFee === 'function') ? calcFee(amount, method, 'deposit') : { total: amount, fee: 0, rate: 0, credit: amount };
+  var line = document.getElementById('deposit-total-line');
+  var rub = document.getElementById('deposit-amount-rub');
+  var rate = (typeof usdRubRate === 'number' && usdRubRate > 0) ? usdRubRate : 0;
+  if (rub) rub.textContent = '~' + (amount * rate).toFixed(0) + ' ₽';
+  var original = feeInfo.total;
+  var total = original;
+  var pct = 0;
+  if (window._depositPromo && _depositPromo.valid && _depositPromo.pct > 0) {
+    pct = _depositPromo.pct;
+    total = Math.round(original * (1 - pct / 100) * 100) / 100;
+  }
+  if (line) {
+    if (pct > 0 && total < original) {
+      line.innerHTML = (tBlock('total_pay') || 'Итого к оплате') + ': ' +
+        '<span style="text-decoration:line-through;opacity:.55;font-size:13px;margin-right:6px;">' + original.toFixed(2) + ' $</span>' +
+        '<span style="color:#34c759;font-size:12px;margin-right:6px;">−' + pct + '%</span>' +
+        '<b>' + total.toFixed(2) + ' $</b>';
+    } else {
+      line.innerHTML = (tBlock('total_pay') || 'Итого к оплате') + ': <b>' + total.toFixed(2) + ' $</b>';
+    }
+  }
+  var hint = document.getElementById('deposit-fee-hint');
+  if (hint) {
+    if (feeInfo.rate > 0) {
+      hint.style.display = '';
+      hint.textContent = (tBlock('fee') || 'Комиссия') + ': ' + (feeInfo.rate * 100).toFixed(1).replace(/\.0$/, '') + '%';
+    } else {
+      hint.style.display = 'none';
+    }
+  }
 }
 
 function updateWithdrawTotals() {
@@ -19628,8 +19827,7 @@ async function payDepositStars() {
 
 async function startDeposit() {
   var amount = parseFloat(document.getElementById('deposit-amount').value);
-  var comment = (document.getElementById('deposit-comment') || {}).value || '';
-  comment = String(comment).trim();
+  var promo = ((document.getElementById('deposit-promo') || {}).value || '').trim().toUpperCase();
   var btn = document.getElementById('deposit-btn');
   var dTerms = document.getElementById('deposit-terms-agree');
   if (dTerms && !dTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Accept the terms'); return; }
@@ -19640,15 +19838,43 @@ async function startDeposit() {
   var methodLabel = selectedDepositMethod === 'card' ? (tBlock('sbp') || 'SBP')
     : (selectedDepositMethod === 'crypto' ? (tBlock('crypto') || 'Crypto') : (tBlock('stars') || 'Telegram Stars'));
   var payUsd = feeInfo.total;
+  var originalPay = payUsd;
+  var discPct = 0;
+  if (promo) {
+    try {
+      var vd = await apiPost('/api/referral/validate-promo', { code: promo, amount: amount, method: selectedDepositMethod });
+      if (vd && vd.valid) {
+        discPct = Number(vd.discount_pct || 0);
+        if (discPct > 0) payUsd = Number(vd.new_total != null ? vd.new_total : (originalPay * (1 - discPct / 100)));
+        try { await apiPost('/api/deposit', { amount: amount, method: selectedDepositMethod, promo: promo }); } catch (eBind) {}
+      } else if (vd && vd.error === 'max_uses') {
+        tg.showAlert(vd.message || tBlock('promo_max_uses') || 'Промокод использован максимальное количество раз');
+        return;
+      } else if (vd && !vd.valid) {
+        tg.showAlert(vd.message || tBlock('promo_not_found') || 'Промокод не найден');
+        return;
+      }
+    } catch (eP) {
+      tg.showAlert(eP.message || tBlock('promo_not_found') || 'Промокод не найден');
+      return;
+    }
+  }
+  window._lastDepositPromo = promo && discPct > 0 ? { code: promo, pct: discPct } : null;
   var creditUsd = feeInfo.credit;
   var payRub = rubOf(payUsd);
   var creditRub = rubOf(creditUsd);
+  var payLine = (discPct > 0 && payUsd < originalPay)
+    ? ('<span style="text-decoration:line-through;opacity:.55;font-size:13px;margin-right:6px;">' + fmtUsd(originalPay) + '$</span>' +
+       '<span style="color:#34c759;font-size:12px;margin-right:6px;">−' + discPct + '%</span>' +
+       '<b>' + fmtUsd(payUsd) + '$ (~' + fmtRub(payRub) + ' ₽)</b>')
+    : (fmtRub(payRub) + ' ₽ (~' + fmtUsd(payUsd) + '$)');
 
   var html = '<div class="payment-card">' +
-    '<div class="row"><span class="label">' + (tBlock('to_pay') || 'К оплате') + '</span><span class="value">' + fmtRub(payRub) + ' ₽ (~' + fmtUsd(payUsd) + '$)</span></div>' +
+    '<div class="row"><span class="label">' + (tBlock('to_pay') || 'К оплате') + '</span><span class="value">' + payLine + '</span></div>' +
     '<div class="row"><span class="label">' + (tBlock('to_credit') || 'К зачислению') + '</span><span class="value">' + fmtUsd(creditUsd) + '$ (~' + fmtRub(creditRub) + ' ₽)</span></div>' +
     '<div class="row"><span class="label">' + (tBlock('pay_method') || 'Способ') + '</span><span class="value">' + methodLabel +
     (feeInfo.rate ? (' · ' + (feeInfo.rate * 100).toFixed(1).replace(/\.0$/, '') + '%') : ' · 0%') + '</span></div>' +
+    (discPct > 0 ? ('<div class="row"><span class="label">' + (tBlock('promo_code') || 'Промокод') + '</span><span class="value" style="color:#34c759;">' + promo + ' (−' + discPct + '%)</span></div>') : '') +
     '</div>';
 
   if (selectedDepositMethod === 'stars') {
