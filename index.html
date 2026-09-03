@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-03-v14 -->
+<!-- XCOD_BUILD 2026-09-03-v16 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -1224,10 +1224,10 @@
 
 <div id="verify-prompt-overlay" class="verify-prompt-overlay" style="display:none;">
  <div class="verify-prompt-card">
-  <h2 id="verify-prompt-title">Complete verification</h2>
-  <p id="verify-prompt-text">Verify your account to unlock full access and higher trust.</p>
-  <button type="button" class="btn" id="verify-prompt-go" onclick="onVerifyPromptGo()">Complete verification</button>
-  <button type="button" class="btn btn-secondary" id="verify-prompt-later" onclick="onVerifyPromptLater()">Later</button>
+  <h2 id="verify-prompt-title">Пройти верификацию</h2>
+  <p id="verify-prompt-text">Пройдите верификацию аккаунта, чтобы получить полный доступ и повысить доверие на платформе.</p>
+  <button type="button" class="btn" id="verify-prompt-go" onclick="onVerifyPromptGo()">Пройти верификацию</button>
+  <button type="button" class="btn btn-secondary" id="verify-prompt-later" onclick="onVerifyPromptLater()">Позже</button>
  </div>
 </div>
 <div id="fa2-overlay" class="fa2-overlay" style="display:none;">
@@ -1238,9 +1238,9 @@
 </div>
 <div id="privacy-overlay" class="privacy-overlay" style="display:none;">
  <div class="privacy-card">
- <h2 id="privacy-title">Privacy policy</h2>
+ <h2 id="privacy-title">Политика конфиденциальности</h2>
  <p id="privacy-text"></p>
- <button type="button" class="btn" id="privacy-accept-btn" onclick="acceptPrivacyAndContinue()">Accept and continue</button>
+ <button type="button" class="btn" id="privacy-accept-btn" onclick="acceptPrivacyAndContinue()">Принимаю и продолжаю</button>
  </div>
 </div>
 
@@ -2235,7 +2235,7 @@
 
  <div id="page-complaint" class="page">
  <button type="button" class="back-link" onclick="showPage('user-profile')" data-i18n="back">← Back</button>
- <div class="section-title" data-i18n="complaint_title">Report user</div>
+ <div class="section-title" data-i18n="complaint_title">Жалоба на пользователя</div>
  <div id="complaint-content"></div>
 </div>
 
@@ -2243,7 +2243,7 @@
  <div class="profile-top-bar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
  <button type="button" class="back-link" id="user-profile-back" onclick="backFromUserProfile()" data-i18n="back" style="margin:0;">← Назад</button>
  <div style="display:flex;align-items:center;gap:8px;">
-  <button type="button" class="btn-complaint" id="user-profile-complaint-btn" onclick="openComplaintMenu()" style="display:none;" data-i18n="complaint_btn">Report</button>
+  <button type="button" class="btn-complaint" id="user-profile-complaint-btn" onclick="openComplaintMenu()" style="display:none;" data-i18n="complaint_btn">Жалоба</button>
   <button type="button" class="btn-logout-red" id="user-profile-logout-btn" onclick="webLogout()" style="display:none;" data-i18n="logout">Выйти</button>
   <button type="button" class="profile-edit-btn" id="user-profile-mod-btn" style="display:none;" onclick="openProfileModMenu()" title="Модерация">✏️</button>
  </div>
@@ -3170,6 +3170,10 @@ function verifyLevelOf(u) {
   try {
     if (!u) return 0;
     var lvl = Math.max(0, Math.min(2, parseInt(u.verify_level, 10) || 0));
+    try {
+      if (u.has_2fa && lvl < 2) lvl = 2;
+      if ((u.verify_email || u.email) && u.has_2fa && lvl < 2) lvl = 2;
+    } catch (e3) {}
     // founders / owners without stored level still show passport verified
     try {
       var role = parseInt(u.role, 10) || 0;
@@ -3179,9 +3183,16 @@ function verifyLevelOf(u) {
   } catch (e) { return 0; }
 }
 function verifyTitle(level) {
-  if (level >= 2) return (typeof tBlock === 'function' && tBlock('verify_full')) || 'Verification passed';
-  if (level >= 1) return (typeof tBlock === 'function' && tBlock('verify_partial')) || 'Partial verification';
-  return (typeof tBlock === 'function' && tBlock('verify_none')) || 'No data';
+  function _vt(k, fb) {
+    try {
+      var v = (typeof tBlock === 'function') ? tBlock(k) : '';
+      if (!v || v === k) return fb;
+      return v;
+    } catch (e) { return fb; }
+  }
+  if (level >= 2) return _vt('verify_full', 'Верификация пройдена');
+  if (level >= 1) return _vt('verify_partial', 'Частичная верификация');
+  return _vt('verify_none', 'Нет данных');
 }
 function verifyBadgeHtml(level, clickable) {
   level = parseInt(level, 10) || 0;
@@ -3216,7 +3227,7 @@ function openComplaintMenu() {
   // only users below intern (role < 3)
   var myRole = Number((userData && userData.role) || 0);
   if (myRole >= 3) {
-    try { tg.showAlert(tBlock('complaint_staff_denied') || 'Staff cannot file complaints'); } catch(e){}
+    try { tg.showAlert(tBlock('complaint_staff_denied') || 'Сотрудники не могут подавать жалобы'); } catch(e){}
     return;
   }
   var myId = userData && (userData.user_id || userData.id);
@@ -3238,7 +3249,7 @@ function renderComplaintMenu() {
     { id: 'other', key: 'complaint_reason_other' }
   ];
   var sel = window._complaintReason || '';
-  var html = '<div class="section-title" style="font-size:16px;color:var(--text);">' + (tBlock('complaint_choose_reason') || 'Choose a reason') + '</div>';
+  var html = '<div class="section-title" style="font-size:16px;color:var(--text);">' + (tBlock('complaint_choose_reason') || 'Выберите причину') + '</div>';
   reasons.forEach(function(r) {
     var on = sel === r.id ? ' selected' : '';
     html += '<button type="button" class="complaint-reason-item' + on + '" onclick="complaintPickReason(\'' + r.id + '\')">' +
@@ -3246,7 +3257,7 @@ function renderComplaintMenu() {
   });
   if (sel) {
     html += '<div class="form-group" style="margin-top:14px;">' +
-      '<label class="form-label" style="color:var(--text);">' + (tBlock('complaint_comment') || 'Comment') + '</label>' +
+      '<label class="form-label" style="color:var(--text);">' + (tBlock('complaint_comment') || 'Комментарий') + '</label>' +
       '<textarea class="form-input" id="complaint-comment" rows="4" placeholder="' + (tBlock('complaint_comment_ph') || 'Describe the issue') + '" style="min-height:100px;color:var(--text);"></textarea></div>' +
       '<button type="button" class="btn" onclick="submitComplaint()">' + (tBlock('continue_btn') || 'Continue') + '</button>';
   }
@@ -3263,7 +3274,7 @@ function complaintPickReason(id) {
 async function submitComplaint() {
   try {
     if (!window._complaintReason) {
-      try { tg.showAlert(tBlock('complaint_choose_reason') || 'Choose a reason'); } catch(e){}
+      try { tg.showAlert(tBlock('complaint_choose_reason') || 'Выберите причину'); } catch(e){}
       return;
     }
     var comment = (document.getElementById('complaint-comment') || {}).value || '';
@@ -3566,10 +3577,17 @@ function showVerifyPrompt() {
   var text = document.getElementById('verify-prompt-text');
   var go = document.getElementById('verify-prompt-go');
   var later = document.getElementById('verify-prompt-later');
-  if (title) title.textContent = tBlock('verify_prompt_title') || 'Завершить верификацию';
-  if (text) text.textContent = tBlock('verify_prompt_text') || 'Verify your account to unlock full access and higher trust.';
-  if (go) go.textContent = tBlock('verify_prompt_go') || 'Завершить верификацию';
-  if (later) later.textContent = tBlock('verify_prompt_later') || 'Later';
+  function _t(k, fb) {
+    try {
+      var v = (typeof tBlock === 'function') ? tBlock(k) : '';
+      if (!v || v === k) return fb;
+      return v;
+    } catch (e) { return fb; }
+  }
+  if (title) title.textContent = _t('verify_prompt_title', 'Пройти верификацию');
+  if (text) text.textContent = _t('verify_prompt_text', 'Пройдите верификацию аккаунта, чтобы получить полный доступ и повысить доверие на платформе.');
+  if (go) go.textContent = _t('verify_prompt_go', 'Пройти верификацию');
+  if (later) later.textContent = _t('verify_prompt_later', 'Позже');
   ov.style.display = 'flex';
 }
 function hideVerifyPrompt() {
@@ -4767,6 +4785,10 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ verify_prompt_later: 'Позже',
+ verify_prompt_go: 'Пройти верификацию',
+ verify_prompt_text: 'Пройдите верификацию аккаунта, чтобы получить полный доступ и повысить доверие на платформе.',
+ verify_prompt_title: 'Пройти верификацию',
  verify_sale_required: 'Для объявлений о продаже нужна верификация паспорта',
  verify_freelance_required: 'Для фриланс-объявлений нужна полная верификация',
  verify_full_required: 'Требуется полная верификация',
@@ -4791,7 +4813,7 @@ var I18N = {
  admin_passport_btn: 'Passport',
  admin_verify_title: 'Verification data',
  admin_verify_btn: 'Verification',
- complaint_staff_denied: 'Staff cannot file complaints',
+ complaint_staff_denied: 'Сотрудники не могут подавать жалобы',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -4799,18 +4821,18 @@ var I18N = {
  mod_complaints_empty: 'No complaints',
  complaint_target: 'Target user',
  complaint_from: 'From',
- complaint_sent: 'Complaint submitted',
- complaint_comment_ph: 'Describe the issue',
- complaint_comment: 'Comment',
- complaint_reason_other: 'Other',
- complaint_reason_fraud_listing: 'Fraudulent listing',
- complaint_reason_fake: 'Fake identity / impersonation',
- complaint_reason_spam: 'Spam / advertising',
- complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
- complaint_reason_scam: 'Scam (Fraud)',
- complaint_choose_reason: 'Choose a reason',
- complaint_title: 'Report user',
- complaint_btn: 'Report',
+ complaint_sent: 'Жалоба отправлена',
+ complaint_comment_ph: 'Опишите проблему',
+ complaint_comment: 'Комментарий',
+ complaint_reason_other: 'Другое',
+ complaint_reason_fraud_listing: 'Мошенническое объявление',
+ complaint_reason_fake: 'Поддельная личность / выдача себя за другого',
+ complaint_reason_spam: 'Спам / реклама',
+ complaint_reason_aggressive: 'Агрессивное / неподобающее поведение',
+ complaint_reason_scam: 'Скам (обман)',
+ complaint_choose_reason: 'Выберите причину',
+ complaint_title: 'Жалоба на пользователя',
+ complaint_btn: 'Жалоба',
  verify_rejected: 'Верификация отклонена',
  verify_approved: 'Верификация одобрена',
  verify_photos_on_server: 'Фото сохранены на сервере',
@@ -4859,13 +4881,13 @@ var I18N = {
  verify_desc_0: 'Нет данных о верификации. Документы не предоставлены.',
  verify_desc_1: 'Частичная верификация: предоставлена только верификация по паспорту.',
  verify_desc_2: 'Верификация пройдена: включена 2FA и подтверждена почта/номер.',
- verify_btn_start: 'Verify passport',
+ verify_btn_start: 'Верифицировать паспорт',
  verify_btn_continue: 'Включить 2FA и подтвердить почту/номер',
  verify_btn_done: 'Верифицирован',
  verify_pending_full: 'Полная верификация на проверке (2FA + почта/номер).',
  verify_untrusted: 'Ненадёжный пользователь',
  privacy_title: 'Политика конфиденциальности',
- privacy_body: "Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp's)</a>.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Принимаю и продолжаю',
  support: 'Поддержка', back: '← Назад', menu: 'Меню',
  home: 'Главная', news: 'Новости', exchange: 'Биржа', freelance: 'Фриланс',
@@ -5577,7 +5599,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
  privacy_title: 'Privacy policy',
- privacy_body: "By continuing, you agree to the <a href=\"{url}\">privacy and data collection policy (for MiniApp's)</a>.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Accept and continue',
  support: 'Support', back: '← Back', menu: 'Menu',
  home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
@@ -6191,10 +6213,10 @@ terms_prefix: 'By continuing, you accept the ',
  fa2_enabled: 'Verifizierung abgeschlossen',
  fa2_setup_title: 'Verifizierung abschliessen',
  fa2_enter_password: 'Enter password',
- verify_prompt_later: 'Later',
- verify_prompt_go: 'Complete verification',
- verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
- verify_prompt_title: 'Complete verification',
+ verify_prompt_later: 'Später',
+ verify_prompt_go: 'Verifizierung starten',
+ verify_prompt_text: 'Verifizieren Sie Ihr Konto, um vollen Zugang und höheres Vertrauen auf der Plattform zu erhalten.',
+ verify_prompt_title: 'Verifizierung abschließen',
  passport_required: 'Complete passport verification first',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
@@ -6223,7 +6245,7 @@ terms_prefix: 'By continuing, you accept the ',
  admin_passport_btn: 'Passport',
  admin_verify_title: 'Verification data',
  admin_verify_btn: 'Verification',
- complaint_staff_denied: 'Staff cannot file complaints',
+ complaint_staff_denied: 'Mitarbeiter können keine Beschwerden einreichen',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -6231,18 +6253,18 @@ terms_prefix: 'By continuing, you accept the ',
  mod_complaints_empty: 'No complaints',
  complaint_target: 'Target user',
  complaint_from: 'From',
- complaint_sent: 'Complaint submitted',
- complaint_comment_ph: 'Describe the issue',
- complaint_comment: 'Comment',
- complaint_reason_other: 'Other',
- complaint_reason_fraud_listing: 'Fraudulent listing',
- complaint_reason_fake: 'Fake identity / impersonation',
- complaint_reason_spam: 'Spam / advertising',
- complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
- complaint_reason_scam: 'Scam (Fraud)',
- complaint_choose_reason: 'Choose a reason',
- complaint_title: 'Report user',
- complaint_btn: 'Report',
+ complaint_sent: 'Beschwerde eingereicht',
+ complaint_comment_ph: 'Beschreiben Sie das Problem',
+ complaint_comment: 'Kommentar',
+ complaint_reason_other: 'Sonstiges',
+ complaint_reason_fraud_listing: 'Betrügerische Anzeige',
+ complaint_reason_fake: 'Falsche Identität / Impersonation',
+ complaint_reason_spam: 'Spam / Werbung',
+ complaint_reason_aggressive: 'Aggressives / unangemessenes Verhalten',
+ complaint_reason_scam: 'Betrug (Scam)',
+ complaint_choose_reason: 'Grund wählen',
+ complaint_title: 'Benutzer melden',
+ complaint_btn: 'Melden',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -6282,7 +6304,7 @@ terms_prefix: 'By continuing, you accept the ',
  verify_photos_required: 'Please attach all required photos',
  verify_sent: 'Application submitted for moderation',verify_none: 'Keine Daten',
  verify_partial: 'Teilweise Verifizierung',
- verify_full: 'Verifizierung bestanden',
+ verify_full: 'Verifizierung abgeschlossen',
  verify_title: 'Verifizierung',
  verify_intro: 'Stufen: keine Daten → Reisepass → 2FA und E-Mail/Telefon.',
  verify_lvl_none: 'Keine Daten',
@@ -6297,7 +6319,7 @@ terms_prefix: 'By continuing, you accept the ',
  verify_pending_full: 'Vollständige Verifizierung wird geprüft.',
  verify_untrusted: 'Nicht vertrauenswürdiger Nutzer',
  privacy_title: 'Datenschutzrichtlinie',
- privacy_body: "Indem Sie fortfahren, stimmen Sie der <a href=\"{url}\">Datenschutzrichtlinie (for MiniApp's)</a> zu.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Akzeptieren und fortfahren',
  support: 'Support', back: '← Zurück', menu: 'Menü',
  home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
@@ -6897,10 +6919,10 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  fa2_enabled: 'Verification terminee',
  fa2_setup_title: 'Terminer la verification',
  fa2_enter_password: 'Enter password',
- verify_prompt_later: 'Later',
- verify_prompt_go: 'Complete verification',
- verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
- verify_prompt_title: 'Complete verification',
+ verify_prompt_later: 'Plus tard',
+ verify_prompt_go: 'Passer la verification',
+ verify_prompt_text: 'Verifiez votre compte pour un acces complet et une meilleure confiance sur la plateforme.',
+ verify_prompt_title: 'Terminer la verification',
  passport_required: 'Complete passport verification first',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
@@ -6929,7 +6951,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  admin_passport_btn: 'Passport',
  admin_verify_title: 'Verification data',
  admin_verify_btn: 'Verification',
- complaint_staff_denied: 'Staff cannot file complaints',
+ complaint_staff_denied: 'Le personnel ne peut pas signaler',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -6937,18 +6959,18 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  mod_complaints_empty: 'No complaints',
  complaint_target: 'Target user',
  complaint_from: 'From',
- complaint_sent: 'Complaint submitted',
- complaint_comment_ph: 'Describe the issue',
- complaint_comment: 'Comment',
- complaint_reason_other: 'Other',
- complaint_reason_fraud_listing: 'Fraudulent listing',
- complaint_reason_fake: 'Fake identity / impersonation',
- complaint_reason_spam: 'Spam / advertising',
- complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
- complaint_reason_scam: 'Scam (Fraud)',
- complaint_choose_reason: 'Choose a reason',
- complaint_title: 'Report user',
- complaint_btn: 'Report',
+ complaint_sent: 'Signalement envoyé',
+ complaint_comment_ph: 'Décrivez le problème',
+ complaint_comment: 'Commentaire',
+ complaint_reason_other: 'Autre',
+ complaint_reason_fraud_listing: 'Annonce frauduleuse',
+ complaint_reason_fake: 'Fausse identité / usurpation',
+ complaint_reason_spam: 'Spam / publicité',
+ complaint_reason_aggressive: 'Comportement agressif / inapproprié',
+ complaint_reason_scam: 'Arnaque (fraude)',
+ complaint_choose_reason: 'Choisissez une raison',
+ complaint_title: 'Signaler un utilisateur',
+ complaint_btn: 'Signaler',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -6986,7 +7008,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  verify_age_16: 'Service is available for users 16+',
  verify_photos_required: 'Please attach all required photos',
  verify_sent: 'Application submitted for moderation',
- verify_none: 'Pas de donnees',
+ verify_none: 'Aucune donnée',
  verify_partial: 'Vérification partielle',
  verify_full: 'Vérification réussie',
  verify_title: 'Vérification',
@@ -6997,13 +7019,13 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  verify_desc_0: 'Aucune donnee de verification. Documents non fournis.',
  verify_desc_1: 'Seule la vérification passeport.',
  verify_desc_2: '2FA activée, e-mail/téléphone confirmés.',
- verify_btn_start: 'Verifier le passeport',
+ verify_btn_start: 'Vérifier le passeport',
  verify_btn_continue: 'Terminer la verification',
  verify_btn_done: 'Vérifié',
  verify_pending_full: 'Vérification complète en cours.',
  verify_untrusted: 'Utilisateur non fiable',
- privacy_title: 'Politique de confidentialité',
- privacy_body: "En continuant, vous acceptez la <a href=\"{url}\">politique de confidentialité (for MiniApp's)</a>.",
+ privacy_title: 'Politique de confidentialite',
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Accepter et continuer',
  support: 'Support', back: '← Retour', menu: 'Menu',
  home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
@@ -7603,10 +7625,10 @@ terms_prefix: 'En continuant, vous acceptez les ',
  fa2_enabled: 'Verificacion completada',
  fa2_setup_title: 'Completar verificacion',
  fa2_enter_password: 'Enter password',
- verify_prompt_later: 'Later',
- verify_prompt_go: 'Complete verification',
- verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
- verify_prompt_title: 'Complete verification',
+ verify_prompt_later: 'Mas tarde',
+ verify_prompt_go: 'Completar verificacion',
+ verify_prompt_text: 'Verifique su cuenta para obtener acceso completo y mayor confianza en la plataforma.',
+ verify_prompt_title: 'Completar verificacion',
  passport_required: 'Complete passport verification first',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
@@ -7635,7 +7657,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  admin_passport_btn: 'Passport',
  admin_verify_title: 'Verification data',
  admin_verify_btn: 'Verification',
- complaint_staff_denied: 'Staff cannot file complaints',
+ complaint_staff_denied: 'El personal no puede presentar quejas',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -7643,18 +7665,18 @@ terms_prefix: 'En continuant, vous acceptez les ',
  mod_complaints_empty: 'No complaints',
  complaint_target: 'Target user',
  complaint_from: 'From',
- complaint_sent: 'Complaint submitted',
- complaint_comment_ph: 'Describe the issue',
- complaint_comment: 'Comment',
- complaint_reason_other: 'Other',
- complaint_reason_fraud_listing: 'Fraudulent listing',
- complaint_reason_fake: 'Fake identity / impersonation',
- complaint_reason_spam: 'Spam / advertising',
- complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
- complaint_reason_scam: 'Scam (Fraud)',
- complaint_choose_reason: 'Choose a reason',
- complaint_title: 'Report user',
- complaint_btn: 'Report',
+ complaint_sent: 'Queja enviada',
+ complaint_comment_ph: 'Describa el problema',
+ complaint_comment: 'Comentario',
+ complaint_reason_other: 'Otro',
+ complaint_reason_fraud_listing: 'Anuncio fraudulento',
+ complaint_reason_fake: 'Identidad falsa / suplantación',
+ complaint_reason_spam: 'Spam / publicidad',
+ complaint_reason_aggressive: 'Comportamiento agresivo / inapropiado',
+ complaint_reason_scam: 'Estafa (fraude)',
+ complaint_choose_reason: 'Elija un motivo',
+ complaint_title: 'Reportar usuario',
+ complaint_btn: 'Reportar',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -7694,7 +7716,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  verify_sent: 'Application submitted for moderation',
  verify_none: 'Sin datos',
  verify_partial: 'Verificación parcial',
- verify_full: 'Verificación superada',
+ verify_full: 'Verificación completada',
  verify_title: 'Verificación',
  verify_intro: 'Niveles: sin datos → pasaporte → 2FA y correo/teléfono.',
  verify_lvl_none: 'Sin datos',
@@ -7708,8 +7730,8 @@ terms_prefix: 'En continuant, vous acceptez les ',
  verify_btn_done: 'Verificado',
  verify_pending_full: 'Verificación completa en revisión.',
  verify_untrusted: 'Usuario no confiable',
- privacy_title: 'Política de privacidad',
- privacy_body: "Al continuar, acepta la <a href=\"{url}\">política de privacidad (for MiniApp's)</a>.",
+ privacy_title: 'Politica de privacidad',
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Aceptar y continuar',
  support: 'Support', back: '← Atrás', menu: 'Menú',
  home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -8284,6 +8306,25 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ verify_partial: '部分验证',
+ verify_full: '验证已通过',
+ complaint_staff_denied: '员工不能提交投诉',
+ complaint_sent: '投诉已提交',
+ complaint_comment_ph: '描述问题',
+ complaint_comment: '评论',
+ complaint_reason_other: '其他',
+ complaint_reason_fraud_listing: '欺诈性广告',
+ complaint_reason_fake: '虚假身份/冒充',
+ complaint_reason_spam: '垃圾信息/广告',
+ complaint_reason_aggressive: '攻击性/不当行为',
+ complaint_reason_scam: '诈骗',
+ complaint_choose_reason: '选择原因',
+ complaint_title: '举报用户',
+ complaint_btn: '举报',
+ verify_prompt_later: '稍后',
+ verify_prompt_go: '完成验证',
+ verify_prompt_text: '完成账户验证以解锁完整访问权限并提高平台信任度。',
+ verify_prompt_title: '完成验证',
  verify_done_desc: '已完成完整验证。密码和邮箱已保存。',
  verify_done_title: '验证已完成',
  verify_email: '邮箱',
@@ -8356,7 +8397,7 @@ terms_prefix: 'Al continuar, acepta el ',
  verify_sent: 'Application submitted for moderation',
  verify_btn_start: '验证护照',
  privacy_title: '隐私政策',
- privacy_body: "继续即表示您同意<a href=\"{url}\">隐私政策 (for MiniApp's)</a>。",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: '接受并继续',
  support: 'Support', back: '← 返回', menu: '菜单',
  home: '首页', news: '新闻', exchange: '交易所', freelance: '自由职业',
@@ -8957,10 +8998,10 @@ terms_prefix: '继续即表示您同意',
  fa2_enabled: 'Верифікацію завершено',
  fa2_setup_title: 'Завершити верифікацію',
  fa2_enter_password: 'Enter password',
- verify_prompt_later: 'Later',
- verify_prompt_go: 'Complete verification',
- verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
- verify_prompt_title: 'Complete verification',
+ verify_prompt_later: 'Пізніше',
+ verify_prompt_go: 'Пройти верифікацію',
+ verify_prompt_text: 'Пройдіть верифікацію акаунта, щоб отримати повний доступ і підвищити довіру на платформі.',
+ verify_prompt_title: 'Пройти верифікацію',
  passport_required: 'Complete passport verification first',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
@@ -8989,7 +9030,7 @@ terms_prefix: '继续即表示您同意',
  admin_passport_btn: 'Passport',
  admin_verify_title: 'Verification data',
  admin_verify_btn: 'Verification',
- complaint_staff_denied: 'Staff cannot file complaints',
+ complaint_staff_denied: 'Співробітники не можуть подавати скарги',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -8997,18 +9038,18 @@ terms_prefix: '继续即表示您同意',
  mod_complaints_empty: 'No complaints',
  complaint_target: 'Target user',
  complaint_from: 'From',
- complaint_sent: 'Complaint submitted',
- complaint_comment_ph: 'Describe the issue',
- complaint_comment: 'Comment',
- complaint_reason_other: 'Other',
- complaint_reason_fraud_listing: 'Fraudulent listing',
- complaint_reason_fake: 'Fake identity / impersonation',
- complaint_reason_spam: 'Spam / advertising',
- complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
- complaint_reason_scam: 'Scam (Fraud)',
- complaint_choose_reason: 'Choose a reason',
- complaint_title: 'Report user',
- complaint_btn: 'Report',
+ complaint_sent: 'Скаргу надіслано',
+ complaint_comment_ph: 'Опишіть проблему',
+ complaint_comment: 'Коментар',
+ complaint_reason_other: 'Інше',
+ complaint_reason_fraud_listing: 'Шахрайське оголошення',
+ complaint_reason_fake: 'Підроблена особа / видавання себе за іншого',
+ complaint_reason_spam: 'Спам / реклама',
+ complaint_reason_aggressive: 'Агресивна / неприйнятна поведінка',
+ complaint_reason_scam: 'Скам (обман)',
+ complaint_choose_reason: 'Оберіть причину',
+ complaint_title: 'Скарга на користувача',
+ complaint_btn: 'Скарга',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -9063,7 +9104,7 @@ terms_prefix: '继续即表示您同意',
  verify_pending_full: 'Повна верифікація на перевірці.',
  verify_untrusted: 'Ненадійний користувач',
  privacy_title: 'Політика конфіденційності',
- privacy_body: "Продовжуючи, ви погоджуєтесь з <a href=\"{url}\">політикою конфіденційності (for MiniApp's)</a>.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Приймаю і продовжую',
  support: 'Support', back: '← Назад', menu: 'Меню',
  home: 'Головна', news: 'Новини', exchange: 'Біржа', freelance: 'Фриланс',
@@ -9769,7 +9810,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
  privacy_title: 'Informativa sulla privacy',
- privacy_body: "Continuando, accetti l'<a href=\"{url}\">informativa sulla privacy (for MiniApp's)</a>.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Accetta e continua',
  support: 'Support', back: '← Indietro', menu: 'Menu',
  home: 'Home', news: 'Notizie', exchange: 'Borsa', freelance: 'Freelance',
@@ -10473,7 +10514,7 @@ terms_prefix: 'Continuando, accetti i ',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
  privacy_title: 'Política de privacidade',
- privacy_body: "Ao continuar, aceita a <a href=\"{url}\">política de privacidade (for MiniApp's)</a>.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Aceitar e continuar',
  support: 'Support', back: '← Voltar', menu: 'Menu',
  home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
@@ -11750,7 +11791,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
  privacy_title: 'Gizlilik politikası',
- privacy_body: "Devam ederek <a href=\"{url}\">gizlilik politikasını (for MiniApp's)</a> kabul edersiniz.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Kabul et ve devam et',
  support: 'Support', back: '← Geri', menu: 'Menü',
  home: 'Ana sayfa', news: 'Haberler', exchange: 'Borsa', freelance: 'Freelance',
@@ -12454,7 +12495,7 @@ terms_prefix: 'Devam ederek ',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
  privacy_title: 'Kebijakan privasi',
- privacy_body: "Dengan melanjutkan, Anda menyetujui <a href=\"{url}\">kebijakan privasi (for MiniApp's)</a>.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Terima dan lanjutkan',
  support: 'Support', back: '← Kembali', menu: 'Menu',
  home: 'Beranda', news: 'Berita', exchange: 'Bursa', freelance: 'Freelance',
@@ -13158,7 +13199,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
  privacy_title: 'سياسة الخصوصية',
- privacy_body: "بالمتابعة فإنك توافق على <a href=\"{url}\">سياسة الخصوصية (for MiniApp's)</a>.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'موافق ومتابعة',
  support: 'Support', back: '→ رجوع', menu: 'القائمة',
  home: 'الرئيسية', news: 'الأخبار', exchange: 'البورصة', freelance: 'العمل الحر',
@@ -13862,7 +13903,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
  privacy_title: 'プライバシーポリシー',
- privacy_body: "続行すると<a href=\"{url}\">プライバシーポリシー (for MiniApp's)</a>に同意したことになります。",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: '同意して続ける',
  support: 'Support', back: '← 戻る', menu: 'メニュー',
  home: 'ホーム', news: 'ニュース', exchange: '取引所', freelance: 'フリーランス',
@@ -14462,10 +14503,10 @@ terms_prefix: '続行すると',
  fa2_enabled: '인증이 완료되었습니다',
  fa2_setup_title: '인증 완료',
  fa2_enter_password: 'Enter password',
- verify_prompt_later: 'Later',
- verify_prompt_go: 'Complete verification',
- verify_prompt_text: 'Verify your account to unlock full access and higher trust on the platform.',
- verify_prompt_title: 'Complete verification',
+ verify_prompt_later: '나중에',
+ verify_prompt_go: '인증하기',
+ verify_prompt_text: '계정을 인증하면 전체 접근 권한과 더 높은 신뢰를 얻을 수 있습니다.',
+ verify_prompt_title: '인증 완료',
  passport_required: 'Complete passport verification first',
  wrong_password: 'Wrong password',
  email_mismatch: 'Email does not match',
@@ -14494,7 +14535,7 @@ terms_prefix: '続行すると',
  admin_passport_btn: 'Passport',
  admin_verify_title: 'Verification data',
  admin_verify_btn: 'Verification',
- complaint_staff_denied: 'Staff cannot file complaints',
+ complaint_staff_denied: '직원은 신고할 수 없습니다',
  btn_reject: 'Reject',
  btn_approve: 'Accept',
  btn_dismiss: 'Dismiss',
@@ -14502,18 +14543,18 @@ terms_prefix: '続行すると',
  mod_complaints_empty: 'No complaints',
  complaint_target: 'Target user',
  complaint_from: 'From',
- complaint_sent: 'Complaint submitted',
- complaint_comment_ph: 'Describe the issue',
- complaint_comment: 'Comment',
- complaint_reason_other: 'Other',
- complaint_reason_fraud_listing: 'Fraudulent listing',
- complaint_reason_fake: 'Fake identity / impersonation',
- complaint_reason_spam: 'Spam / advertising',
- complaint_reason_aggressive: 'Aggressive / inappropriate behavior',
- complaint_reason_scam: 'Scam (Fraud)',
- complaint_choose_reason: 'Choose a reason',
- complaint_title: 'Report user',
- complaint_btn: 'Report',
+ complaint_sent: '신고가 접수되었습니다',
+ complaint_comment_ph: '문제 설명',
+ complaint_comment: '댓글',
+ complaint_reason_other: '기타',
+ complaint_reason_fraud_listing: '사기성 게시물',
+ complaint_reason_fake: '가짜 신원/사칭',
+ complaint_reason_spam: '스팸/광고',
+ complaint_reason_aggressive: '공격적/부적절한 행동',
+ complaint_reason_scam: '사기',
+ complaint_choose_reason: '사유 선택',
+ complaint_title: '사용자 신고',
+ complaint_btn: '신고',
  verify_rejected: 'Verification rejected',
  verify_approved: 'Verification approved',
  verify_photos_on_server: 'Photos are stored on the server',
@@ -14552,8 +14593,8 @@ terms_prefix: '続行すると',
  verify_photos_required: 'Please attach all required photos',
  verify_sent: 'Application submitted for moderation',
  verify_none: '데이터 없음',
- verify_partial: 'Partial verification',
- verify_full: 'Verification passed',
+ verify_partial: '부분 인증',
+ verify_full: '인증 완료',
  verify_title: 'Verification',
  verify_intro: 'Levels: no data → passport → 2FA and confirmed email/phone.',
  verify_lvl_none: 'No data',
@@ -14568,7 +14609,7 @@ terms_prefix: '続行すると',
  verify_pending_full: 'Full verification is pending review (2FA + email/phone).',
  verify_untrusted: 'Untrusted user',
  privacy_title: '개인정보 처리방침',
- privacy_body: "계속하면 <a href=\"{url}\">개인정보 처리방침 (for MiniApp's)</a>에 동의하게 됩니다.",
+ privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: '동의하고 계속',
  support: 'Support', back: '← 뒤로', menu: '메뉴',
  home: '홈', news: '뉴스', exchange: '거래소', freelance: '프리랜스',
@@ -15965,6 +16006,24 @@ function tBlock(key) {
  if (I18N.en && I18N.en[key] != null && I18N.en[key] !== '') return I18N.en[key];
  // last-resort Russian defaults for critical keys
  var RU_FALLBACK = {
+   complaint_btn: 'Жалоба',
+   complaint_title: 'Жалоба на пользователя',
+   complaint_choose_reason: 'Выберите причину',
+   complaint_reason_scam: 'Скам (обман)',
+   complaint_reason_aggressive: 'Агрессивное / неподобающее поведение',
+   complaint_reason_spam: 'Спам / реклама',
+   complaint_reason_fake: 'Поддельная личность / выдача себя за другого',
+   complaint_reason_fraud_listing: 'Мошенническое объявление',
+   complaint_reason_other: 'Другое',
+   verify_btn_start: 'Верифицировать паспорт',
+
+   verify_prompt_title: 'Пройти верификацию',
+   verify_prompt_text: 'Пройдите верификацию аккаунта, чтобы получить полный доступ и повысить доверие на платформе.',
+   verify_prompt_go: 'Пройти верификацию',
+   verify_prompt_later: 'Позже',
+   privacy_title: 'Политика конфиденциальности',
+   privacy_accept: 'Принимаю и продолжаю',
+
    verify_done_title: 'Верификация пройдена',
    verify_done_desc: 'Полная верификация установлена. Пароль и почта сохранены.',
    code_sent_to_linked: 'Код будет отправлен на почту, привязанную к аккаунту',
@@ -16938,7 +16997,7 @@ async function renderUserProfile() {
      // only regular users below intern (role < 3), not own profile
      if (myId && String(myId) !== String(uid) && myRole < 3 && !(p && p.banned_profile)) {
        cbtn.style.display = 'inline-flex';
-       cbtn.textContent = tBlock('complaint_btn') || 'Report';
+       cbtn.textContent = tBlock('complaint_btn') || 'Жалоба';
      } else {
        cbtn.style.display = 'none';
      }
@@ -20664,7 +20723,7 @@ async function openAdminComplaintDetail(id) {
       '<b>' + (tBlock('complaint_target') || 'Target') + ':</b> <span class="seller-link" onclick="goProfile(' + it.target_id + ')">' + it.target_id + '</span><br>' +
       '<b>' + (tBlock('complaint_from') || 'From') + ':</b> <span class="seller-link" onclick="goProfile(' + it.reporter_id + ')">' + it.reporter_id + '</span><br>' +
       '<b>' + (tBlock('complaint_choose_reason') || 'Reason') + ':</b> ' + (reasonMap[it.reason] || it.reason) + '<br>' +
-      '<b>' + (tBlock('complaint_comment') || 'Comment') + ':</b> ' + String(it.comment || '—').replace(/</g,'&lt;') +
+      '<b>' + (tBlock('complaint_comment') || 'Комментарий') + ':</b> ' + String(it.comment || '—').replace(/</g,'&lt;') +
       '</div>' +
       '<div class="btn-row">' +
       '<button type="button" class="btn btn-success" onclick="adminDecideComplaint(' + id + ',\'resolve\')">' + (tBlock('btn_resolve') || 'Resolve') + '</button>' +
@@ -21290,20 +21349,20 @@ function showPrivacyOverlay(policyUrl) {
  else if (userData && userData.privacy_policy_url) url = String(userData.privacy_policy_url).trim();
  } catch (e) {}
 
- var title = (typeof tBlock === 'function' ? tBlock('privacy_title') : '') || 'Privacy policy';
- if (title === 'privacy_title') title = 'Privacy policy';
- title = String(title).replace(/<[^>]+>/g, '').replace(/^📄\s*/, '').trim() || 'Privacy policy';
+ var title = (typeof tBlock === 'function' ? tBlock('privacy_title') : '') || '';
+ if (!title || title === 'privacy_title') title = 'Политика конфиденциальности';
+ title = String(title).replace(/<[^>]+>/g, '').replace(/^📄\s*/, '').trim() || 'Политика конфиденциальности';
 
  var bodyTpl = (typeof tBlock === 'function' ? tBlock('privacy_body') : '') || '';
  if (!bodyTpl || bodyTpl === 'privacy_body') {
- bodyTpl = "By continuing, you agree to the <a href=\"{url}\">privacy and data collection policy (for MiniApp's)</a>.";
+ bodyTpl = "Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.";
  }
  var body = bodyTpl.replace(/\{url\}/g, url.replace(/"/g, ''));
  body = body.replace(/<a /g, '<a style="color:#2AABEE;text-decoration:none;font-weight:500;" target="_blank" rel="noopener noreferrer" ');
 
- var accept = (typeof tBlock === 'function' ? tBlock('privacy_accept') : '') || 'Accept and continue';
- if (accept === 'privacy_accept') accept = 'Accept and continue';
- accept = String(accept).replace(/^✅\s*/, '').trim() || 'Accept and continue';
+ var accept = (typeof tBlock === 'function' ? tBlock('privacy_accept') : '') || '';
+ if (!accept || accept === 'privacy_accept') accept = 'Принимаю и продолжаю';
+ accept = String(accept).replace(/^✅\s*/, '').trim() || 'Принимаю и продолжаю';
 
  if (h2) h2.textContent = title;
  if (btn) {
