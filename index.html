@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-03-v12 -->
+<!-- XCOD_BUILD 2026-09-03-v13 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -3327,7 +3327,7 @@ function openProfileSettings() {
   window._settingsSeries = '';
   function fillSettingsLabels() {
     var title = document.querySelector('#page-profile-settings .section-title');
-    if (title) title.textContent = tBlock('profile_settings') || 'Настройки профиля';
+    if (title) { var _ps = tBlock('profile_settings'); title.textContent = (!_ps || _ps === 'profile_settings') ? 'Настройки профиля' : _ps; }
     var page = document.getElementById('page-profile-settings');
     if (!page) return;
     var titles = page.querySelectorAll('.support-tile-title');
@@ -3860,8 +3860,7 @@ async function sendFa2EmailCode() {
     if (btn) { btn.disabled = true; btn.textContent = tBlock('wait') || 'Подождите...'; }
     var res = await apiPost('/api/verify/2fa/send-email-code', { email: email });
     var hintMsg = tBlock('code_sent_email') || 'Код отправлен на почту';
-    if (res && res.sent_telegram && !res.sent_email) hintMsg = tBlock('code_sent_tg') || 'Код отправлен в Telegram (отправка на почту временно недоступна)';
-    else if (res && res.sent_email) hintMsg = tBlock('code_sent_email') || 'Код отправлен на почту';
+    hintMsg = tBlock('code_sent_email') || 'Код отправлен на почту';
     try { tg.showAlert(hintMsg); } catch(e){}
     if (btn) { btn.disabled = false; btn.textContent = tBlock('send_email_code') || 'Отправить код'; }
     /* после отправки — отдельное меню ввода кода */
@@ -3993,8 +3992,8 @@ function renderVerifyPage() {
   if (btn) {
     if (level >= 2) {
       btn.style.display = 'none';
-      if (title) title.textContent = tBlock('verify_done_title') || 'Верификация пройдена';
-      if (desc) desc.textContent = tBlock('verify_done_desc') || 'Полная верификация установлена. Пароль и почта сохранены.';
+      if (title) { var _vt = tBlock('verify_done_title'); title.textContent = (!_vt || _vt === 'verify_done_title') ? 'Верификация пройдена' : _vt; }
+      if (desc) { var _vd = tBlock('verify_done_desc'); desc.textContent = (!_vd || _vd === 'verify_done_desc') ? 'Полная верификация установлена. Пароль и почта сохранены.' : _vd; }
       window.__fa2Step = 0;
     } else if (level >= 1) {
       btn.style.display = 'none';
@@ -4768,11 +4767,21 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ fa2_enabled: 'Верификация пройдена',
+ code_sent_email: 'Код отправлен на почту',
+ email_code: 'Код подтверждения',
+ send_email_code: 'Отправить код',
+ code_sent_to_linked: 'Код будет отправлен на почту, привязанную к аккаунту',
+ verify_done_desc: 'Полная верификация установлена. Пароль и почта сохранены.',
+ verify_done_title: 'Верификация пройдена',
+ change_email: 'Сменить почту',
+ change_password: 'Сменить пароль',
+ profile_settings: 'Настройки профиля',
  pwd_email_not_set: 'Пароль и почта не установлены. Сначала пройдите полную верификацию.',
  restrict_publish: 'Restrict publishing',
  action_history: 'Action history',
  verify_passport_status: 'Passport status',
- verify_email: 'Email',
+ verify_email: 'Почта',
  verify_phone: 'Phone (Telegram)',
  verify_country: 'Country of residence',
  admin_no_passport: 'No passport data submitted',
@@ -5445,6 +5454,12 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ code_sent_email: 'Code sent to email',
+ email_code: 'Verification code',
+ send_email_code: 'Send code',
+ code_sent_to_linked: 'A code will be sent to the email linked to this account',
+ verify_done_desc: 'Full verification is set. Password and email are saved.',
+ verify_done_title: 'Verification completed',
  pwd_email_not_set: 'Password and email are not set. Complete full verification first.',
  verify_freelance_required: 'Your account must be fully verified to create freelance listings',
  verify_sale_required: 'Passport verification is required to create sale listings',
@@ -6146,7 +6161,8 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
- verify_done_desc: 'Vollstandige Verifizierung eingerichtet. Passwort und E-Mail gespeichert.',
+ code_sent_to_linked: 'Ein Code wird an die mit dem Konto verknüpfte E-Mail gesendet',
+ verify_done_desc: 'Vollständige Verifizierung eingerichtet. Passwort und E-Mail gespeichert.',
  verify_done_title: 'Verifizierung abgeschlossen',
  code_sent_to: 'Code gesendet an',
  code_sent_tg: 'Code an Telegram gesendet (E-Mail voruebergehend nicht verfuegbar)',
@@ -6156,7 +6172,7 @@ terms_prefix: 'By continuing, you accept the ',
  tg_code: 'Code aus Telegram',
  send_tg_code: 'Code an Telegram senden',
  fa2_ready_hint: 'E-Mail bestaetigt. Tippen Sie auf die Schaltflaeche, um abzuschliessen.',
- email_code: 'Bestaetigungscode',
+ email_code: 'Bestätigungscode',
  send_email_code: 'Code senden',
  verify_full_required: 'Vollstandige Verifizierung erforderlich',
  fa2_setup_hint: 'Legen Sie Passwort und E-Mail fest, um die vollstandige Verifizierung abzuschliessen.',
@@ -8911,6 +8927,7 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ code_sent_to_linked: 'Код буде надіслано на пошту, привʼязану до акаунта',
  verify_done_desc: 'Повну верифікацію встановлено. Пароль і пошту збережено.',
  verify_done_title: 'Верифікацію пройдено',
  code_sent_to: 'Код надіслано на',
@@ -15944,6 +15961,9 @@ function tBlock(key) {
  if (I18N.en && I18N.en[key] != null && I18N.en[key] !== '') return I18N.en[key];
  // last-resort Russian defaults for critical keys
  var RU_FALLBACK = {
+   verify_done_title: 'Верификация пройдена',
+   verify_done_desc: 'Полная верификация установлена. Пароль и почта сохранены.',
+   code_sent_to_linked: 'Код будет отправлен на почту, привязанную к аккаунту',
    profile_settings: 'Настройки профиля',
    change_password: 'Сменить пароль',
    change_email: 'Сменить почту',
