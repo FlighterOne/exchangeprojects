@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-02-v11 -->
+<!-- XCOD_BUILD 2026-09-03-v12 -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -2306,6 +2306,8 @@ var APP_INSTALL_FILES = {
 var __appInstallPlatform = null;
 var APP_I18N = {
   ru: {
+ verify_done_desc: 'Полная верификация установлена. Пароль и почта сохранены.',
+ verify_done_title: 'Верификация пройдена',
  password_updated: 'Пароль обновлён',
  email_updated: 'Почта обновлена',
  wrong_password: 'Неверный пароль',
@@ -2313,7 +2315,9 @@ var APP_I18N = {
  code_sent_to_linked: 'Код будет отправлен на почту, привязанную к аккаунту',
  verify_email: 'Почта',
  code_sent_to: 'Код отправлен на',
- fa2_enabled: 'Верификация завершена',
+ verify_done_title: 'Верификация пройдена',
+   verify_done_desc: 'Полная верификация установлена. Пароль и почта сохранены.',
+   fa2_enabled: 'Верификация пройдена',
  fa2_ready_hint: 'Почта подтверждена. Нажмите кнопку, чтобы завершить верификацию.',
  forgot_password: 'Забыли пароль?',
  tg_code_sent: 'Код отправлен в Telegram',
@@ -2371,6 +2375,8 @@ var APP_I18N = {
     dl_macos_guide:'1. Скачайте .dmg.\n2. В «Программы».\n3. Разрешите при блоке.\n4. Запустите.',
     dl_linux_guide:'1. Скачайте AppImage.\n2. chmod +x\n3. Запустите.' },
   en: {
+ verify_done_desc: 'Full verification is set. Password and email are saved.',
+ verify_done_title: 'Verification completed',
  password_updated: 'Password updated',
  email_updated: 'Email updated',
  wrong_password: 'Wrong password',
@@ -3830,8 +3836,8 @@ async function confirmFa2EmailCode() {
     await apiPost('/api/verify/2fa/check-email-code', { email: email, code: code });
     window.__fa2Email = email;
     window.__fa2EmailCode = code;
-    window.__fa2Step = 4;
-    renderVerifyPage();
+    // сразу сохраняем пароль+почту и ставим полную верификацию
+    await submit2faSetup();
   } catch (e) {
     var cerr2 = document.getElementById('v2-code-err');
     var msg = mapPwdError(e.message);
@@ -3886,12 +3892,11 @@ async function submit2faSetup() {
       return;
     }
     var res = await apiPost('/api/verify/2fa/setup', { password: p1, password2: p1, email: email, code: code });
-    if (userData) {
-      userData.verify_level = 2;
-      userData.has_2fa = true;
-      userData.verify_email = (res && (res.verify_email || res.email)) || email;
-      userData.email = userData.verify_email;
-    }
+    if (!userData) userData = {};
+    userData.verify_level = 2;
+    userData.has_2fa = true;
+    userData.verify_email = (res && (res.verify_email || res.email)) || email;
+    userData.email = userData.verify_email;
     window.__fa2Step = 0;
     window.__fa2Pwd = '';
     window.__fa2Email = '';
@@ -3900,15 +3905,14 @@ async function submit2faSetup() {
       var fresh = await apiGet('/api/user');
       if (fresh) {
         userData = Object.assign(userData || {}, fresh);
-        if (fresh.verify_email) userData.verify_email = fresh.verify_email;
-        if (fresh.email) userData.email = fresh.email;
-        userData.verify_level = fresh.verify_level != null ? fresh.verify_level : 2;
+        userData.verify_level = Math.max(2, Number(fresh.verify_level || 0) || 0);
         userData.has_2fa = true;
+        if (fresh.verify_email) userData.verify_email = fresh.verify_email;
       }
     } catch (eU) {}
-    try { tg.showAlert(tBlock('fa2_enabled') || 'Верификация завершена'); } catch(e){}
-    renderVerifyPage();
     try { updateOwnVerifyBadge(); } catch (e3) {}
+    try { tg.showAlert(tBlock('fa2_enabled') || 'Верификация пройдена'); } catch(e){}
+    renderVerifyPage();
   } catch (e) {
     var msg = mapPwdError(e.message);
     if (String(e.message || '').indexOf('bad_code') >= 0) msg = tBlock('bad_code') || 'Неверный или просроченный код';
@@ -3989,6 +3993,9 @@ function renderVerifyPage() {
   if (btn) {
     if (level >= 2) {
       btn.style.display = 'none';
+      if (title) title.textContent = tBlock('verify_done_title') || 'Верификация пройдена';
+      if (desc) desc.textContent = tBlock('verify_done_desc') || 'Полная верификация установлена. Пароль и почта сохранены.';
+      window.__fa2Step = 0;
     } else if (level >= 1) {
       btn.style.display = 'none';
       if (!window.__fa2Step) window.__fa2Step = 0;
@@ -6139,6 +6146,8 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ verify_done_desc: 'Vollstandige Verifizierung eingerichtet. Passwort und E-Mail gespeichert.',
+ verify_done_title: 'Verifizierung abgeschlossen',
  code_sent_to: 'Code gesendet an',
  code_sent_tg: 'Code an Telegram gesendet (E-Mail voruebergehend nicht verfuegbar)',
  code_sent_email: 'Code an E-Mail gesendet',
@@ -6843,6 +6852,8 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ verify_done_desc: 'Verification complete activee. Mot de passe et e-mail enregistres.',
+ verify_done_title: 'Verification terminee',
  code_sent_to: 'Code envoye a',
  code_sent_tg: 'Code envoye sur Telegram (e-mail temporairement indisponible)',
  code_sent_email: 'Code envoye par e-mail',
@@ -7547,6 +7558,8 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ verify_done_desc: 'Verificacion completa activada. Contrasena y correo guardados.',
+ verify_done_title: 'Verificacion completada',
  code_sent_to: 'Codigo enviado a',
  code_sent_tg: 'Codigo enviado a Telegram (correo temporalmente no disponible)',
  code_sent_email: 'Codigo enviado al correo',
@@ -8251,6 +8264,8 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ verify_done_desc: '已完成完整验证。密码和邮箱已保存。',
+ verify_done_title: '验证已完成',
  verify_email: '邮箱',
  code_sent_to: '验证码已发送至',
  fa2_enabled: '验证已完成',
@@ -8896,6 +8911,8 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ verify_done_desc: 'Повну верифікацію встановлено. Пароль і пошту збережено.',
+ verify_done_title: 'Верифікацію пройдено',
  code_sent_to: 'Код надіслано на',
  code_sent_tg: 'Код надіслано в Telegram (надсилання на пошту тимчасово недоступне)',
  code_sent_email: 'Код надіслано на пошту',
@@ -14399,6 +14416,8 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ verify_done_desc: '전체 인증이 설정되었습니다. 비밀번호와 이메일이 저장되었습니다.',
+ verify_done_title: '인증 완료',
  code_sent_to: '코드 전송됨',
  code_sent_tg: '텔레그램으로 코드를 보냈습니다 (이메일 일시 불가)',
  code_sent_email: '이메일로 코드를 보냈습니다',
