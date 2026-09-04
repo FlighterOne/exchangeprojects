@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- XCOD_BUILD 2026-09-04-v30-i18n-deep-audit -->
+<!-- XCOD_BUILD 2026-09-05-v34-ratings-fl-analytics -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -1480,7 +1480,7 @@ button.btn.btn-compact,
  <span class="di">📰</span> <span data-i18n="news">Новости</span>
  </button>
  <button class="drawer-item" data-page="exchange" onclick="navTo('exchange')">
- <span class="di">📊</span> <span data-i18n="exchange">Биржа</span>
+ <span class="di">📊</span> <span data-i18n="exchange">Биржа продаж</span>
  </button>
  <button class="drawer-item" data-page="freelance" onclick="navTo('freelance')">
  <span class="di">🛠️</span> <span data-i18n="freelance">Фриланс</span>
@@ -1755,7 +1755,7 @@ button.btn.btn-compact,
  <!-- EXCHANGE -->
  <div id="page-exchange" class="page">
  <div class="page-header-row" style="margin-bottom:16px;">
- <div class="section-title" data-i18n="exchange">Биржа</div>
+ <div class="section-title" data-i18n="exchange">Биржа продаж</div>
  <button type="button" class="btn btn-compact" onclick="startSaleCreate()" data-i18n="create">+ Создать</button>
  </div>
  <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
@@ -1864,6 +1864,7 @@ button.btn.btn-compact,
  <input class="form-input" type="number" id="fl-price-to" placeholder="до" style="flex:1;">
  </div>
  </div>
+ <button class="btn" style="margin-bottom:14px;" onclick="runFreelanceSearch()" data-i18n="search_btn">Найти</button>
  <div id="freelance-results" style="margin-top:14px;"><div class="empty"><div class="icon">🔍</div><span data-i18n="enter_query_or_filters">Введите запрос или задайте фильтры</span></div></div>
  </div>
 
@@ -5292,7 +5293,7 @@ var I18N = {
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Принимаю и продолжаю',
  support: 'Поддержка', back: '← Назад', menu: 'Меню',
- home: 'Главная', news: 'Новости', exchange: 'Биржа', freelance: 'Фриланс',
+ home: 'Главная', news: 'Новости', exchange: 'Биржа продаж', freelance: 'Фриланс',
  balance: 'Баланс', favorites: 'Избранные', my_listings: 'Мои объявления',
  orders: 'История заказов', settings: 'Настройки', panel: 'Панель',
  feed_title: 'Лента объявлений', create: '+ Создать', search: 'Поиск',
@@ -6080,7 +6081,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Accept and continue',
  support: 'Support', back: '← Back', menu: 'Menu',
- home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
+ home: 'Home', news: 'News', exchange: 'Sales exchange', freelance: 'Freelance',
  balance: 'Balance', favorites: 'Favorites', my_listings: 'My listings',
  orders: 'Order history', settings: 'Settings', panel: 'Panel',
  feed_title: 'Listings feed', create: '+ Create', search: 'Search',
@@ -6866,7 +6867,7 @@ terms_prefix: 'By continuing, you accept the ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Akzeptieren und fortfahren',
  support: 'Support', back: '← Zurück', menu: 'Menü',
- home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
+ home: 'Start', news: 'News', exchange: 'Verkaufsbörse', freelance: 'Freelance',
  balance: 'Guthaben', favorites: 'Favoriten', my_listings: 'Meine Anzeigen',
  orders: 'Bestellverlauf', settings: 'Einstellungen', panel: 'Panel',
  feed_title: 'Listings feed', create: '+ Create', search: 'Suche',
@@ -7054,9 +7055,9 @@ terms_prefix: 'By continuing, you accept the ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Staff rating',
- seller_rating: 'Seller rating',
- buyer_rating: 'Buyer rating',
+ staff_rating: 'Mitarbeiterbewertung',
+ seller_rating: 'Verkäuferbewertung',
+ buyer_rating: 'Käuferbewertung',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -7636,7 +7637,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Accepter et continuer',
  support: 'Support', back: '← Retour', menu: 'Menu',
- home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
+ home: 'Accueil', news: 'Actualités', exchange: 'Bourse des ventes', freelance: 'Freelance',
  balance: 'Solde', favorites: 'Favoris', my_listings: 'Mes annonces',
  orders: 'Historique des commandes', settings: 'Paramètres', panel: 'Panneau',
  feed_title: 'Listings feed', create: '+ Create', search: 'Recherche',
@@ -7824,9 +7825,9 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Staff rating',
- seller_rating: 'Seller rating',
- buyer_rating: 'Buyer rating',
+ staff_rating: 'Note du personnel',
+ seller_rating: 'Note du vendeur',
+ buyer_rating: 'Note de l’acheteur',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -8406,7 +8407,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Aceptar y continuar',
  support: 'Support', back: '← Atrás', menu: 'Menú',
- home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
+ home: 'Inicio', news: 'Noticias', exchange: 'Bolsa de ventas', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favoritos', my_listings: 'Mis anuncios',
  orders: 'Historial de pedidos', settings: 'Ajustes', panel: 'Panel',
  feed_title: 'Listings feed', create: '+ Create', search: 'Buscar',
@@ -8594,9 +8595,9 @@ terms_prefix: 'En continuant, vous acceptez les ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Staff rating',
- seller_rating: 'Seller rating',
- buyer_rating: 'Buyer rating',
+ staff_rating: 'Valoración del personal',
+ seller_rating: 'Valoración del vendedor',
+ buyer_rating: 'Valoración del comprador',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -9136,7 +9137,7 @@ terms_prefix: 'Al continuar, acepta el ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: '接受并继续',
  support: 'Support', back: '← 返回', menu: '菜单',
- home: '首页', news: '新闻', exchange: '交易所', freelance: '自由职业',
+ home: '首页', news: '新闻', exchange: '销售交易所', freelance: '自由职业',
  balance: '余额', favorites: '收藏', my_listings: '我的广告',
  orders: '订单历史', settings: '设置', panel: '管理面板',
  feed_title: 'Listings feed', create: '+ Create', search: '搜索',
@@ -9324,9 +9325,9 @@ terms_prefix: 'Al continuar, acepta el ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Staff rating',
- seller_rating: 'Seller rating',
- buyer_rating: 'Buyer rating',
+ staff_rating: '员工评分',
+ seller_rating: '卖家评分',
+ buyer_rating: '买家评分',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -9909,7 +9910,7 @@ terms_prefix: '继续即表示您同意',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Приймаю і продовжую',
  support: 'Support', back: '← Назад', menu: 'Меню',
- home: 'Головна', news: 'Новини', exchange: 'Біржа', freelance: 'Фриланс',
+ home: 'Головна', news: 'Новини', exchange: 'Біржа продажів', freelance: 'Фриланс',
  balance: 'Баланс', favorites: 'Обране', my_listings: 'Мої оголошення',
  orders: 'Історія замовлень', settings: 'Налаштування', panel: 'Панель',
  feed_title: 'Listings feed', create: '+ Create', search: 'Пошук',
@@ -10099,9 +10100,9 @@ terms_prefix: '继续即表示您同意',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Staff rating',
- seller_rating: 'Seller rating',
- buyer_rating: 'Buyer rating',
+ staff_rating: 'Рейтинг співробітника',
+ seller_rating: 'Рейтинг продавця',
+ buyer_rating: 'Рейтинг покупця',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -10679,7 +10680,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Accetta e continua',
  support: 'Support', back: '← Indietro', menu: 'Menu',
- home: 'Home', news: 'Notizie', exchange: 'Borsa', freelance: 'Freelance',
+ home: 'Home', news: 'Notizie', exchange: 'Borsa delle vendite', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Preferiti', my_listings: 'I miei annunci',
  orders: 'Cronologia ordini', settings: 'Impostazioni', panel: 'Pannello',
  feed_title: 'Listings feed', create: '+ Create', search: 'Cerca',
@@ -10867,9 +10868,9 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Staff rating',
- seller_rating: 'Seller rating',
- buyer_rating: 'Buyer rating',
+ staff_rating: 'Valutazione staff',
+ seller_rating: 'Valutazione venditore',
+ buyer_rating: 'Valutazione acquirente',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -11447,7 +11448,7 @@ terms_prefix: 'Continuando, accetti i ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Aceitar e continuar',
  support: 'Support', back: '← Voltar', menu: 'Menu',
- home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
+ home: 'Início', news: 'Notícias', exchange: 'Bolsa de vendas', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favoritos', my_listings: 'Os meus anúncios',
  orders: 'Histórico de pedidos', settings: 'Definições', panel: 'Painel',
  feed_title: 'Listings feed', create: '+ Create', search: 'Pesquisar',
@@ -11635,9 +11636,9 @@ terms_prefix: 'Continuando, accetti i ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Staff rating',
- seller_rating: 'Seller rating',
- buyer_rating: 'Buyer rating',
+ staff_rating: 'Avaliação da equipe',
+ seller_rating: 'Avaliação do vendedor',
+ buyer_rating: 'Avaliação do comprador',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -23290,22 +23291,23 @@ async function openVisitsAnalytics() {
  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
  try {
  var d = await apiGet('/api/admin/analytics/visits');
- function row(label, val) {
- return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + label + '</div>' +
- '<div style="font-weight:600;font-size:14px;">' + val + '</div></div></div>';
+ function line(l, v) {
+ return '• ' + l + ': <b>' + v + '</b><br>';
  }
- var html = '<div class="info-block" style="margin-bottom:10px;font-size:12px;opacity:.8;">' + (tBlock('analytics_live') || 'Данные обновляются в реальном времени из БД') + '</div>';
- html += row(tBlock('stat_registered') || 'Зарегистрировано людей', d.registered);
- html += row(tBlock('stat_passport') || 'Верифицировано паспортов', d.passport_verified);
- html += row(tBlock('stat_full_verify') || 'Верифицировано полностью', d.full_verified);
- html += row(tBlock('stat_active_10d') || 'В сети за последние 10 дней', d.active_10d);
- html += row(tBlock('stat_listings_all') || 'Объявлений за всё время',
-   d.listings_total + ' <span style="font-weight:400;opacity:.75;font-size:12px;">(' + (tBlock('sale')||'продажа') + ': ' + d.listings_sale + ', ' + (tBlock('freelance')||'фриланс') + ': ' + d.listings_freelance + ')</span>');
- html += row(tBlock('stat_listings_active') || 'Объявлений сейчас активно',
-   d.active_total + ' <span style="font-weight:400;opacity:.75;font-size:12px;">(' + (tBlock('sale')||'продажа') + ': ' + d.active_sale + ', ' + (tBlock('freelance')||'фриланс') + ': ' + d.active_freelance + ')</span>');
- html += row(tBlock('stat_sales_all') || 'Продаж за всё время',
-   d.sales_count + ' <span style="font-weight:400;opacity:.75;font-size:12px;">(' + Number(d.sales_sum||0).toLocaleString('ru-RU') + ' $)</span>');
- html += row(tBlock('stat_online_now') || 'Пользователей онлайн сейчас', d.online_now);
+ var html = '<div class="info-block" style="line-height:1.55;margin-bottom:10px;font-size:12px;opacity:.85;">' + (tBlock('analytics_live') || 'Данные обновляются в реальном времени из БД') + '</div>';
+ html += '<div class="info-block" style="line-height:1.55;">';
+ html += line(tBlock('stat_registered') || 'Зарегистрировано людей', d.registered != null ? d.registered : 0);
+ html += line(tBlock('stat_passport') || 'Верифицировано паспортов', d.passport_verified != null ? d.passport_verified : 0);
+ html += line(tBlock('stat_full_verify') || 'Верифицировано полностью', d.full_verified != null ? d.full_verified : 0);
+ html += line(tBlock('stat_active_10d') || 'В сети за последние 10 дней', d.active_10d != null ? d.active_10d : 0);
+ html += line(tBlock('stat_listings_all') || 'Объявлений за всё время',
+   (d.listings_total != null ? d.listings_total : 0) + ' (' + (tBlock('sale')||'продажа') + ': ' + (d.listings_sale||0) + ', ' + (tBlock('freelance')||'фриланс') + ': ' + (d.listings_freelance||0) + ')');
+ html += line(tBlock('stat_listings_active') || 'Объявлений сейчас активно',
+   (d.active_total != null ? d.active_total : 0) + ' (' + (tBlock('sale')||'продажа') + ': ' + (d.active_sale||0) + ', ' + (tBlock('freelance')||'фриланс') + ': ' + (d.active_freelance||0) + ')');
+ html += line(tBlock('stat_sales_all') || 'Продаж за всё время',
+   (d.sales_count != null ? d.sales_count : 0) + ' (' + Number(d.sales_sum||0).toLocaleString('ru-RU') + ' $)');
+ html += line(tBlock('stat_online_now') || 'Пользователей онлайн сейчас', d.online_now != null ? d.online_now : 0);
+ html += '</div>';
  box.innerHTML = html;
  } catch (e) {
  box.innerHTML = '<div class="empty">' + (e.message || tBlock('error')) + '</div>';
@@ -23329,6 +23331,7 @@ async function openAnalytics(kind) {
  return;
  }
 
+ setAdminSectionBack(function(){ openAdminSection('analytics'); });
  var titles = { expenses: tBlock('analytics_exp'), income: tBlock('analytics_inc'), listings: tBlock('analytics_list') };
  document.getElementById('admin-section-title').textContent = titles[kind] || 'Аналитика';
  var p = defaultPeriod();
@@ -25347,21 +25350,21 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 (function(){try{
 var X={
-ru:{active_tab:'Активные',active_listings:'Активные',seller_rating:'Рейтинг продавца',buyer_rating:'Рейтинг покупателя',staff_rating:'Рейтинг сотрудника',faq:'Часто задаваемые вопросы'},
-en:{active_tab:'Active',active_listings:'Active',seller_rating:'Seller rating',buyer_rating:'Buyer rating',staff_rating:'Staff rating',faq:'FAQ'},
-de:{active_tab:'Aktiv',active_listings:'Aktiv',seller_rating:'Verkäuferbewertung',buyer_rating:'Käuferbewertung',staff_rating:'Mitarbeiterbewertung',faq:'Häufig gestellte Fragen'},
-fr:{active_tab:'Actifs',active_listings:'Actifs',seller_rating:'Note du vendeur',buyer_rating:'Note de l’acheteur',staff_rating:'Note du personnel',faq:'Questions fréquentes'},
-es:{active_tab:'Activos',active_listings:'Activos',seller_rating:'Valoración del vendedor',buyer_rating:'Valoración del comprador',staff_rating:'Valoración del personal',faq:'Preguntas frecuentes'},
-zh:{active_tab:'活跃',active_listings:'活跃',seller_rating:'卖家评分',buyer_rating:'买家评分',staff_rating:'员工评分',faq:'常见问题'},
-uk:{active_tab:'Активні',active_listings:'Активні',seller_rating:'Рейтинг продавця',buyer_rating:'Рейтинг покупця',staff_rating:'Рейтинг працівника',faq:'Часті запитання'},
-it:{active_tab:'Attivi',active_listings:'Attivi',seller_rating:'Valutazione del venditore',buyer_rating:'Valutazione dell’acquirente',staff_rating:'Valutazione del personale',faq:'Domande frequenti'},
-pt:{active_tab:'Ativos',active_listings:'Ativos',seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',faq:'Perguntas frequentes'},
-'pt-BR':{active_tab:'Ativos',active_listings:'Ativos',seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',faq:'Perguntas frequentes'},
-tr:{active_tab:'Aktif',active_listings:'Aktif',seller_rating:'Satıcı puanı',buyer_rating:'Alıcı puanı',staff_rating:'Personel puanı',faq:'Sıkça sorulan sorular'},
-id:{active_tab:'Aktif',active_listings:'Aktif',seller_rating:'Rating penjual',buyer_rating:'Rating pembeli',staff_rating:'Rating staf',faq:'Pertanyaan yang sering diajukan'},
-ar:{active_tab:'نشط',active_listings:'نشط',seller_rating:'تقييم البائع',buyer_rating:'تقييم المشتري',staff_rating:'تقييم الموظف',faq:'الأسئلة الشائعة'},
-ja:{active_tab:'アクティブ',active_listings:'アクティブ',seller_rating:'販売者評価',buyer_rating:'購入者評価',staff_rating:'スタッフ評価',faq:'よくある質問'},
-ko:{active_tab:'활성',active_listings:'활성',seller_rating:'판매자 평점',buyer_rating:'구매자 평점',staff_rating:'직원 평점',faq:'자주 묻는 질문'}
+ru:{active_tab:'Активные',active_listings:'Активные',seller_rating:'Рейтинг продавца',buyer_rating:'Рейтинг покупателя',staff_rating:'Рейтинг сотрудника',faq:'FAQ',exchange:'Биржа продаж'},
+en:{active_tab:'Active',active_listings:'Active',seller_rating:'Seller rating',buyer_rating:'Buyer rating',staff_rating:'Staff rating',faq:'FAQ',exchange:'Sales exchange'},
+de:{active_tab:'Aktiv',active_listings:'Aktiv',seller_rating:'Verkäuferbewertung',buyer_rating:'Käuferbewertung',staff_rating:'Mitarbeiterbewertung',exchange:'Verkaufsbörse'},
+fr:{active_tab:'Actifs',active_listings:'Actifs',seller_rating:'Note du vendeur',buyer_rating:'Note de l’acheteur',staff_rating:'Note du personnel',exchange:'Bourse des ventes'},
+es:{active_tab:'Activos',active_listings:'Activos',seller_rating:'Valoración del vendedor',buyer_rating:'Valoración del comprador',staff_rating:'Valoración del personal',exchange:'Bolsa de ventas'},
+zh:{active_tab:'活跃',active_listings:'活跃',seller_rating:'卖家评分',buyer_rating:'买家评分',staff_rating:'员工评分',exchange:'销售交易所'},
+uk:{active_tab:'Активні',active_listings:'Активні',seller_rating:'Рейтинг продавця',buyer_rating:'Рейтинг покупця',staff_rating:'Рейтинг співробітника',exchange:'Біржа продажів'},
+it:{active_tab:'Attivi',active_listings:'Attivi',seller_rating:'Valutazione venditore',buyer_rating:'Valutazione acquirente',staff_rating:'Valutazione staff',exchange:'Borsa delle vendite'},
+pt:{active_tab:'Ativos',active_listings:'Ativos',seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',exchange:'Bolsa de vendas'},
+'pt-BR':{active_tab:'Ativos',active_listings:'Ativos',seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',exchange:'Bolsa de vendas'},
+tr:{active_tab:'Aktif',active_listings:'Aktif',seller_rating:'Satıcı puanı',buyer_rating:'Alıcı puanı',staff_rating:'Personel puanı',exchange:'Satış borsası'},
+id:{active_tab:'Aktif',active_listings:'Aktif',seller_rating:'Peringkat penjual',buyer_rating:'Peringkat pembeli',staff_rating:'Peringkat staf',exchange:'Bursa penjualan'},
+ar:{active_tab:'نشط',active_listings:'نشط',seller_rating:'تقييم البائع',buyer_rating:'تقييم المشتري',staff_rating:'تقييم الموظف',exchange:'بورصة المبيعات'},
+ja:{active_tab:'アクティブ',active_listings:'アクティブ',seller_rating:'出品者評価',buyer_rating:'購入者評価',staff_rating:'スタッフ評価',exchange:'販売取引所'},
+ko:{active_tab:'활성',active_listings:'활성',seller_rating:'판매자 평점',buyer_rating:'구매자 평점',staff_rating:'직원 평점',exchange:'판매 거래소'}
 };
 Object.keys(X).forEach(function(l){if(!I18N[l])I18N[l]={};Object.assign(I18N[l],X[l]);});
 }catch(e){}})();
