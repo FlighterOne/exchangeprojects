@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-<!-- XCOD_BUILD 2026-09-04-v28-i18n-full -->
+<!-- XCOD_BUILD 2026-09-04-v29-i18n-full-ui -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -3507,7 +3507,7 @@ var APP_I18N = {
 };;
 function tApp(key) {
   try {
-    var lang = (typeof getAppLang === 'function' ? getAppLang() : null) || (localStorage.getItem('xcod_lang') || 'ru');
+    var lang = (typeof getAppLang === 'function' ? getAppLang() : null) || (localStorage.getItem('xcod_lang') || window._serverLang || 'en');
     lang = String(lang || 'ru').split('-')[0];
     var pack = (typeof APP_I18N !== 'undefined' && (APP_I18N[lang] || APP_I18N.en || APP_I18N.ru)) || {};
     if (pack && pack[key]) return pack[key];
@@ -3977,9 +3977,11 @@ async function continueAfterAuth() {
  try {
  var srvLang = (userData && userData.lang) ? userData.lang : null;
  var srvTheme = (userData && userData.theme) ? userData.theme : null;
- if (srvLang && typeof setAppLang === 'function') {
- var _loc = null; try { _loc = localStorage.getItem('xcod_lang'); } catch(e){}
- if (_loc) setAppLang(_loc, false); else setAppLang(srvLang, false);
+ if (typeof setAppLang === 'function') {
+   // The user's saved language in the DB is authoritative after authentication.
+   // localStorage is only a pre-auth fallback and must not override the DB value.
+   if (srvLang) setAppLang(srvLang, false);
+   else setAppLang('en', false);
  }
  if (srvTheme && typeof setAppTheme === 'function') {
  try { localStorage.setItem('xcod_theme', srvTheme); } catch (e) {}
@@ -5925,11 +5927,11 @@ function backFromUserProfile() {
 function getAppLang() {
  try {
  var v = localStorage.getItem('xcod_lang') || window._serverLang || 'ru';
- return v || 'ru';
- } catch (e) { return 'ru'; }
+ return v || 'en';
+ } catch (e) { return 'en'; }
 }
 function setAppLang(code, syncServer) {
- code = (code || 'ru').toString();
+ code = (code || 'en').toString();
  try { localStorage.setItem('xcod_lang', code); } catch (e) {}
  window._serverLang = code;
  try { document.documentElement.lang = code; } catch (e) {}
@@ -18615,7 +18617,7 @@ function applyI18n() {
 
  var flags = { ru: 'ru', en: 'gb', uk: 'ua', de: 'de', fr: 'fr', es: 'es', it: 'it', pt: 'pt', 'pt-BR': 'br', tr: 'tr', id: 'id', ar: 'sa', zh: 'cn', ja: 'jp', ko: 'kr' };
  var flagImg = document.getElementById('top-lang-flag');
- if (flagImg) flagImg.src = 'https://flagcdn.com/w40/' + (flags[lang] || 'ru') + '.png';
+ if (flagImg) flagImg.src = 'https://flagcdn.com/w40/' + (flags[lang] || 'gb') + '.png';
  try { updateLangLabels(); } catch (e) {}
  try { updateMyListingsSheetLabels(); } catch (e) {}
  try { applyAppInstallI18n(); } catch (e) {}
@@ -19524,6 +19526,77 @@ function trUi(text) {
 }
 
 
+// ===== FULL UI I18N SAFETY NET =====
+// Translates static interface text that was not explicitly marked with data-i18n.
+// DB/resource content is intentionally excluded by selector. Login overlay is ALWAYS excluded.
+(function setupFullUiI18n() {
+  if (window._xcodFullUiI18n) return;
+  window._xcodFullUiI18n = true;
+
+  function excluded(el) {
+    if (!el) return true;
+    if (el.closest && el.closest('#login-overlay')) return true; // login stays English
+    if (el.closest && el.closest(
+      '#listings-feed,#exchange-results,#freelance-results,#listing-detail-content,' +
+      '#news-list,#news-detail-content,#favorites-list,#my-listings-list,' +
+      '#orders-list,#profile-content,#user-profile-content,#deposit-result-content,' +
+      '#withdraw-result-content,#admin-content,#admin-detail-content,#staff-detail-content,' +
+      '#chat-messages,#messages-list'
+    )) return true; // DB/resource content
+    return false;
+  }
+
+  function sourceToKey(text) {
+    var q = String(text || '').replace(/\\s+/g, ' ').trim();
+    if (!q || q.length > 300 || typeof I18N === 'undefined' || !I18N) return null;
+    var packs = [I18N.en, I18N.ru];
+    for (var pi = 0; pi < packs.length; pi++) {
+      var pack = packs[pi] || {};
+      for (var k in pack) {
+        if (pack[k] === q) return k;
+      }
+    }
+    return null;
+  }
+
+  function translateStatic(root) {
+    if (!root || excluded(root)) return;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n) {
+        if (!n || !n.parentElement || excluded(n.parentElement)) return NodeFilter.FILTER_REJECT;
+        if (n.parentElement.closest && n.parentElement.closest('[data-i18n]')) return NodeFilter.FILTER_REJECT;
+        var tag = n.parentElement.tagName;
+        if (/^(SCRIPT|STYLE|NOSCRIPT|INPUT|TEXTAREA|OPTION)$/i.test(tag)) return NodeFilter.FILTER_REJECT;
+        return n.nodeValue && n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function(n) {
+      var key = sourceToKey(n.nodeValue);
+      if (key) {
+        var val = tBlock(key);
+        if (val && val !== key) n.nodeValue = n.nodeValue.replace(n.nodeValue.trim(), val);
+      }
+    });
+
+    root.querySelectorAll && root.querySelectorAll('[title],[aria-label]').forEach(function(el) {
+      if (excluded(el)) return;
+      ['title','aria-label'].forEach(function(attr) {
+        var v = el.getAttribute(attr);
+        var key = sourceToKey(v);
+        if (key) el.setAttribute(attr, tBlock(key));
+      });
+    });
+  }
+
+  window._xcodTranslateStaticUi = translateStatic;
+  document.addEventListener('DOMContentLoaded', function() {
+    try { translateStatic(document.body); } catch (e) {}
+  });
+  try { if (document.body) translateStatic(document.body); } catch (e) {}
+})();
+
 // Auto-translate dynamic UI after DOM changes (listing body skipped inside applyI18n)
 (function setupI18nObserver() {
  if (window._xcodI18nObs) return;
@@ -19669,7 +19742,7 @@ var MONTHS_I18N = {
 
 function formatNewsDateLabel(n) {
   function fmtFromDate(d) {
-    var lang = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru';
+    var lang = (typeof getAppLang === 'function' ? getAppLang() : 'en') || 'en';
     var months = (typeof MONTHS_I18N !== 'undefined' && (MONTHS_I18N[lang] || MONTHS_I18N.en || MONTHS_I18N.ru)) || ['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'];
     var day = d.getDate();
     day = day < 10 ? ('0' + day) : ('' + day);
@@ -19769,13 +19842,12 @@ function tBlock(key) {
   }
  } catch (e) {}
  if (typeof I18N === 'undefined' || !I18N) return key || '';
- var lang = 'ru';
- try { lang = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru'; } catch (e2) { lang = 'ru'; }
- lang = String(lang || 'ru').split('-')[0];
- var pack = I18N[lang] || {};
+ var lang = 'en';
+ try { lang = (typeof getAppLang === 'function' ? getAppLang() : 'en') || 'en'; } catch (e2) { lang = 'en'; }
+ lang = String(lang || 'en');
+ var pack = I18N[lang] || I18N[lang.split('-')[0]] || {};
  if (pack && pack[key] != null && pack[key] !== '' && pack[key] !== key) return pack[key];
  if (I18N.en && I18N.en[key] != null && I18N.en[key] !== '') return I18N.en[key];
- if (I18N.ru && I18N.ru[key] != null && I18N.ru[key] !== '') return I18N.ru[key];
  return key || '';
 }
 
