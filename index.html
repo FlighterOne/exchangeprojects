@@ -157,7 +157,11 @@
  }
  .support-grid.app-install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
  .support-grid.app-install-grid .support-tile.tile-span-full { grid-column: 1 / -1; max-width: calc(50% - 5px); }
- .app-install-expand-btn { margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
+ 
+#app-install-pc-grid[data-open="0"], #app-install-tg-grid[data-open="0"] { display: none !important; }
+#app-install-pc-grid[data-open="1"], #app-install-tg-grid[data-open="1"] { display: grid !important; }
+
+.app-install-expand-btn { margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
 
 
  .lang-btn {
@@ -1542,7 +1546,7 @@ button.btn.btn-compact,
    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
    <span id="app-install-label-pc">Установить на ПК</span>
   </button>
-  <div id="app-install-pc-grid" class="support-grid app-install-grid" style="display:none;margin-top:12px;">
+  <div id="app-install-pc-grid" class="support-grid app-install-grid" data-open="0" style="display:none;margin-top:12px;">
    <button type="button" class="support-tile" onclick="openAppInstallDetail('windows')">
     <div class="app-install-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5l8-1.1v7.1H3V5.5zm9-1.2l9-1.2v8.5h-9V4.3zM3 12.5h8v7.1l-8-1.1v-6zm9 0h9v8.5l-9-1.2v-7.3z"/></svg></div>
     <div class="support-tile-title" id="app-install-label-windows">Windows</div>
@@ -1560,7 +1564,7 @@ button.btn.btn-compact,
    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8.02c-.13.58-.47.72-.95.45l-2.62-1.93-1.26 1.21c-.14.14-.26.26-.53.26l.19-2.67 4.89-4.42c.21-.19-.05-.29-.33-.11l-6.04 3.8-2.6-.81c-.57-.18-.58-.57.12-.84l10.16-3.92c.47-.18.88.11.67.78z"/></svg>
    <span id="app-install-label-tg">Мы в Telegram</span>
   </button>
-  <div id="app-install-tg-grid" class="support-grid app-install-grid" style="display:none;margin-top:12px;">
+  <div id="app-install-tg-grid" class="support-grid app-install-grid" data-open="0" style="display:none;margin-top:12px;">
    <button type="button" class="support-tile" onclick="openTelegramBotLink()">
     <div class="app-install-icon-wrap"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8.02c-.13.58-.47.72-.95.45l-2.62-1.93-1.26 1.21c-.14.14-.26.26-.53.26l.19-2.67 4.89-4.42c.21-.19-.05-.29-.33-.11l-6.04 3.8-2.6-.81c-.57-.18-.58-.57.12-.84l10.16-3.92c.47-.18.88.11.67.78z"/></svg></div>
     <div class="support-tile-title" id="app-install-label-tg-bot">Бот</div>
@@ -2163,40 +2167,40 @@ button.btn.btn-compact,
  <div class="support-tile-title" data-i18n="support_ticket">Написать обращение</div>
  <div class="support-tile-sub" data-i18n="chat_manager">Чат с менеджером</div>
  </button>
- <button type="button" class="support-tile" onclick="showPage('collaborate')">
- <div class="support-tile-icon">🤝</div>
- <div class="support-tile-title" data-i18n="support_hire">Сотрудничать</div>
- <div class="support-tile-sub" data-i18n="vacancies">Вакансии</div>
+ <button type="button" class="support-tile" onclick="openSupportManager()">
+ <div class="support-tile-icon">✈️</div>
+ <div class="support-tile-title" data-i18n="support_manager">Менеджер в Telegram</div>
+ <div class="support-tile-sub" id="support-manager-sub">@mediamanagering</div>
  </button>
  <button type="button" class="support-tile" onclick="openSupportBot()">
  <div class="support-tile-icon">🤖</div>
  <div class="support-tile-title" data-i18n="support_bot">Бот поддержки</div>
  <div class="support-tile-sub" id="support-bot-sub">@clossrsuppbot</div>
  </button>
- <button type="button" class="support-tile" onclick="openSupportManager()">
- <div class="support-tile-icon">✈️</div>
- <div class="support-tile-title" data-i18n="support_manager">Менеджер в Telegram</div>
- <div class="support-tile-sub" id="support-manager-sub">@mediamanagering</div>
- </button>
  <button type="button" class="support-tile" onclick="openEmail(typeof SUPPORT_EMAIL_ADDR!=='undefined'?SUPPORT_EMAIL_ADDR:'clossr.support@gmail.com')">
  <div class="support-tile-icon">✉️</div>
  <div class="support-tile-title" data-i18n="support_mail">Написать на почту</div>
  <div class="support-tile-sub" id="support-mail-sub">clossr.support@gmail.com</div>
  </button>
+ <button type="button" class="support-tile" onclick="showPage('collaborate')">
+ <div class="support-tile-icon">🤝</div>
+ <div class="support-tile-title" data-i18n="support_hire">Сотрудничать</div>
+ <div class="support-tile-sub" data-i18n="ads_and_jobs">Реклама и вакансии</div>
+ </button>
  <button type="button" class="support-tile" onclick="openSupportFaq()">
  <div class="support-tile-icon" style="color:#e53935;font-size:28px;font-weight:700;">❓</div>
  <div class="support-tile-title" data-i18n="support_faq">FAQ</div>
  </button>
+ <button type="button" class="support-tile" onclick="openPrivacyPolicy()">
+ <div class="support-tile-icon">📄</div>
+ <div class="support-tile-title" data-i18n="support_privacy">Политика конфиденциальности</div>
+ </button>
+ <button type="button" class="support-tile" onclick="openTermsOfService()">
+ <div class="support-tile-icon">📋</div>
+ <div class="support-tile-title" data-i18n="support_terms">Пользовательское соглашение</div>
+ </button>
  </div>
- <button type="button" class="btn btn-secondary" style="margin-top:14px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="openPrivacyPolicy()">
- <span style="font-size:18px;line-height:1;">📄</span>
- <span data-i18n="support_privacy">Политика конфиденциальности</span>
- </button>
- <button type="button" class="btn btn-secondary" style="margin-top:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="openTermsOfService()">
- <span style="font-size:18px;line-height:1;">📋</span>
- <span data-i18n="support_terms">Пользовательское соглашение</span>
- </button>
- <button type="button" class="btn btn-secondary" style="margin-top:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="openOtherInfo()">
+ <button type="button" class="btn btn-secondary" style="margin-top:14px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="openOtherInfo()">
  <span style="font-size:18px;line-height:1;">ℹ️</span>
  <span data-i18n="support_other_info">Другая информация</span>
  </button>
@@ -2617,7 +2621,7 @@ var APP_I18N = {
 };
 function tApp(key) {
   try {
-    var lang = (typeof getAppLang === 'function' ? getAppLang() : null) || (localStorage.getItem('xcod_lang') || 'en');
+    var lang = (typeof getAppLang === 'function' ? getAppLang() : null) || (localStorage.getItem('xcod_lang') || 'ru');
     var pack = APP_I18N[lang] || APP_I18N[String(lang).split('-')[0]] || APP_I18N.en || APP_I18N.ru;
     if (pack && pack[key]) return pack[key];
     if (APP_I18N.ru && APP_I18N.ru[key]) return APP_I18N.ru[key];
@@ -2744,6 +2748,8 @@ function onTopSideBtnClick() {
   openAppInstallMenu();
 }
 function openAppInstallMenu() {
+  try { resetAppInstallExpand(); } catch(e){}
+
   try {
     var g = document.getElementById('app-install-pc-grid'); if (g) g.style.display = 'none';
     var tg = document.getElementById('app-install-tg-grid'); if (tg) tg.style.display = 'none';
@@ -2754,12 +2760,34 @@ function openAppInstallMenu() {
 function toggleAppInstallPc() {
   var g = document.getElementById('app-install-pc-grid');
   if (!g) return;
-  g.style.display = (g.style.display === 'none' || !g.style.display) ? 'grid' : 'none';
+  var open = g.getAttribute('data-open') === '1';
+  if (open) {
+    g.style.display = 'none';
+    g.setAttribute('data-open', '0');
+  } else {
+    g.style.display = 'grid';
+    g.setAttribute('data-open', '1');
+  }
 }
 function toggleAppInstallTg() {
   var g = document.getElementById('app-install-tg-grid');
   if (!g) return;
-  g.style.display = (g.style.display === 'none' || !g.style.display) ? 'grid' : 'none';
+  var open = g.getAttribute('data-open') === '1';
+  if (open) {
+    g.style.display = 'none';
+    g.setAttribute('data-open', '0');
+  } else {
+    g.style.display = 'grid';
+    g.setAttribute('data-open', '1');
+  }
+}
+function resetAppInstallExpand() {
+  ['app-install-pc-grid','app-install-tg-grid'].forEach(function(id){
+    var g = document.getElementById(id);
+    if (!g) return;
+    g.style.display = 'none';
+    g.setAttribute('data-open', '0');
+  });
 }
 function openAppInstallDetail(platform) {
   __appInstallPlatform = platform;
@@ -3569,6 +3597,8 @@ function openChangeEmail() {
     return;
   }
   window._settingsAction = 'email';
+  window._settingsNewEmail = '';
+  window._settingsAccPwd = '';
   showPage('profile-settings');
   var f = document.getElementById('profile-settings-form');
   var tiles = document.querySelector('#page-profile-settings .support-grid');
@@ -3579,10 +3609,100 @@ function openChangeEmail() {
   f.innerHTML =
     '<div class="form-group"><label class="form-label">' + (tBlock('password') || 'Пароль аккаунта') + '</label>' +
     '<input class="form-input" id="ch-acc-pwd" type="password" autocomplete="current-password"></div>' +
-    '<div class="form-group"><label class="form-label">' + (tBlock('verify_email') || 'Новая почта') + '</label>' +
+    '<div class="form-group"><label class="form-label">' + (tBlock('new_email') || tBlock('verify_email') || 'Новая почта') + '</label>' +
     '<input class="form-input" id="ch-new-email" type="email" autocomplete="email" placeholder="name@example.com"></div>' +
     '<div id="ch-email-err" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
-    '<button type="button" class="btn" onclick="submitChangeEmailWithPassword()">' + (tBlock('save') || 'Сохранить') + '</button>';
+    '<button type="button" class="btn" id="ch-email-next-btn" onclick="submitChangeEmailStep1()">' + (tBlock('next') || 'Далее') + '</button>';
+}
+async function submitChangeEmailStep1() {
+  try {
+    var pwd = ((document.getElementById('ch-acc-pwd') || {}).value || '');
+    var email = ((document.getElementById('ch-new-email') || {}).value || '').trim().toLowerCase();
+    if (!pwd) { try { tg.showAlert(tBlock('password') || 'Введите пароль'); } catch(e){} return; }
+    if (!isValidEmailFormat(email)) {
+      var err = document.getElementById('ch-email-err');
+      if (err) { err.style.display = 'block'; err.textContent = tBlock('bad_email') || 'Неверный формат почты'; }
+      return;
+    }
+    var btn = document.getElementById('ch-email-next-btn');
+    if (btn) { btn.disabled = true; btn.textContent = tBlock('wait') || 'Подождите...'; }
+    // verify password first (auth endpoint)
+    try {
+      await apiPost('/api/auth/2fa', { password: pwd });
+    } catch (e0) {
+      if (btn) { btn.disabled = false; btn.textContent = tBlock('next') || 'Далее'; }
+      var msg0 = mapPwdError(e0.message);
+      if (String(e0.message||'').indexOf('wrong_password') >= 0) msg0 = tBlock('wrong_password') || 'Неверный пароль';
+      try { tg.showAlert(msg0); } catch(e){}
+      return;
+    }
+    // send code to NEW email
+    var res = await apiPost('/api/verify/2fa/send-email-code', { email: email, purpose: 'change_email' });
+    window._settingsAccPwd = pwd;
+    window._settingsNewEmail = email;
+    showChangeEmailCodeStep(res && res.email_masked);
+  } catch (e) {
+    var btn2 = document.getElementById('ch-email-next-btn');
+    if (btn2) { btn2.disabled = false; btn2.textContent = tBlock('next') || 'Далее'; }
+    var msg = mapPwdError(e.message);
+    try { tg.showAlert(msg); } catch(e2){}
+  }
+}
+function showChangeEmailCodeStep(masked) {
+  var f = document.getElementById('profile-settings-form');
+  var title = document.querySelector('#page-profile-settings .section-title');
+  if (title) title.textContent = tBlock('change_email') || 'Сменить почту';
+  if (!f) return;
+  var hint = (tBlock('code_sent_to_new_email') || 'Код отправлен на новую почту') + (masked ? (' (' + masked + ')') : '');
+  f.innerHTML =
+    '<div class="form-group"><label class="form-label">' + hint + '</label></div>' +
+    '<div class="form-group"><label class="form-label">' + (tBlock('email_code') || 'Код подтверждения') + '</label>' +
+    '<input class="form-input" id="ch-email-code-new" type="text" inputmode="numeric" maxlength="8" placeholder="000000"></div>' +
+    '<div id="ch-email-code-err" style="display:none;color:#ff4d4f;font-size:12px;margin:4px 0 8px;"></div>' +
+    '<button type="button" class="btn" id="ch-email-confirm-btn" onclick="submitChangeEmailWithCode()">' + (tBlock('save') || 'Сохранить') + '</button>' +
+    '<button type="button" class="btn btn-secondary" style="margin-top:8px;" onclick="sendChangeEmailCodeAgain()">' + (tBlock('send_email_code') || 'Отправить код') + '</button>';
+}
+async function sendChangeEmailCodeAgain() {
+  try {
+    var email = window._settingsNewEmail || '';
+    if (!email) return;
+    var res = await apiPost('/api/verify/2fa/send-email-code', { email: email, purpose: 'change_email' });
+    try { tg.showAlert((tBlock('code_sent_email') || 'Код отправлен на почту') + (res && res.email_masked ? (' (' + res.email_masked + ')') : '')); } catch(e){}
+  } catch (e) {
+    try { tg.showAlert(mapPwdError(e.message)); } catch(e2){}
+  }
+}
+async function submitChangeEmailWithCode() {
+  try {
+    var code = ((document.getElementById('ch-email-code-new') || {}).value || '').trim();
+    if (!code) {
+      var err = document.getElementById('ch-email-code-err');
+      if (err) { err.style.display = 'block'; err.textContent = tBlock('code_required') || 'Введите код'; }
+      return;
+    }
+    var btn = document.getElementById('ch-email-confirm-btn');
+    if (btn) { btn.disabled = true; btn.textContent = tBlock('wait') || 'Подождите...'; }
+    var res = await apiPost('/api/verify/2fa/change-email', {
+      password: window._settingsAccPwd || '',
+      email: window._settingsNewEmail || '',
+      code: code
+    });
+    if (userData) {
+      userData.verify_email = (res && res.verify_email) || window._settingsNewEmail;
+      userData.email = userData.verify_email;
+    }
+    try { tg.showAlert(tBlock('email_updated') || 'Почта обновлена'); } catch(e){}
+    openProfileSettings();
+  } catch (e) {
+    var btn2 = document.getElementById('ch-email-confirm-btn');
+    if (btn2) { btn2.disabled = false; btn2.textContent = tBlock('save') || 'Сохранить'; }
+    var msg = mapPwdError(e.message);
+    if (String(e.message||'').indexOf('bad_code') >= 0) msg = tBlock('bad_code') || 'Неверный или просроченный код';
+    if (String(e.message||'').indexOf('wrong_password') >= 0) msg = tBlock('wrong_password') || 'Неверный пароль';
+    var err2 = document.getElementById('ch-email-code-err');
+    if (err2) { err2.style.display = 'block'; err2.textContent = msg; }
+    else { try { tg.showAlert(msg); } catch(e2){} }
+  }
 }
 async function sendSettingsEmailCode() {
   try {
@@ -4833,6 +4953,8 @@ function bindHashRouting() {
 }
 
 function showPage(name) {
+ try { if (name === 'app-install') resetAppInstallExpand(); } catch(e){}
+
  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
  var page = document.getElementById('page-' + name);
  if (page) page.classList.add('active');
@@ -5027,6 +5149,10 @@ var I18N = {
  collab_ads: 'Реклама',
  support_other_info_empty: 'Раздел в разработке',
  support_other_info: 'Другая информация',
+ ads_and_jobs: 'Реклама и вакансии',
+ code_sent_to_new_email: 'Код отправлен на новую почту',
+ new_email: 'Новая почта',
+ next: 'Далее',
  view_only_hint: 'Режим просмотра: открытие смены и начисление ЗП доступны админам',
  duty_analytics_list: 'Аналитика объявлений',
  duty_control_full: 'Контроль смены (открыть/закрыть, ЗП)',
@@ -5810,6 +5936,10 @@ terms_prefix: 'Продолжая, вы даёте ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  hire_duties: 'Responsibilities',
  stat_online_now: 'Users online now',
  stat_sales_all: 'Sales all time',
@@ -6591,6 +6721,10 @@ terms_prefix: 'By continuing, you accept the ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  files_escrow_note: 'Der Käufer erhält diese Dateien erst nach der Zahlung. Bis zur Bestätigung hält die Börse die Mittel.',
  previous_price: 'Vorheriger Preis',
  code_sent_to_linked: 'Ein Code wird an die mit dem Konto verknüpfte E-Mail gesendet',
@@ -7360,6 +7494,10 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  verify_done_desc: 'Verification complete activee. Mot de passe et e-mail enregistres.',
  verify_done_title: 'Verification terminee',
  code_sent_to: 'Code envoye a',
@@ -8126,6 +8264,10 @@ terms_prefix: 'En continuant, vous acceptez les ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  verify_done_desc: 'Verificacion completa activada. Contrasena y correo guardados.',
  verify_done_title: 'Verificacion completada',
  code_sent_to: 'Codigo enviado a',
@@ -8892,6 +9034,10 @@ terms_prefix: 'Al continuar, acepta el ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  verify_partial: '部分验证',
  verify_full: '验证已通过',
  complaint_staff_denied: '员工不能提交投诉',
@@ -9618,6 +9764,10 @@ terms_prefix: '继续即表示您同意',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  files_escrow_note: 'Покупець отримає ці файли лише після оплати. До підтвердження угоди кошти у біржі.',
  previous_price: 'Минула ціна',
  code_sent_to_linked: 'Код буде надіслано на пошту, привʼязану до акаунта',
@@ -10389,6 +10539,10 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  code_sent_to: 'Codice inviato a',
  code_sent_tg: 'Codice inviato su Telegram (email non disponibile)',
  code_sent_email: 'Codice inviato via e-mail',
@@ -11153,6 +11307,10 @@ terms_prefix: 'Continuando, accetti i ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  code_sent_to: 'Codigo enviado para',
  code_sent_tg: 'Codigo enviado no Telegram (e-mail temporariamente indisponivel)',
  code_sent_email: 'Codigo enviado por e-mail',
@@ -12490,6 +12648,10 @@ terms_prefix: 'Ao continuar, você aceita o ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  code_sent_to: 'Kod gonderildi:',
  code_sent_tg: 'Kod Telegrame gonderildi (e-posta gecici olarak kapali)',
  code_sent_email: 'Kod e-postaya gonderildi',
@@ -13254,6 +13416,10 @@ terms_prefix: 'Devam ederek ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  code_sent_to: 'Kode dikirim ke',
  code_sent_tg: 'Kode dikirim ke Telegram (email sementara tidak tersedia)',
  code_sent_email: 'Kode dikirim ke email',
@@ -14018,6 +14184,10 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  code_sent_to: 'تم إرسال الرمز إلى',
  code_sent_tg: 'تم إرسال الرمز إلى تيليجرام (البريد غير متاح مؤقتاً)',
  code_sent_email: 'تم إرسال الرمز إلى البريد',
@@ -14782,6 +14952,10 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  code_sent_to: 'コードの送信先',
  code_sent_tg: 'コードをTelegramに送信しました（メールは一時利用不可）',
  code_sent_email: 'コードをメールに送信しました',
@@ -15546,6 +15720,10 @@ terms_prefix: '続行すると',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
+ ads_and_jobs: 'Ads and vacancies',
+ code_sent_to_new_email: 'Code sent to the new email',
+ new_email: 'New email',
+ next: 'Next',
  verify_done_desc: '전체 인증이 설정되었습니다. 비밀번호와 이메일이 저장되었습니다.',
  verify_done_title: '인증 완료',
  code_sent_to: '코드 전송됨',
@@ -16872,40 +17050,37 @@ async function loadReferralPanel() {
       var p2 = Number(rates.partner_2||0);
       var d1 = Number(rates.discount_1||0);
       var d2 = Number(rates.discount_2||0);
-      html += '<div class="ref-info-card">';
-      html += '<div class="ref-info-code-row"><b id="ref-code-display" class="ref-code-big">' + code.replace(/</g,'&lt;') + '</b>';
+      html += '<div class="ref-info-code-row" style="margin-bottom:12px;"><b id="ref-code-display" class="ref-code-big">' + code.replace(/</g,'&lt;') + '</b>';
       html += ' <button type="button" class="ref-edit-btn" onclick="startEditRefCode()" title="' + (tBlock('edit') || 'Изменить') + '">✏️</button></div>';
       html += '<div id="ref-code-edit-row" style="display:none;margin:0 0 10px;">';
       html += '<div class="ref-code-row">';
       html += '<input type="text" class="form-input" id="ref-code-edit-input" value="' + code.replace(/"/g,'&quot;') + '" style="text-transform:uppercase;">';
       html += '<button type="button" class="btn btn-compact" onclick="saveEditRefCode()">' + (tBlock('save') || 'Сохранить') + '</button>';
       html += '</div></div>';
-      // line 1: you earn
-      html += '<div class="ref-info-line">' + (tBlock('ref_you_get') || 'Вы получаете') + ' <span class="pct">' + p1 + '%</span> ' + (tBlock('ref_from_1st') || 'с 1 пополнения');
+      // one info table like analytics ads stats
+      function line(l, v) {
+        return '• ' + l + ': <b>' + v + '</b><br>';
+      }
+      html += '<div class="info-block" style="line-height:1.55;">';
+      html += line((tBlock('ref_you_get') || 'Вы получаете') + ' ' + (tBlock('ref_from_1st') || 'с 1 пополнения'), '<span style="color:#2ecc71;">' + p1 + '%</span>');
       if (p2 > 0) {
-        html += ' ' + (tBlock('ref_and') || 'и') + ' <span class="pct">' + p2 + '%</span> ' + (tBlock('ref_from_2nd') || 'со 2 пополнения') + ' ' + (tBlock('ref_of_referrals') || 'рефералов');
-      } else {
-        html += ' ' + (tBlock('ref_of_referrals') || 'рефералов');
+        html += line((tBlock('ref_you_get') || 'Вы получаете') + ' ' + (tBlock('ref_from_2nd') || 'со 2 пополнения'), '<span style="color:#2ecc71;">' + p2 + '%</span>');
       }
-      html += '</div>';
-      // line 2: invitee bonus
-      html += '<div class="ref-info-line">' + (tBlock('ref_invitee_gets') || 'Реферал получает бонус') + ' <span class="pct">' + d1 + '%</span> ' + (tBlock('ref_on_1st') || 'при 1 пополнении');
+      html += line((tBlock('ref_invitee_gets') || 'Реферал получает бонус') + ' ' + (tBlock('ref_on_1st') || 'при 1 пополнении'), '<span style="color:#2ecc71;">' + d1 + '%</span>');
       if (d2 > 0) {
-        html += ' ' + (tBlock('ref_and') || 'и') + ' <span class="pct">' + d2 + '%</span> ' + (tBlock('ref_on_2nd') || 'при втором пополнении');
+        html += line((tBlock('ref_invitee_gets') || 'Реферал получает бонус') + ' ' + (tBlock('ref_on_2nd') || 'при втором пополнении'), '<span style="color:#2ecc71;">' + d2 + '%</span>');
       }
+      html += '<br>';
+      html += line(tBlock('ref_10d') || 'Рефералов за 10 дней', stats.refs_10d != null ? stats.refs_10d : 0);
+      html += line(tBlock('ref_total') || 'Рефералов всего', stats.refs_total != null ? stats.refs_total : 0);
+      html += line(tBlock('ref_retained') || 'Рефералов 2+ пополнений', stats.refs_retained != null ? stats.refs_retained : 0);
+      html += '<br>';
+      html += line(tBlock('ref_earned_total') || 'Заработано всего', Number(stats.earned_total||0).toFixed(2) + ' $');
+      html += line(tBlock('ref_earned_1') || 'С 1-х пополнений', Number(stats.earned_1||0).toFixed(2) + ' $');
+      html += line(tBlock('ref_earned_2') || 'Со 2-х пополнений', Number(stats.earned_2||0).toFixed(2) + ' $');
       html += '</div>';
-      html += '</div>';
-            html += '<div class="section-title" style="font-size:15px;margin:14px 0 8px;">' + (tBlock('ref_stats') || 'Статистика') + '</div>';
-      html += refStatRow(tBlock('ref_10d') || 'Рефералов за 10 дней', stats.refs_10d);
-      html += refStatRow(tBlock('ref_total') || 'Рефералов всего', stats.refs_total);
-      html += refStatRow(tBlock('ref_retained') || 'Рефералов 2+ пополнений', stats.refs_retained);
-      html += '<div style="height:10px;"></div>';
-      html += refStatRow(tBlock('ref_earned_total') || 'Заработано всего', Number(stats.earned_total||0).toFixed(2) + ' $');
-      html += refStatRow(tBlock('ref_earned_1') || 'С 1-х пополнений', Number(stats.earned_1||0).toFixed(2) + ' $');
-      html += refStatRow(tBlock('ref_earned_2') || 'Со 2-х пополнений', Number(stats.earned_2||0).toFixed(2) + ' $');
     }
     box.innerHTML = html;
-    // ensure input is focusable
     setTimeout(function(){
       var inp = document.getElementById('ref-code-input');
       if (inp) {
@@ -16918,7 +17093,7 @@ async function loadReferralPanel() {
     box.innerHTML = '<div class="empty">' + (e.message || tBlock('error')) + '</div>';
   }
 }
-function refStatRow(label, val) {
+function refStatRowfunction refStatRow(label, val) {
   return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + label + '</div><div style="font-weight:600;">' + val + '</div></div></div>';
 }
 async function submitRefCode() {
@@ -20921,9 +21096,9 @@ function loadAnalyticsMenu() {
  '<div class="support-grid">' +
  '<button class="support-tile" onclick="openAnalytics(\'expenses\')"><div class="support-tile-icon">📤</div><div class="support-tile-title">' + (tBlock('analytics_exp') || 'Аналитика расходов') + '</div></button>' +
  '<button class="support-tile" onclick="openAnalytics(\'income\')"><div class="support-tile-icon">📥</div><div class="support-tile-title">' + (tBlock('analytics_inc') || 'Аналитика доходов') + '</div></button>' +
+ '<button class="support-tile" onclick="openAdsAnalytics()"><div class="support-tile-icon">📣</div><div class="support-tile-title">' + (tBlock('analytics_ads') || 'Реклама') + '</div></button>' +
  listingsTile +
  '<button class="support-tile" onclick="openVisitsAnalytics()"><div class="support-tile-icon">👁</div><div class="support-tile-title">' + (tBlock('analytics_visits') || 'Аналитика посещений') + '</div></button>' +
- '<button class="support-tile" onclick="openAdsAnalytics()"><div class="support-tile-icon">📣</div><div class="support-tile-title">' + (tBlock('analytics_ads') || 'Реклама') + '</div></button>' +
  '</div>';
 }
 async function openVisitsAnalytics() {
