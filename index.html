@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-03-v20-promo -->
+<!-- XCOD_BUILD 2026-09-04-v22-ref-input -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -287,7 +287,7 @@
  display: flex; gap: 8px; align-items: center; margin-top: 14px;
  }
  .shift-bottom-actions .back-link { margin: 0; flex: 1; }
- .shift-bottom-actions .btn { width: auto; flex: 1; margin: 0; padding: 10px 12px; font-size: 13px; }
+ .btn { width: auto; flex: 1; margin: 0; padding: 10px 12px; font-size: 13px; }
  .schedule-item.done .stitle::after {
  content: ' ✓'; color: #34c759; font-weight: 700;
  }
@@ -367,6 +367,45 @@
  border-radius: 12px; background: var(--secondary-bg); color: var(--text); font-size: 16px; outline: none;
  }
  .form-input:focus { border-color: var(--button); }
+
+/* Referral code registration row: big input, compact Apply button */
+.ref-code-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.ref-code-row .form-input,
+.ref-code-row input.form-input,
+.ref-code-row #ref-code-input,
+.ref-code-row #ref-code-edit-input {
+  flex: 1 1 auto !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 5 !important;
+  font-size: 16px !important;
+  padding: 14px 16px !important;
+}
+.ref-code-row .btn,
+.ref-code-row button.btn,
+.ref-code-row #ref-code-apply-btn {
+  width: auto !important;
+  max-width: 120px !important;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  padding: 12px 14px !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+
 
  .info-block {
  background: var(--secondary-bg); border-radius: 12px; padding: 14px 16px;
@@ -4811,6 +4850,16 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ ads_partner_level: 'Уровень партнёра',
+ ads_partner_detail: 'Партнёр',
+ ads_level0_hint: 'без дохода партнёра, бонус 5% приглашённому',
+ ads_level: 'Уровень',
+ ads_default_level_label: 'Все партнёры сначала получают уровень',
+ ads_pay2_10d: '2-степенные платежи за последние 10 дн.',
+ ads_pay2_total: '2-степенные платежи',
+ ads_pay1_10d: '1-степенных платежей за последние 10 дн.',
+ ads_pay1_total: 'Приглашено партнёрами 1-степенных платежей',
+ ads_invited_total: 'Приглашено партнёрами всего',
  promo_max_uses: 'Промокод использован максимальное количество раз',
  promo_not_found: 'Промокод не найден',
  promo_discount: 'Скидка',
@@ -5568,6 +5617,16 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -5589,10 +5648,10 @@ terms_prefix: 'Продолжая, вы даёте ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -6322,6 +6381,16 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -6343,10 +6412,10 @@ terms_prefix: 'By continuing, you accept the ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -7064,6 +7133,16 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -7085,10 +7164,10 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -7803,6 +7882,16 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -7824,10 +7913,10 @@ terms_prefix: 'En continuant, vous acceptez les ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -8542,6 +8631,16 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -8563,10 +8662,10 @@ terms_prefix: 'Al continuar, acepta el ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -9241,6 +9340,16 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -9262,10 +9371,10 @@ terms_prefix: '继续即表示您同意',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -9985,6 +10094,16 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -10006,10 +10125,10 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -10722,6 +10841,16 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -10743,10 +10872,10 @@ terms_prefix: 'Continuando, accetti i ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -12032,6 +12161,16 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -12053,10 +12192,10 @@ terms_prefix: 'Ao continuar, você aceita o ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -12769,6 +12908,16 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -12790,10 +12939,10 @@ terms_prefix: 'Devam ederek ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -13506,6 +13655,16 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -13527,10 +13686,10 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -14243,6 +14402,16 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -14264,10 +14433,10 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -14980,6 +15149,16 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ ads_partner_level: 'Partner level',
+ ads_partner_detail: 'Partner',
+ ads_level0_hint: 'no partner income, 5% bonus for invitee',
+ ads_level: 'Level',
+ ads_default_level_label: 'All new partners start at level',
+ ads_pay2_10d: 'Secondary deposits in last 10 days',
+ ads_pay2_total: 'Secondary (2nd) deposit events',
+ ads_pay1_10d: 'Primary deposits in last 10 days',
+ ads_pay1_total: 'Primary (1st) deposit events',
+ ads_invited_total: 'Total invited by partners',
  promo_max_uses: 'Promo code used maximum times',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
@@ -15001,10 +15180,10 @@ terms_prefix: '続行すると',
  ref_earned_total: 'Earned total',
  ref_retained: 'Referrals with 2+ deposits',
  ref_total: 'Referrals total',
- ref_10d: 'Referrals in last 10 days',
+ ref_10d: 'Referrals in 10 days',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
- ref_you_earn: 'You earn from 1st / 2nd deposit',
+ ref_you_earn: 'You earn from 1st / 2nd deposits',
  ref_your_code: 'Referral code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
@@ -16316,6 +16495,7 @@ function setCollabTab(tab) {
 }
 
 
+
 async function loadReferralPanel() {
   var box = document.getElementById('referral-panel');
   if (!box) return;
@@ -16328,11 +16508,11 @@ async function loadReferralPanel() {
     var html = '';
     if (!code) {
       html += '<div class="form-group"><label class="form-label">' + (tBlock('ref_register_label') || 'Регистрация индивидуального кода') + '</label>';
-      html += '<div style="display:flex;gap:8px;align-items:stretch;">';
-      html += '<input class="form-input" id="ref-code-input" placeholder="' + (tBlock('ref_code_placeholder') || 'Ваш код') + '" style="flex:1 1 auto;min-width:0;text-transform:uppercase;font-size:15px;padding:12px 14px;">';
-      html += '<button type="button" class="btn" style="flex:0 0 auto;padding:10px 12px;font-size:13px;white-space:nowrap;min-width:0;" onclick="submitRefCode()">' + (tBlock('apply') || 'Применить') + '</button>';
-      html += '</div></div>';
-      html += '<div class="subtitle" style="font-size:12px;margin-top:6px;">' + (tBlock('ref_code_hint') || '3–24 символа, латиница и цифры') + '</div>';
+      html += '<div class="ref-code-row">';
+      html += '<input type="text" class="form-input" id="ref-code-input" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" inputmode="text" placeholder="' + (tBlock('ref_code_placeholder') || 'Ваш код') + '" style="text-transform:uppercase;">';
+      html += '<button type="button" id="ref-code-apply-btn" class="btn" onclick="submitRefCode()">' + (tBlock('apply') || 'Применить') + '</button>';
+      html += '</div>';
+      html += '<div class="subtitle" style="font-size:12px;margin-top:6px;">' + (tBlock('ref_code_hint') || '3–24 символа, латиница и цифры') + '</div></div>';
     } else {
       html += '<div class="list-item" style="margin-bottom:10px;">';
       html += '<div class="top" style="align-items:center;gap:8px;">';
@@ -16342,9 +16522,9 @@ async function loadReferralPanel() {
       html += '<div style="color:#34c759;font-weight:700;font-size:13px;flex-shrink:0;">' + Number(rates.partner_1||0) + '% / ' + Number(rates.partner_2||0) + '%</div>';
       html += '</div>';
       html += '<div id="ref-code-edit-row" style="display:none;margin-top:10px;">';
-      html += '<div style="display:flex;gap:8px;align-items:stretch;">';
-      html += '<input class="form-input" id="ref-code-edit-input" value="' + code.replace(/"/g,'&quot;') + '" style="flex:1;text-transform:uppercase;font-size:15px;padding:12px 14px;">';
-      html += '<button type="button" class="btn" style="padding:10px 12px;font-size:13px;" onclick="saveEditRefCode()">' + (tBlock('save') || 'Сохранить') + '</button>';
+      html += '<div class="ref-code-row">';
+      html += '<input type="text" class="form-input" id="ref-code-edit-input" value="' + code.replace(/"/g,'&quot;') + '" style="text-transform:uppercase;">';
+      html += '<button type="button" class="btn" onclick="saveEditRefCode()">' + (tBlock('save') || 'Сохранить') + '</button>';
       html += '</div></div>';
       html += '<div class="subtitle">' + (tBlock('ref_you_earn') || 'Вы получаете с 1 / 2 пополнения') + '</div>';
       html += '<div class="subtitle" style="margin-top:4px;">' + (tBlock('ref_invitee_disc') || 'Скидка приглашённому с 1 пополнения') + ': <b>' + Number(rates.discount_1||0) + '%</b>';
@@ -16360,6 +16540,15 @@ async function loadReferralPanel() {
       html += refStatRow(tBlock('ref_earned_2') || 'Со 2-х пополнений', Number(stats.earned_2||0).toFixed(2) + ' $');
     }
     box.innerHTML = html;
+    // ensure input is focusable
+    setTimeout(function(){
+      var inp = document.getElementById('ref-code-input');
+      if (inp) {
+        inp.removeAttribute('readonly');
+        inp.removeAttribute('disabled');
+        try { inp.focus(); } catch(e){}
+      }
+    }, 50);
   } catch (e) {
     box.innerHTML = '<div class="empty">' + (e.message || tBlock('error')) + '</div>';
   }
@@ -16371,16 +16560,22 @@ async function submitRefCode() {
   var el = document.getElementById('ref-code-input');
   var code = (el && el.value || '').trim();
   if (!code) { try { tg.showAlert(tBlock('ref_code_required') || 'Введите код'); } catch(e){} return; }
+  var btn = document.getElementById('ref-code-apply-btn');
+  if (btn) btn.disabled = true;
   try {
     await apiPost('/api/referral/register', { code: code });
     await loadReferralPanel();
   } catch (e) {
     try { tg.showAlert(e.message || tBlock('error')); } catch (e2) {}
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 function startEditRefCode() {
   var row = document.getElementById('ref-code-edit-row');
   if (row) row.style.display = row.style.display === 'none' ? '' : 'none';
+  var inp = document.getElementById('ref-code-edit-input');
+  if (inp) { try { inp.focus(); inp.select(); } catch(e){} }
 }
 async function saveEditRefCode() {
   var el = document.getElementById('ref-code-edit-input');
@@ -16394,6 +16589,22 @@ async function saveEditRefCode() {
   }
 }
 
+function adsStatsHtml(s) {
+  s = s || {};
+  function row(l,v){ return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + l + '</div><div style="font-weight:600;">' + v + '</div></div></div>'; }
+  var h = '';
+  h += row(tBlock('ads_invited_total') || 'Приглашено партнёрами всего', s.invited_total != null ? s.invited_total : (s.invited_by_partners || 0));
+  h += row(tBlock('ads_pay1_total') || 'Приглашено партнёрами 1-степенных платежей', s.pay1_total || 0);
+  h += row(tBlock('ads_pay1_10d') || '1-степенных платежей за последние 10 дн.', s.pay1_10d || 0);
+  h += row(tBlock('ads_pay2_total') || '2-степенные платежи', s.pay2_total || 0);
+  h += row(tBlock('ads_pay2_10d') || '2-степенные платежи за последние 10 дн.', s.pay2_10d || 0);
+  h += '<div style="height:12px;"></div>';
+  h += row(tBlock('ads_spend_total') || 'Потрачено на рекламу всего', Number(s.spend_total||0).toFixed(2) + ' $');
+  h += row(tBlock('ads_spend_1') || 'Траты на первостепенные платежи', Number(s.spend_1||0).toFixed(2) + ' $');
+  h += row(tBlock('ads_spend_2') || 'Траты на второстепенные платежи', Number(s.spend_2||0).toFixed(2) + ' $');
+  return h;
+}
+
 async function openAdsAnalytics() {
   document.getElementById('admin-section-title').textContent = tBlock('analytics_ads') || 'Реклама';
   setAdminSectionBack(function(){ openAdminSection('analytics'); });
@@ -16403,7 +16614,6 @@ async function openAdsAnalytics() {
 async function renderAdsAnalytics() {
   var box = document.getElementById('admin-content');
   var tab = window._adsAnalyticsTab || 'stats';
-  // switcher like collaborate
   var html = '<div class="seg-toggle" id="ads-seg" style="grid-template-columns:1fr 1fr;gap:6px;width:100%;box-sizing:border-box;margin-bottom:12px;">';
   html += '<button type="button" class="' + (tab==='stats'?'active':'') + '" onclick="window._adsAnalyticsTab=\'stats\';renderAdsAnalytics()">' + (tBlock('ads_tab_stats') || 'Статистика') + '</button>';
   html += '<button type="button" class="' + (tab==='partners'?'active':'') + '" onclick="window._adsAnalyticsTab=\'partners\';renderAdsAnalytics()">' + (tBlock('ads_tab_partners') || 'Партнёры') + '</button>';
@@ -16413,32 +16623,37 @@ async function renderAdsAnalytics() {
   try {
     if (tab === 'stats') {
       var d = await apiGet('/api/admin/referral/stats');
-      function row(l,v){ return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + l + '</div><div style="font-weight:600;">' + v + '</div></div></div>'; }
-      var h = '';
-      h += row(tBlock('ads_invited') || 'Приглашено партнёрами', d.invited_by_partners);
-      h += row(tBlock('ads_l2_10d') || 'Партнёров 2 уровня приглашено за последние 10 дней', d.l2_invited_10d);
-      h += '<div style="height:12px;"></div>';
-      h += row(tBlock('ads_spend_total') || 'Потрачено на рекламу всего', Number(d.spend_total||0).toFixed(2) + ' $');
-      h += row(tBlock('ads_spend_1') || 'Траты на первостепенные платежи', Number(d.spend_1||0).toFixed(2) + ' $');
-      h += row(tBlock('ads_spend_2') || 'Траты на второстепенные платежи', Number(d.spend_2||0).toFixed(2) + ' $');
-      body.innerHTML = h;
+      body.innerHTML = adsStatsHtml(d);
     } else {
+      var def = { level: 1 };
+      try { def = await apiGet('/api/admin/referral/default-level'); } catch(e){}
+      window._defaultPartnerLevel = Number(def.level != null ? def.level : 1);
       var d = await apiGet('/api/admin/referral/partners');
       var items = d.partners || [];
-      if (!items.length) { body.innerHTML = '<div class="empty">' + (tBlock('ads_no_partners') || 'Партнёров пока нет') + '</div>'; return; }
       var h = '';
+      h += '<div class="form-group" style="margin-bottom:12px;">';
+      h += '<label class="form-label">' + (tBlock('ads_default_level_label') || 'Все партнёры сначала получают уровень') + '</label>';
+      h += '<button type="button" class="btn btn-secondary" style="width:100%;justify-content:space-between;" onclick="toggleDefaultLevelSheet()">';
+      h += '<span>' + (tBlock('ads_level') || 'Уровень') + ' ' + window._defaultPartnerLevel + '</span><span>▾</span></button>';
+      h += '<div id="default-level-sheet" class="inline-options" style="display:none;margin-top:8px;">';
+      for (var lv=0; lv<=3; lv++) {
+        var sel = window._defaultPartnerLevel === lv ? ' selected' : '';
+        h += '<button type="button" class="sheet-option' + sel + '" onclick="setDefaultPartnerLevel(' + lv + ')">' + (tBlock('ads_level') || 'Уровень') + ' ' + lv + (lv===0 ? (' — ' + (tBlock('ads_level0_hint') || 'без дохода партнёра, бонус 5% приглашённому')) : '') + '</button>';
+      }
+      h += '</div></div>';
+      if (!items.length) {
+        h += '<div class="empty">' + (tBlock('ads_no_partners') || 'Партнёров пока нет') + '</div>';
+        body.innerHTML = h;
+        return;
+      }
       items.forEach(function(p) {
-        h += '<div class="list-item" style="padding:12px;">';
+        h += '<div class="list-item" style="padding:12px;cursor:pointer;" onclick="openPartnerAdsDetail(' + p.user_id + ')">';
         h += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
-        h += '<div style="flex:1;min-width:90px;"><span class="seller-link" data-uid="' + p.user_id + '" onclick="return goProfile(' + p.user_id + ', event)" style="color:var(--accent,#2aabee);font-weight:600;">' + String(p.name||p.user_id).replace(/</g,'&lt;') + '</span></div>';
-        h += '<div style="flex:1;text-align:center;font-family:monospace;font-size:13px;letter-spacing:.02em;">' + String(p.ref_code||'').replace(/</g,'&lt;') + '</div>';
-        h += '<div style="flex:0 0 auto;font-size:13px;font-variant-numeric:tabular-nums;opacity:.95;">' + (p.refs_10d||0) + '/' + (p.refs_total||0) + '/' + (p.refs_retained||0) + '</div>';
-        h += '<div style="display:flex;gap:4px;flex-shrink:0;">';
-        for (var lv=1; lv<=3; lv++) {
-          var sel = Number(p.ref_level) === lv;
-          h += '<button type="button" class="' + (sel ? 'btn' : 'btn btn-secondary') + '" style="padding:6px 10px;font-size:12px;min-width:36px;' + (sel ? 'background:var(--accent,#2aabee);border-color:var(--accent,#2aabee);' : '') + '" onclick="setPartnerLevel(' + p.user_id + ',' + lv + ')">' + lv + '</button>';
-        }
-        h += '</div></div></div>';
+        h += '<div style="flex:1;min-width:90px;"><span class="seller-link" data-uid="' + p.user_id + '" onclick="event.stopPropagation();return goProfile(' + p.user_id + ', event)" style="color:var(--accent,#2aabee);font-weight:600;">' + String(p.name||p.user_id).replace(/</g,'&lt;') + '</span></div>';
+        h += '<div style="flex:1;text-align:center;font-family:monospace;font-size:13px;">' + String(p.ref_code||'').replace(/</g,'&lt;') + '</div>';
+        h += '<div style="flex:0 0 auto;font-size:13px;font-variant-numeric:tabular-nums;">' + (p.refs_10d||0) + '/' + (p.refs_total||0) + '/' + (p.refs_retained||0) + '</div>';
+        h += '<div style="flex:0 0 auto;font-size:12px;opacity:.85;">' + (tBlock('ads_level') || 'Ур.') + ' ' + (p.ref_level != null ? p.ref_level : 1) + '</div>';
+        h += '</div></div>';
       });
       body.innerHTML = h;
       bindProfileLinks(body);
@@ -16447,14 +16662,53 @@ async function renderAdsAnalytics() {
     body.innerHTML = '<div class="empty">' + (e.message || tBlock('error')) + '</div>';
   }
 }
+function toggleDefaultLevelSheet() {
+  var el = document.getElementById('default-level-sheet');
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+async function setDefaultPartnerLevel(level) {
+  try {
+    await apiPost('/api/admin/referral/default-level', { level: level });
+    window._defaultPartnerLevel = level;
+    renderAdsAnalytics();
+  } catch (e) {
+    try { tg.showAlert(e.message); } catch(e2){}
+  }
+}
+async function openPartnerAdsDetail(pid) {
+  document.getElementById('admin-section-title').textContent = tBlock('ads_partner_detail') || 'Партнёр';
+  setAdminSectionBack(function(){ window._adsAnalyticsTab='partners'; renderAdsAnalytics(); });
+  var box = document.getElementById('admin-content');
+  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var d = await apiGet('/api/admin/referral/partner/' + pid);
+    var h = '';
+    h += '<div class="list-item" style="margin-bottom:10px;"><div class="top">';
+    h += '<div class="title"><span class="seller-link" data-uid="' + d.user_id + '" onclick="return goProfile(' + d.user_id + ', event)">' + String(d.name||d.user_id).replace(/</g,'&lt;') + '</span></div>';
+    h += '<div style="font-family:monospace;">' + String(d.ref_code||'').replace(/</g,'&lt;') + '</div></div></div>';
+    h += adsStatsHtml(d.stats || {});
+    h += '<div class="form-label" style="margin-top:14px;">' + (tBlock('ads_partner_level') || 'Уровень партнёра') + '</div>';
+    h += '<div style="display:flex;gap:6px;margin-top:8px;">';
+    for (var lv=0; lv<=3; lv++) {
+      var sel = Number(d.ref_level) === lv;
+      h += '<button type="button" class="' + (sel ? 'btn' : 'btn btn-secondary') + '" style="flex:1;padding:10px;font-size:13px;' + (sel ? 'background:var(--accent,#2aabee);border-color:var(--accent,#2aabee);' : '') + '" onclick="setPartnerLevel(' + d.user_id + ',' + lv + ')">' + lv + '</button>';
+    }
+    h += '</div>';
+    box.innerHTML = h;
+    bindProfileLinks(box);
+  } catch (e) {
+    box.innerHTML = '<div class="empty">' + (e.message || tBlock('error')) + '</div>';
+  }
+}
 async function setPartnerLevel(uid, level) {
   try {
     await apiPost('/api/admin/referral/set-level', { user_id: uid, level: level });
-    renderAdsAnalytics();
+    openPartnerAdsDetail(uid);
   } catch (e) {
     try { tg.showAlert(e.message); } catch (e2) {}
   }
 }
+
 
 var _depositPromo = { valid: false, pct: 0, original: 0, total: 0, code: '' };
 var _promoTimer = null;
