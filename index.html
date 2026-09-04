@@ -25407,5 +25407,93 @@ Object.keys(X).forEach(function(l){
   Object.keys(X[l]).forEach(function(k){ I18N[l][k] = X[l][k]; });
 });
 }catch(e){}})();
+
+/* ===== XCOD I18N PATCH: FAQ + ratings + roles across all supported languages ===== */
+(function(){try{
+var XP={
+"ru":{
+  "support_faq":"FAQ","faq":"FAQ","seller_rating":"Рейтинг продавца","buyer_rating":"Рейтинг покупателя","staff_rating":"Рейтинг персонала",
+  "role_label":"Роль","your_role":"Ваша роль","role_user":"Пользователь","role_partner":"Партнёр","role_corp":"Корпоративный","role_intern":"Стажёр","role_mod":"Модератор","role_admin":"Администратор","role_owner":"Создатель"
+},
+"en":{
+  "support_faq":"FAQ","faq":"FAQ","seller_rating":"Seller rating","buyer_rating":"Buyer rating","staff_rating":"Staff rating",
+  "role_label":"Role","your_role":"Your role","role_user":"User","role_partner":"Partner","role_corp":"Corporate","role_intern":"Intern","role_mod":"Moderator","role_admin":"Administrator","role_owner":"Owner"
+},
+"uk":{
+  "support_faq":"Поширені запитання","faq":"Поширені запитання","seller_rating":"Рейтинг продавця","buyer_rating":"Рейтинг покупця","staff_rating":"Рейтинг персоналу",
+  "role_label":"Роль","your_role":"Ваша роль","role_user":"Користувач","role_partner":"Партнер","role_corp":"Корпоративний","role_intern":"Стажер","role_mod":"Модератор","role_admin":"Адміністратор","role_owner":"Власник"
+},
+"de":{
+  "support_faq":"Häufig gestellte Fragen","faq":"Häufig gestellte Fragen","seller_rating":"Verkäuferbewertung","buyer_rating":"Käuferbewertung","staff_rating":"Mitarbeiterbewertung",
+  "role_label":"Rolle","your_role":"Ihre Rolle","role_user":"Benutzer","role_partner":"Partner","role_corp":"Unternehmen","role_intern":"Praktikant","role_mod":"Moderator","role_admin":"Administrator","role_owner":"Inhaber"
+},
+"fr":{
+  "support_faq":"Questions fréquentes","faq":"Questions fréquentes","seller_rating":"Évaluation du vendeur","buyer_rating":"Évaluation de l’acheteur","staff_rating":"Évaluation du personnel",
+  "role_label":"Rôle","your_role":"Votre rôle","role_user":"Utilisateur","role_partner":"Partenaire","role_corp":"Entreprise","role_intern":"Stagiaire","role_mod":"Modérateur","role_admin":"Administrateur","role_owner":"Propriétaire"
+},
+"es":{
+  "support_faq":"Preguntas frecuentes","faq":"Preguntas frecuentes","seller_rating":"Valoración del vendedor","buyer_rating":"Valoración del comprador","staff_rating":"Valoración del personal",
+  "role_label":"Rol","your_role":"Tu rol","role_user":"Usuario","role_partner":"Socio","role_corp":"Corporativo","role_intern":"Becario","role_mod":"Moderador","role_admin":"Administrador","role_owner":"Propietario"
+},
+"it":{
+  "support_faq":"Domande frequenti","faq":"Domande frequenti","seller_rating":"Valutazione del venditore","buyer_rating":"Valutazione dell’acquirente","staff_rating":"Valutazione del personale",
+  "role_label":"Ruolo","your_role":"Il tuo ruolo","role_user":"Utente","role_partner":"Partner","role_corp":"Aziendale","role_intern":"Stagista","role_mod":"Moderatore","role_admin":"Amministratore","role_owner":"Proprietario"
+},
+"pt":{
+  "support_faq":"Perguntas frequentes","faq":"Perguntas frequentes","seller_rating":"Avaliação do vendedor","buyer_rating":"Avaliação do comprador","staff_rating":"Avaliação da equipa",
+  "role_label":"Função","your_role":"A sua função","role_user":"Utilizador","role_partner":"Parceiro","role_corp":"Corporativo","role_intern":"Estagiário","role_mod":"Moderador","role_admin":"Administrador","role_owner":"Proprietário"
+},
+"pt-BR":{
+  "support_faq":"Perguntas frequentes","faq":"Perguntas frequentes","seller_rating":"Avaliação do vendedor","buyer_rating":"Avaliação do comprador","staff_rating":"Avaliação da equipe",
+  "role_label":"Função","your_role":"Sua função","role_user":"Usuário","role_partner":"Parceiro","role_corp":"Corporativo","role_intern":"Estagiário","role_mod":"Moderador","role_admin":"Administrador","role_owner":"Proprietário"
+},
+"tr":{
+  "support_faq":"Sıkça sorulan sorular","faq":"Sıkça sorulan sorular","seller_rating":"Satıcı puanı","buyer_rating":"Alıcı puanı","staff_rating":"Personel puanı",
+  "role_label":"Rol","your_role":"Rolünüz","role_user":"Kullanıcı","role_partner":"Partner","role_corp":"Kurumsal","role_intern":"Stajyer","role_mod":"Moderatör","role_admin":"Yönetici","role_owner":"Sahip"
+},
+"id":{
+  "support_faq":"Pertanyaan yang sering diajukan","faq":"Pertanyaan yang sering diajukan","seller_rating":"Rating penjual","buyer_rating":"Rating pembeli","staff_rating":"Rating staf",
+  "role_label":"Peran","your_role":"Peran Anda","role_user":"Pengguna","role_partner":"Partner","role_corp":"Korporat","role_intern":"Magang","role_mod":"Moderator","role_admin":"Administrator","role_owner":"Pemilik"
+},
+"ar":{
+  "support_faq":"الأسئلة الشائعة","faq":"الأسئلة الشائعة","seller_rating":"تقييم البائع","buyer_rating":"تقييم المشتري","staff_rating":"تقييم الموظفين",
+  "role_label":"الدور","your_role":"دورك","role_user":"مستخدم","role_partner":"شريك","role_corp":"مؤسسي","role_intern":"متدرب","role_mod":"مشرف","role_admin":"مسؤول","role_owner":"المالك"
+},
+"zh":{
+  "support_faq":"常见问题","faq":"常见问题","seller_rating":"卖家评分","buyer_rating":"买家评分","staff_rating":"员工评分",
+  "role_label":"角色","your_role":"您的角色","role_user":"用户","role_partner":"合作伙伴","role_corp":"企业","role_intern":"实习生","role_mod":"版主","role_admin":"管理员","role_owner":"所有者"
+},
+"ja":{
+  "support_faq":"よくある質問","faq":"よくある質問","seller_rating":"販売者評価","buyer_rating":"購入者評価","staff_rating":"スタッフ評価",
+  "role_label":"役割","your_role":"あなたの役割","role_user":"ユーザー","role_partner":"パートナー","role_corp":"法人","role_intern":"インターン","role_mod":"モデレーター","role_admin":"管理者","role_owner":"所有者"
+},
+"ko":{
+  "support_faq":"자주 묻는 질문","faq":"자주 묻는 질문","seller_rating":"판매자 평점","buyer_rating":"구매자 평점","staff_rating":"직원 평점",
+  "role_label":"역할","your_role":"내 역할","role_user":"사용자","role_partner":"파트너","role_corp":"법인","role_intern":"인턴","role_mod":"모더레이터","role_admin":"관리자","role_owner":"소유자"
+}
+};
+Object.keys(XP).forEach(function(lang){
+  if(!I18N[lang]) I18N[lang]={};
+  Object.keys(XP[lang]).forEach(function(k){ I18N[lang][k]=XP[lang][k]; });
+});
+}catch(e){console.warn('I18N FAQ/ratings/roles patch',e);}})();
+
+/* Make roleName return the actual role for partner/corporate roles too. */
+(function(){
+  try{
+    roleName = function(role){
+      var r=parseInt(role,10)||0;
+      var key='role_user';
+      if(r>=6) key='role_owner';
+      else if(r>=5) key='role_admin';
+      else if(r>=4) key='role_mod';
+      else if(r>=3) key='role_intern';
+      else if(r>=2) key='role_corp';
+      else if(r>=1) key='role_partner';
+      return tBlock(key);
+    };
+  }catch(e){console.warn('roleName patch',e);}
+})();
+
 </script>
 </body>
