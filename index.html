@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- XCOD_BUILD 2026-09-05-v35-ratings-faq-roles-14 -->
+<!-- XCOD_BUILD 2026-09-05-v36-profile-ratings-roles-i18n -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -23516,12 +23516,12 @@ async function searchBlockUser() {
  var data = await apiGet('/api/users/' + id + '/profile');
  var u = data.user || data;
  var name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || (u.username ? '@' + u.username : ('ID ' + id));
- var roleName = roleName(u.role) || "";
+ var foundRoleName = roleName(u.role) || "";
  window._blockFoundName = name;
  box.innerHTML =
  '<div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openBlockUserActions(' + id + ')">' +
  '<div class="top"><div class="title">' + String(name).replace(/</g,'&lt;') + '</div>' +
- (roleName ? '<span class="badge badge-gray">' + String(roleName).replace(/</g,'&lt;') + '</span>' : '') +
+ (foundRoleName ? '<span class="badge badge-gray">' + String(foundRoleName).replace(/</g,'&lt;') + '</span>' : '') +
  '</div><div class="subtitle">ID ' + id + (u.username ? (' · @' + String(u.username).replace(/</g,'&lt;')) : '') + '</div></div>';
  } catch (e) {
  box.innerHTML = '<div class="empty">' + (e.message || 'Пользователь не найден') + '</div>';
@@ -25478,22 +25478,35 @@ Object.keys(XP).forEach(function(lang){
 });
 }catch(e){console.warn('I18N FAQ/ratings/roles patch',e);}})();
 
-/* Make roleName return the actual role for partner/corporate roles too. */
-(function(){
-  try{
-    roleName = function(role){
-      var r=parseInt(role,10)||0;
-      var key='role_user';
-      if(r>=6) key='role_owner';
-      else if(r>=5) key='role_admin';
-      else if(r>=4) key='role_mod';
-      else if(r>=3) key='role_intern';
-      else if(r>=2) key='role_corp';
-      else if(r>=1) key='role_partner';
-      return tBlock(key);
-    };
-  }catch(e){console.warn('roleName patch',e);}
-})();
-
+/* ===== XCOD FINAL ROLE + PROFILE RATING I18N OVERRIDE ===== */
+(function(){try{
+  var XR={
+    ru:{seller_rating:'Рейтинг продавца',buyer_rating:'Рейтинг покупателя',staff_rating:'Рейтинг сотрудника',role_user:'Пользователь',role_partner:'Партнёр',role_corp:'Юрлицо',role_intern:'Стажёр',role_mod:'Модератор',role_admin:'Администратор',role_owner:'Создатель'},
+    en:{seller_rating:'Seller rating',buyer_rating:'Buyer rating',staff_rating:'Employee rating',role_user:'User',role_partner:'Partner',role_corp:'Corporate',role_intern:'Intern',role_mod:'Moderator',role_admin:'Administrator',role_owner:'Founder'},
+    uk:{seller_rating:'Рейтинг продавця',buyer_rating:'Рейтинг покупця',staff_rating:'Рейтинг співробітника',role_user:'Користувач',role_partner:'Партнер',role_corp:'Юридична особа',role_intern:'Стажер',role_mod:'Модератор',role_admin:'Адміністратор',role_owner:'Засновник'},
+    de:{seller_rating:'Verkäuferbewertung',buyer_rating:'Käuferbewertung',staff_rating:'Mitarbeiterbewertung',role_user:'Benutzer',role_partner:'Partner',role_corp:'Unternehmen',role_intern:'Praktikant',role_mod:'Moderator',role_admin:'Administrator',role_owner:'Gründer'},
+    fr:{seller_rating:'Évaluation du vendeur',buyer_rating:'Évaluation de l’acheteur',staff_rating:'Évaluation de l’employé',role_user:'Utilisateur',role_partner:'Partenaire',role_corp:'Entreprise',role_intern:'Stagiaire',role_mod:'Modérateur',role_admin:'Administrateur',role_owner:'Fondateur'},
+    es:{seller_rating:'Valoración del vendedor',buyer_rating:'Valoración del comprador',staff_rating:'Valoración del empleado',role_user:'Usuario',role_partner:'Socio',role_corp:'Empresa',role_intern:'Becario',role_mod:'Moderador',role_admin:'Administrador',role_owner:'Fundador'},
+    it:{seller_rating:'Valutazione del venditore',buyer_rating:'Valutazione dell’acquirente',staff_rating:'Valutazione del dipendente',role_user:'Utente',role_partner:'Partner',role_corp:'Aziendale',role_intern:'Stagista',role_mod:'Moderatore',role_admin:'Amministratore',role_owner:'Fondatore'},
+    pt:{seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação do funcionário',role_user:'Utilizador',role_partner:'Parceiro',role_corp:'Empresarial',role_intern:'Estagiário',role_mod:'Moderador',role_admin:'Administrador',role_owner:'Fundador'},
+    'pt-BR':{seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação do funcionário',role_user:'Usuário',role_partner:'Parceiro',role_corp:'Empresarial',role_intern:'Estagiário',role_mod:'Moderador',role_admin:'Administrador',role_owner:'Fundador'},
+    tr:{seller_rating:'Satıcı puanı',buyer_rating:'Alıcı puanı',staff_rating:'Çalışan puanı',role_user:'Kullanıcı',role_partner:'Partner',role_corp:'Kurumsal',role_intern:'Stajyer',role_mod:'Moderatör',role_admin:'Yönetici',role_owner:'Kurucu'},
+    id:{seller_rating:'Rating penjual',buyer_rating:'Rating pembeli',staff_rating:'Rating karyawan',role_user:'Pengguna',role_partner:'Mitra',role_corp:'Korporat',role_intern:'Magang',role_mod:'Moderator',role_admin:'Administrator',role_owner:'Pendiri'},
+    ar:{seller_rating:'تقييم البائع',buyer_rating:'تقييم المشتري',staff_rating:'تقييم الموظف',role_user:'مستخدم',role_partner:'شريك',role_corp:'مؤسسي',role_intern:'متدرب',role_mod:'مشرف',role_admin:'مسؤول',role_owner:'مؤسس'},
+    zh:{seller_rating:'卖家评分',buyer_rating:'买家评分',staff_rating:'员工评分',role_user:'用户',role_partner:'合作伙伴',role_corp:'企业',role_intern:'实习生',role_mod:'版主',role_admin:'管理员',role_owner:'创始人'},
+    ja:{seller_rating:'販売者評価',buyer_rating:'購入者評価',staff_rating:'従業員評価',role_user:'ユーザー',role_partner:'パートナー',role_corp:'法人',role_intern:'インターン',role_mod:'モデレーター',role_admin:'管理者',role_owner:'創設者'},
+    ko:{seller_rating:'판매자 평점',buyer_rating:'구매자 평점',staff_rating:'직원 평점',role_user:'사용자',role_partner:'파트너',role_corp:'기업',role_intern:'인턴',role_mod:'모더레이터',role_admin:'관리자',role_owner:'창립자'}
+  };
+  Object.keys(XR).forEach(function(lang){
+    if(!I18N[lang]) I18N[lang]={};
+    Object.keys(XR[lang]).forEach(function(k){ I18N[lang][k]=XR[lang][k]; });
+  });
+  roleName=function(role){
+    var r=parseInt(role,10);
+    if(isNaN(r)) r=0;
+    var key=r>=6?'role_owner':r>=5?'role_admin':r>=4?'role_mod':r>=3?'role_intern':r>=2?'role_corp':r>=1?'role_partner':'role_user';
+    return tBlock(key);
+  };
+}catch(e){console.warn('final role/profile rating i18n',e);}})();
 </script>
 </body>
