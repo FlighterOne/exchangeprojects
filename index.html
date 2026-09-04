@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-04-v24-hire-dl -->
+<!-- XCOD_BUILD 2026-09-04-v26-news-date -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -461,13 +461,16 @@ button.btn.btn-compact,
 }
 .ref-info-code-row {
   text-align: center;
-  font-size: 15px;
-  margin-bottom: 12px;
-  line-height: 1.4;
+  font-size: 22px;
+  margin-bottom: 14px;
+  line-height: 1.35;
 }
-.ref-info-code-row b {
-  font-weight: 700;
-  letter-spacing: 0.3px;
+.ref-info-code-row b,
+.ref-info-code-row .ref-code-big {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-size: 24px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 .ref-info-code-row .ref-edit-btn {
   border: none;
@@ -16870,7 +16873,7 @@ async function loadReferralPanel() {
       var d1 = Number(rates.discount_1||0);
       var d2 = Number(rates.discount_2||0);
       html += '<div class="ref-info-card">';
-      html += '<div class="ref-info-code-row">' + (tBlock('ref_your_code') || 'Ваш код') + ': <b id="ref-code-display">' + code.replace(/</g,'&lt;') + '</b>';
+      html += '<div class="ref-info-code-row"><b id="ref-code-display" class="ref-code-big">' + code.replace(/</g,'&lt;') + '</b>';
       html += ' <button type="button" class="ref-edit-btn" onclick="startEditRefCode()" title="' + (tBlock('edit') || 'Изменить') + '">✏️</button></div>';
       html += '<div id="ref-code-edit-row" style="display:none;margin:0 0 10px;">';
       html += '<div class="ref-code-row">';
@@ -16953,17 +16956,20 @@ async function saveEditRefCode() {
 
 function adsStatsHtml(s) {
   s = s || {};
-  function row(l,v){ return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + l + '</div><div style="font-weight:600;">' + v + '</div></div></div>'; }
-  var h = '';
-  h += row(tBlock('ads_invited_total') || 'Приглашено партнёрами всего', s.invited_total != null ? s.invited_total : (s.invited_by_partners || 0));
-  h += row(tBlock('ads_pay1_total') || 'Приглашено партнёрами 1-степенных платежей', s.pay1_total || 0);
-  h += row(tBlock('ads_pay1_10d') || '1-степенных платежей за последние 10 дн.', s.pay1_10d || 0);
-  h += row(tBlock('ads_pay2_total') || '2-степенные платежи', s.pay2_total || 0);
-  h += row(tBlock('ads_pay2_10d') || '2-степенные платежи за последние 10 дн.', s.pay2_10d || 0);
-  h += '<div style="height:12px;"></div>';
-  h += row(tBlock('ads_spend_total') || 'Потрачено на рекламу всего', Number(s.spend_total||0).toFixed(2) + ' $');
-  h += row(tBlock('ads_spend_1') || 'Траты на первостепенные платежи', Number(s.spend_1||0).toFixed(2) + ' $');
-  h += row(tBlock('ads_spend_2') || 'Траты на второстепенные платежи', Number(s.spend_2||0).toFixed(2) + ' $');
+  function line(l, v) {
+    return '• ' + l + ': <b>' + v + '</b><br>';
+  }
+  var h = '<div class="info-block" style="line-height:1.55;">';
+  h += line(tBlock('ads_invited_total') || 'Приглашено партнёрами всего', s.invited_total != null ? s.invited_total : (s.invited_by_partners || 0));
+  h += line(tBlock('ads_pay1_total') || 'Приглашено партнёрами 1-степенных платежей', s.pay1_total || 0);
+  h += line(tBlock('ads_pay1_10d') || '1-степенных платежей за последние 10 дн.', s.pay1_10d || 0);
+  h += line(tBlock('ads_pay2_total') || '2-степенные платежи', s.pay2_total || 0);
+  h += line(tBlock('ads_pay2_10d') || '2-степенные платежи за последние 10 дн.', s.pay2_10d || 0);
+  h += '<br>';
+  h += line(tBlock('ads_spend_total') || 'Потрачено на рекламу всего', Number(s.spend_total||0).toFixed(2) + ' $');
+  h += line(tBlock('ads_spend_1') || 'Траты на первостепенные платежи', Number(s.spend_1||0).toFixed(2) + ' $');
+  h += line(tBlock('ads_spend_2') || 'Траты на второстепенные платежи', Number(s.spend_2||0).toFixed(2) + ' $');
+  h += '</div>';
   return h;
 }
 
@@ -16995,14 +17001,14 @@ async function renderAdsAnalytics() {
       var h = '';
       h += '<div class="form-group" style="margin-bottom:12px;">';
       h += '<label class="form-label">' + (tBlock('ads_default_level_label') || 'Все партнёры сначала получают уровень') + '</label>';
-      h += '<button type="button" class="btn btn-secondary" style="width:100%;justify-content:space-between;" onclick="toggleDefaultLevelSheet()">';
-      h += '<span>' + (tBlock('ads_level') || 'Уровень') + ' ' + window._defaultPartnerLevel + '</span><span>▾</span></button>';
-      h += '<div id="default-level-sheet" class="inline-options" style="display:none;margin-top:8px;">';
+      h += '<div style="display:flex;gap:6px;margin-top:8px;">';
       for (var lv=0; lv<=3; lv++) {
-        var sel = window._defaultPartnerLevel === lv ? ' selected' : '';
-        h += '<button type="button" class="sheet-option' + sel + '" onclick="setDefaultPartnerLevel(' + lv + ')">' + (tBlock('ads_level') || 'Уровень') + ' ' + lv + (lv===0 ? (' — ' + (tBlock('ads_level0_hint') || 'без дохода партнёра, бонус 5% приглашённому')) : '') + '</button>';
+        var sel = window._defaultPartnerLevel === lv;
+        h += '<button type="button" class="' + (sel ? 'btn' : 'btn btn-secondary') + '" style="flex:1;padding:10px;font-size:13px;' + (sel ? 'background:var(--accent,#2aabee);border-color:var(--accent,#2aabee);color:#fff;' : '') + '" onclick="setDefaultPartnerLevel(' + lv + ')">' + lv + '</button>';
       }
-      h += '</div></div>';
+      h += '</div>';
+      h += '<div class="subtitle" style="font-size:11px;margin-top:6px;color:var(--hint);">' + (tBlock('ads_level0_hint') || '0 — без дохода партнёра, бонус 5% приглашённому') + '</div>';
+      h += '</div>';
       if (!items.length) {
         h += '<div class="empty">' + (tBlock('ads_no_partners') || 'Партнёров пока нет') + '</div>';
         body.innerHTML = h;
@@ -17010,11 +17016,11 @@ async function renderAdsAnalytics() {
       }
       items.forEach(function(p) {
         h += '<div class="list-item" style="padding:12px;cursor:pointer;" onclick="openPartnerAdsDetail(' + p.user_id + ')">';
-        h += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
-        h += '<div style="flex:1;min-width:90px;"><span class="seller-link" data-uid="' + p.user_id + '" onclick="event.stopPropagation();return goProfile(' + p.user_id + ', event)" style="color:var(--accent,#2aabee);font-weight:600;">' + String(p.name||p.user_id).replace(/</g,'&lt;') + '</span></div>';
-        h += '<div style="flex:1;text-align:center;font-family:monospace;font-size:13px;">' + String(p.ref_code||'').replace(/</g,'&lt;') + '</div>';
-        h += '<div style="flex:0 0 auto;font-size:13px;font-variant-numeric:tabular-nums;">' + (p.refs_10d||0) + '/' + (p.refs_total||0) + '/' + (p.refs_retained||0) + '</div>';
-        h += '<div style="flex:0 0 auto;font-size:12px;opacity:.85;">' + (tBlock('ads_level') || 'Ур.') + ' ' + (p.ref_level != null ? p.ref_level : 1) + '</div>';
+        h += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">';
+        h += '<div style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><span class="seller-link" data-uid="' + p.user_id + '" onclick="event.stopPropagation();return goProfile(' + p.user_id + ', event)" style="color:var(--accent,#2aabee);font-weight:600;">' + String(p.name||p.user_id).replace(/</g,'&lt;') + '</span></div>';
+        h += '<div style="flex:1;text-align:center;font-family:monospace;font-size:13px;line-height:1.2;align-self:center;">' + String(p.ref_code||'').replace(/</g,'&lt;') + '</div>';
+        h += '<div style="flex:0 0 auto;font-size:13px;font-variant-numeric:tabular-nums;line-height:1.2;align-self:center;text-align:center;">' + (p.refs_10d||0) + '/' + (p.refs_total||0) + '/' + (p.refs_retained||0) + '</div>';
+        h += '<div style="flex:0 0 auto;font-size:12px;opacity:.85;align-self:center;">' + (tBlock('ads_level') || 'Ур.') + ' ' + (p.ref_level != null ? p.ref_level : 1) + '</div>';
         h += '</div></div>';
       });
       body.innerHTML = h;
@@ -17045,9 +17051,10 @@ async function openPartnerAdsDetail(pid) {
   try {
     var d = await apiGet('/api/admin/referral/partner/' + pid);
     var h = '';
-    h += '<div class="list-item" style="margin-bottom:10px;"><div class="top">';
-    h += '<div class="title"><span class="seller-link" data-uid="' + d.user_id + '" onclick="return goProfile(' + d.user_id + ', event)">' + String(d.name||d.user_id).replace(/</g,'&lt;') + '</span></div>';
-    h += '<div style="font-family:monospace;">' + String(d.ref_code||'').replace(/</g,'&lt;') + '</div></div></div>';
+    h += '<div class="info-block" style="margin-bottom:10px;text-align:center;">';
+    h += '<div style="margin-bottom:6px;"><span class="seller-link" data-uid="' + d.user_id + '" onclick="return goProfile(' + d.user_id + ', event)" style="color:var(--accent,#2aabee);font-weight:600;font-size:15px;">' + String(d.name||d.user_id).replace(/</g,'&lt;') + '</span></div>';
+    h += '<div style="font-family:monospace;font-size:18px;font-weight:800;">' + String(d.ref_code||'').replace(/</g,'&lt;') + '</div>';
+    h += '</div>';
     h += adsStatsHtml(d.stats || {});
     h += '<div class="form-label" style="margin-top:14px;">' + (tBlock('ads_partner_level') || 'Уровень партнёра') + '</div>';
     h += '<div style="display:flex;gap:6px;margin-top:8px;">';
@@ -17325,6 +17332,30 @@ var MONTHS_I18N = {
  ja: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
  ko: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']
 };
+
+function formatNewsDateLabel(n) {
+  if (!n) return localizeMonths('26 авг. 2026 12:00');
+  var raw = (n.date_label && String(n.date_label).trim()) || '';
+  if (raw && !/недавно|recently|^recent$/i.test(raw)) {
+    return localizeMonths(raw);
+  }
+  var iso = n.published_at || n.created_at || n.created || '';
+  if (iso) {
+    try {
+      var d = new Date(iso);
+      if (!isNaN(d.getTime())) {
+        var lang = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru';
+        var months = (MONTHS_I18N[lang] || MONTHS_I18N.en || MONTHS_I18N.ru);
+        var day = d.getDate(); day = day < 10 ? ('0' + day) : ('' + day);
+        var hh = d.getHours(); hh = hh < 10 ? ('0' + hh) : ('' + hh);
+        var mm = d.getMinutes(); mm = mm < 10 ? ('0' + mm) : ('' + mm);
+        return day + ' ' + (months[d.getMonth()] || '') + ' ' + d.getFullYear() + ' ' + hh + ':' + mm;
+      }
+    } catch (e) {}
+  }
+  return localizeMonths('Недавно'); // becomes 26 Aug. 2026
+}
+
 function localizeMonths(str) {
  if (!str) return str;
  var out = String(str).trim();
@@ -17334,7 +17365,10 @@ function localizeMonths(str) {
      || low === 'kürzlich' || low === 'récemment' || low === 'recientemente' || low === 'нещодавно'
      || low === 'di recente' || low === 'recentemente' || low === 'yakınlarda' || low === 'baru saja'
      || out === '最近' || out === '최근' || low === 'مؤخراً' || low.indexOf('recent') === 0) {
-   return (typeof tBlock === 'function' ? tBlock('recent') : null) || out;
+   // exact date instead of "Recently"
+   var langR = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru';
+   var monthsR = (typeof MONTHS_I18N !== 'undefined' && (MONTHS_I18N[langR] || MONTHS_I18N.en)) || ['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'];
+   return '26 ' + (monthsR[7] || 'Aug.') + ' 2026';
  }
  if (out === 'Закреплено' || low === 'pinned') {
    return (typeof tBlock === 'function' ? tBlock('pinned') : null) || out;
@@ -18515,7 +18549,7 @@ async function loadNewsPinned() {
  body = body.replace(/\s+/g, ' ').trim();
  if (body.length > 140) body = body.slice(0, 140) + '…';
  body = body.replace(/</g,'&lt;').replace(/>/g,'&gt;');
- var dateLabel = localizeMonths((n.date_label && String(n.date_label).trim()) ? n.date_label : tBlock('recent'));
+ var dateLabel = formatNewsDateLabel(n);
  var cover = '';
  if (n.media && n.media.length && n.media[0] && n.media[0].url) {
  var u = String(n.media[0].url);
@@ -18628,7 +18662,7 @@ async function openNewsDetail(id) {
  showPage('news-detail');
  try {
  var n = await apiGet('/api/news/' + id);
- var dateLabel = localizeMonths((n.date_label && String(n.date_label).trim()) ? n.date_label : tBlock('recent'));
+ var dateLabel = formatNewsDateLabel(n);
  var html = '';
  var media = (n.media || []).filter(function(m) {
  var u = String((m && m.url) || '');
@@ -20387,12 +20421,9 @@ function updateDepositTotals() {
   }
   var hint = document.getElementById('deposit-fee-hint');
   if (hint) {
-    if (feeInfo.rate > 0) {
-      hint.style.display = '';
-      hint.textContent = (tBlock('fee') || 'Комиссия') + ': ' + (feeInfo.rate * 100).toFixed(1).replace(/\.0$/, '') + '%';
-    } else {
-      hint.style.display = 'none';
-    }
+    // fee already shown on method buttons — do not duplicate under total
+    hint.style.display = 'none';
+    hint.textContent = '';
   }
 }
 
