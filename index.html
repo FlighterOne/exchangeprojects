@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- XCOD_BUILD 2026-09-05-v36-profile-ratings-roles-i18n -->
+<!-- XCOD_BUILD 2026-09-05-v37-ads-back-fix -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -19265,6 +19265,11 @@ async function openAdsAnalytics() {
   renderAdsAnalytics();
 }
 async function renderAdsAnalytics() {
+  // Always restore back → analytics menu (fixes trap after partner detail)
+  setAdminSectionBack(function(){ openAdminSection('analytics'); });
+  try {
+    document.getElementById('admin-section-title').textContent = tBlock('analytics_ads') || 'Реклама';
+  } catch (e) {}
   var box = document.getElementById('admin-content');
   var tab = window._adsAnalyticsTab || 'stats';
   var html = '<div class="seg-toggle" id="ads-seg" style="grid-template-columns:1fr 1fr;gap:6px;width:100%;box-sizing:border-box;margin-bottom:12px;">';
