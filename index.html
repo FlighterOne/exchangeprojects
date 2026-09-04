@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-04-v22-ref-input -->
+<!-- XCOD_BUILD 2026-09-04-v23-compact-ui -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -367,6 +367,84 @@
  border-radius: 12px; background: var(--secondary-bg); color: var(--text); font-size: 16px; outline: none;
  }
  .form-input:focus { border-color: var(--button); }
+
+
+/* Compact header actions: Create / page titles */
+.page-header-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.page-header-row .section-title {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  margin-bottom: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.btn-compact,
+button.btn.btn-compact,
+.page-header-row .btn,
+.page-header-row button.btn {
+  width: auto !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  min-height: 0 !important;
+  height: auto !important;
+}
+.top-side-btn {
+  width: auto !important;
+  max-width: 140px !important;
+  flex: 0 0 auto !important;
+}
+.ref-info-card {
+  background: var(--secondary-bg);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.ref-info-code-row {
+  text-align: center;
+  font-size: 15px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.ref-info-code-row b {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.ref-info-code-row .ref-edit-btn {
+  border: none;
+  background: transparent;
+  color: var(--accent, #2aabee);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  vertical-align: middle;
+}
+.ref-info-line {
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 6px;
+  color: var(--text);
+}
+.ref-info-line .pct {
+  color: #34c759;
+  font-weight: 700;
+}
 
 /* Referral code registration row: big input, compact Apply button */
 .ref-code-row {
@@ -1387,9 +1465,9 @@
 
  <!-- HOME -->
  <div id="page-home" class="page">
- <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
- <div class="section-title" style="margin-bottom:0;"><span data-i18n="feed_title">Лента объявлений</span></div>
- <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()" data-i18n="create">+ Создать</button>
+ <div class="page-header-row">
+ <div class="section-title"><span data-i18n="feed_title">Лента объявлений</span></div>
+ <button type="button" class="btn btn-compact" onclick="openCreateTypeSheet()" data-i18n="create">+ Создать</button>
  </div>
  <div id="listings-feed"><div class="loading"><div class="spinner"></div></div></div>
  </div>
@@ -1602,7 +1680,7 @@
  <div id="page-news" class="page">
  <div class="section-title" data-i18n="news_title">Новости</div>
  <div id="news-pinned"><div class="loading"><div class="spinner"></div></div></div>
- <div class="section-title" style="font-size:16px;margin-top:8px;" data-i18n="news_feed_title">Лента новостей</div>
+ <div class="section-title" style="font-size:18px;margin-top:4px;margin-bottom:14px;" data-i18n="news_feed_title">Лента новостей</div>
  <div id="news-feed"></div>
  </div>
 
@@ -1613,9 +1691,9 @@
 
  <!-- EXCHANGE -->
  <div id="page-exchange" class="page">
- <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
- <div class="section-title" style="margin:0;flex:1;min-width:0;" data-i18n="exchange">Биржа</div>
- <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startSaleCreate()" data-i18n="create">+ Создать</button>
+ <div class="page-header-row" style="margin-bottom:16px;">
+ <div class="section-title" data-i18n="exchange">Биржа</div>
+ <button type="button" class="btn btn-compact" onclick="startSaleCreate()" data-i18n="create">+ Создать</button>
  </div>
  <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
  <input class="form-input" type="search" id="exchange-q" placeholder="Поиск по бирже..." data-i18n-placeholder="search_exchange" enterkeyhint="search">
@@ -1681,9 +1759,9 @@
  <!-- MY LISTINGS -->
 
  <div id="page-freelance" class="page">
- <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;">
- <div class="section-title" style="margin:0;flex:1;min-width:0;" data-i18n="freelance">Фриланс</div>
- <button type="button" class="btn" style="width:auto;padding:8px 12px;flex-shrink:0;white-space:nowrap;" onclick="startFreelanceCreate()" data-i18n="create">+ Создать</button>
+ <div class="page-header-row" style="margin-bottom:16px;">
+ <div class="section-title" data-i18n="freelance">Фриланс</div>
+ <button type="button" class="btn btn-compact" onclick="startFreelanceCreate()" data-i18n="create">+ Создать</button>
  </div>
  <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
  <input class="form-input" type="search" id="fl-q" placeholder="Поиск по ключевым словам..." data-i18n-placeholder="search_keywords" enterkeyhint="search">
@@ -1817,9 +1895,9 @@
  </div>
 
  <div id="page-my-listings" class="page">
- <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+ <div class="page-header-row">
  <div class="section-title" style="margin-bottom:0;"><span data-i18n="my_listings">Мои объявления</span></div>
- <button class="btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="openCreateTypeSheet()" data-i18n="create">+ Создать</button>
+ <button type="button" class="btn btn-compact" onclick="openCreateTypeSheet()" data-i18n="create">+ Создать</button>
  </div>
  <div class="seg-toggle" id="my-listings-seg" style="grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;box-sizing:border-box;">
  <button type="button" class="active" id="my-seg-mod" onclick="setMyListingsTab('moderation')" style="font-size:12px;padding:8px 4px;min-width:0;overflow:hidden;">Модерация <span class="seg-count" id="my-cnt-mod">0</span></button>
@@ -4850,6 +4928,15 @@ function updateLangLabels() {
 
 var I18N = {
  ru: {
+ dl_app: 'Скачать приложение',
+ ref_and: 'и',
+ ref_on_2nd: 'при втором пополнении',
+ ref_on_1st: 'при 1 пополнении',
+ ref_invitee_gets: 'Реферал получает бонус',
+ ref_of_referrals: 'рефералов',
+ ref_from_2nd: 'со 2 пополнения',
+ ref_from_1st: 'с 1 пополнения',
+ ref_you_get: 'Вы получаете',
  ads_partner_level: 'Уровень партнёра',
  ads_partner_detail: 'Партнёр',
  ads_level0_hint: 'без дохода партнёра, бонус 5% приглашённому',
@@ -4885,7 +4972,7 @@ var I18N = {
  ref_stats: 'Статистика',
  ref_invitee_disc: 'Скидка приглашённому с 1 пополнения',
  ref_you_earn: 'Вы получаете с 1 / 2 пополнения',
- ref_your_code: 'Реферальный код',
+ ref_your_code: 'Ваш код',
  ref_code_hint: '3–24 символа, латиница и цифры',
  ref_code_placeholder: 'Ваш код',
  ref_register_label: 'Регистрация индивидуального кода',
@@ -5617,6 +5704,15 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -5652,7 +5748,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -6381,6 +6477,15 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -6416,7 +6521,7 @@ terms_prefix: 'By continuing, you accept the ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -6564,7 +6669,7 @@ terms_prefix: 'By continuing, you accept the ',
  home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
  balance: 'Guthaben', favorites: 'Favoriten', my_listings: 'Meine Anzeigen',
  orders: 'Bestellverlauf', settings: 'Einstellungen', panel: 'Panel',
- feed_title: 'Anzeigen-Feed', create: '+ Erstellen', search: 'Suche',
+ feed_title: 'Listings feed', create: '+ Create', search: 'Suche',
  filters: 'Filter', language: 'Sprache', theme: 'Design', theme_auto: 'Wie in Telegram',
  theme_light: 'Hell', theme_dark: 'Dunkel',
  ban_title: 'Zugang wegen Regelverstößen eingeschränkt',
@@ -6952,7 +7057,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  no_orders: 'Noch keine Bestellungen',
  no_listings_yet: 'Noch keine Anzeigen',
  create_listing: 'Anzeige erstellen',
- news_feed_title: 'News-Feed',
+ news_feed_title: 'News feed',
  role_partner: 'Partner',
  role_corp: 'Unternehmen',
  fl_execute: 'Freelance — ausführen',
@@ -7133,6 +7238,15 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -7168,7 +7282,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -7313,7 +7427,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
  balance: 'Solde', favorites: 'Favoris', my_listings: 'Mes annonces',
  orders: 'Historique des commandes', settings: 'Paramètres', panel: 'Panneau',
- feed_title: 'Fil d\'annonces', create: '+ Créer', search: 'Recherche',
+ feed_title: 'Listings feed', create: '+ Create', search: 'Recherche',
  filters: 'Filtres', language: 'Langue', theme: 'Thème', theme_auto: 'Comme Telegram',
  theme_light: 'Clair', theme_dark: 'Sombre',
  ban_title: 'Accès restreint pour violation des règles',
@@ -7701,7 +7815,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  no_orders: 'Pas encore de commandes',
  no_listings_yet: 'Pas encore d’annonces',
  create_listing: 'Créer une annonce',
- news_feed_title: 'Fil d’actualités',
+ news_feed_title: 'News feed',
  role_partner: 'Partenaire',
  role_corp: 'Entreprise',
  fl_execute: 'Freelance — exécuter',
@@ -7882,6 +7996,15 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -7917,7 +8040,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -8062,7 +8185,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favoritos', my_listings: 'Mis anuncios',
  orders: 'Historial de pedidos', settings: 'Ajustes', panel: 'Panel',
- feed_title: 'Feed de anuncios', create: '+ Crear', search: 'Buscar',
+ feed_title: 'Listings feed', create: '+ Create', search: 'Buscar',
  filters: 'Filtros', language: 'Idioma', theme: 'Tema', theme_auto: 'Como en Telegram',
  theme_light: 'Claro', theme_dark: 'Oscuro',
  ban_title: 'Acceso restringido por violar las reglas',
@@ -8450,7 +8573,7 @@ terms_prefix: 'Al continuar, acepta el ',
  no_orders: 'Aún no hay pedidos',
  no_listings_yet: 'Aún no hay anuncios',
  create_listing: 'Crear anuncio',
- news_feed_title: 'Feed de noticias',
+ news_feed_title: 'News feed',
  role_partner: 'Socio',
  role_corp: 'Corporativo',
  fl_execute: 'Freelance — ejecutar',
@@ -8631,6 +8754,15 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -8666,7 +8798,7 @@ terms_prefix: 'Al continuar, acepta el ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -8771,7 +8903,7 @@ terms_prefix: 'Al continuar, acepta el ',
  home: '首页', news: '新闻', exchange: '交易所', freelance: '自由职业',
  balance: '余额', favorites: '收藏', my_listings: '我的广告',
  orders: '订单历史', settings: '设置', panel: '管理面板',
- feed_title: '广告动态', create: '+ 创建', search: '搜索',
+ feed_title: 'Listings feed', create: '+ Create', search: '搜索',
  filters: '筛选', language: '语言', theme: '主题', theme_auto: '跟随 Telegram',
  theme_light: '浅色', theme_dark: '深色',
  ban_title: '因违反社区规则，访问受到限制',
@@ -9159,7 +9291,7 @@ terms_prefix: '继续即表示您同意',
  no_orders: '暂无订单',
  no_listings_yet: '暂无广告',
  create_listing: '创建广告',
- news_feed_title: '新闻动态',
+ news_feed_title: 'News feed',
  role_partner: '合作伙伴',
  role_corp: '企业',
  fl_execute: '自由职业-接单',
@@ -9340,6 +9472,15 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -9375,7 +9516,7 @@ terms_prefix: '继续即表示您同意',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -9523,7 +9664,7 @@ terms_prefix: '继续即表示您同意',
  home: 'Головна', news: 'Новини', exchange: 'Біржа', freelance: 'Фриланс',
  balance: 'Баланс', favorites: 'Обране', my_listings: 'Мої оголошення',
  orders: 'Історія замовлень', settings: 'Налаштування', panel: 'Панель',
- feed_title: 'Стрічка оголошень', create: '+ Створити', search: 'Пошук',
+ feed_title: 'Listings feed', create: '+ Create', search: 'Пошук',
  filters: 'Фільтри', language: 'Мова', theme: 'Тема', theme_auto: 'Як у Telegram',
  theme_light: 'Світла', theme_dark: 'Темна',
  ban_title: 'Access restricted due to community rules violations',
@@ -9913,7 +10054,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  no_orders: 'Замовлень поки немає',
  no_listings_yet: 'Поки немає оголошень',
  create_listing: 'Створити оголошення',
- news_feed_title: 'Стрічка новин',
+ news_feed_title: 'News feed',
  role_partner: 'Партнер',
  role_corp: 'Корпоративний',
  fl_execute: 'Фриланс-виконання',
@@ -10094,6 +10235,15 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -10129,7 +10279,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -10272,7 +10422,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  home: 'Home', news: 'Notizie', exchange: 'Borsa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Preferiti', my_listings: 'I miei annunci',
  orders: 'Cronologia ordini', settings: 'Impostazioni', panel: 'Pannello',
- feed_title: 'Feed annunci', create: '+ Crea', search: 'Cerca',
+ feed_title: 'Listings feed', create: '+ Create', search: 'Cerca',
  filters: 'Filtri', language: 'Lingua', theme: 'Tema', theme_auto: 'Come Telegram',
  theme_light: 'Chiaro', theme_dark: 'Scuro',
  ban_title: 'Access restricted due to community rules violations',
@@ -10660,7 +10810,7 @@ terms_prefix: 'Continuando, accetti i ',
  no_orders: 'Nessun ordine ancora',
  no_listings_yet: 'Nessun annuncio ancora',
  create_listing: 'Crea annuncio',
- news_feed_title: 'Feed notizie',
+ news_feed_title: 'News feed',
  role_partner: 'Partner',
  role_corp: 'Aziendale',
  fl_execute: 'Freelance — esecuzione',
@@ -10841,6 +10991,15 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -10876,7 +11035,7 @@ terms_prefix: 'Continuando, accetti i ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -11019,7 +11178,7 @@ terms_prefix: 'Continuando, accetti i ',
  home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favoritos', my_listings: 'Os meus anúncios',
  orders: 'Histórico de pedidos', settings: 'Definições', panel: 'Painel',
- feed_title: 'Feed de anúncios', create: '+ Criar', search: 'Pesquisar',
+ feed_title: 'Listings feed', create: '+ Create', search: 'Pesquisar',
  filters: 'Filtros', language: 'Idioma', theme: 'Tema', theme_auto: 'Como no Telegram',
  theme_light: 'Claro', theme_dark: 'Escuro',
  ban_title: 'Access restricted due to community rules violations',
@@ -11407,7 +11566,7 @@ terms_prefix: 'Ao continuar, aceita o ',
  no_orders: 'Ainda sem pedidos',
  no_listings_yet: 'Ainda sem anúncios',
  create_listing: 'Criar anúncio',
- news_feed_title: 'Feed de notícias',
+ news_feed_title: 'News feed',
  role_partner: 'Parceiro',
  role_corp: 'Corporativo',
  fl_execute: 'Freelance — execução',
@@ -12161,6 +12320,15 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -12196,7 +12364,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -12339,7 +12507,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  home: 'Ana sayfa', news: 'Haberler', exchange: 'Borsa', freelance: 'Freelance',
  balance: 'Bakiye', favorites: 'Favoriler', my_listings: 'İlanlarım',
  orders: 'Sipariş geçmişi', settings: 'Ayarlar', panel: 'Panel',
- feed_title: 'İlan akışı', create: '+ Oluştur', search: 'Ara',
+ feed_title: 'Listings feed', create: '+ Create', search: 'Ara',
  filters: 'Filtreler', language: 'Dil', theme: 'Tema', theme_auto: 'Telegram gibi',
  theme_light: 'Açık', theme_dark: 'Koyu',
  ban_title: 'Access restricted due to community rules violations',
@@ -12727,7 +12895,7 @@ terms_prefix: 'Devam ederek ',
  no_orders: 'Henüz sipariş yok',
  no_listings_yet: 'Henüz ilan yok',
  create_listing: 'İlan oluştur',
- news_feed_title: 'Haber akışı',
+ news_feed_title: 'News feed',
  role_partner: 'Ortak',
  role_corp: 'Kurumsal',
  fl_execute: 'Freelance — yürütme',
@@ -12908,6 +13076,15 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -12943,7 +13120,7 @@ terms_prefix: 'Devam ederek ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -13086,7 +13263,7 @@ terms_prefix: 'Devam ederek ',
  home: 'Beranda', news: 'Berita', exchange: 'Bursa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favorit', my_listings: 'Iklan saya',
  orders: 'Riwayat pesanan', settings: 'Pengaturan', panel: 'Panel',
- feed_title: 'Feed iklan', create: '+ Buat', search: 'Cari',
+ feed_title: 'Listings feed', create: '+ Create', search: 'Cari',
  filters: 'Filter', language: 'Bahasa', theme: 'Tema', theme_auto: 'Seperti Telegram',
  theme_light: 'Terang', theme_dark: 'Gelap',
  ban_title: 'Access restricted due to community rules violations',
@@ -13474,7 +13651,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  no_orders: 'Belum ada pesanan',
  no_listings_yet: 'Belum ada iklan',
  create_listing: 'Buat iklan',
- news_feed_title: 'Feed berita',
+ news_feed_title: 'News feed',
  role_partner: 'Mitra',
  role_corp: 'Korporat',
  fl_execute: 'Freelance — eksekusi',
@@ -13655,6 +13832,15 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -13690,7 +13876,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -13833,7 +14019,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  home: 'الرئيسية', news: 'الأخبار', exchange: 'البورصة', freelance: 'العمل الحر',
  balance: 'الرصيد', favorites: 'المفضلة', my_listings: 'إعلاناتي',
  orders: 'سجل الطلبات', settings: 'الإعدادات', panel: 'لوحة التحكم',
- feed_title: 'خلاصة الإعلانات', create: '+ إنشاء', search: 'بحث',
+ feed_title: 'Listings feed', create: '+ Create', search: 'بحث',
  filters: 'تصفية', language: 'اللغة', theme: 'المظهر', theme_auto: 'مثل تيليجرام',
  theme_light: 'فاتح', theme_dark: 'داكن',
  ban_title: 'Access restricted due to community rules violations',
@@ -14221,7 +14407,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  no_orders: 'لا طلبات بعد',
  no_listings_yet: 'لا إعلانات بعد',
  create_listing: 'إنشاء إعلان',
- news_feed_title: 'خلاصة الأخبار',
+ news_feed_title: 'News feed',
  role_partner: 'شريك',
  role_corp: 'شركات',
  fl_execute: 'عمل حر — تنفيذ',
@@ -14402,6 +14588,15 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -14437,7 +14632,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -14580,7 +14775,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  home: 'ホーム', news: 'ニュース', exchange: '取引所', freelance: 'フリーランス',
  balance: '残高', favorites: 'お気に入り', my_listings: '自分の出品',
  orders: '注文履歴', settings: '設定', panel: '管理パネル',
- feed_title: '出品フィード', create: '+ 作成', search: '検索',
+ feed_title: 'Listings feed', create: '+ Create', search: '検索',
  filters: 'フィルター', language: '言語', theme: 'テーマ', theme_auto: 'Telegramに合わせる',
  theme_light: 'ライト', theme_dark: 'ダーク',
  ban_title: 'Access restricted due to community rules violations',
@@ -14968,7 +15163,7 @@ terms_prefix: '続行すると',
  no_orders: '注文はまだありません',
  no_listings_yet: 'まだ出品がありません',
  create_listing: '出品を作成',
- news_feed_title: 'ニュースフィード',
+ news_feed_title: 'News feed',
  role_partner: 'パートナー',
  role_corp: '法人',
  fl_execute: 'フリーランス実行',
@@ -15149,6 +15344,15 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ dl_app: 'Download app',
+ ref_and: 'and',
+ ref_on_2nd: 'on the 2nd deposit',
+ ref_on_1st: 'on the 1st deposit',
+ ref_invitee_gets: 'Referral gets a bonus of',
+ ref_of_referrals: 'of referrals',
+ ref_from_2nd: 'from the 2nd deposit',
+ ref_from_1st: 'from the 1st deposit',
+ ref_you_get: 'You receive',
  ads_partner_level: 'Partner level',
  ads_partner_detail: 'Partner',
  ads_level0_hint: 'no partner income, 5% bonus for invitee',
@@ -15184,7 +15388,7 @@ terms_prefix: '続行すると',
  ref_stats: 'Statistics',
  ref_invitee_disc: 'Invitee discount on 1st deposit',
  ref_you_earn: 'You earn from 1st / 2nd deposits',
- ref_your_code: 'Referral code',
+ ref_your_code: 'Your code',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
@@ -15329,7 +15533,7 @@ terms_prefix: '続行すると',
  home: '홈', news: '뉴스', exchange: '거래소', freelance: '프리랜스',
  balance: '잔액', favorites: '즐겨찾기', my_listings: '내 광고',
  orders: '주문 내역', settings: '설정', panel: '관리 패널',
- feed_title: '광고 피드', create: '+ 만들기', search: '검색',
+ feed_title: 'Listings feed', create: '+ Create', search: '검색',
  filters: '필터', language: '언어', theme: '테마', theme_auto: '텔레그램과 동일',
  theme_light: '라이트', theme_dark: '다크',
  ban_title: 'Access restricted due to community rules violations',
@@ -15717,7 +15921,7 @@ terms_prefix: '계속하면 ',
  no_orders: '주문 없음',
  no_listings_yet: '아직 광고 없음',
  create_listing: '광고 만들기',
- news_feed_title: '뉴스 피드',
+ news_feed_title: 'News feed',
  role_partner: '파트너',
  role_corp: '기업',
  fl_execute: '프리랜스-수행',
@@ -16514,23 +16718,34 @@ async function loadReferralPanel() {
       html += '</div>';
       html += '<div class="subtitle" style="font-size:12px;margin-top:6px;">' + (tBlock('ref_code_hint') || '3–24 символа, латиница и цифры') + '</div></div>';
     } else {
-      html += '<div class="list-item" style="margin-bottom:10px;">';
-      html += '<div class="top" style="align-items:center;gap:8px;">';
-      html += '<div class="title" style="flex:1;min-width:0;">' + (tBlock('ref_your_code') || 'Реферальный код') + ': <b id="ref-code-display">' + code.replace(/</g,'&lt;') + '</b>';
-      html += ' <button type="button" onclick="startEditRefCode()" title="' + (tBlock('edit') || 'Изменить') + '" style="border:none;background:transparent;color:var(--accent,#2aabee);font-size:16px;cursor:pointer;padding:2px 6px;vertical-align:middle;">✏️</button>';
-      html += '</div>';
-      html += '<div style="color:#34c759;font-weight:700;font-size:13px;flex-shrink:0;">' + Number(rates.partner_1||0) + '% / ' + Number(rates.partner_2||0) + '%</div>';
-      html += '</div>';
-      html += '<div id="ref-code-edit-row" style="display:none;margin-top:10px;">';
+      var p1 = Number(rates.partner_1||0);
+      var p2 = Number(rates.partner_2||0);
+      var d1 = Number(rates.discount_1||0);
+      var d2 = Number(rates.discount_2||0);
+      html += '<div class="ref-info-card">';
+      html += '<div class="ref-info-code-row">' + (tBlock('ref_your_code') || 'Ваш код') + ': <b id="ref-code-display">' + code.replace(/</g,'&lt;') + '</b>';
+      html += ' <button type="button" class="ref-edit-btn" onclick="startEditRefCode()" title="' + (tBlock('edit') || 'Изменить') + '">✏️</button></div>';
+      html += '<div id="ref-code-edit-row" style="display:none;margin:0 0 10px;">';
       html += '<div class="ref-code-row">';
       html += '<input type="text" class="form-input" id="ref-code-edit-input" value="' + code.replace(/"/g,'&quot;') + '" style="text-transform:uppercase;">';
-      html += '<button type="button" class="btn" onclick="saveEditRefCode()">' + (tBlock('save') || 'Сохранить') + '</button>';
+      html += '<button type="button" class="btn btn-compact" onclick="saveEditRefCode()">' + (tBlock('save') || 'Сохранить') + '</button>';
       html += '</div></div>';
-      html += '<div class="subtitle">' + (tBlock('ref_you_earn') || 'Вы получаете с 1 / 2 пополнения') + '</div>';
-      html += '<div class="subtitle" style="margin-top:4px;">' + (tBlock('ref_invitee_disc') || 'Скидка приглашённому с 1 пополнения') + ': <b>' + Number(rates.discount_1||0) + '%</b>';
-      if (Number(rates.discount_2||0) > 0) html += ' · 2: <b>' + Number(rates.discount_2||0) + '%</b>';
-      html += '</div></div>';
-      html += '<div class="section-title" style="font-size:15px;margin:14px 0 8px;">' + (tBlock('ref_stats') || 'Статистика') + '</div>';
+      // line 1: you earn
+      html += '<div class="ref-info-line">' + (tBlock('ref_you_get') || 'Вы получаете') + ' <span class="pct">' + p1 + '%</span> ' + (tBlock('ref_from_1st') || 'с 1 пополнения');
+      if (p2 > 0) {
+        html += ' ' + (tBlock('ref_and') || 'и') + ' <span class="pct">' + p2 + '%</span> ' + (tBlock('ref_from_2nd') || 'со 2 пополнения') + ' ' + (tBlock('ref_of_referrals') || 'рефералов');
+      } else {
+        html += ' ' + (tBlock('ref_of_referrals') || 'рефералов');
+      }
+      html += '</div>';
+      // line 2: invitee bonus
+      html += '<div class="ref-info-line">' + (tBlock('ref_invitee_gets') || 'Реферал получает бонус') + ' <span class="pct">' + d1 + '%</span> ' + (tBlock('ref_on_1st') || 'при 1 пополнении');
+      if (d2 > 0) {
+        html += ' ' + (tBlock('ref_and') || 'и') + ' <span class="pct">' + d2 + '%</span> ' + (tBlock('ref_on_2nd') || 'при втором пополнении');
+      }
+      html += '</div>';
+      html += '</div>';
+            html += '<div class="section-title" style="font-size:15px;margin:14px 0 8px;">' + (tBlock('ref_stats') || 'Статистика') + '</div>';
       html += refStatRow(tBlock('ref_10d') || 'Рефералов за 10 дней', stats.refs_10d);
       html += refStatRow(tBlock('ref_total') || 'Рефералов всего', stats.refs_total);
       html += refStatRow(tBlock('ref_retained') || 'Рефералов 2+ пополнений', stats.refs_retained);
