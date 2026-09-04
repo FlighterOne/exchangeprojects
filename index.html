@@ -158,9 +158,6 @@
  .support-grid.app-install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
  .support-grid.app-install-grid .support-tile.tile-span-full { grid-column: 1 / -1; max-width: calc(50% - 5px); }
  
-#app-install-pc-grid[data-open="0"], #app-install-tg-grid[data-open="0"] { display: none !important; }
-#app-install-pc-grid[data-open="1"], #app-install-tg-grid[data-open="1"] { display: grid !important; }
-
 .app-install-expand-btn { margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
 
 
@@ -375,15 +372,34 @@
 
 
 /* App install tiles - keep original 2-column grid spacing */
-#page-app-install .support-grid,
-#page-app-install .app-install-grid,
-.support-grid.app-install-grid {
+/* Top row (android/ios) always visible; PC/TG sub-grids only when data-open=1 */
+#page-app-install > .support-grid.app-install-grid {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
   gap: 10px !important;
   margin-top: 8px !important;
   width: 100% !important;
   box-sizing: border-box !important;
+}
+#page-app-install .app-install-grid,
+.support-grid.app-install-grid {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin-top: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+#app-install-pc-grid,
+#app-install-tg-grid {
+  display: none !important;
+}
+#app-install-pc-grid[data-open="1"],
+#app-install-tg-grid[data-open="1"] {
+  display: grid !important;
+}
+#app-install-pc-grid[data-open="0"],
+#app-install-tg-grid[data-open="0"] {
+  display: none !important;
 }
 #page-app-install .support-tile,
 .support-grid.app-install-grid .support-tile {
@@ -2761,32 +2777,23 @@ function toggleAppInstallPc() {
   var g = document.getElementById('app-install-pc-grid');
   if (!g) return;
   var open = g.getAttribute('data-open') === '1';
-  if (open) {
-    g.style.display = 'none';
-    g.setAttribute('data-open', '0');
-  } else {
-    g.style.display = 'grid';
-    g.setAttribute('data-open', '1');
-  }
+  g.setAttribute('data-open', open ? '0' : '1');
+  // clear inline display so CSS [data-open] rules control visibility
+  try { g.style.removeProperty('display'); } catch (e) { g.style.display = ''; }
 }
 function toggleAppInstallTg() {
   var g = document.getElementById('app-install-tg-grid');
   if (!g) return;
   var open = g.getAttribute('data-open') === '1';
-  if (open) {
-    g.style.display = 'none';
-    g.setAttribute('data-open', '0');
-  } else {
-    g.style.display = 'grid';
-    g.setAttribute('data-open', '1');
-  }
+  g.setAttribute('data-open', open ? '0' : '1');
+  try { g.style.removeProperty('display'); } catch (e) { g.style.display = ''; }
 }
 function resetAppInstallExpand() {
   ['app-install-pc-grid','app-install-tg-grid'].forEach(function(id){
     var g = document.getElementById(id);
     if (!g) return;
-    g.style.display = 'none';
     g.setAttribute('data-open', '0');
+    try { g.style.removeProperty('display'); } catch (e) { g.style.display = ''; }
   });
 }
 function openAppInstallDetail(platform) {
@@ -17509,26 +17516,36 @@ var MONTHS_I18N = {
 };
 
 function formatNewsDateLabel(n) {
-  if (!n) return localizeMonths('26 авг. 2026 12:00');
-  var raw = (n.date_label && String(n.date_label).trim()) || '';
-  if (raw && !/недавно|recently|^recent$/i.test(raw)) {
-    return localizeMonths(raw);
+  function fmtFromDate(d) {
+    var lang = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru';
+    var months = (typeof MONTHS_I18N !== 'undefined' && (MONTHS_I18N[lang] || MONTHS_I18N.en || MONTHS_I18N.ru)) || ['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'];
+    var day = d.getDate();
+    day = day < 10 ? ('0' + day) : ('' + day);
+    var hh = d.getHours(); hh = hh < 10 ? ('0' + hh) : ('' + hh);
+    var mm = d.getMinutes(); mm = mm < 10 ? ('0' + mm) : ('' + mm);
+    // 25 авг. 2026 · 12:00
+    return day + ' ' + (months[d.getMonth()] || '') + ' ' + d.getFullYear() + ' · ' + hh + ':' + mm;
+  }
+  if (!n) {
+    try { return fmtFromDate(new Date(2026, 7, 26, 12, 0)); } catch (e0) { return '26 авг. 2026 · 12:00'; }
   }
   var iso = n.published_at || n.created_at || n.created || '';
   if (iso) {
     try {
       var d = new Date(iso);
-      if (!isNaN(d.getTime())) {
-        var lang = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru';
-        var months = (MONTHS_I18N[lang] || MONTHS_I18N.en || MONTHS_I18N.ru);
-        var day = d.getDate(); day = day < 10 ? ('0' + day) : ('' + day);
-        var hh = d.getHours(); hh = hh < 10 ? ('0' + hh) : ('' + hh);
-        var mm = d.getMinutes(); mm = mm < 10 ? ('0' + mm) : ('' + mm);
-        return day + ' ' + (months[d.getMonth()] || '') + ' ' + d.getFullYear() + ' ' + hh + ':' + mm;
-      }
+      if (!isNaN(d.getTime())) return fmtFromDate(d);
     } catch (e) {}
   }
-  return localizeMonths('Недавно'); // becomes 26 Aug. 2026
+  var raw = (n.date_label && String(n.date_label).trim()) || '';
+  if (raw) {
+    // already has time? insert middle dot if missing
+    var loc = (typeof localizeMonths === 'function') ? localizeMonths(raw) : raw;
+    if (loc && loc.indexOf('·') < 0) {
+      loc = String(loc).replace(/(\d{4})\s+(\d{1,2}:\d{2})/, '$1 · $2');
+    }
+    return loc;
+  }
+  try { return fmtFromDate(new Date(2026, 7, 26, 12, 0)); } catch (e2) { return '26 авг. 2026 · 12:00'; }
 }
 
 function localizeMonths(str) {
@@ -17543,7 +17560,7 @@ function localizeMonths(str) {
    // exact date instead of "Recently"
    var langR = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru';
    var monthsR = (typeof MONTHS_I18N !== 'undefined' && (MONTHS_I18N[langR] || MONTHS_I18N.en)) || ['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'];
-   return '26 ' + (monthsR[7] || 'Aug.') + ' 2026';
+   return '26 ' + (monthsR[7] || 'Aug.') + ' 2026 · 12:00';
  }
  if (out === 'Закреплено' || low === 'pinned') {
    return (typeof tBlock === 'function' ? tBlock('pinned') : null) || out;
