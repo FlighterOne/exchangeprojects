@@ -19096,7 +19096,7 @@ function applyI18n() {
  m.appendChild(s);
  }
  setSeg('my-seg-mod', 'my-cnt-mod', 'moderation');
- setSeg('my-seg-active', 'my-cnt-active', 'active');
+ setSeg('my-seg-active', 'my-cnt-active', 'active_listings');
  setSeg('my-seg-done', 'my-cnt-done', 'completed_tab');
  } catch (e) {}
 
@@ -19655,7 +19655,14 @@ ja:{faq:"よくある質問",support_faq:"よくある質問",analytics_ads:"広
 ko:{faq:"자주 묻는 질문",support_faq:"자주 묻는 질문",analytics_ads:"광고",ads_tab_partners:"파트너",ads_tab_stats:"통계",moderation:"검수",active_tab:"활성",done_tab:"완료",completed_tab:"완료",all:"전체",sale:"판매",freelance:"프리랜서"}
 };Object.keys(X36).forEach(function(l){if(!I18N[l])I18N[l]={};Object.keys(X36[l]).forEach(function(k){I18N[l][k]=X36[l][k];});});}catch(e){}})();
 
-var MONTHS_I18N = {
+/* XCOD FINAL PATCH: My Listings active button */
+(function(){try{
+var _AL={
+ru:'Активные объявления',en:'Active listings',de:'Aktive Anzeigen',fr:'Annonces actives',es:'Anuncios activos',zh:'活跃公告',uk:'Активні оголошення',it:'Annunci attivi',pt:'Anúncios ativos','pt-BR':'Anúncios ativos',tr:'Aktif ilanlar',id:'Iklan aktif',ar:'الإعلانات النشطة',ja:'公開中の広告',ko:'활성 게시물'
+};
+Object.keys(_AL).forEach(function(l){if(I18N[l])I18N[l].active_listings=_AL[l];});
+}catch(e){}})();
+MONTHS_I18N = {
  ru: ['янв.','фев.','мар.','апр.','мая','июн.','июл.','авг.','сент.','окт.','нояб.','дек.'],
  en: ['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'],
  uk: ['січ.','лют.','бер.','квіт.','трав.','черв.','лип.','серп.','вер.','жовт.','лист.','груд.'],
