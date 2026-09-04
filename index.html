@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-04-v26-news-date -->
+<!-- XCOD_BUILD 2026-09-04-v27-install-news -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -371,18 +371,9 @@
 
 
 
-/* App install tiles - keep original 2-column grid spacing */
-/* Top row (android/ios) always visible; PC/TG sub-grids only when data-open=1 */
-#page-app-install > .support-grid.app-install-grid {
+/* App install: main row always open; PC/TG rows toggled via .is-open class */
+#app-install-main-grid {
   display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 10px !important;
-  margin-top: 8px !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-#page-app-install .app-install-grid,
-.support-grid.app-install-grid {
   grid-template-columns: 1fr 1fr !important;
   gap: 10px !important;
   margin-top: 8px !important;
@@ -392,14 +383,19 @@
 #app-install-pc-grid,
 #app-install-tg-grid {
   display: none !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin-top: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
-#app-install-pc-grid[data-open="1"],
-#app-install-tg-grid[data-open="1"] {
+#app-install-pc-grid.is-open,
+#app-install-tg-grid.is-open {
   display: grid !important;
 }
-#app-install-pc-grid[data-open="0"],
-#app-install-tg-grid[data-open="0"] {
-  display: none !important;
+.support-grid.app-install-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 #page-app-install .support-tile,
 .support-grid.app-install-grid .support-tile {
@@ -1544,7 +1540,7 @@ button.btn.btn-compact,
  <div id="page-app-install" class="page">
   <button type="button" class="back-link" onclick="showPage('home')" data-i18n="back">← Назад</button>
   <div class="section-title" id="app-install-main-title">Установка приложения</div>
-  <div class="support-grid app-install-grid" style="margin-top:8px;">
+  <div id="app-install-main-grid" class="support-grid app-install-grid" style="margin-top:8px;">
    <button type="button" class="support-tile" onclick="openAppInstallDetail('android')">
     <div class="app-install-icon-wrap">
      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.48l1.84-3.18a.5.5 0 00-.86-.5l-1.86 3.22A7.97 7.97 0 0012 8c-1.48 0-2.85.4-4.02 1.1L6.1 5.8a.5.5 0 10-.86.5L7.1 9.48C5.2 10.8 4 12.97 4 15.4v.1c0 .28.22.5.5.5h15c.28 0 .5-.22.5-.5v-.1c0-2.43-1.2-4.6-3.4-5.92zM9.5 13.5a1 1 0 110-2 1 1 0 010 2zm5 0a1 1 0 110-2 1 1 0 010 2zM7 17.5h10v2H7v-2z"/></svg>
@@ -2776,23 +2772,20 @@ function openAppInstallMenu() {
 function toggleAppInstallPc() {
   var g = document.getElementById('app-install-pc-grid');
   if (!g) return;
-  var open = g.getAttribute('data-open') === '1';
-  g.setAttribute('data-open', open ? '0' : '1');
-  // clear inline display so CSS [data-open] rules control visibility
+  g.classList.toggle('is-open');
   try { g.style.removeProperty('display'); } catch (e) { g.style.display = ''; }
 }
 function toggleAppInstallTg() {
   var g = document.getElementById('app-install-tg-grid');
   if (!g) return;
-  var open = g.getAttribute('data-open') === '1';
-  g.setAttribute('data-open', open ? '0' : '1');
+  g.classList.toggle('is-open');
   try { g.style.removeProperty('display'); } catch (e) { g.style.display = ''; }
 }
 function resetAppInstallExpand() {
   ['app-install-pc-grid','app-install-tg-grid'].forEach(function(id){
     var g = document.getElementById(id);
     if (!g) return;
-    g.setAttribute('data-open', '0');
+    g.classList.remove('is-open');
     try { g.style.removeProperty('display'); } catch (e) { g.style.display = ''; }
   });
 }
