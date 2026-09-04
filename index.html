@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- XCOD_BUILD 2026-09-04-v23-compact-ui -->
+<!-- XCOD_BUILD 2026-09-04-v24-hire-dl -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -369,6 +369,55 @@
  .form-input:focus { border-color: var(--button); }
 
 
+
+/* App install tiles - keep original 2-column grid spacing */
+#page-app-install .support-grid,
+#page-app-install .app-install-grid,
+.support-grid.app-install-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin-top: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+#page-app-install .support-tile,
+.support-grid.app-install-grid .support-tile {
+  aspect-ratio: 1 !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px 12px !important;
+  border-radius: 16px !important;
+  gap: 6px !important;
+}
+#page-app-install .support-tile.tile-span-full,
+.support-grid.app-install-grid .support-tile.tile-span-full {
+  grid-column: 1 / -1 !important;
+  max-width: calc(50% - 5px) !important;
+  aspect-ratio: 1 !important;
+}
+#page-app-install .app-install-expand-btn,
+.app-install-expand-btn {
+  margin-top: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+#page-app-install .app-install-icon-wrap {
+  width: 48px !important;
+  height: 48px !important;
+  margin: 0 auto 8px !important;
+}
+
 /* Compact header actions: Create / page titles */
 .page-header-row {
   display: flex !important;
@@ -403,11 +452,6 @@ button.btn.btn-compact,
   line-height: 1.2 !important;
   min-height: 0 !important;
   height: auto !important;
-}
-.top-side-btn {
-  width: auto !important;
-  max-width: 140px !important;
-  flex: 0 0 auto !important;
 }
 .ref-info-card {
   background: var(--secondary-bg);
@@ -5704,6 +5748,13 @@ terms_prefix: 'Продолжая, вы даёте ',
  role_label: 'Роль',
  reply_ph: 'Ответ...'},
  en: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -5752,7 +5803,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -6477,6 +6528,14 @@ terms_prefix: 'By continuing, you accept the ',
  role_label: 'Role',
  reply_ph: 'Reply...'},
  de: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -6525,7 +6584,7 @@ terms_prefix: 'By continuing, you accept the ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -7238,6 +7297,14 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  role_label: 'Rolle',
  reply_ph: 'Antwort...'},
  fr: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -7286,7 +7353,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -7996,6 +8063,14 @@ terms_prefix: 'En continuant, vous acceptez les ',
  role_label: 'Rôle',
  reply_ph: 'Réponse...'},
  es: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -8044,7 +8119,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -8754,6 +8829,14 @@ terms_prefix: 'Al continuar, acepta el ',
  role_label: 'Rol',
  reply_ph: 'Respuesta...'},
  zh: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -8802,7 +8885,7 @@ terms_prefix: 'Al continuar, acepta el ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -9472,6 +9555,14 @@ terms_prefix: '继续即表示您同意',
  role_label: '角色',
  reply_ph: '回复...'},
  uk: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -9520,7 +9611,7 @@ terms_prefix: '继续即表示您同意',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -10235,6 +10326,14 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  role_label: 'Роль',
  reply_ph: 'Відповідь...'},
  it: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -10283,7 +10382,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -10991,6 +11090,14 @@ terms_prefix: 'Continuando, accetti i ',
  role_label: 'Ruolo',
  reply_ph: 'Risposta...'},
  pt: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -11039,7 +11146,7 @@ terms_prefix: 'Continuando, accetti i ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -12320,6 +12427,14 @@ terms_prefix: 'Ao continuar, você aceita o ',
  role_label: 'Função',
  reply_ph: 'Resposta...'},
  tr: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -12368,7 +12483,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -13076,6 +13191,14 @@ terms_prefix: 'Devam ederek ',
  role_label: 'Rol',
  reply_ph: 'Yanıt...'},
  id: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -13124,7 +13247,7 @@ terms_prefix: 'Devam ederek ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -13832,6 +13955,14 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  role_label: 'Peran',
  reply_ph: 'Balasan...'},
  ar: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -13880,7 +14011,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -14588,6 +14719,14 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  role_label: 'الدور',
  reply_ph: 'رد...'},
  ja: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -14636,7 +14775,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -15344,6 +15483,14 @@ terms_prefix: '続行すると',
  role_label: '役割',
  reply_ph: '返信...'},
  ko: {
+ duty_control_full: 'Shift control (open/close, payroll)',
+ duty_control_view: 'Shift control (view only)',
+ duty_workcenter: 'Work center / shifts',
+ duty_analytics: 'Analytics (view)',
+ duty_mod_tickets: 'Support tickets moderation',
+ duty_mod_complaints: 'Complaints moderation',
+ duty_mod_listings: 'Listings moderation',
+ hire_duties: 'Responsibilities',
  dl_app: 'Download app',
  ref_and: 'and',
  ref_on_2nd: 'on the 2nd deposit',
@@ -15392,7 +15539,7 @@ terms_prefix: '続行すると',
  ref_code_hint: '3–24 chars, Latin letters and digits',
  ref_code_placeholder: 'Your code',
  ref_register_label: 'Register your referral code',
- collab_work: 'Jobs',
+ collab_work: 'Work',
  collab_ads: 'Advertising',
  support_other_info_empty: 'Section under development',
  support_other_info: 'Other information',
@@ -17009,7 +17156,7 @@ function renderHireInfo() {
 '• ' + (tBlock('duty_mod_tickets') || 'Модерация обращений') + '<br>' +
 '• ' + (tBlock('duty_analytics') || 'Аналитика (просмотр)') + '<br>' +
 '• ' + (tBlock('duty_workcenter') || 'Рабочий центр / смены') + '<br>' +
-'• ' + (tBlock('duty_control_view') || 'Контроль смены (просмотр)');
+'• ' + (tBlock('duty_control_view') || 'Контроль смены (только просмотр)');
 }
 
 function trUi(text) {
