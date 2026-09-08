@@ -2012,12 +2012,12 @@ button.btn.btn-compact,
  <button class="back-link" onclick="showPage('balance')" data-i18n="back">← Назад</button>
  <div class="section-title" data-i18n="deposit">Пополнение</div>
 
- <div class="min-hint" data-i18n="min_1">Минимум 1$</div>
+ <div class="min-hint" data-i18n="min_01">Минимум 0.1$</div>
 
  <div class="form-group">
  <label class="form-label" data-i18n="amount_usdt">Сумма (USDT)</label>
  <div class="amount-with-rub">
- <input class="form-input" type="number" id="deposit-amount" placeholder="0.00" min="1" step="0.01" oninput="updateDepositTotals()">
+ <input class="form-input" type="number" id="deposit-amount" placeholder="0.00" min="0.1" step="0.01" oninput="updateDepositTotals()">
  <span class="amount-rub-hint" id="deposit-amount-rub">~0 ₽</span>
  </div>
  <div class="total-pay-line" id="deposit-total-line">Итого к оплате: 0.00 $</div>
@@ -3092,8 +3092,18 @@ async function continueAfterAuth() {
    var fa2ok = '';
    try { fa2ok = sessionStorage.getItem('xcod_2fa_ok') || ''; } catch(e){}
    var need2fa = !!window.__xcodNeed2fa;
-   if (userData.has_2fa && fa2ok !== '1' && need2fa && typeof isTelegramMiniApp === 'function' && !isTelegramMiniApp()) {
-     show2faGate('login');
+   var isWebBrowser = (typeof isTelegramMiniApp === 'function' && !isTelegramMiniApp());
+   if (userData.has_2fa && fa2ok !== '1' && isWebBrowser) {
+     // For web login, a refresh invalidates the local password confirmation.
+     // The user must start again with Telegram and then enter the password.
+     if (need2fa) {
+       show2faGate('login');
+       return;
+     }
+     clearWebSession();
+     try { sessionStorage.removeItem('xcod_2fa_ok'); } catch(eClear2fa) {}
+     if (box) box.style.display = 'none';
+     showLoginOverlay();
      return;
    }
    // miniapp uses Telegram as first factor
@@ -22758,8 +22768,7 @@ function updateDepositTotals() {
   var feeInfo = (typeof calcFee === 'function') ? calcFee(amount, method, 'deposit') : { total: amount, fee: 0, rate: 0, credit: amount };
   var line = document.getElementById('deposit-total-line');
   var rub = document.getElementById('deposit-amount-rub');
-  var rate = (typeof usdRubRate === 'number' && usdRubRate > 0) ? usdRubRate : 0;
-  if (rub) rub.textContent = '~' + (amount * rate).toFixed(0) + ' ₽';
+  var rate = (typeof _usdRubRate === 'number' && _usdRubRate > 0) ? _usdRubRate : 0;
   var original = feeInfo.total;
   var total = original;
   var pct = 0;
@@ -22767,6 +22776,7 @@ function updateDepositTotals() {
     pct = _depositPromo.pct;
     total = Math.round(original * (1 - pct / 100) * 100) / 100;
   }
+  if (rub) rub.textContent = amount > 0 ? '~' + fmtRub(rubOf(total)) + ' ₽' : '~0 ₽';
   if (line) {
     if (pct > 0 && total < original) {
       line.innerHTML = (tBlock('total_pay') || 'Итого к оплате') + ': ' +
@@ -22813,14 +22823,6 @@ function payDepositUnavailable() {
   }
 }
 
-
-async function confirmDepositPaid() {
-  try {
-    tg.showAlert(tBlock('section_in_dev') || 'This section is under development');
-  } catch (e) {
-    alert('This section is under development');
-  }
-}
 
 async function payDepositStars() {
   try {
@@ -22885,8 +22887,15 @@ async function watchDepositPayment(paymentRef, credit) {
 function resumePendingDepositWatch() {
   try {
     var raw = sessionStorage.getItem('xcod_pending_deposit');
-    if (!raw) return;
-    var p = JSON.parse(raw);
+    var p = raw ? JSON.parse(raw) : null;
+    if (!p || !p.payment_ref) {
+      var qs = new URLSearchParams(window.location.search || '');
+      var ref = qs.get('payment_ref') || '';
+      if (ref) {
+        p = { payment_ref: ref, credit: 0, started_at: Date.now() };
+        try { sessionStorage.setItem('xcod_pending_deposit', JSON.stringify(p)); } catch(e0) {}
+      }
+    }
     if (!p || !p.payment_ref) return;
     watchDepositPayment(p.payment_ref, Number(p.credit || 0));
   } catch (e) {}
@@ -22921,7 +22930,7 @@ async function startDeposit() {
   var btn = document.getElementById('deposit-btn');
   var dTerms = document.getElementById('deposit-terms-agree');
   if (dTerms && !dTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Accept the terms'); return; }
-  if (!amount || amount < 1) { tg.showAlert(tBlock('min_1')); return; }
+  if (!amount || amount < 0.1) { tg.showAlert(tBlock('min_01') || 'Minimum 0.1$'); return; }
   if (!selectedDepositMethod) { tg.showAlert(tBlock('err_method') || 'Select a payment method'); return; }
 
   // Stars keep their existing Telegram invoice flow and are not sent to Platega.
@@ -22958,9 +22967,12 @@ async function startDeposit() {
 
     savePendingDeposit(result.payment_ref, creditUsd);
 
+    // Preview the amount the customer will pay. The API request sent to Platega
+    // contains only the base amount; Platega adds its own commission at checkout.
+    var customerTotal = Number(result.total != null ? result.total : payUsd);
     var payDisplay = result.provider_currency === 'USDT'
-      ? fmtUsd(providerAmount) + ' USDT'
-      : fmtRub(providerAmount) + ' ₽';
+      ? fmtUsd(customerTotal) + ' USDT'
+      : fmtRub(customerTotal * Number(result.usd_rub || _usdRubRate || 90)) + ' ₽';
     var html = '<div class="payment-card">' +
       '<div class="row"><span class="label">' + (tBlock('to_pay') || 'To pay') + '</span><span class="value"><b>' + payDisplay + '</b></span></div>' +
       '<div class="row"><span class="label">' + (tBlock('to_credit') || 'To credit') + '</span><span class="value">' + fmtUsd(creditUsd) + '$</span></div>' +
@@ -22970,7 +22982,6 @@ async function startDeposit() {
 
     html += '<div class="list-item" style="margin-top:12px;"><div class="subtitle">' + (tBlock('awaiting_payment') || 'Awaiting payment') + '</div></div>';
     html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" onclick="payDepositPlatega(' + JSON.stringify(String(result.payment_url)) + ')">' + (tBlock('pay_btn') || 'Pay') + '</button>';
-    html += '<button class="btn btn-secondary" style="margin-top:10px;" id="deposit-paid-btn" onclick="confirmDepositPaid()">' + (tBlock('btn_i_paid') || 'Check payment') + '</button>';
     html += '<button class="btn btn-secondary" style="margin-top:8px;" onclick="showPage(\'balance\');">' + (tBlock('back_to_balance') || tBlock('back') || '← Back to balance') + '</button>';
 
     document.getElementById('deposit-result-content').innerHTML = html;
@@ -25456,3 +25467,6 @@ Object.keys(X).forEach(function(l){if(!I18N[l])I18N[l]={};Object.assign(I18N[l],
 }catch(e){}})();
 </script>
 </body>
+<script>
+(function(){try{var M={"ru":"Минимум 0.1$","en":"Minimum 0.1$","de":"Mindestens 0,1$","fr":"Minimum 0,1$","es":"Mínimo 0,1$","zh":"最低 0.1$","uk":"Мінімум 0,1$","it":"Minimo 0,1$","pt":"Mínimo 0,1$","pt-BR":"Mínimo 0,1$","tr":"Minimum 0,1$","id":"Minimum 0,1$","ar":"الحد الأدنى 0.1$","ja":"最小 0.1$","ko":"최소 0.1$"};if(typeof I18N==='object'){Object.keys(M).forEach(function(k){if(!I18N[k])I18N[k]={};I18N[k].min_01=M[k];});}if(typeof applyI18n==='function'){try{applyI18n();}catch(e1){}}}catch(e){}})();
+</script>
