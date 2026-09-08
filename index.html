@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- XCOD_BUILD 2026-09-05-v38-total-pay-label -->
+<!-- XCOD_BUILD 2026-09-04-v30-i18n-deep-audit -->
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Exchange Projects</title>
@@ -1408,10 +1408,6 @@ button.btn.btn-compact,
 .verify-step-dots span.on{background:var(--button);opacity:1;}
 .verify-node-label{font-size:11px;text-align:center;margin-top:8px;color:var(--hint);line-height:1.25;max-width:86px;}
 
-
-/* Promo-code placeholder uses normal sentence case; only entered promo code is uppercased. */
-#deposit-promo::placeholder { text-transform: none !important; }
-
 </style>
 </head>
 <body>
@@ -1484,7 +1480,7 @@ button.btn.btn-compact,
  <span class="di">📰</span> <span data-i18n="news">Новости</span>
  </button>
  <button class="drawer-item" data-page="exchange" onclick="navTo('exchange')">
- <span class="di">📊</span> <span data-i18n="exchange">Биржа продаж</span>
+ <span class="di">📊</span> <span data-i18n="exchange">Биржа</span>
  </button>
  <button class="drawer-item" data-page="freelance" onclick="navTo('freelance')">
  <span class="di">🛠️</span> <span data-i18n="freelance">Фриланс</span>
@@ -1759,7 +1755,7 @@ button.btn.btn-compact,
  <!-- EXCHANGE -->
  <div id="page-exchange" class="page">
  <div class="page-header-row" style="margin-bottom:16px;">
- <div class="section-title" data-i18n="exchange">Биржа продаж</div>
+ <div class="section-title" data-i18n="exchange">Биржа</div>
  <button type="button" class="btn btn-compact" onclick="startSaleCreate()" data-i18n="create">+ Создать</button>
  </div>
  <div class="search-bar" style="margin-top:0;margin-bottom:12px;">
@@ -1868,7 +1864,6 @@ button.btn.btn-compact,
  <input class="form-input" type="number" id="fl-price-to" placeholder="до" style="flex:1;">
  </div>
  </div>
- <button class="btn" style="margin-bottom:14px;" onclick="runFreelanceSearch()" data-i18n="search_btn">Найти</button>
  <div id="freelance-results" style="margin-top:14px;"><div class="empty"><div class="icon">🔍</div><span data-i18n="enter_query_or_filters">Введите запрос или задайте фильтры</span></div></div>
  </div>
 
@@ -2492,7 +2487,7 @@ window.onerror = function(msg, src, line) {
 window.addEventListener('unhandledrejection', function(ev) {
  window.__xcodLastErr = 'Promise: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason);
 });
-const API_URL = ("https://exchange-bot4.waw0.amvera.tech" || "").replace(/\/$/, "");
+const API_URL = ("https://exchange-bot5.waw0.amvera.tech" || "").replace(/\/$/, "");
 var SUPPORT_MANAGER_URL = 'https://t.me/mediamanagering';
 var SUPPORT_BOT_URL = 'https://t.me/clossrsuppbot';
 var SUPPORT_BOT_USERNAME = 'clossrsuppbot';
@@ -3382,6 +3377,7 @@ async function init() {
 
  try { renderMain(); } catch (re) {}
  showPage('home');
+ try { resumePendingDepositWatch(); } catch (ePayResume) {}
  window.__xcodBootOk = true;
  try { updateTopSideButton(); } catch (eTB) {}
  } catch (e) {
@@ -5297,7 +5293,7 @@ var I18N = {
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Принимаю и продолжаю',
  support: 'Поддержка', back: '← Назад', menu: 'Меню',
- home: 'Главная', news: 'Новости', exchange: 'Биржа продаж', freelance: 'Фриланс',
+ home: 'Главная', news: 'Новости', exchange: 'Биржа', freelance: 'Фриланс',
  balance: 'Баланс', favorites: 'Избранные', my_listings: 'Мои объявления',
  orders: 'История заказов', settings: 'Настройки', panel: 'Панель',
  feed_title: 'Лента объявлений', create: '+ Создать', search: 'Поиск',
@@ -5328,7 +5324,7 @@ var I18N = {
  partner: 'Партнёр', own_product: 'Свой товар', deposit: 'Пополнение', withdrawal: 'Вывод',
  salary: 'Зарплата', freelance_publish: 'Публикация фриланс', tx_done: 'Выполнено',
  tx_pending: 'В обработке', status_awaiting: 'Ожидает', sbp_card: 'СБП / карта', deal: 'Сделка', tx_rejected: 'Отклонено', lang_changed: 'Язык изменён',
- original: 'Оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
+ original: 'оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
  insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: tBlock('mod_tx') || 'Transaction moderation',
  verification: tBlock('mod_verify') || 'Модерация верификации',
  complaints: tBlock('mod_complaints') || 'Модерация жалоб',
@@ -6085,7 +6081,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Accept and continue',
  support: 'Support', back: '← Back', menu: 'Menu',
- home: 'Home', news: 'News', exchange: 'Sales exchange', freelance: 'Freelance',
+ home: 'Home', news: 'News', exchange: 'Exchange', freelance: 'Freelance',
  balance: 'Balance', favorites: 'Favorites', my_listings: 'My listings',
  orders: 'Order history', settings: 'Settings', panel: 'Panel',
  feed_title: 'Listings feed', create: '+ Create', search: 'Search',
@@ -6116,7 +6112,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  partner: 'Partner', own_product: 'Own product', deposit: 'Deposit', withdrawal: 'Withdrawal',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
  tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Language updated',
- original: 'Original', category: 'Category', buy_confirm: 'Confirm purchase',
+ original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Insufficient funds', listings: 'Listings', transactions: 'Transactions'
  ,
  your_role: 'Your role',
@@ -6701,7 +6697,7 @@ terms_prefix: 'By continuing, you accept the ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'Geben Sie den Promo-Code ein',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -6871,7 +6867,7 @@ terms_prefix: 'By continuing, you accept the ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Akzeptieren und fortfahren',
  support: 'Support', back: '← Zurück', menu: 'Menü',
- home: 'Start', news: 'News', exchange: 'Verkaufsbörse', freelance: 'Freelance',
+ home: 'Start', news: 'News', exchange: 'Börse', freelance: 'Freelance',
  balance: 'Guthaben', favorites: 'Favoriten', my_listings: 'Meine Anzeigen',
  orders: 'Bestellverlauf', settings: 'Einstellungen', panel: 'Panel',
  feed_title: 'Listings feed', create: '+ Create', search: 'Suche',
@@ -6881,7 +6877,7 @@ terms_prefix: 'By continuing, you accept the ',
  ban_for: ' für ', ban_days: ' Tage', ban_until_label: 'Bis zur Entsperrung',
  ban_support_note: 'Andere Bereiche sind während der Sperre nicht verfügbar',
  support_tg: 'Telegram', support_mail: 'E-Mail',
- support_faq: 'Häufig gestellte Fragen', support_privacy: 'Datenschutzrichtlinie', support_terms: 'Nutzungsbedingungen', support_faq_sub: 'Hilfe', support_bot: 'Support-Bot', support_manager: 'Manager in Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Manager-Link folgt', support_ticket: 'Anfrage senden', support_hire: 'Mitarbeiten',
+ support_faq: 'FAQ', support_privacy: 'Datenschutzrichtlinie', support_terms: 'Nutzungsbedingungen', support_faq_sub: 'Hilfe', support_bot: 'Support-Bot', support_manager: 'Manager in Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Manager-Link folgt', support_ticket: 'Anfrage senden', support_hire: 'Mitarbeiten',
  publish_blocked: 'Veröffentlichung von Anzeigen ist eingeschränkt',
  publish_blocked_for: ' für ', publish_blocked_until: ' bis ', day_short: 'T',
  status_blocked: 'Gesperrt', status_pending: 'In Prüfung', status_active: 'Aktiv',
@@ -6902,7 +6898,7 @@ terms_prefix: 'By continuing, you accept the ',
  partner: 'Partner', own_product: 'Eigenes Produkt', deposit: 'Einzahlung', withdrawal: 'Auszahlung',
  salary: 'Gehalt', freelance_publish: 'Freelance-Veröffentlichung', tx_done: 'Erledigt',
  tx_pending: 'In Bearbeitung', tx_rejected: 'Abgelehnt', lang_changed: 'Sprache geändert',
- original: 'Original', category: 'Kategorie', buy_confirm: 'Kauf bestätigen',
+ original: 'original', category: 'Kategorie', buy_confirm: 'Kauf bestätigen',
  insufficient: 'Unzureichendes Guthaben', listings: 'Anzeigen', transactions: 'Transaktionen'
  ,
  your_role: 'Ihre Rolle',
@@ -7028,7 +7024,7 @@ terms_prefix: 'By continuing, you accept the ',
  send: 'Send',
  message_ph: 'Nachricht...',
  manager_eta: '*ein Manager antwortet innerhalb von 96 Std.',
- faq: 'Häufig gestellte Fragen',
+ faq: 'FAQ',
  search_exchange: 'Börse durchsuchen...',
  search_keywords: 'Nach Stichworten suchen...',
  portfolio: 'Portfolio',
@@ -7059,9 +7055,9 @@ terms_prefix: 'By continuing, you accept the ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Mitarbeiterbewertung',
- seller_rating: 'Verkäuferbewertung',
- buyer_rating: 'Käuferbewertung',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -7474,7 +7470,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'Entrez le code promo',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -7641,7 +7637,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Accepter et continuer',
  support: 'Support', back: '← Retour', menu: 'Menu',
- home: 'Accueil', news: 'Actualités', exchange: 'Bourse des ventes', freelance: 'Freelance',
+ home: 'Accueil', news: 'Actualités', exchange: 'Bourse', freelance: 'Freelance',
  balance: 'Solde', favorites: 'Favoris', my_listings: 'Mes annonces',
  orders: 'Historique des commandes', settings: 'Paramètres', panel: 'Panneau',
  feed_title: 'Listings feed', create: '+ Create', search: 'Recherche',
@@ -7651,7 +7647,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  ban_for: ' pendant ', ban_days: ' j', ban_until_label: 'Jusqu\'au déblocage',
  ban_support_note: 'Les autres sections sont indisponibles pendant le ban',
  support_tg: 'Telegram', support_mail: 'E-mail',
- support_faq: 'Questions fréquentes', support_privacy: 'Politique de confidentialité', support_terms: 'Conditions d\'utilisation', support_faq_sub: 'FAQ', support_bot: 'Bot support', support_manager: 'Manager Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Lien manager bientôt', support_ticket: 'Ouvrir un ticket', support_hire: 'Collaborer',
+ support_faq: 'FAQ', support_privacy: 'Politique de confidentialité', support_terms: 'Conditions d\'utilisation', support_faq_sub: 'FAQ', support_bot: 'Bot support', support_manager: 'Manager Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Lien manager bientôt', support_ticket: 'Ouvrir un ticket', support_hire: 'Collaborer',
  publish_blocked: 'La publication d\'annonces est restreinte',
  publish_blocked_for: ' pendant ', publish_blocked_until: ' jusqu\'au ', day_short: 'j',
  status_blocked: 'Bloqué', status_pending: 'En modération', status_active: 'Actif',
@@ -7672,7 +7668,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  partner: 'Partenaire', own_product: 'Produit propre', deposit: 'Dépôt', withdrawal: 'Retrait',
  salary: 'Salaire', freelance_publish: 'Publication freelance', tx_done: 'Effectué',
  tx_pending: 'En cours', tx_rejected: 'Refusé', lang_changed: 'Langue mise à jour',
- original: 'Original', category: 'Catégorie', buy_confirm: 'Confirmer l\'achat',
+ original: 'original', category: 'Catégorie', buy_confirm: 'Confirmer l\'achat',
  insufficient: 'Fonds insuffisants', listings: 'Annonces', transactions: 'Transactions'
  ,
  your_role: 'Votre rôle',
@@ -7798,7 +7794,7 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  send: 'Send',
  message_ph: 'Message...',
  manager_eta: '*un manager répondra sous 96 h',
- faq: 'Questions fréquentes',
+ faq: 'FAQ',
  search_exchange: 'Rechercher sur la bourse...',
  search_keywords: 'Recherche par mots-clés...',
  portfolio: 'Portfolio',
@@ -7829,9 +7825,9 @@ terms_prefix: 'Mit dem Fortfahren akzeptieren Sie die ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Note du personnel',
- seller_rating: 'Note du vendeur',
- buyer_rating: 'Note de l’acheteur',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -8244,7 +8240,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'Introduce el código promocional',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -8411,7 +8407,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Aceptar y continuar',
  support: 'Support', back: '← Atrás', menu: 'Menú',
- home: 'Inicio', news: 'Noticias', exchange: 'Bolsa de ventas', freelance: 'Freelance',
+ home: 'Inicio', news: 'Noticias', exchange: 'Bolsa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favoritos', my_listings: 'Mis anuncios',
  orders: 'Historial de pedidos', settings: 'Ajustes', panel: 'Panel',
  feed_title: 'Listings feed', create: '+ Create', search: 'Buscar',
@@ -8421,7 +8417,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  ban_for: ' por ', ban_days: ' días', ban_until_label: 'Hasta el desbloqueo',
  ban_support_note: 'Otras secciones no están disponibles durante el ban',
  support_tg: 'Telegram', support_mail: 'Correo',
- support_faq: 'Preguntas frecuentes', support_privacy: 'Política de privacidad', support_terms: 'Términos de servicio', support_faq_sub: 'Preguntas', support_bot: 'Bot de soporte', support_manager: 'Manager en Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Enlace del manager pronto', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
+ support_faq: 'FAQ', support_privacy: 'Política de privacidad', support_terms: 'Términos de servicio', support_faq_sub: 'Preguntas', support_bot: 'Bot de soporte', support_manager: 'Manager en Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Enlace del manager pronto', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
  publish_blocked: 'La publicación de anuncios está restringida',
  publish_blocked_for: ' por ', publish_blocked_until: ' hasta ', day_short: 'd',
  status_blocked: 'Bloqueado', status_pending: 'En moderación', status_active: 'Activo',
@@ -8442,7 +8438,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  partner: 'Socio', own_product: 'Producto propio', deposit: 'Depósito', withdrawal: 'Retiro',
  salary: 'Salario', freelance_publish: 'Publicación freelance', tx_done: 'Hecho',
  tx_pending: 'Procesando', tx_rejected: 'Rechazado', lang_changed: 'Idioma actualizado',
- original: 'Original', category: 'Categoría', buy_confirm: 'Confirmar compra',
+ original: 'original', category: 'Categoría', buy_confirm: 'Confirmar compra',
  insufficient: 'Fondos insuficientes', listings: 'Anuncios', transactions: 'Transacciones'
  ,
  your_role: 'Tu rol',
@@ -8568,7 +8564,7 @@ terms_prefix: 'En continuant, vous acceptez les ',
  send: 'Send',
  message_ph: 'Mensaje...',
  manager_eta: '*un manager responderá en 96 h',
- faq: 'Preguntas frecuentes',
+ faq: 'FAQ',
  search_exchange: 'Buscar en la bolsa...',
  search_keywords: 'Buscar por palabras clave...',
  portfolio: 'Portfolio',
@@ -8599,9 +8595,9 @@ terms_prefix: 'En continuant, vous acceptez les ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Valoración del personal',
- seller_rating: 'Valoración del vendedor',
- buyer_rating: 'Valoración del comprador',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -9014,7 +9010,7 @@ terms_prefix: 'Al continuar, acepta el ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: '输入优惠码',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -9141,7 +9137,7 @@ terms_prefix: 'Al continuar, acepta el ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: '接受并继续',
  support: 'Support', back: '← 返回', menu: '菜单',
- home: '首页', news: '新闻', exchange: '销售交易所', freelance: '自由职业',
+ home: '首页', news: '新闻', exchange: '交易所', freelance: '自由职业',
  balance: '余额', favorites: '收藏', my_listings: '我的广告',
  orders: '订单历史', settings: '设置', panel: '管理面板',
  feed_title: 'Listings feed', create: '+ Create', search: '搜索',
@@ -9151,7 +9147,7 @@ terms_prefix: 'Al continuar, acepta el ',
  ban_for: ' 时长 ', ban_days: ' 天', ban_until_label: '解封倒计时',
  ban_support_note: '封禁期间其他功能不可用',
  support_tg: 'Telegram', support_mail: '邮件',
- support_faq: '常见问题', support_privacy: '隐私政策', support_terms: '用户协议', support_faq_sub: '常见问题', support_bot: '客服机器人', support_manager: 'Telegram 经理', support_manager_sub: 'Telegram', support_manager_soon: '经理链接即将添加', support_ticket: '提交工单', support_hire: '加入我们',
+ support_faq: 'FAQ', support_privacy: '隐私政策', support_terms: '用户协议', support_faq_sub: '常见问题', support_bot: '客服机器人', support_manager: 'Telegram 经理', support_manager_sub: 'Telegram', support_manager_soon: '经理链接即将添加', support_ticket: '提交工单', support_hire: '加入我们',
  publish_blocked: '您的发布权限已被限制',
  publish_blocked_for: ' 时长 ', publish_blocked_until: ' 至 ', day_short: '天',
  status_blocked: '已封禁', status_pending: '审核中', status_active: '上架中',
@@ -9298,7 +9294,7 @@ terms_prefix: 'Al continuar, acepta el ',
  send: 'Send',
  message_ph: '消息...',
  manager_eta: '*经理将在 96 小时内回复',
- faq: '常见问题',
+ faq: 'FAQ',
  search_exchange: '搜索交易所...',
  search_keywords: '按关键词搜索...',
  portfolio: 'Portfolio',
@@ -9329,9 +9325,9 @@ terms_prefix: 'Al continuar, acepta el ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: '员工评分',
- seller_rating: '卖家评分',
- buyer_rating: '买家评分',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -9744,7 +9740,7 @@ terms_prefix: '继续即表示您同意',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'Введіть промокод',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -9914,7 +9910,7 @@ terms_prefix: '继续即表示您同意',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Приймаю і продовжую',
  support: 'Support', back: '← Назад', menu: 'Меню',
- home: 'Головна', news: 'Новини', exchange: 'Біржа продажів', freelance: 'Фриланс',
+ home: 'Головна', news: 'Новини', exchange: 'Біржа', freelance: 'Фриланс',
  balance: 'Баланс', favorites: 'Обране', my_listings: 'Мої оголошення',
  orders: 'Історія замовлень', settings: 'Налаштування', panel: 'Панель',
  feed_title: 'Listings feed', create: '+ Create', search: 'Пошук',
@@ -9924,7 +9920,7 @@ terms_prefix: '继续即表示您同意',
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Написати в Telegram', support_mail: 'Написати на пошту',
- support_faq: 'Часті запитання', support_privacy: 'Політика конфіденційності', support_terms: 'Користувацька угода', support_faq_sub: 'Питання', support_bot: 'Бот підтримки', support_manager: 'Менеджер в Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Посилання на менеджера згодом', support_ticket: 'Написати звернення', support_hire: 'Співпрацювати',
+ support_faq: 'FAQ', support_privacy: 'Політика конфіденційності', support_terms: 'Користувацька угода', support_faq_sub: 'Питання', support_bot: 'Бот підтримки', support_manager: 'Менеджер в Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Посилання на менеджера згодом', support_ticket: 'Написати звернення', support_hire: 'Співпрацювати',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Заблоковано', status_pending: 'На модерації', status_active: 'Активно',
@@ -9945,7 +9941,7 @@ terms_prefix: '继续即表示您同意',
  partner: 'Partner', own_product: 'Свій товар', deposit: 'Поповнення', withdrawal: 'Виведення',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
  tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Мову змінено',
- original: 'Оригінал', category: 'Category', buy_confirm: 'Confirm purchase',
+ original: 'оригінал', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Недостатньо коштів', listings: 'Listings', transactions: 'Transactions'
  ,
  your_role: 'Ваша роль',
@@ -10073,7 +10069,7 @@ terms_prefix: '继续即表示您同意',
  send: 'Send',
  message_ph: 'Повідомлення...',
  manager_eta: '*менеджер напише вам протягом 96 год',
- faq: 'Часті запитання',
+ faq: 'FAQ',
  search_exchange: 'Пошук на біржі...',
  search_keywords: 'Пошук за ключовими словами...',
  portfolio: 'Portfolio',
@@ -10104,9 +10100,9 @@ terms_prefix: '继续即表示您同意',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Рейтинг співробітника',
- seller_rating: 'Рейтинг продавця',
- buyer_rating: 'Рейтинг покупця',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -10519,7 +10515,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'Inserisci il codice promozionale',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -10684,7 +10680,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Accetta e continua',
  support: 'Support', back: '← Indietro', menu: 'Menu',
- home: 'Home', news: 'Notizie', exchange: 'Borsa delle vendite', freelance: 'Freelance',
+ home: 'Home', news: 'Notizie', exchange: 'Borsa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Preferiti', my_listings: 'I miei annunci',
  orders: 'Cronologia ordini', settings: 'Impostazioni', panel: 'Pannello',
  feed_title: 'Listings feed', create: '+ Create', search: 'Cerca',
@@ -10694,7 +10690,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: 'Email',
- support_faq: 'Domande frequenti', support_privacy: 'Informativa sulla privacy', support_terms: 'Termini di servizio', support_ticket: 'Apri ticket', support_hire: 'Collabora',
+ support_faq: 'FAQ', support_privacy: 'Informativa sulla privacy', support_terms: 'Termini di servizio', support_ticket: 'Apri ticket', support_hire: 'Collabora',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Bloccato', status_pending: 'In moderazione', status_active: 'Attivo',
@@ -10715,7 +10711,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  partner: 'Partner', own_product: 'Prodotto proprio', deposit: 'Deposito', withdrawal: 'Prelievo',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
  tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Lingua aggiornata',
- original: 'Originale', category: 'Category', buy_confirm: 'Confirm purchase',
+ original: 'originale', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Fondi insufficienti', listings: 'Listings', transactions: 'Transactions'
  ,
  your_role: 'Il tuo ruolo',
@@ -10841,7 +10837,7 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  send: 'Send',
  message_ph: 'Messaggio...',
  manager_eta: '*un manager risponderà entro 96 ore',
- faq: 'Domande frequenti',
+ faq: 'FAQ',
  search_exchange: 'Cerca nella borsa...',
  search_keywords: 'Cerca per parole chiave...',
  portfolio: 'Portfolio',
@@ -10872,9 +10868,9 @@ terms_prefix: 'Продовжуючи, ви приймаєте ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Valutazione staff',
- seller_rating: 'Valutazione venditore',
- buyer_rating: 'Valutazione acquirente',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -11287,7 +11283,7 @@ terms_prefix: 'Continuando, accetti i ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'Introduza o código promocional',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -11452,7 +11448,7 @@ terms_prefix: 'Continuando, accetti i ',
  privacy_body: 'Продолжая, вы соглашаетесь с <a href=\"{url}\">политикой конфиденциальности и сбора данных (for MiniApp\'s)</a>.',
  privacy_accept: 'Aceitar e continuar',
  support: 'Support', back: '← Voltar', menu: 'Menu',
- home: 'Início', news: 'Notícias', exchange: 'Bolsa de vendas', freelance: 'Freelance',
+ home: 'Início', news: 'Notícias', exchange: 'Bolsa', freelance: 'Freelance',
  balance: 'Saldo', favorites: 'Favoritos', my_listings: 'Os meus anúncios',
  orders: 'Histórico de pedidos', settings: 'Definições', panel: 'Painel',
  feed_title: 'Listings feed', create: '+ Create', search: 'Pesquisar',
@@ -11462,7 +11458,7 @@ terms_prefix: 'Continuando, accetti i ',
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: 'E-mail',
- support_faq: 'Perguntas frequentes', support_privacy: 'Política de privacidad', support_terms: 'Términos de servicio', support_faq_sub: 'Preguntas', support_bot: 'Bot de soporte', support_manager: 'Manager en Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Enlace del manager pronto', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
+ support_faq: 'FAQ', support_privacy: 'Política de privacidad', support_terms: 'Términos de servicio', support_faq_sub: 'Preguntas', support_bot: 'Bot de soporte', support_manager: 'Manager en Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Enlace del manager pronto', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Bloqueado', status_pending: 'Em moderação', status_active: 'Ativo',
@@ -11483,7 +11479,7 @@ terms_prefix: 'Continuando, accetti i ',
  partner: 'Partner', own_product: 'Produto próprio', deposit: 'Depósito', withdrawal: 'Levantamento',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
  tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Idioma atualizado',
- original: 'Original', category: 'Category', buy_confirm: 'Confirm purchase',
+ original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Fundos insuficientes', listings: 'Listings', transactions: 'Transactions'
  ,
  your_role: 'O seu papel',
@@ -11609,7 +11605,7 @@ terms_prefix: 'Continuando, accetti i ',
  send: 'Send',
  message_ph: 'Mensagem...',
  manager_eta: '*um gestor responde em 96 h',
- faq: 'Perguntas frequentes',
+ faq: 'FAQ',
  search_exchange: 'Pesquisar na bolsa...',
  search_keywords: 'Pesquisar por palavras-chave...',
  portfolio: 'Portfolio',
@@ -11640,9 +11636,9 @@ terms_prefix: 'Continuando, accetti i ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Avaliação da equipe',
- seller_rating: 'Avaliação do vendedor',
- buyer_rating: 'Avaliação do comprador',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -12035,7 +12031,7 @@ terms_prefix: 'Ao continuar, aceita o ',
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: 'E-mail',
- support_faq: 'Perguntas frequentes', support_privacy: 'Política de privacidad', support_terms: 'Términos de servicio', support_faq_sub: 'Preguntas', support_bot: 'Bot de soporte', support_manager: 'Manager en Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Enlace del manager pronto', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
+ support_faq: 'FAQ', support_privacy: 'Política de privacidad', support_terms: 'Términos de servicio', support_faq_sub: 'Preguntas', support_bot: 'Bot de soporte', support_manager: 'Manager en Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Enlace del manager pronto', support_ticket: 'Abrir ticket', support_hire: 'Colaborar',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Bloqueado', status_pending: 'Em moderação', status_active: 'Ativo',
@@ -12056,7 +12052,7 @@ terms_prefix: 'Ao continuar, aceita o ',
  partner: 'Partner', own_product: 'Produto próprio', deposit: 'Depósito', withdrawal: 'Levantamento',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
  tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Idioma atualizado',
- original: 'Original', category: 'Category', buy_confirm: 'Confirm purchase',
+ original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Saldo insuficiente', listings: 'Listings', transactions: 'Transactions'
  ,
  your_role: 'Seu papel',
@@ -12182,7 +12178,7 @@ terms_prefix: 'Ao continuar, aceita o ',
  send: 'Send',
  message_ph: 'Mensagem...',
  manager_eta: '*um gerente responde em 96 h',
- faq: 'Perguntas frequentes',
+ faq: 'FAQ',
  search_exchange: 'Pesquisar na bolsa...',
  search_keywords: 'Pesquisar por palavras-chave...',
  portfolio: 'Portfolio',
@@ -12628,7 +12624,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'Digite o código promocional',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -12803,7 +12799,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: 'E-posta',
- support_faq: 'Sıkça sorulan sorular', support_privacy: 'Gizlilik politikası', support_terms: 'Kullanıcı sözleşmesi', support_ticket: 'Talep aç', support_hire: 'İşbirliği',
+ support_faq: 'FAQ', support_privacy: 'Gizlilik politikası', support_terms: 'Kullanıcı sözleşmesi', support_ticket: 'Talep aç', support_hire: 'İşbirliği',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Engellendi', status_pending: 'Moderasyonda', status_active: 'Aktif',
@@ -12950,7 +12946,7 @@ terms_prefix: 'Ao continuar, você aceita o ',
  send: 'Send',
  message_ph: 'Mesaj...',
  manager_eta: '*yönetici 96 saat içinde yanıtlar',
- faq: 'Sıkça sorulan sorular',
+ faq: 'FAQ',
  search_exchange: 'Borsada ara...',
  search_keywords: 'Anahtar kelimelerle ara...',
  portfolio: 'Portfolio',
@@ -12981,9 +12977,9 @@ terms_prefix: 'Ao continuar, você aceita o ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Personel puanı',
- seller_rating: 'Satıcı puanı',
- buyer_rating: 'Alıcı puanı',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -13396,7 +13392,7 @@ terms_prefix: 'Devam ederek ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'Promosyon kodunu girin',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -13571,7 +13567,7 @@ terms_prefix: 'Devam ederek ',
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: 'Email',
- support_faq: 'Pertanyaan yang sering diajukan', support_privacy: 'Kebijakan privasi', support_terms: 'Ketentuan layanan', support_faq_sub: 'FAQ', support_bot: 'Bot dukungan', support_manager: 'Manajer Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Tautan manajer segera', support_ticket: 'Buat tiket', support_hire: 'Bergabung',
+ support_faq: 'FAQ', support_privacy: 'Kebijakan privasi', support_terms: 'Ketentuan layanan', support_faq_sub: 'FAQ', support_bot: 'Bot dukungan', support_manager: 'Manajer Telegram', support_manager_sub: 'Telegram', support_manager_soon: 'Tautan manajer segera', support_ticket: 'Buat tiket', support_hire: 'Bergabung',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'Diblokir', status_pending: 'Moderasi', status_active: 'Aktif',
@@ -13592,7 +13588,7 @@ terms_prefix: 'Devam ederek ',
  partner: 'Partner', own_product: 'Produk sendiri', deposit: 'Deposit', withdrawal: 'Penarikan',
  salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
  tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Bahasa diperbarui',
- original: 'Asli', category: 'Category', buy_confirm: 'Confirm purchase',
+ original: 'asli', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Saldo tidak cukup', listings: 'Listings', transactions: 'Transactions'
  ,
  your_role: 'Peran Anda',
@@ -13718,7 +13714,7 @@ terms_prefix: 'Devam ederek ',
  send: 'Send',
  message_ph: 'Pesan...',
  manager_eta: '*manajer membalas dalam 96 jam',
- faq: 'Pertanyaan yang sering diajukan',
+ faq: 'FAQ',
  search_exchange: 'Cari di bursa...',
  search_keywords: 'Cari kata kunci...',
  portfolio: 'Portfolio',
@@ -13749,9 +13745,9 @@ terms_prefix: 'Devam ederek ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'Peringkat staf',
- seller_rating: 'Peringkat penjual',
- buyer_rating: 'Peringkat pembeli',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -14164,7 +14160,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'Masukkan kode promo',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -14339,7 +14335,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'تيليجرام', support_mail: 'البريد',
- support_faq: 'الأسئلة الشائعة', support_privacy: 'سياسة الخصوصية', support_terms: 'اتفاقية المستخدم', support_faq_sub: 'الأسئلة', support_bot: 'بوت الدعم', support_manager: 'المدير على تيليجرام', support_manager_sub: 'Telegram', support_manager_soon: 'رابط المدير قريباً', support_ticket: 'فتح تذكرة', support_hire: 'التعاون',
+ support_faq: 'FAQ', support_privacy: 'سياسة الخصوصية', support_terms: 'اتفاقية المستخدم', support_faq_sub: 'الأسئلة', support_bot: 'بوت الدعم', support_manager: 'المدير على تيليجرام', support_manager_sub: 'Telegram', support_manager_soon: 'رابط المدير قريباً', support_ticket: 'فتح تذكرة', support_hire: 'التعاون',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'محظور', status_pending: 'قيد المراجعة', status_active: 'نشط',
@@ -14486,7 +14482,7 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  send: 'Send',
  message_ph: 'رسالة...',
  manager_eta: '*سيرد المدير خلال 96 ساعة',
- faq: 'الأسئلة الشائعة',
+ faq: 'FAQ',
  search_exchange: 'البحث في البورصة...',
  search_keywords: 'البحث بالكلمات المفتاحية...',
  portfolio: 'Portfolio',
@@ -14517,9 +14513,9 @@ terms_prefix: 'Dengan melanjutkan, Anda menerima ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'تقييم الموظف',
- seller_rating: 'تقييم البائع',
- buyer_rating: 'تقييم المشتري',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -14932,7 +14928,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'أدخل الرمز الترويجي',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -15107,7 +15103,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: 'メール',
- support_faq: 'よくある質問', support_privacy: 'プライバシーポリシー', support_terms: '利用規約', support_ticket: 'チケット作成', support_hire: '協力する',
+ support_faq: 'FAQ', support_privacy: 'プライバシーポリシー', support_terms: '利用規約', support_ticket: 'チケット作成', support_hire: '協力する',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: 'ブロック', status_pending: '審査中', status_active: '公開中',
@@ -15254,7 +15250,7 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  send: 'Send',
  message_ph: 'メッセージ...',
  manager_eta: '*担当者より96時間以内に返信します',
- faq: 'よくある質問',
+ faq: 'FAQ',
  search_exchange: '取引所を検索...',
  search_keywords: 'キーワード検索...',
  portfolio: 'Portfolio',
@@ -15285,9 +15281,9 @@ terms_prefix: 'بالمتابعة فإنك توافق على ',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: 'スタッフ評価',
- seller_rating: '出品者評価',
- buyer_rating: '購入者評価',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -15700,7 +15696,7 @@ terms_prefix: '続行すると',
  promo_not_found: 'Promo code not found',
  promo_discount: 'Discount',
  promo_activated: 'Activated',
- promo_placeholder: 'プロモーションコードを入力',
+ promo_placeholder: 'Enter promo code',
  promo_code: 'Promo code',
  ads_no_partners: 'No partners yet',
  ads_spend_2: 'Spend on secondary deposits',
@@ -15877,7 +15873,7 @@ terms_prefix: '続行すると',
  ban_for: ' for ', ban_days: ' days', ban_until_label: 'Until unlock',
  ban_support_note: 'Other sections are unavailable while banned',
  support_tg: 'Telegram', support_mail: '이메일',
- support_faq: '자주 묻는 질문', support_privacy: '개인정보 처리방침', support_terms: '이용약관', support_ticket: '티켓 열기', support_hire: '협업',
+ support_faq: 'FAQ', support_privacy: '개인정보 처리방침', support_terms: '이용약관', support_ticket: '티켓 열기', support_hire: '협업',
  publish_blocked: 'Publishing listings is restricted for your account',
  publish_blocked_for: ' for ', publish_blocked_until: ' until ', day_short: 'd',
  status_blocked: '차단됨', status_pending: '검토 중', status_active: '활성',
@@ -16024,7 +16020,7 @@ terms_prefix: '続行すると',
  send: 'Send',
  message_ph: '메시지...',
  manager_eta: '*관리자가 96시간 내 답변합니다',
- faq: '자주 묻는 질문',
+ faq: 'FAQ',
  search_exchange: '거래소 검색...',
  search_keywords: '키워드 검색...',
  portfolio: 'Portfolio',
@@ -16055,9 +16051,9 @@ terms_prefix: '続行すると',
  ban_user: 'Ban user',
  unban: 'Unban',
  end_punish: 'End restriction early',
- staff_rating: '직원 평점',
- seller_rating: '판매자 평점',
- buyer_rating: '구매자 평점',
+ staff_rating: 'Staff rating',
+ seller_rating: 'Seller rating',
+ buyer_rating: 'Buyer rating',
  active_count: 'Active',
  done_count: 'Completed',
  wait_admin_shift: 'Wait for admin to open the shift',
@@ -19265,11 +19261,6 @@ async function openAdsAnalytics() {
   renderAdsAnalytics();
 }
 async function renderAdsAnalytics() {
-  // Always restore back → analytics menu (fixes trap after partner detail)
-  setAdminSectionBack(function(){ openAdminSection('analytics'); });
-  try {
-    document.getElementById('admin-section-title').textContent = tBlock('analytics_ads') || 'Реклама';
-  } catch (e) {}
   var box = document.getElementById('admin-content');
   var tab = window._adsAnalyticsTab || 'stats';
   var html = '<div class="seg-toggle" id="ads-seg" style="grid-template-columns:1fr 1fr;gap:6px;width:100%;box-sizing:border-box;margin-bottom:12px;">';
@@ -19309,6 +19300,7 @@ async function renderAdsAnalytics() {
         h += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">';
         h += '<div style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><span class="seller-link" data-uid="' + p.user_id + '" onclick="event.stopPropagation();return goProfile(' + p.user_id + ', event)" style="color:var(--accent,#2aabee);font-weight:600;">' + String(p.name||p.user_id).replace(/</g,'&lt;') + '</span></div>';
         h += '<div style="flex:1;text-align:center;font-family:monospace;font-size:13px;line-height:1.2;align-self:center;">' + String(p.ref_code||'').replace(/</g,'&lt;') + '</div>';
+        h += '<div style="flex:0 0 auto;font-size:13px;font-variant-numeric:tabular-nums;line-height:1.2;align-self:center;text-align:center;">' + (p.refs_10d||0) + '/' + (p.refs_total||0) + '/' + (p.refs_retained||0) + '</div>';
         h += '<div style="flex:0 0 auto;font-size:12px;opacity:.85;align-self:center;">' + (tBlock('ads_level') || 'Ур.') + ' ' + (p.ref_level != null ? p.ref_level : 1) + '</div>';
         h += '</div></div>';
       });
@@ -19590,19 +19582,11 @@ function modActionLabel(type, fallback) {
 
 function roleName(role) {
  var r = parseInt(role, 10) || 0;
- var key = 'role_user';
- if (r >= 6) key = 'role_owner';
- else if (r >= 5) key = 'role_admin';
- else if (r >= 4) key = 'role_mod';
- else if (r >= 3) key = 'role_intern';
- var name = tBlock(key);
- // if translation missing and fell back to English key word incorrectly, try direct pack
- try {
-   var lang = (typeof getAppLang === 'function' ? getAppLang() : 'ru') || 'ru';
-   lang = String(lang).split('-')[0];
-   if (I18N && I18N[lang] && I18N[lang][key]) name = I18N[lang][key];
- } catch (e) {}
- return name;
+ if (r >= 6) return tBlock('role_owner');
+ if (r >= 5) return tBlock('role_admin');
+ if (r >= 4) return tBlock('role_mod');
+ if (r >= 3) return tBlock('role_intern');
+ return tBlock('role_user');
 }
 
 function txTypeLabel(tp) {
@@ -19621,30 +19605,30 @@ function txTypeLabel(tp) {
 (function(){try{
 var X={
 "ru":{
-"active_tab":"Активные","done_tab":"Завершённые","total_to_pay":"Итого к оплате","promo_code":"Промокод","worker":"Работник","independent":"Самостоятельно","who_performs":"Кто выполняет","product_kind_label":"Тип (бот / сайт / другое)","users_month":"Пользователей в месяц","earn_month":"Доход в месяц","product_type_ph":"TG-бот / Mini App + сайт / другое","tgstat":"Ссылка на TGStat","username":"Имя пользователя","price_usd":"Цена ($)","upload_photos":"Загрузить фото","upload_files":"Загрузить файлы","verify_passport":"Верификация паспорта","verification_data":"Данные верификации","verification_menu":"Меню верификации","search":"Поиск","deposit_n":"Пополнение","awaiting_payment":"Ожидает оплаты","pending_status":"В ожидании","rejected_status":"Отклонено","payment_stars":"Оплата в боте · Stars","transaction_history":"История транзакций","ref_receive_1":"Вы получаете с 1-го пополнения: {value}%","ref_bonus_1":"Бонус рефералу с 1-го пополнения: {value}%","referrals_10d":"Рефералов за 10 дней: {value}","referrals_total":"Всего рефералов: {value}","referrals_2plus":"Рефералов с 2+ пополнениями: {value}","earned_total":"Заработано всего: {value} $","earned_1":"С 1-х пополнений: {value} $","earned_2":"Со 2-х пополнений: {value} $","moderator":"Модератор","salary_hours":"Зарплата: {value} $ / {hours} ч","required_shifts":"Требуется: {value} смен/нед","intern":"Стажёр","period":"Период","intern_shift":"Смена стажёра","intern_salary":"Зарплата стажёра","duties":"Обязанности","duty_listings":"Модерация объявлений","duty_complaints":"Модерация жалоб","duty_tickets":"Модерация обращений","duty_analytics":"Аналитика (просмотр)","duty_workcenter":"Рабочий центр / смены","duty_control_view":"Контроль смены (только просмотр)","fill_application":"Заполнить анкету","job_applications":"Заявки на работу","full_name":"ФИО","age":"Возраст","employment":"Занятость","phone":"Телефон","email":"Почта","tg_id":"TG ID","created":"Создано","name":"Имя","id_label":"ID","privilege":"Права","role_change":"Изменить роль","roles_all":"Пользователь · Партнёр · Юрлицо · Стажёр · Модератор · Администратор","balance_change":"Изменить баланс","new_balance":"Новый баланс ($)","save_balance":"Сохранить баланс","seller_rating":"Рейтинг продавца","buyer_rating":"Рейтинг покупателя","staff_rating":"Рейтинг персонала","complete_tab":"Завершённые","active_count":"Активные","code_sent_linked":"Код будет отправлен на почту, привязанную к этому аккаунту"},
-"en":{"active_tab":"Active","done_tab":"Done","total_to_pay":"Total to pay","promo_code":"Promo code","worker":"Worker","independent":"Independent","who_performs":"Who performs","product_kind_label":"Type (bot / site / other)","users_month":"Users / mo","earn_month":"Revenue / mo","product_type_ph":"TG bot / Mini App + site / other","tgstat":"TGStat link","username":"Username","price_usd":"Price ($)","upload_photos":"Upload photos","upload_files":"Upload files","verify_passport":"Passport verification","verification_data":"Verification data","verification_menu":"Verification menu","search":"Search","deposit_n":"Deposit","awaiting_payment":"Awaiting payment","pending_status":"Pending","rejected_status":"Rejected","payment_stars":"Payment in bot · Stars","transaction_history":"Transaction history","ref_receive_1":"You receive from the 1st deposit: {value}%","ref_bonus_1":"Referral bonus on the 1st deposit: {value}%","referrals_10d":"Referrals in 10 days: {value}","referrals_total":"Referrals total: {value}","referrals_2plus":"Referrals with 2+ deposits: {value}","earned_total":"Earned total: {value} $","earned_1":"From 1st deposits: {value} $","earned_2":"From 2nd deposits: {value} $","moderator":"Moderator","salary_hours":"Salary: {value} $ / {hours} h","required_shifts":"Required: {value} shifts/week","intern":"Intern","period":"Period","intern_shift":"Intern shift","intern_salary":"Intern shift salary","duties":"Duties","duty_listings":"Listings moderation","duty_complaints":"Complaints moderation","duty_tickets":"Support tickets moderation","duty_analytics":"Analytics (view)","duty_workcenter":"Work center / shifts","duty_control_view":"Shift control (view only)","fill_application":"Fill application","job_applications":"Job applications","full_name":"Full name","age":"Age","employment":"Employment","phone":"Phone","email":"Email","tg_id":"TG ID","created":"Created","name":"Name","id_label":"ID","privilege":"Privilege","role_change":"Change role","roles_all":"User · Partner · Corporate · Intern · Moderator · Administrator","balance_change":"Change balance","new_balance":"New balance ($)","save_balance":"Save balance","seller_rating":"Seller rating","buyer_rating":"Buyer rating","staff_rating":"Staff rating","complete_tab":"Completed","active_count":"Active","code_sent_linked":"A code will be sent to the email linked to this account"},
-"de":{"active_tab":"Aktiv","done_tab":"Abgeschlossen","total_to_pay":"Gesamt zu zahlen","promo_code":"Promo-Code","worker":"Mitarbeiter","independent":"Selbstständig","who_performs":"Wer führt aus","product_kind_label":"Typ (Bot / Website / Sonstiges)","users_month":"Nutzer / Monat","earn_month":"Umsatz / Monat","product_type_ph":"TG-Bot / Mini App + Website / Sonstiges","tgstat":"TGStat-Link","username":"Benutzername","price_usd":"Preis ($)","upload_photos":"Fotos hochladen","upload_files":"Dateien hochladen","verify_passport":"Passverifizierung","verification_data":"Verifizierungsdaten","verification_menu":"Verifizierungsmenü","search":"Suche","deposit_n":"Einzahlung","awaiting_payment":"Zahlung ausstehend","pending_status":"Ausstehend","rejected_status":"Abgelehnt","payment_stars":"Zahlung im Bot · Stars","transaction_history":"Transaktionsverlauf","ref_receive_1":"Sie erhalten von der 1. Einzahlung: {value}%","ref_bonus_1":"Empfehlungsbonus bei der 1. Einzahlung: {value}%","referrals_10d":"Empfehlungen in 10 Tagen: {value}","referrals_total":"Empfehlungen insgesamt: {value}","referrals_2plus":"Empfehlungen mit 2+ Einzahlungen: {value}","earned_total":"Gesamt verdient: {value} $","earned_1":"Von 1. Einzahlungen: {value} $","earned_2":"Von 2. Einzahlungen: {value} $","moderator":"Moderator","salary_hours":"Gehalt: {value} $ / {hours} Std.","required_shifts":"Erforderlich: {value} Schichten/Woche","intern":"Praktikant","period":"Zeitraum","intern_shift":"Praktikantenschicht","intern_salary":"Gehalt der Praktikantenschicht","duties":"Aufgaben","duty_listings":"Anzeigenmoderation","duty_complaints":"Beschwerdemoderation","duty_tickets":"Support-Ticket-Moderation","duty_analytics":"Analytik (Ansicht)","duty_workcenter":"Arbeitszentrum / Schichten","duty_control_view":"Schichtkontrolle (nur Ansicht)","fill_application":"Bewerbung ausfüllen","job_applications":"Bewerbungen","full_name":"Vollständiger Name","age":"Alter","employment":"Beschäftigung","phone":"Telefon","email":"E-Mail","tg_id":"TG-ID","created":"Erstellt","name":"Name","id_label":"ID","privilege":"Berechtigung","role_change":"Rolle ändern","roles_all":"Benutzer · Partner · Unternehmen · Praktikant · Moderator · Administrator","balance_change":"Guthaben ändern","new_balance":"Neues Guthaben ($)","save_balance":"Guthaben speichern","seller_rating":"Verkäuferbewertung","buyer_rating":"Käuferbewertung","staff_rating":"Mitarbeiterbewertung","complete_tab":"Abgeschlossen","active_count":"Aktiv","code_sent_linked":"Ein Code wird an die mit diesem Konto verknüpfte E-Mail gesendet"},
-"fr":{"active_tab":"Actives","done_tab":"Terminées","total_to_pay":"Total à payer","promo_code":"Code promo","worker":"Travailleur","independent":"Indépendant","who_performs":"Qui exécute","product_kind_label":"Type (bot / site / autre)","users_month":"Utilisateurs / mois","earn_month":"Revenus / mois","product_type_ph":"Bot TG / Mini App + site / autre","tgstat":"Lien TGStat","username":"Nom d’utilisateur","price_usd":"Prix ($)","upload_photos":"Télécharger des photos","upload_files":"Télécharger des fichiers","verify_passport":"Vérification du passeport","verification_data":"Données de vérification","verification_menu":"Menu de vérification","search":"Rechercher","deposit_n":"Dépôt","awaiting_payment":"Paiement en attente","pending_status":"En attente","rejected_status":"Refusé","payment_stars":"Paiement dans le bot · Stars","transaction_history":"Historique des transactions","ref_receive_1":"Vous recevez du 1er dépôt : {value}%","ref_bonus_1":"Bonus du filleul sur le 1er dépôt : {value}%","referrals_10d":"Filleuls en 10 jours : {value}","referrals_total":"Filleuls au total : {value}","referrals_2plus":"Filleuls avec 2+ dépôts : {value}","earned_total":"Total gagné : {value} $","earned_1":"Des 1ers dépôts : {value} $","earned_2":"Des 2es dépôts : {value} $","moderator":"Modérateur","salary_hours":"Salaire : {value} $ / {hours} h","required_shifts":"Requis : {value} shifts/semaine","intern":"Stagiaire","period":"Période","intern_shift":"Shift du stagiaire","intern_salary":"Salaire du shift du stagiaire","duties":"Missions","duty_listings":"Modération des annonces","duty_complaints":"Modération des plaintes","duty_tickets":"Modération des tickets support","duty_analytics":"Analytique (lecture)","duty_workcenter":"Centre de travail / shifts","duty_control_view":"Contrôle des shifts (lecture seule)","fill_application":"Remplir la candidature","job_applications":"Candidatures","full_name":"Nom complet","age":"Âge","employment":"Emploi","phone":"Téléphone","email":"E-mail","tg_id":"ID TG","created":"Créé","name":"Nom","id_label":"ID","privilege":"Droits","role_change":"Modifier le rôle","roles_all":"Utilisateur · Partenaire · Entreprise · Stagiaire · Modérateur · Administrateur","balance_change":"Modifier le solde","new_balance":"Nouveau solde ($)","save_balance":"Enregistrer le solde","seller_rating":"Note du vendeur","buyer_rating":"Note de l’acheteur","staff_rating":"Note du personnel","complete_tab":"Terminées","active_count":"Actives","code_sent_linked":"Un code sera envoyé à l’adresse e-mail liée à ce compte"},
-"es":{"active_tab":"Activos","done_tab":"Completados","total_to_pay":"Total a pagar","promo_code":"Código promocional","worker":"Trabajador","independent":"Independiente","who_performs":"Quién realiza","product_kind_label":"Tipo (bot / sitio / otro)","users_month":"Usuarios / mes","earn_month":"Ingresos / mes","product_type_ph":"Bot de TG / Mini App + sitio / otro","tgstat":"Enlace de TGStat","username":"Nombre de usuario","price_usd":"Precio ($)","upload_photos":"Subir fotos","upload_files":"Subir archivos","verify_passport":"Verificación del pasaporte","verification_data":"Datos de verificación","verification_menu":"Menú de verificación","search":"Buscar","deposit_n":"Depósito","awaiting_payment":"Pago pendiente","pending_status":"Pendiente","rejected_status":"Rechazado","payment_stars":"Pago en el bot · Stars","transaction_history":"Historial de transacciones","ref_receive_1":"Recibes del 1.er depósito: {value}%","ref_bonus_1":"Bono por el 1.er depósito: {value}%","referrals_10d":"Referidos en 10 días: {value}","referrals_total":"Referidos totales: {value}","referrals_2plus":"Referidos con 2+ depósitos: {value}","earned_total":"Total ganado: {value} $","earned_1":"De los 1.er depósitos: {value} $","earned_2":"De los 2.º depósitos: {value} $","moderator":"Moderador","salary_hours":"Salario: {value} $ / {hours} h","required_shifts":"Requerido: {value} turnos/semana","intern":"Practicante","period":"Periodo","intern_shift":"Turno del practicante","intern_salary":"Salario del turno del practicante","duties":"Funciones","duty_listings":"Moderación de anuncios","duty_complaints":"Moderación de quejas","duty_tickets":"Moderación de tickets de soporte","duty_analytics":"Analítica (consulta)","duty_workcenter":"Centro de trabajo / turnos","duty_control_view":"Control de turnos (solo lectura)","fill_application":"Rellenar solicitud","job_applications":"Solicitudes de empleo","full_name":"Nombre completo","age":"Edad","employment":"Situación laboral","phone":"Teléfono","email":"Correo electrónico","tg_id":"ID de TG","created":"Creado","name":"Nombre","id_label":"ID","privilege":"Permisos","role_change":"Cambiar rol","roles_all":"Usuario · Socio · Empresa · Practicante · Moderador · Administrador","balance_change":"Cambiar saldo","new_balance":"Nuevo saldo ($)","save_balance":"Guardar saldo","seller_rating":"Valoración del vendedor","buyer_rating":"Valoración del comprador","staff_rating":"Valoración del personal","complete_tab":"Completados","active_count":"Activos","code_sent_linked":"Se enviará un código al correo vinculado a esta cuenta"},
-"uk":{"active_tab":"Активні","done_tab":"Завершені","total_to_pay":"Разом до сплати","promo_code":"Промокод","worker":"Працівник","independent":"Самостійно","who_performs":"Хто виконує","product_kind_label":"Тип (бот / сайт / інше)","users_month":"Користувачів / міс.","earn_month":"Дохід / міс.","product_type_ph":"TG-бот / Mini App + сайт / інше","tgstat":"Посилання TGStat","username":"Ім’я користувача","price_usd":"Ціна ($)","upload_photos":"Завантажити фото","upload_files":"Завантажити файли","verify_passport":"Верифікація паспорта","verification_data":"Дані верифікації","verification_menu":"Меню верифікації","search":"Пошук","deposit_n":"Поповнення","awaiting_payment":"Очікує оплати","pending_status":"В очікуванні","rejected_status":"Відхилено","payment_stars":"Оплата в боті · Stars","transaction_history":"Історія транзакцій","ref_receive_1":"Ви отримуєте з 1-го поповнення: {value}%","ref_bonus_1":"Бонус рефералу з 1-го поповнення: {value}%","referrals_10d":"Рефералів за 10 днів: {value}","referrals_total":"Усього рефералів: {value}","referrals_2plus":"Рефералів із 2+ поповненнями: {value}","earned_total":"Зароблено всього: {value} $","earned_1":"З 1-х поповнень: {value} $","earned_2":"З 2-х поповнень: {value} $","moderator":"Модератор","salary_hours":"Зарплата: {value} $ / {hours} год","required_shifts":"Потрібно: {value} змін/тиждень","intern":"Стажер","period":"Період","intern_shift":"Зміна стажера","intern_salary":"Зарплата стажерської зміни","duties":"Обов’язки","duty_listings":"Модерація оголошень","duty_complaints":"Модерація скарг","duty_tickets":"Модерація звернень","duty_analytics":"Аналітика (перегляд)","duty_workcenter":"Робочий центр / зміни","duty_control_view":"Контроль змін (лише перегляд)","fill_application":"Заповнити заявку","job_applications":"Заявки на роботу","full_name":"ПІБ","age":"Вік","employment":"Зайнятість","phone":"Телефон","email":"Пошта","tg_id":"TG ID","created":"Створено","name":"Ім’я","id_label":"ID","privilege":"Права","role_change":"Змінити роль","roles_all":"Користувач · Партнер · Юрособа · Стажер · Модератор · Адміністратор","balance_change":"Змінити баланс","new_balance":"Новий баланс ($)","save_balance":"Зберегти баланс","seller_rating":"Рейтинг продавця","buyer_rating":"Рейтинг покупця","staff_rating":"Рейтинг персоналу","complete_tab":"Завершені","active_count":"Активні","code_sent_linked":"Код буде надіслано на електронну пошту, прив’язану до цього облікового запису"},
-"it":{"active_tab":"Attivi","done_tab":"Completati","total_to_pay":"Totale da pagare","promo_code":"Codice promo","worker":"Lavoratore","independent":"Autonomo","who_performs":"Chi esegue","product_kind_label":"Tipo (bot / sito / altro)","users_month":"Utenti / mese","earn_month":"Entrate / mese","product_type_ph":"Bot TG / Mini App + sito / altro","tgstat":"Link TGStat","username":"Nome utente","price_usd":"Prezzo ($)","upload_photos":"Carica foto","upload_files":"Carica file","verify_passport":"Verifica del passaporto","verification_data":"Dati di verifica","verification_menu":"Menu di verifica","search":"Cerca","deposit_n":"Deposito","awaiting_payment":"In attesa di pagamento","pending_status":"In attesa","rejected_status":"Rifiutato","payment_stars":"Pagamento nel bot · Stars","transaction_history":"Cronologia transazioni","ref_receive_1":"Ricevi dal 1° deposito: {value}%","ref_bonus_1":"Bonus referral sul 1° deposito: {value}%","referrals_10d":"Referral in 10 giorni: {value}","referrals_total":"Referral totali: {value}","referrals_2plus":"Referral con 2+ depositi: {value}","earned_total":"Totale guadagnato: {value} $","earned_1":"Dai 1° depositi: {value} $","earned_2":"Dai 2° depositi: {value} $","moderator":"Moderatore","salary_hours":"Stipendio: {value} $ / {hours} h","required_shifts":"Richiesto: {value} turni/settimana","intern":"Stagista","period":"Periodo","intern_shift":"Turno dello stagista","intern_salary":"Stipendio del turno dello stagista","duties":"Mansioni","duty_listings":"Moderazione annunci","duty_complaints":"Moderazione reclami","duty_tickets":"Moderazione ticket di supporto","duty_analytics":"Analisi (visualizzazione)","duty_workcenter":"Centro di lavoro / turni","duty_control_view":"Controllo turni (solo visualizzazione)","fill_application":"Compila la candidatura","job_applications":"Candidature di lavoro","full_name":"Nome completo","age":"Età","employment":"Occupazione","phone":"Telefono","email":"E-mail","tg_id":"TG ID","created":"Creato","name":"Nome","id_label":"ID","privilege":"Permessi","role_change":"Cambia ruolo","roles_all":"Utente · Partner · Azienda · Stagista · Moderatore · Amministratore","balance_change":"Modifica saldo","new_balance":"Nuovo saldo ($)","save_balance":"Salva saldo","seller_rating":"Valutazione venditore","buyer_rating":"Valutazione acquirente","staff_rating":"Valutazione personale","complete_tab":"Completati","active_count":"Attivi","code_sent_linked":"Un codice sarà inviato all’e-mail collegata a questo account"},
-"pt":{"active_tab":"Ativos","done_tab":"Concluídos","total_to_pay":"Total a pagar","promo_code":"Código promocional","worker":"Trabalhador","independent":"Independente","who_performs":"Quem executa","product_kind_label":"Tipo (bot / site / outro)","users_month":"Utilizadores / mês","earn_month":"Receita / mês","product_type_ph":"Bot TG / Mini App + site / outro","tgstat":"Link do TGStat","username":"Nome de utilizador","price_usd":"Preço ($)","upload_photos":"Carregar fotos","upload_files":"Carregar ficheiros","verify_passport":"Verificação do passaporte","verification_data":"Dados de verificação","verification_menu":"Menu de verificação","search":"Pesquisar","deposit_n":"Depósito","awaiting_payment":"A aguardar pagamento","pending_status":"Pendente","rejected_status":"Rejeitado","payment_stars":"Pagamento no bot · Stars","transaction_history":"Histórico de transações","ref_receive_1":"Recebe do 1.º depósito: {value}%","ref_bonus_1":"Bónus do referenciado no 1.º depósito: {value}%","referrals_10d":"Referências em 10 dias: {value}","referrals_total":"Total de referências: {value}","referrals_2plus":"Referências com 2+ depósitos: {value}","earned_total":"Total ganho: {value} $","earned_1":"De 1.ºs depósitos: {value} $","earned_2":"De 2.ºs depósitos: {value} $","moderator":"Moderador","salary_hours":"Salário: {value} $ / {hours} h","required_shifts":"Necessário: {value} turnos/semana","intern":"Estagiário","period":"Período","intern_shift":"Turno do estagiário","intern_salary":"Salário do turno do estagiário","duties":"Funções","duty_listings":"Moderação de anúncios","duty_complaints":"Moderação de reclamações","duty_tickets":"Moderação de tickets de suporte","duty_analytics":"Análise (visualização)","duty_workcenter":"Centro de trabalho / turnos","duty_control_view":"Controlo de turnos (só leitura)","fill_application":"Preencher candidatura","job_applications":"Candidaturas de trabalho","full_name":"Nome completo","age":"Idade","employment":"Ocupação","phone":"Telefone","email":"E-mail","tg_id":"ID TG","created":"Criado","name":"Nome","id_label":"ID","privilege":"Permissões","role_change":"Alterar função","roles_all":"Utilizador · Parceiro · Empresa · Estagiário · Moderador · Administrador","balance_change":"Alterar saldo","new_balance":"Novo saldo ($)","save_balance":"Guardar saldo","seller_rating":"Avaliação do vendedor","buyer_rating":"Avaliação do comprador","staff_rating":"Avaliação da equipa","complete_tab":"Concluídos","active_count":"Ativos","code_sent_linked":"Será enviado um código para o e-mail associado a esta conta"},
+"active_tab":"Активные","done_tab":"Завершённые","total_to_pay":"Итого к оплате: {total} $","promo_code":"Промокод","worker":"Работник","independent":"Самостоятельно","who_performs":"Кто выполняет","product_kind_label":"Тип (бот / сайт / другое)","users_month":"Пользователей в месяц","earn_month":"Доход в месяц","product_type_ph":"TG-бот / Mini App + сайт / другое","tgstat":"Ссылка на TGStat","username":"Имя пользователя","price_usd":"Цена ($)","upload_photos":"Загрузить фото","upload_files":"Загрузить файлы","verify_passport":"Верификация паспорта","verification_data":"Данные верификации","verification_menu":"Меню верификации","search":"Поиск","deposit_n":"Пополнение","awaiting_payment":"Ожидает оплаты","pending_status":"В ожидании","rejected_status":"Отклонено","payment_stars":"Оплата в боте · Stars","transaction_history":"История транзакций","ref_receive_1":"Вы получаете с 1-го пополнения: {value}%","ref_bonus_1":"Бонус рефералу с 1-го пополнения: {value}%","referrals_10d":"Рефералов за 10 дней: {value}","referrals_total":"Всего рефералов: {value}","referrals_2plus":"Рефералов с 2+ пополнениями: {value}","earned_total":"Заработано всего: {value} $","earned_1":"С 1-х пополнений: {value} $","earned_2":"Со 2-х пополнений: {value} $","moderator":"Модератор","salary_hours":"Зарплата: {value} $ / {hours} ч","required_shifts":"Требуется: {value} смен/нед","intern":"Стажёр","period":"Период","intern_shift":"Смена стажёра","intern_salary":"Зарплата стажёра","duties":"Обязанности","duty_listings":"Модерация объявлений","duty_complaints":"Модерация жалоб","duty_tickets":"Модерация обращений","duty_analytics":"Аналитика (просмотр)","duty_workcenter":"Рабочий центр / смены","duty_control_view":"Контроль смены (только просмотр)","fill_application":"Заполнить анкету","job_applications":"Заявки на работу","full_name":"ФИО","age":"Возраст","employment":"Занятость","phone":"Телефон","email":"Почта","tg_id":"TG ID","created":"Создано","name":"Имя","id_label":"ID","privilege":"Права","role_change":"Изменить роль","roles_all":"Пользователь · Партнёр · Юрлицо · Стажёр · Модератор · Администратор","balance_change":"Изменить баланс","new_balance":"Новый баланс ($)","save_balance":"Сохранить баланс","seller_rating":"Рейтинг продавца","buyer_rating":"Рейтинг покупателя","staff_rating":"Рейтинг персонала","complete_tab":"Завершённые","active_count":"Активные","code_sent_linked":"Код будет отправлен на почту, привязанную к этому аккаунту"},
+"en":{"active_tab":"Active","done_tab":"Done","total_to_pay":"Total to pay: {total} $","promo_code":"Promo code","worker":"Worker","independent":"Independent","who_performs":"Who performs","product_kind_label":"Type (bot / site / other)","users_month":"Users / mo","earn_month":"Revenue / mo","product_type_ph":"TG bot / Mini App + site / other","tgstat":"TGStat link","username":"Username","price_usd":"Price ($)","upload_photos":"Upload photos","upload_files":"Upload files","verify_passport":"Passport verification","verification_data":"Verification data","verification_menu":"Verification menu","search":"Search","deposit_n":"Deposit","awaiting_payment":"Awaiting payment","pending_status":"Pending","rejected_status":"Rejected","payment_stars":"Payment in bot · Stars","transaction_history":"Transaction history","ref_receive_1":"You receive from the 1st deposit: {value}%","ref_bonus_1":"Referral bonus on the 1st deposit: {value}%","referrals_10d":"Referrals in 10 days: {value}","referrals_total":"Referrals total: {value}","referrals_2plus":"Referrals with 2+ deposits: {value}","earned_total":"Earned total: {value} $","earned_1":"From 1st deposits: {value} $","earned_2":"From 2nd deposits: {value} $","moderator":"Moderator","salary_hours":"Salary: {value} $ / {hours} h","required_shifts":"Required: {value} shifts/week","intern":"Intern","period":"Period","intern_shift":"Intern shift","intern_salary":"Intern shift salary","duties":"Duties","duty_listings":"Listings moderation","duty_complaints":"Complaints moderation","duty_tickets":"Support tickets moderation","duty_analytics":"Analytics (view)","duty_workcenter":"Work center / shifts","duty_control_view":"Shift control (view only)","fill_application":"Fill application","job_applications":"Job applications","full_name":"Full name","age":"Age","employment":"Employment","phone":"Phone","email":"Email","tg_id":"TG ID","created":"Created","name":"Name","id_label":"ID","privilege":"Privilege","role_change":"Change role","roles_all":"User · Partner · Corporate · Intern · Moderator · Administrator","balance_change":"Change balance","new_balance":"New balance ($)","save_balance":"Save balance","seller_rating":"Seller rating","buyer_rating":"Buyer rating","staff_rating":"Staff rating","complete_tab":"Completed","active_count":"Active","code_sent_linked":"A code will be sent to the email linked to this account"},
+"de":{"active_tab":"Aktiv","done_tab":"Abgeschlossen","total_to_pay":"Gesamt zu zahlen: {total} $","promo_code":"Promo-Code","worker":"Mitarbeiter","independent":"Selbstständig","who_performs":"Wer führt aus","product_kind_label":"Typ (Bot / Website / Sonstiges)","users_month":"Nutzer / Monat","earn_month":"Umsatz / Monat","product_type_ph":"TG-Bot / Mini App + Website / Sonstiges","tgstat":"TGStat-Link","username":"Benutzername","price_usd":"Preis ($)","upload_photos":"Fotos hochladen","upload_files":"Dateien hochladen","verify_passport":"Passverifizierung","verification_data":"Verifizierungsdaten","verification_menu":"Verifizierungsmenü","search":"Suche","deposit_n":"Einzahlung","awaiting_payment":"Zahlung ausstehend","pending_status":"Ausstehend","rejected_status":"Abgelehnt","payment_stars":"Zahlung im Bot · Stars","transaction_history":"Transaktionsverlauf","ref_receive_1":"Sie erhalten von der 1. Einzahlung: {value}%","ref_bonus_1":"Empfehlungsbonus bei der 1. Einzahlung: {value}%","referrals_10d":"Empfehlungen in 10 Tagen: {value}","referrals_total":"Empfehlungen insgesamt: {value}","referrals_2plus":"Empfehlungen mit 2+ Einzahlungen: {value}","earned_total":"Gesamt verdient: {value} $","earned_1":"Von 1. Einzahlungen: {value} $","earned_2":"Von 2. Einzahlungen: {value} $","moderator":"Moderator","salary_hours":"Gehalt: {value} $ / {hours} Std.","required_shifts":"Erforderlich: {value} Schichten/Woche","intern":"Praktikant","period":"Zeitraum","intern_shift":"Praktikantenschicht","intern_salary":"Gehalt der Praktikantenschicht","duties":"Aufgaben","duty_listings":"Anzeigenmoderation","duty_complaints":"Beschwerdemoderation","duty_tickets":"Support-Ticket-Moderation","duty_analytics":"Analytik (Ansicht)","duty_workcenter":"Arbeitszentrum / Schichten","duty_control_view":"Schichtkontrolle (nur Ansicht)","fill_application":"Bewerbung ausfüllen","job_applications":"Bewerbungen","full_name":"Vollständiger Name","age":"Alter","employment":"Beschäftigung","phone":"Telefon","email":"E-Mail","tg_id":"TG-ID","created":"Erstellt","name":"Name","id_label":"ID","privilege":"Berechtigung","role_change":"Rolle ändern","roles_all":"Benutzer · Partner · Unternehmen · Praktikant · Moderator · Administrator","balance_change":"Guthaben ändern","new_balance":"Neues Guthaben ($)","save_balance":"Guthaben speichern","seller_rating":"Verkäuferbewertung","buyer_rating":"Käuferbewertung","staff_rating":"Mitarbeiterbewertung","complete_tab":"Abgeschlossen","active_count":"Aktiv","code_sent_linked":"Ein Code wird an die mit diesem Konto verknüpfte E-Mail gesendet"},
+"fr":{"active_tab":"Actives","done_tab":"Terminées","total_to_pay":"Total à payer : {total} $","promo_code":"Code promo","worker":"Travailleur","independent":"Indépendant","who_performs":"Qui exécute","product_kind_label":"Type (bot / site / autre)","users_month":"Utilisateurs / mois","earn_month":"Revenus / mois","product_type_ph":"Bot TG / Mini App + site / autre","tgstat":"Lien TGStat","username":"Nom d’utilisateur","price_usd":"Prix ($)","upload_photos":"Télécharger des photos","upload_files":"Télécharger des fichiers","verify_passport":"Vérification du passeport","verification_data":"Données de vérification","verification_menu":"Menu de vérification","search":"Rechercher","deposit_n":"Dépôt","awaiting_payment":"Paiement en attente","pending_status":"En attente","rejected_status":"Refusé","payment_stars":"Paiement dans le bot · Stars","transaction_history":"Historique des transactions","ref_receive_1":"Vous recevez du 1er dépôt : {value}%","ref_bonus_1":"Bonus du filleul sur le 1er dépôt : {value}%","referrals_10d":"Filleuls en 10 jours : {value}","referrals_total":"Filleuls au total : {value}","referrals_2plus":"Filleuls avec 2+ dépôts : {value}","earned_total":"Total gagné : {value} $","earned_1":"Des 1ers dépôts : {value} $","earned_2":"Des 2es dépôts : {value} $","moderator":"Modérateur","salary_hours":"Salaire : {value} $ / {hours} h","required_shifts":"Requis : {value} shifts/semaine","intern":"Stagiaire","period":"Période","intern_shift":"Shift du stagiaire","intern_salary":"Salaire du shift du stagiaire","duties":"Missions","duty_listings":"Modération des annonces","duty_complaints":"Modération des plaintes","duty_tickets":"Modération des tickets support","duty_analytics":"Analytique (lecture)","duty_workcenter":"Centre de travail / shifts","duty_control_view":"Contrôle des shifts (lecture seule)","fill_application":"Remplir la candidature","job_applications":"Candidatures","full_name":"Nom complet","age":"Âge","employment":"Emploi","phone":"Téléphone","email":"E-mail","tg_id":"ID TG","created":"Créé","name":"Nom","id_label":"ID","privilege":"Droits","role_change":"Modifier le rôle","roles_all":"Utilisateur · Partenaire · Entreprise · Stagiaire · Modérateur · Administrateur","balance_change":"Modifier le solde","new_balance":"Nouveau solde ($)","save_balance":"Enregistrer le solde","seller_rating":"Note du vendeur","buyer_rating":"Note de l’acheteur","staff_rating":"Note du personnel","complete_tab":"Terminées","active_count":"Actives","code_sent_linked":"Un code sera envoyé à l’adresse e-mail liée à ce compte"},
+"es":{"active_tab":"Activos","done_tab":"Completados","total_to_pay":"Total a pagar: {total} $","promo_code":"Código promocional","worker":"Trabajador","independent":"Independiente","who_performs":"Quién realiza","product_kind_label":"Tipo (bot / sitio / otro)","users_month":"Usuarios / mes","earn_month":"Ingresos / mes","product_type_ph":"Bot de TG / Mini App + sitio / otro","tgstat":"Enlace de TGStat","username":"Nombre de usuario","price_usd":"Precio ($)","upload_photos":"Subir fotos","upload_files":"Subir archivos","verify_passport":"Verificación del pasaporte","verification_data":"Datos de verificación","verification_menu":"Menú de verificación","search":"Buscar","deposit_n":"Depósito","awaiting_payment":"Pago pendiente","pending_status":"Pendiente","rejected_status":"Rechazado","payment_stars":"Pago en el bot · Stars","transaction_history":"Historial de transacciones","ref_receive_1":"Recibes del 1.er depósito: {value}%","ref_bonus_1":"Bono por el 1.er depósito: {value}%","referrals_10d":"Referidos en 10 días: {value}","referrals_total":"Referidos totales: {value}","referrals_2plus":"Referidos con 2+ depósitos: {value}","earned_total":"Total ganado: {value} $","earned_1":"De los 1.er depósitos: {value} $","earned_2":"De los 2.º depósitos: {value} $","moderator":"Moderador","salary_hours":"Salario: {value} $ / {hours} h","required_shifts":"Requerido: {value} turnos/semana","intern":"Practicante","period":"Periodo","intern_shift":"Turno del practicante","intern_salary":"Salario del turno del practicante","duties":"Funciones","duty_listings":"Moderación de anuncios","duty_complaints":"Moderación de quejas","duty_tickets":"Moderación de tickets de soporte","duty_analytics":"Analítica (consulta)","duty_workcenter":"Centro de trabajo / turnos","duty_control_view":"Control de turnos (solo lectura)","fill_application":"Rellenar solicitud","job_applications":"Solicitudes de empleo","full_name":"Nombre completo","age":"Edad","employment":"Situación laboral","phone":"Teléfono","email":"Correo electrónico","tg_id":"ID de TG","created":"Creado","name":"Nombre","id_label":"ID","privilege":"Permisos","role_change":"Cambiar rol","roles_all":"Usuario · Socio · Empresa · Practicante · Moderador · Administrador","balance_change":"Cambiar saldo","new_balance":"Nuevo saldo ($)","save_balance":"Guardar saldo","seller_rating":"Valoración del vendedor","buyer_rating":"Valoración del comprador","staff_rating":"Valoración del personal","complete_tab":"Completados","active_count":"Activos","code_sent_linked":"Se enviará un código al correo vinculado a esta cuenta"},
+"uk":{"active_tab":"Активні","done_tab":"Завершені","total_to_pay":"Разом до сплати: {total} $","promo_code":"Промокод","worker":"Працівник","independent":"Самостійно","who_performs":"Хто виконує","product_kind_label":"Тип (бот / сайт / інше)","users_month":"Користувачів / міс.","earn_month":"Дохід / міс.","product_type_ph":"TG-бот / Mini App + сайт / інше","tgstat":"Посилання TGStat","username":"Ім’я користувача","price_usd":"Ціна ($)","upload_photos":"Завантажити фото","upload_files":"Завантажити файли","verify_passport":"Верифікація паспорта","verification_data":"Дані верифікації","verification_menu":"Меню верифікації","search":"Пошук","deposit_n":"Поповнення","awaiting_payment":"Очікує оплати","pending_status":"В очікуванні","rejected_status":"Відхилено","payment_stars":"Оплата в боті · Stars","transaction_history":"Історія транзакцій","ref_receive_1":"Ви отримуєте з 1-го поповнення: {value}%","ref_bonus_1":"Бонус рефералу з 1-го поповнення: {value}%","referrals_10d":"Рефералів за 10 днів: {value}","referrals_total":"Усього рефералів: {value}","referrals_2plus":"Рефералів із 2+ поповненнями: {value}","earned_total":"Зароблено всього: {value} $","earned_1":"З 1-х поповнень: {value} $","earned_2":"З 2-х поповнень: {value} $","moderator":"Модератор","salary_hours":"Зарплата: {value} $ / {hours} год","required_shifts":"Потрібно: {value} змін/тиждень","intern":"Стажер","period":"Період","intern_shift":"Зміна стажера","intern_salary":"Зарплата стажерської зміни","duties":"Обов’язки","duty_listings":"Модерація оголошень","duty_complaints":"Модерація скарг","duty_tickets":"Модерація звернень","duty_analytics":"Аналітика (перегляд)","duty_workcenter":"Робочий центр / зміни","duty_control_view":"Контроль змін (лише перегляд)","fill_application":"Заповнити заявку","job_applications":"Заявки на роботу","full_name":"ПІБ","age":"Вік","employment":"Зайнятість","phone":"Телефон","email":"Пошта","tg_id":"TG ID","created":"Створено","name":"Ім’я","id_label":"ID","privilege":"Права","role_change":"Змінити роль","roles_all":"Користувач · Партнер · Юрособа · Стажер · Модератор · Адміністратор","balance_change":"Змінити баланс","new_balance":"Новий баланс ($)","save_balance":"Зберегти баланс","seller_rating":"Рейтинг продавця","buyer_rating":"Рейтинг покупця","staff_rating":"Рейтинг персоналу","complete_tab":"Завершені","active_count":"Активні","code_sent_linked":"Код буде надіслано на електронну пошту, прив’язану до цього облікового запису"},
+"it":{"active_tab":"Attivi","done_tab":"Completati","total_to_pay":"Totale da pagare: {total} $","promo_code":"Codice promo","worker":"Lavoratore","independent":"Autonomo","who_performs":"Chi esegue","product_kind_label":"Tipo (bot / sito / altro)","users_month":"Utenti / mese","earn_month":"Entrate / mese","product_type_ph":"Bot TG / Mini App + sito / altro","tgstat":"Link TGStat","username":"Nome utente","price_usd":"Prezzo ($)","upload_photos":"Carica foto","upload_files":"Carica file","verify_passport":"Verifica del passaporto","verification_data":"Dati di verifica","verification_menu":"Menu di verifica","search":"Cerca","deposit_n":"Deposito","awaiting_payment":"In attesa di pagamento","pending_status":"In attesa","rejected_status":"Rifiutato","payment_stars":"Pagamento nel bot · Stars","transaction_history":"Cronologia transazioni","ref_receive_1":"Ricevi dal 1° deposito: {value}%","ref_bonus_1":"Bonus referral sul 1° deposito: {value}%","referrals_10d":"Referral in 10 giorni: {value}","referrals_total":"Referral totali: {value}","referrals_2plus":"Referral con 2+ depositi: {value}","earned_total":"Totale guadagnato: {value} $","earned_1":"Dai 1° depositi: {value} $","earned_2":"Dai 2° depositi: {value} $","moderator":"Moderatore","salary_hours":"Stipendio: {value} $ / {hours} h","required_shifts":"Richiesto: {value} turni/settimana","intern":"Stagista","period":"Periodo","intern_shift":"Turno dello stagista","intern_salary":"Stipendio del turno dello stagista","duties":"Mansioni","duty_listings":"Moderazione annunci","duty_complaints":"Moderazione reclami","duty_tickets":"Moderazione ticket di supporto","duty_analytics":"Analisi (visualizzazione)","duty_workcenter":"Centro di lavoro / turni","duty_control_view":"Controllo turni (solo visualizzazione)","fill_application":"Compila la candidatura","job_applications":"Candidature di lavoro","full_name":"Nome completo","age":"Età","employment":"Occupazione","phone":"Telefono","email":"E-mail","tg_id":"TG ID","created":"Creato","name":"Nome","id_label":"ID","privilege":"Permessi","role_change":"Cambia ruolo","roles_all":"Utente · Partner · Azienda · Stagista · Moderatore · Amministratore","balance_change":"Modifica saldo","new_balance":"Nuovo saldo ($)","save_balance":"Salva saldo","seller_rating":"Valutazione venditore","buyer_rating":"Valutazione acquirente","staff_rating":"Valutazione personale","complete_tab":"Completati","active_count":"Attivi","code_sent_linked":"Un codice sarà inviato all’e-mail collegata a questo account"},
+"pt":{"active_tab":"Ativos","done_tab":"Concluídos","total_to_pay":"Total a pagar: {total} $","promo_code":"Código promocional","worker":"Trabalhador","independent":"Independente","who_performs":"Quem executa","product_kind_label":"Tipo (bot / site / outro)","users_month":"Utilizadores / mês","earn_month":"Receita / mês","product_type_ph":"Bot TG / Mini App + site / outro","tgstat":"Link do TGStat","username":"Nome de utilizador","price_usd":"Preço ($)","upload_photos":"Carregar fotos","upload_files":"Carregar ficheiros","verify_passport":"Verificação do passaporte","verification_data":"Dados de verificação","verification_menu":"Menu de verificação","search":"Pesquisar","deposit_n":"Depósito","awaiting_payment":"A aguardar pagamento","pending_status":"Pendente","rejected_status":"Rejeitado","payment_stars":"Pagamento no bot · Stars","transaction_history":"Histórico de transações","ref_receive_1":"Recebe do 1.º depósito: {value}%","ref_bonus_1":"Bónus do referenciado no 1.º depósito: {value}%","referrals_10d":"Referências em 10 dias: {value}","referrals_total":"Total de referências: {value}","referrals_2plus":"Referências com 2+ depósitos: {value}","earned_total":"Total ganho: {value} $","earned_1":"De 1.ºs depósitos: {value} $","earned_2":"De 2.ºs depósitos: {value} $","moderator":"Moderador","salary_hours":"Salário: {value} $ / {hours} h","required_shifts":"Necessário: {value} turnos/semana","intern":"Estagiário","period":"Período","intern_shift":"Turno do estagiário","intern_salary":"Salário do turno do estagiário","duties":"Funções","duty_listings":"Moderação de anúncios","duty_complaints":"Moderação de reclamações","duty_tickets":"Moderação de tickets de suporte","duty_analytics":"Análise (visualização)","duty_workcenter":"Centro de trabalho / turnos","duty_control_view":"Controlo de turnos (só leitura)","fill_application":"Preencher candidatura","job_applications":"Candidaturas de trabalho","full_name":"Nome completo","age":"Idade","employment":"Ocupação","phone":"Telefone","email":"E-mail","tg_id":"ID TG","created":"Criado","name":"Nome","id_label":"ID","privilege":"Permissões","role_change":"Alterar função","roles_all":"Utilizador · Parceiro · Empresa · Estagiário · Moderador · Administrador","balance_change":"Alterar saldo","new_balance":"Novo saldo ($)","save_balance":"Guardar saldo","seller_rating":"Avaliação do vendedor","buyer_rating":"Avaliação do comprador","staff_rating":"Avaliação da equipa","complete_tab":"Concluídos","active_count":"Ativos","code_sent_linked":"Será enviado um código para o e-mail associado a esta conta"},
 "pt-BR":{},
-"tr":{"active_tab":"Aktif","done_tab":"Tamamlandı","total_to_pay":"Ödenecek toplam","promo_code":"Promosyon kodu","worker":"Çalışan","independent":"Bağımsız","who_performs":"Kim yapıyor","product_kind_label":"Tür (bot / site / diğer)","users_month":"Kullanıcı / ay","earn_month":"Gelir / ay","product_type_ph":"TG bot / Mini App + site / diğer","tgstat":"TGStat bağlantısı","username":"Kullanıcı adı","price_usd":"Fiyat ($)","upload_photos":"Fotoğraf yükle","upload_files":"Dosya yükle","verify_passport":"Pasaport doğrulaması","verification_data":"Doğrulama verileri","verification_menu":"Doğrulama menüsü","search":"Ara","deposit_n":"Yatırma","awaiting_payment":"Ödeme bekleniyor","pending_status":"Beklemede","rejected_status":"Reddedildi","payment_stars":"Botta ödeme · Stars","transaction_history":"İşlem geçmişi","ref_receive_1":"1. yatırmadan alırsınız: %{value}","ref_bonus_1":"1. yatırma referans bonusu: %{value}","referrals_10d":"10 günde referanslar: {value}","referrals_total":"Toplam referans: {value}","referrals_2plus":"2+ yatırımı olan referanslar: {value}","earned_total":"Toplam kazanç: {value} $","earned_1":"1. yatırımlardan: {value} $","earned_2":"2. yatırımlardan: {value} $","moderator":"Moderatör","salary_hours":"Maaş: {value} $ / {hours} saat","required_shifts":"Gerekli: haftada {value} vardiya","intern":"Stajyer","period":"Dönem","intern_shift":"Stajyer vardiyası","intern_salary":"Stajyer vardiya ücreti","duties":"Görevler","duty_listings":"İlan moderasyonu","duty_complaints":"Şikâyet moderasyonu","duty_tickets":"Destek talepleri moderasyonu","duty_analytics":"Analitik (görüntüleme)","duty_workcenter":"Çalışma merkezi / vardiyalar","duty_control_view":"Vardiya kontrolü (salt görüntüleme)","fill_application":"Başvuru doldur","job_applications":"İş başvuruları","full_name":"Ad soyad","age":"Yaş","employment":"Çalışma durumu","phone":"Telefon","email":"E-posta","tg_id":"TG ID","created":"Oluşturuldu","name":"Ad","id_label":"ID","privilege":"Yetki","role_change":"Rolü değiştir","roles_all":"Kullanıcı · Partner · Şirket · Stajyer · Moderatör · Yönetici","balance_change":"Bakiyeyi değiştir","new_balance":"Yeni bakiye ($)","save_balance":"Bakiyeyi kaydet","seller_rating":"Satıcı puanı","buyer_rating":"Alıcı puanı","staff_rating":"Personel puanı","complete_tab":"Tamamlandı","active_count":"Aktif","code_sent_linked":"Bu hesaba bağlı e-postaya bir kod gönderilecek"},
-"id":{"active_tab":"Aktif","done_tab":"Selesai","total_to_pay":"Total yang harus dibayar","promo_code":"Kode promo","worker":"Pekerja","independent":"Mandiri","who_performs":"Siapa yang mengerjakan","product_kind_label":"Jenis (bot / situs / lainnya)","users_month":"Pengguna / bulan","earn_month":"Pendapatan / bulan","product_type_ph":"Bot TG / Mini App + situs / lainnya","tgstat":"Tautan TGStat","username":"Nama pengguna","price_usd":"Harga ($)","upload_photos":"Unggah foto","upload_files":"Unggah file","verify_passport":"Verifikasi paspor","verification_data":"Data verifikasi","verification_menu":"Menu verifikasi","search":"Cari","deposit_n":"Deposit","awaiting_payment":"Menunggu pembayaran","pending_status":"Menunggu","rejected_status":"Ditolak","payment_stars":"Pembayaran di bot · Stars","transaction_history":"Riwayat transaksi","ref_receive_1":"Anda menerima dari deposit pertama: {value}%","ref_bonus_1":"Bonus referral dari deposit pertama: {value}%","referrals_10d":"Referral dalam 10 hari: {value}","referrals_total":"Total referral: {value}","referrals_2plus":"Referral dengan 2+ deposit: {value}","earned_total":"Total diperoleh: {value} $","earned_1":"Dari deposit pertama: {value} $","earned_2":"Dari deposit kedua: {value} $","moderator":"Moderator","salary_hours":"Gaji: {value} $ / {hours} jam","required_shifts":"Wajib: {value} shift/minggu","intern":"Magang","period":"Periode","intern_shift":"Shift magang","intern_salary":"Gaji shift magang","duties":"Tugas","duty_listings":"Moderasi listing","duty_complaints":"Moderasi keluhan","duty_tickets":"Moderasi tiket dukungan","duty_analytics":"Analitik (lihat)","duty_workcenter":"Pusat kerja / shift","duty_control_view":"Kontrol shift (hanya lihat)","fill_application":"Isi lamaran","job_applications":"Lamaran kerja","full_name":"Nama lengkap","age":"Usia","employment":"Pekerjaan","phone":"Telepon","email":"Email","tg_id":"ID TG","created":"Dibuat","name":"Nama","id_label":"ID","privilege":"Hak akses","role_change":"Ubah peran","roles_all":"Pengguna · Partner · Perusahaan · Magang · Moderator · Administrator","balance_change":"Ubah saldo","new_balance":"Saldo baru ($)","save_balance":"Simpan saldo","seller_rating":"Rating penjual","buyer_rating":"Rating pembeli","staff_rating":"Rating staf","complete_tab":"Selesai","active_count":"Aktif","code_sent_linked":"Kode akan dikirim ke email yang tertaut ke akun ini"},
-"ar":{"active_tab":"نشطة","done_tab":"مكتملة","total_to_pay":"الإجمالي المطلوب دفعه","promo_code":"الرمز الترويجي","worker":"عامل","independent":"مستقل","who_performs":"من ينفذ","product_kind_label":"النوع (بوت / موقع / آخر)","users_month":"المستخدمون / شهر","earn_month":"الإيرادات / شهر","product_type_ph":"بوت TG / Mini App + موقع / آخر","tgstat":"رابط TGStat","username":"اسم المستخدم","price_usd":"السعر ($)","upload_photos":"رفع الصور","upload_files":"رفع الملفات","verify_passport":"التحقق من جواز السفر","verification_data":"بيانات التحقق","verification_menu":"قائمة التحقق","search":"بحث","deposit_n":"إيداع","awaiting_payment":"بانتظار الدفع","pending_status":"قيد الانتظار","rejected_status":"مرفوض","payment_stars":"الدفع في البوت · Stars","transaction_history":"سجل المعاملات","ref_receive_1":"تحصل من الإيداع الأول: {value}%","ref_bonus_1":"مكافأة الإحالة من الإيداع الأول: {value}%","referrals_10d":"الإحالات خلال 10 أيام: {value}","referrals_total":"إجمالي الإحالات: {value}","referrals_2plus":"الإحالات مع إيداعين أو أكثر: {value}","earned_total":"إجمالي الأرباح: {value} $","earned_1":"من الإيداعات الأولى: {value} $","earned_2":"من الإيداعات الثانية: {value} $","moderator":"مشرف","salary_hours":"الراتب: {value} $ / {hours} ساعة","required_shifts":"المطلوب: {value} نوبات/أسبوع","intern":"متدرب","period":"الفترة","intern_shift":"نوبة المتدرب","intern_salary":"راتب نوبة المتدرب","duties":"المهام","duty_listings":"مراجعة القوائم","duty_complaints":"مراجعة الشكاوى","duty_tickets":"مراجعة تذاكر الدعم","duty_analytics":"التحليلات (عرض)","duty_workcenter":"مركز العمل / النوبات","duty_control_view":"التحكم بالنوبة (عرض فقط)","fill_application":"تعبئة الطلب","job_applications":"طلبات العمل","full_name":"الاسم الكامل","age":"العمر","employment":"العمل","phone":"الهاتف","email":"البريد الإلكتروني","tg_id":"معرّف TG","created":"تاريخ الإنشاء","name":"الاسم","id_label":"المعرّف","privilege":"الصلاحيات","role_change":"تغيير الدور","roles_all":"مستخدم · شريك · شركة · متدرب · مشرف · مسؤول","balance_change":"تغيير الرصيد","new_balance":"الرصيد الجديد ($)","save_balance":"حفظ الرصيد","seller_rating":"تقييم البائع","buyer_rating":"تقييم المشتري","staff_rating":"تقييم الموظفين","complete_tab":"مكتملة","active_count":"نشطة","code_sent_linked":"سيتم إرسال رمز إلى البريد المرتبط بهذا الحساب"},
-"zh":{"active_tab":"进行中","done_tab":"已完成","total_to_pay":"应付总额","promo_code":"优惠码","worker":"工作人员","independent":"独立完成","who_performs":"执行者","product_kind_label":"类型（机器人 / 网站 / 其他）","users_month":"每月用户数","earn_month":"每月收入","product_type_ph":"TG 机器人 / Mini App + 网站 / 其他","tgstat":"TGStat 链接","username":"用户名","price_usd":"价格（$）","upload_photos":"上传照片","upload_files":"上传文件","verify_passport":"护照验证","verification_data":"验证数据","verification_menu":"验证菜单","search":"搜索","deposit_n":"充值","awaiting_payment":"等待付款","pending_status":"待处理","rejected_status":"已拒绝","payment_stars":"机器人内付款 · Stars","transaction_history":"交易记录","ref_receive_1":"您从第1次充值获得：{value}%","ref_bonus_1":"第1次充值的推荐奖励：{value}%","referrals_10d":"10天内推荐人数：{value}","referrals_total":"推荐总数：{value}","referrals_2plus":"充值2次以上的推荐人数：{value}","earned_total":"总收益：{value} $","earned_1":"来自第1次充值：{value} $","earned_2":"来自第2次充值：{value} $","moderator":"版主","salary_hours":"工资：{value} $ / {hours} 小时","required_shifts":"要求：每周 {value} 个班次","intern":"实习生","period":"周期","intern_shift":"实习生班次","intern_salary":"实习生班次工资","duties":"职责","duty_listings":"公告审核","duty_complaints":"投诉审核","duty_tickets":"支持工单审核","duty_analytics":"分析（查看）","duty_workcenter":"工作中心 / 班次","duty_control_view":"班次控制（仅查看）","fill_application":"填写申请","job_applications":"工作申请","full_name":"姓名","age":"年龄","employment":"就业情况","phone":"电话","email":"邮箱","tg_id":"TG ID","created":"创建时间","name":"名称","id_label":"ID","privilege":"权限","role_change":"更改角色","roles_all":"用户 · 合作伙伴 · 企业 · 实习生 · 版主 · 管理员","balance_change":"更改余额","new_balance":"新余额（$）","save_balance":"保存余额","seller_rating":"卖家评分","buyer_rating":"买家评分","staff_rating":"员工评分","complete_tab":"已完成","active_count":"进行中","code_sent_linked":"验证码将发送到与此账户关联的邮箱"},
-"ja":{"active_tab":"進行中","done_tab":"完了","total_to_pay":"支払合計","promo_code":"プロモコード","worker":"作業者","independent":"自分で対応","who_performs":"実行者","product_kind_label":"種類（ボット / サイト / その他）","users_month":"月間ユーザー数","earn_month":"月間収益","product_type_ph":"TGボット / Mini App + サイト / その他","tgstat":"TGStatリンク","username":"ユーザー名","price_usd":"価格（$）","upload_photos":"写真をアップロード","upload_files":"ファイルをアップロード","verify_passport":"パスポート認証","verification_data":"認証データ","verification_menu":"認証メニュー","search":"検索","deposit_n":"入金","awaiting_payment":"支払い待ち","pending_status":"保留中","rejected_status":"却下","payment_stars":"ボット内決済 · Stars","transaction_history":"取引履歴","ref_receive_1":"1回目の入金から受け取る割合：{value}%","ref_bonus_1":"1回目の入金の紹介ボーナス：{value}%","referrals_10d":"10日間の紹介者数：{value}","referrals_total":"紹介者合計：{value}","referrals_2plus":"2回以上入金した紹介者：{value}","earned_total":"獲得合計：{value} $","earned_1":"1回目の入金から：{value} $","earned_2":"2回目の入金から：{value} $","moderator":"モデレーター","salary_hours":"給与：{value} $ / {hours} 時間","required_shifts":"必須：週 {value} シフト","intern":"インターン","period":"期間","intern_shift":"インターンシフト","intern_salary":"インターンシフト給与","duties":"業務内容","duty_listings":"掲載のモデレーション","duty_complaints":"苦情のモデレーション","duty_tickets":"サポートチケットのモデレーション","duty_analytics":"分析（閲覧）","duty_workcenter":"ワークセンター / シフト","duty_control_view":"シフト管理（閲覧のみ）","fill_application":"応募フォームを入力","job_applications":"求人応募","full_name":"氏名","age":"年齢","employment":"就労状況","phone":"電話番号","email":"メール","tg_id":"TG ID","created":"作成日時","name":"名前","id_label":"ID","privilege":"権限","role_change":"役割を変更","roles_all":"ユーザー · パートナー · 法人 · インターン · モデレーター · 管理者","balance_change":"残高を変更","new_balance":"新しい残高（$）","save_balance":"残高を保存","seller_rating":"販売者評価","buyer_rating":"購入者評価","staff_rating":"スタッフ評価","complete_tab":"完了","active_count":"進行中","code_sent_linked":"このアカウントに紐づいたメールにコードが送信されます"},
-"ko":{"active_tab":"활성","done_tab":"완료","total_to_pay":"총 결제 금액","promo_code":"프로모션 코드","worker":"작업자","independent":"독립 수행","who_performs":"수행자","product_kind_label":"유형 (봇 / 사이트 / 기타)","users_month":"월 사용자 수","earn_month":"월 매출","product_type_ph":"TG 봇 / Mini App + 사이트 / 기타","tgstat":"TGStat 링크","username":"사용자 이름","price_usd":"가격 ($)","upload_photos":"사진 업로드","upload_files":"파일 업로드","verify_passport":"여권 인증","verification_data":"인증 데이터","verification_menu":"인증 메뉴","search":"검색","deposit_n":"입금","awaiting_payment":"결제 대기","pending_status":"대기 중","rejected_status":"거부됨","payment_stars":"봇에서 결제 · Stars","transaction_history":"거래 내역","ref_receive_1":"첫 입금에서 받는 금액: {value}%","ref_bonus_1":"첫 입금 추천 보너스: {value}%","referrals_10d":"10일간 추천인: {value}","referrals_total":"총 추천인: {value}","referrals_2plus":"2회 이상 입금한 추천인: {value}","earned_total":"총 수익: {value} $","earned_1":"첫 입금에서: {value} $","earned_2":"두 번째 입금에서: {value} $","moderator":"모더레이터","salary_hours":"급여: {value} $ / {hours}시간","required_shifts":"필수: 주 {value}회 교대","intern":"인턴","period":"기간","intern_shift":"인턴 교대","intern_salary":"인턴 교대 급여","duties":"업무 내용","duty_listings":"게시물 검수","duty_complaints":"불만 검수","duty_tickets":"지원 티켓 검수","duty_analytics":"분석 (보기)","duty_workcenter":"워크센터 / 교대","duty_control_view":"교대 관리 (보기 전용)","fill_application":"지원서 작성","job_applications":"채용 지원","full_name":"이름","age":"나이","employment":"고용 상태","phone":"전화번호","email":"이메일","tg_id":"TG ID","created":"생성일","name":"이름","id_label":"ID","privilege":"권한","role_change":"역할 변경","roles_all":"사용자 · 파트너 · 법인 · 인턴 · 모더레이터 · 관리자","balance_change":"잔액 변경","new_balance":"새 잔액 ($)","save_balance":"잔액 저장","seller_rating":"판매자 평점","buyer_rating":"구매자 평점","staff_rating":"직원 평점","complete_tab":"완료","active_count":"활성","code_sent_linked":"이 계정에 연결된 이메일로 코드가 전송됩니다"}
+"tr":{"active_tab":"Aktif","done_tab":"Tamamlandı","total_to_pay":"Ödenecek toplam: {total} $","promo_code":"Promosyon kodu","worker":"Çalışan","independent":"Bağımsız","who_performs":"Kim yapıyor","product_kind_label":"Tür (bot / site / diğer)","users_month":"Kullanıcı / ay","earn_month":"Gelir / ay","product_type_ph":"TG bot / Mini App + site / diğer","tgstat":"TGStat bağlantısı","username":"Kullanıcı adı","price_usd":"Fiyat ($)","upload_photos":"Fotoğraf yükle","upload_files":"Dosya yükle","verify_passport":"Pasaport doğrulaması","verification_data":"Doğrulama verileri","verification_menu":"Doğrulama menüsü","search":"Ara","deposit_n":"Yatırma","awaiting_payment":"Ödeme bekleniyor","pending_status":"Beklemede","rejected_status":"Reddedildi","payment_stars":"Botta ödeme · Stars","transaction_history":"İşlem geçmişi","ref_receive_1":"1. yatırmadan alırsınız: %{value}","ref_bonus_1":"1. yatırma referans bonusu: %{value}","referrals_10d":"10 günde referanslar: {value}","referrals_total":"Toplam referans: {value}","referrals_2plus":"2+ yatırımı olan referanslar: {value}","earned_total":"Toplam kazanç: {value} $","earned_1":"1. yatırımlardan: {value} $","earned_2":"2. yatırımlardan: {value} $","moderator":"Moderatör","salary_hours":"Maaş: {value} $ / {hours} saat","required_shifts":"Gerekli: haftada {value} vardiya","intern":"Stajyer","period":"Dönem","intern_shift":"Stajyer vardiyası","intern_salary":"Stajyer vardiya ücreti","duties":"Görevler","duty_listings":"İlan moderasyonu","duty_complaints":"Şikâyet moderasyonu","duty_tickets":"Destek talepleri moderasyonu","duty_analytics":"Analitik (görüntüleme)","duty_workcenter":"Çalışma merkezi / vardiyalar","duty_control_view":"Vardiya kontrolü (salt görüntüleme)","fill_application":"Başvuru doldur","job_applications":"İş başvuruları","full_name":"Ad soyad","age":"Yaş","employment":"Çalışma durumu","phone":"Telefon","email":"E-posta","tg_id":"TG ID","created":"Oluşturuldu","name":"Ad","id_label":"ID","privilege":"Yetki","role_change":"Rolü değiştir","roles_all":"Kullanıcı · Partner · Şirket · Stajyer · Moderatör · Yönetici","balance_change":"Bakiyeyi değiştir","new_balance":"Yeni bakiye ($)","save_balance":"Bakiyeyi kaydet","seller_rating":"Satıcı puanı","buyer_rating":"Alıcı puanı","staff_rating":"Personel puanı","complete_tab":"Tamamlandı","active_count":"Aktif","code_sent_linked":"Bu hesaba bağlı e-postaya bir kod gönderilecek"},
+"id":{"active_tab":"Aktif","done_tab":"Selesai","total_to_pay":"Total yang harus dibayar: {total} $","promo_code":"Kode promo","worker":"Pekerja","independent":"Mandiri","who_performs":"Siapa yang mengerjakan","product_kind_label":"Jenis (bot / situs / lainnya)","users_month":"Pengguna / bulan","earn_month":"Pendapatan / bulan","product_type_ph":"Bot TG / Mini App + situs / lainnya","tgstat":"Tautan TGStat","username":"Nama pengguna","price_usd":"Harga ($)","upload_photos":"Unggah foto","upload_files":"Unggah file","verify_passport":"Verifikasi paspor","verification_data":"Data verifikasi","verification_menu":"Menu verifikasi","search":"Cari","deposit_n":"Deposit","awaiting_payment":"Menunggu pembayaran","pending_status":"Menunggu","rejected_status":"Ditolak","payment_stars":"Pembayaran di bot · Stars","transaction_history":"Riwayat transaksi","ref_receive_1":"Anda menerima dari deposit pertama: {value}%","ref_bonus_1":"Bonus referral dari deposit pertama: {value}%","referrals_10d":"Referral dalam 10 hari: {value}","referrals_total":"Total referral: {value}","referrals_2plus":"Referral dengan 2+ deposit: {value}","earned_total":"Total diperoleh: {value} $","earned_1":"Dari deposit pertama: {value} $","earned_2":"Dari deposit kedua: {value} $","moderator":"Moderator","salary_hours":"Gaji: {value} $ / {hours} jam","required_shifts":"Wajib: {value} shift/minggu","intern":"Magang","period":"Periode","intern_shift":"Shift magang","intern_salary":"Gaji shift magang","duties":"Tugas","duty_listings":"Moderasi listing","duty_complaints":"Moderasi keluhan","duty_tickets":"Moderasi tiket dukungan","duty_analytics":"Analitik (lihat)","duty_workcenter":"Pusat kerja / shift","duty_control_view":"Kontrol shift (hanya lihat)","fill_application":"Isi lamaran","job_applications":"Lamaran kerja","full_name":"Nama lengkap","age":"Usia","employment":"Pekerjaan","phone":"Telepon","email":"Email","tg_id":"ID TG","created":"Dibuat","name":"Nama","id_label":"ID","privilege":"Hak akses","role_change":"Ubah peran","roles_all":"Pengguna · Partner · Perusahaan · Magang · Moderator · Administrator","balance_change":"Ubah saldo","new_balance":"Saldo baru ($)","save_balance":"Simpan saldo","seller_rating":"Rating penjual","buyer_rating":"Rating pembeli","staff_rating":"Rating staf","complete_tab":"Selesai","active_count":"Aktif","code_sent_linked":"Kode akan dikirim ke email yang tertaut ke akun ini"},
+"ar":{"active_tab":"نشطة","done_tab":"مكتملة","total_to_pay":"الإجمالي المطلوب دفعه: {total} $","promo_code":"الرمز الترويجي","worker":"عامل","independent":"مستقل","who_performs":"من ينفذ","product_kind_label":"النوع (بوت / موقع / آخر)","users_month":"المستخدمون / شهر","earn_month":"الإيرادات / شهر","product_type_ph":"بوت TG / Mini App + موقع / آخر","tgstat":"رابط TGStat","username":"اسم المستخدم","price_usd":"السعر ($)","upload_photos":"رفع الصور","upload_files":"رفع الملفات","verify_passport":"التحقق من جواز السفر","verification_data":"بيانات التحقق","verification_menu":"قائمة التحقق","search":"بحث","deposit_n":"إيداع","awaiting_payment":"بانتظار الدفع","pending_status":"قيد الانتظار","rejected_status":"مرفوض","payment_stars":"الدفع في البوت · Stars","transaction_history":"سجل المعاملات","ref_receive_1":"تحصل من الإيداع الأول: {value}%","ref_bonus_1":"مكافأة الإحالة من الإيداع الأول: {value}%","referrals_10d":"الإحالات خلال 10 أيام: {value}","referrals_total":"إجمالي الإحالات: {value}","referrals_2plus":"الإحالات مع إيداعين أو أكثر: {value}","earned_total":"إجمالي الأرباح: {value} $","earned_1":"من الإيداعات الأولى: {value} $","earned_2":"من الإيداعات الثانية: {value} $","moderator":"مشرف","salary_hours":"الراتب: {value} $ / {hours} ساعة","required_shifts":"المطلوب: {value} نوبات/أسبوع","intern":"متدرب","period":"الفترة","intern_shift":"نوبة المتدرب","intern_salary":"راتب نوبة المتدرب","duties":"المهام","duty_listings":"مراجعة القوائم","duty_complaints":"مراجعة الشكاوى","duty_tickets":"مراجعة تذاكر الدعم","duty_analytics":"التحليلات (عرض)","duty_workcenter":"مركز العمل / النوبات","duty_control_view":"التحكم بالنوبة (عرض فقط)","fill_application":"تعبئة الطلب","job_applications":"طلبات العمل","full_name":"الاسم الكامل","age":"العمر","employment":"العمل","phone":"الهاتف","email":"البريد الإلكتروني","tg_id":"معرّف TG","created":"تاريخ الإنشاء","name":"الاسم","id_label":"المعرّف","privilege":"الصلاحيات","role_change":"تغيير الدور","roles_all":"مستخدم · شريك · شركة · متدرب · مشرف · مسؤول","balance_change":"تغيير الرصيد","new_balance":"الرصيد الجديد ($)","save_balance":"حفظ الرصيد","seller_rating":"تقييم البائع","buyer_rating":"تقييم المشتري","staff_rating":"تقييم الموظفين","complete_tab":"مكتملة","active_count":"نشطة","code_sent_linked":"سيتم إرسال رمز إلى البريد المرتبط بهذا الحساب"},
+"zh":{"active_tab":"进行中","done_tab":"已完成","total_to_pay":"应付总额：{total} $","promo_code":"优惠码","worker":"工作人员","independent":"独立完成","who_performs":"执行者","product_kind_label":"类型（机器人 / 网站 / 其他）","users_month":"每月用户数","earn_month":"每月收入","product_type_ph":"TG 机器人 / Mini App + 网站 / 其他","tgstat":"TGStat 链接","username":"用户名","price_usd":"价格（$）","upload_photos":"上传照片","upload_files":"上传文件","verify_passport":"护照验证","verification_data":"验证数据","verification_menu":"验证菜单","search":"搜索","deposit_n":"充值","awaiting_payment":"等待付款","pending_status":"待处理","rejected_status":"已拒绝","payment_stars":"机器人内付款 · Stars","transaction_history":"交易记录","ref_receive_1":"您从第1次充值获得：{value}%","ref_bonus_1":"第1次充值的推荐奖励：{value}%","referrals_10d":"10天内推荐人数：{value}","referrals_total":"推荐总数：{value}","referrals_2plus":"充值2次以上的推荐人数：{value}","earned_total":"总收益：{value} $","earned_1":"来自第1次充值：{value} $","earned_2":"来自第2次充值：{value} $","moderator":"版主","salary_hours":"工资：{value} $ / {hours} 小时","required_shifts":"要求：每周 {value} 个班次","intern":"实习生","period":"周期","intern_shift":"实习生班次","intern_salary":"实习生班次工资","duties":"职责","duty_listings":"公告审核","duty_complaints":"投诉审核","duty_tickets":"支持工单审核","duty_analytics":"分析（查看）","duty_workcenter":"工作中心 / 班次","duty_control_view":"班次控制（仅查看）","fill_application":"填写申请","job_applications":"工作申请","full_name":"姓名","age":"年龄","employment":"就业情况","phone":"电话","email":"邮箱","tg_id":"TG ID","created":"创建时间","name":"名称","id_label":"ID","privilege":"权限","role_change":"更改角色","roles_all":"用户 · 合作伙伴 · 企业 · 实习生 · 版主 · 管理员","balance_change":"更改余额","new_balance":"新余额（$）","save_balance":"保存余额","seller_rating":"卖家评分","buyer_rating":"买家评分","staff_rating":"员工评分","complete_tab":"已完成","active_count":"进行中","code_sent_linked":"验证码将发送到与此账户关联的邮箱"},
+"ja":{"active_tab":"進行中","done_tab":"完了","total_to_pay":"支払合計：{total} $","promo_code":"プロモコード","worker":"作業者","independent":"自分で対応","who_performs":"実行者","product_kind_label":"種類（ボット / サイト / その他）","users_month":"月間ユーザー数","earn_month":"月間収益","product_type_ph":"TGボット / Mini App + サイト / その他","tgstat":"TGStatリンク","username":"ユーザー名","price_usd":"価格（$）","upload_photos":"写真をアップロード","upload_files":"ファイルをアップロード","verify_passport":"パスポート認証","verification_data":"認証データ","verification_menu":"認証メニュー","search":"検索","deposit_n":"入金","awaiting_payment":"支払い待ち","pending_status":"保留中","rejected_status":"却下","payment_stars":"ボット内決済 · Stars","transaction_history":"取引履歴","ref_receive_1":"1回目の入金から受け取る割合：{value}%","ref_bonus_1":"1回目の入金の紹介ボーナス：{value}%","referrals_10d":"10日間の紹介者数：{value}","referrals_total":"紹介者合計：{value}","referrals_2plus":"2回以上入金した紹介者：{value}","earned_total":"獲得合計：{value} $","earned_1":"1回目の入金から：{value} $","earned_2":"2回目の入金から：{value} $","moderator":"モデレーター","salary_hours":"給与：{value} $ / {hours} 時間","required_shifts":"必須：週 {value} シフト","intern":"インターン","period":"期間","intern_shift":"インターンシフト","intern_salary":"インターンシフト給与","duties":"業務内容","duty_listings":"掲載のモデレーション","duty_complaints":"苦情のモデレーション","duty_tickets":"サポートチケットのモデレーション","duty_analytics":"分析（閲覧）","duty_workcenter":"ワークセンター / シフト","duty_control_view":"シフト管理（閲覧のみ）","fill_application":"応募フォームを入力","job_applications":"求人応募","full_name":"氏名","age":"年齢","employment":"就労状況","phone":"電話番号","email":"メール","tg_id":"TG ID","created":"作成日時","name":"名前","id_label":"ID","privilege":"権限","role_change":"役割を変更","roles_all":"ユーザー · パートナー · 法人 · インターン · モデレーター · 管理者","balance_change":"残高を変更","new_balance":"新しい残高（$）","save_balance":"残高を保存","seller_rating":"販売者評価","buyer_rating":"購入者評価","staff_rating":"スタッフ評価","complete_tab":"完了","active_count":"進行中","code_sent_linked":"このアカウントに紐づいたメールにコードが送信されます"},
+"ko":{"active_tab":"활성","done_tab":"완료","total_to_pay":"총 결제 금액: {total} $","promo_code":"프로모션 코드","worker":"작업자","independent":"독립 수행","who_performs":"수행자","product_kind_label":"유형 (봇 / 사이트 / 기타)","users_month":"월 사용자 수","earn_month":"월 매출","product_type_ph":"TG 봇 / Mini App + 사이트 / 기타","tgstat":"TGStat 링크","username":"사용자 이름","price_usd":"가격 ($)","upload_photos":"사진 업로드","upload_files":"파일 업로드","verify_passport":"여권 인증","verification_data":"인증 데이터","verification_menu":"인증 메뉴","search":"검색","deposit_n":"입금","awaiting_payment":"결제 대기","pending_status":"대기 중","rejected_status":"거부됨","payment_stars":"봇에서 결제 · Stars","transaction_history":"거래 내역","ref_receive_1":"첫 입금에서 받는 금액: {value}%","ref_bonus_1":"첫 입금 추천 보너스: {value}%","referrals_10d":"10일간 추천인: {value}","referrals_total":"총 추천인: {value}","referrals_2plus":"2회 이상 입금한 추천인: {value}","earned_total":"총 수익: {value} $","earned_1":"첫 입금에서: {value} $","earned_2":"두 번째 입금에서: {value} $","moderator":"모더레이터","salary_hours":"급여: {value} $ / {hours}시간","required_shifts":"필수: 주 {value}회 교대","intern":"인턴","period":"기간","intern_shift":"인턴 교대","intern_salary":"인턴 교대 급여","duties":"업무 내용","duty_listings":"게시물 검수","duty_complaints":"불만 검수","duty_tickets":"지원 티켓 검수","duty_analytics":"분석 (보기)","duty_workcenter":"워크센터 / 교대","duty_control_view":"교대 관리 (보기 전용)","fill_application":"지원서 작성","job_applications":"채용 지원","full_name":"이름","age":"나이","employment":"고용 상태","phone":"전화번호","email":"이메일","tg_id":"TG ID","created":"생성일","name":"이름","id_label":"ID","privilege":"권한","role_change":"역할 변경","roles_all":"사용자 · 파트너 · 법인 · 인턴 · 모더레이터 · 관리자","balance_change":"잔액 변경","new_balance":"새 잔액 ($)","save_balance":"잔액 저장","seller_rating":"판매자 평점","buyer_rating":"구매자 평점","staff_rating":"직원 평점","complete_tab":"완료","active_count":"활성","code_sent_linked":"이 계정에 연결된 이메일로 코드가 전송됩니다"}
 };
 /* pt-BR intentionally uses the same complete UI vocabulary as pt, but with Brazilian wording where relevant. */
-X["pt-BR"]=Object.assign({},X.pt,{active_tab:"Ativos",done_tab:"Concluídos",total_to_pay: "Total a pagar",users_month:"Usuários / mês",earn_month:"Receita / mês",username:"Nome de usuário",upload_photos:"Enviar fotos",upload_files:"Enviar arquivos",fill_application:"Preencher candidatura",job_applications:"Candidaturas de trabalho",employment:"Ocupação",phone:"Telefone",save_balance:"Salvar saldo"});
+X["pt-BR"]=Object.assign({},X.pt,{active_tab:"Ativos",done_tab:"Concluídos",total_to_pay:"Total a pagar: {total} $",users_month:"Usuários / mês",earn_month:"Receita / mês",username:"Nome de usuário",upload_photos:"Enviar fotos",upload_files:"Enviar arquivos",fill_application:"Preencher candidatura",job_applications:"Candidaturas de trabalho",employment:"Ocupação",phone:"Telefone",save_balance:"Salvar saldo"});
 Object.keys(X).forEach(function(lang){if(!I18N[lang])I18N[lang]={};Object.keys(X[lang]).forEach(function(k){I18N[lang][k]=X[lang][k];});});
 }catch(e){}})();
 
 
 /* XCOD_BUILD 2026-09-05-v34-i18n-verification-profile-listings */
-(function(){try{var X34={"ru":{"statistics_partners":"Статистика партнёров","ads_spend_1":"Расходы на первичные пополнения","ads_spend_2":"Расходы на вторичные пополнения","status_awaiting":"Ожидает оплаты","tx_pending":"В ожидании","tx_done":"Завершено","status_cancelled":"Отменено","requests":"Заявки","no_operations":"Нет операций","paid_action":"Я оплатил","cancel_action":"Отменить","payment_in_bot_stars":"Оплата в боте · Stars","done_count":"Завершённые","total_pay":"Итого к оплате","terms_prefix":"Продолжая, вы даёте ","terms_link":"пользовательское соглашение","terms_suffix":" с правилами сервиса","verification":"Верификация","verification_passed":"Верификация пройдена","verification_completed":"Верификация завершена","passport":"Паспорт","full":"Полная","no_data":"Нет данных","passport_status":"Статус паспорта","passport_verification":"Верификация паспорта","email_password":"Пароль и почта","password_saved":"Пароль и почта сохранены","username_bot":"Username бота","delete_listing_btn":"Удалить объявление","views":"Просмотры","favorite":"В избранном","favorite_add":"В избранное","write":"Написать","buy":"Купить","publish":"Опубликовать","unpublish":"Снять с публикации","moderation":"На модерации","refund_moderation":"На модерации: возврат средств по сделке. Удаление недоступно до решения модерации.","delete_history_confirm":"Удалить объявление из истории?","sale":"Продажа","files":"Файлы"},"en":{"statistics_partners":"Partner statistics","ads_spend_1":"Spend on primary deposits","ads_spend_2":"Spend on secondary deposits","status_awaiting":"Awaiting payment","tx_pending":"Pending","tx_done":"Completed","status_cancelled":"Cancelled","requests":"Requests","no_operations":"No operations","paid_action":"I paid","cancel_action":"Cancel","payment_in_bot_stars":"Payment in bot · Stars","done_count":"Completed","total_pay":"Total to pay","terms_prefix":"By continuing, you agree to the ","terms_link":"Terms of Service","terms_suffix":"","verification":"Verification","verification_passed":"Verification passed","verification_completed":"Verification completed","passport":"Passport","full":"Full","no_data":"No data","passport_status":"Passport status","passport_verification":"Passport verification","email_password":"Password and email","password_saved":"Password and email are saved.","username_bot":"Bot username","delete_listing_btn":"Delete listing","views":"Views","favorite":"In favorites","favorite_add":"Add to favorites","write":"Message","buy":"Buy","publish":"Publish","unpublish":"Unpublish","moderation":"Under moderation","refund_moderation":"Under moderation: transaction refund. Deletion is unavailable until the moderation decision.","delete_history_confirm":"Delete this listing from history?","sale":"Sale","files":"Files"},"de":{"statistics_partners":"Partnerstatistik","ads_spend_1":"Ausgaben für primäre Einzahlungen","ads_spend_2":"Ausgaben für sekundäre Einzahlungen","status_awaiting":"Zahlung ausstehend","tx_pending":"Ausstehend","tx_done":"Abgeschlossen","status_cancelled":"Storniert","requests":"Anfragen","no_operations":"Keine Vorgänge","paid_action":"Ich habe bezahlt","cancel_action":"Abbrechen","payment_in_bot_stars":"Zahlung im Bot · Stars","done_count":"Abgeschlossen","total_pay":"Gesamt zu zahlen","terms_prefix":"Durch Fortfahren stimmen Sie den ","terms_link":"Nutzungsbedingungen","terms_suffix":" zu","verification":"Verifizierung","verification_passed":"Verifizierung bestanden","verification_completed":"Verifizierung abgeschlossen","passport":"Reisepass","full":"Vollständig","no_data":"Keine Daten","passport_status":"Passstatus","passport_verification":"Passverifizierung","email_password":"Passwort und E-Mail","password_saved":"Passwort und E-Mail sind gespeichert.","username_bot":"Bot-Benutzername","delete_listing_btn":"Anzeige löschen","views":"Aufrufe","favorite":"In Favoriten","favorite_add":"Zu Favoriten","write":"Nachricht","buy":"Kaufen","publish":"Veröffentlichen","unpublish":"Veröffentlichung aufheben","moderation":"In Moderation","refund_moderation":"In Moderation: Rückerstattung der Transaktion. Löschen ist bis zur Moderationsentscheidung nicht möglich.","delete_history_confirm":"Anzeige aus dem Verlauf löschen?","sale":"Verkauf","files":"Dateien"},"fr":{"statistics_partners":"Statistiques des partenaires","ads_spend_1":"Dépenses sur les dépôts primaires","ads_spend_2":"Dépenses sur les dépôts secondaires","status_awaiting":"Paiement en attente","tx_pending":"En attente","tx_done":"Terminé","status_cancelled":"Annulé","requests":"Demandes","no_operations":"Aucune opération","paid_action":"J’ai payé","cancel_action":"Annuler","payment_in_bot_stars":"Paiement dans le bot · Stars","done_count":"Terminées","total_pay":"Total à payer","terms_prefix":"En continuant, vous acceptez les ","terms_link":"conditions d’utilisation","terms_suffix":"","verification":"Vérification","verification_passed":"Vérification réussie","verification_completed":"Vérification terminée","passport":"Passeport","full":"Complète","no_data":"Aucune donnée","passport_status":"Statut du passeport","passport_verification":"Vérification du passeport","email_password":"Mot de passe et e-mail","password_saved":"Le mot de passe et l’e-mail sont enregistrés.","username_bot":"Nom d’utilisateur du bot","delete_listing_btn":"Supprimer l’annonce","views":"Vues","favorite":"Dans les favoris","favorite_add":"Ajouter aux favoris","write":"Écrire","buy":"Acheter","publish":"Publier","unpublish":"Retirer de la publication","moderation":"En modération","refund_moderation":"En modération : remboursement de la transaction. Suppression indisponible jusqu’à la décision.","delete_history_confirm":"Supprimer l’annonce de l’historique ?","sale":"Vente","files":"Fichiers"},"es":{"statistics_partners":"Estadísticas de socios","ads_spend_1":"Gasto en depósitos primarios","ads_spend_2":"Gasto en depósitos secundarios","status_awaiting":"Pago pendiente","tx_pending":"Pendiente","tx_done":"Completado","status_cancelled":"Cancelado","requests":"Solicitudes","no_operations":"No hay operaciones","paid_action":"He pagado","cancel_action":"Cancelar","payment_in_bot_stars":"Pago en el bot · Stars","done_count":"Completados","total_pay":"Total a pagar","terms_prefix":"Al continuar, aceptas los ","terms_link":"términos de servicio","terms_suffix":"","verification":"Verificación","verification_passed":"Verificación superada","verification_completed":"Verificación completada","passport":"Pasaporte","full":"Completa","no_data":"Sin datos","passport_status":"Estado del pasaporte","passport_verification":"Verificación del pasaporte","email_password":"Contraseña y correo electrónico","password_saved":"La contraseña y el correo están guardados.","username_bot":"Nombre de usuario del bot","delete_listing_btn":"Eliminar anuncio","views":"Vistas","favorite":"En favoritos","favorite_add":"Añadir a favoritos","write":"Escribir","buy":"Comprar","publish":"Publicar","unpublish":"Retirar de publicación","moderation":"En moderación","refund_moderation":"En moderación: reembolso de la transacción. No se puede eliminar hasta la decisión.","delete_history_confirm":"¿Eliminar el anuncio del historial?","sale":"Venta","files":"Archivos"},"uk":{"statistics_partners":"Статистика партнерів","ads_spend_1":"Витрати на первинні поповнення","ads_spend_2":"Витрати на вторинні поповнення","status_awaiting":"Очікує оплати","tx_pending":"В очікуванні","tx_done":"Завершено","status_cancelled":"Скасовано","requests":"Заявки","no_operations":"Немає операцій","paid_action":"Я оплатив","cancel_action":"Скасувати","payment_in_bot_stars":"Оплата в боті · Stars","done_count":"Завершені","total_pay":"Разом до сплати","terms_prefix":"Продовжуючи, ви погоджуєтеся з ","terms_link":"умовами користування","terms_suffix":"","verification":"Верифікація","verification_passed":"Верифікацію пройдено","verification_completed":"Верифікацію завершено","passport":"Паспорт","full":"Повна","no_data":"Немає даних","passport_status":"Статус паспорта","passport_verification":"Верифікація паспорта","email_password":"Пароль і пошта","password_saved":"Пароль і пошту збережено.","username_bot":"Username бота","delete_listing_btn":"Видалити оголошення","views":"Перегляди","favorite":"В обраному","favorite_add":"Додати в обране","write":"Написати","buy":"Купити","publish":"Опублікувати","unpublish":"Зняти з публікації","moderation":"На модерації","refund_moderation":"На модерації: повернення коштів за угодою. Видалення недоступне до рішення модерації.","delete_history_confirm":"Видалити оголошення з історії?","sale":"Продаж","files":"Файли"},"it":{"statistics_partners":"Statistiche dei partner","ads_spend_1":"Spesa per i depositi primari","ads_spend_2":"Spesa per i depositi secondari","status_awaiting":"Pagamento in attesa","tx_pending":"In attesa","tx_done":"Completato","status_cancelled":"Annullato","requests":"Richieste","no_operations":"Nessuna operazione","paid_action":"Ho pagato","cancel_action":"Annulla","payment_in_bot_stars":"Pagamento nel bot · Stars","done_count":"Completati","total_pay":"Totale da pagare","terms_prefix":"Continuando, accetti i ","terms_link":"termini di servizio","terms_suffix":"","verification":"Verifica","verification_passed":"Verifica superata","verification_completed":"Verifica completata","passport":"Passaporto","full":"Completa","no_data":"Nessun dato","passport_status":"Stato del passaporto","passport_verification":"Verifica del passaporto","email_password":"Password ed e-mail","password_saved":"Password ed e-mail sono salvate.","username_bot":"Nome utente del bot","delete_listing_btn":"Elimina annuncio","views":"Visualizzazioni","favorite":"Nei preferiti","favorite_add":"Aggiungi ai preferiti","write":"Scrivi","buy":"Acquista","publish":"Pubblica","unpublish":"Rimuovi dalla pubblicazione","moderation":"In moderazione","refund_moderation":"In moderazione: rimborso della transazione. Eliminazione non disponibile fino alla decisione.","delete_history_confirm":"Eliminare l’annuncio dalla cronologia?","sale":"Vendita","files":"File"},"pt":{"statistics_partners":"Estatísticas dos parceiros","ads_spend_1":"Gastos com depósitos primários","ads_spend_2":"Gastos com depósitos secundários","status_awaiting":"Pagamento pendente","tx_pending":"Pendente","tx_done":"Concluído","status_cancelled":"Cancelado","requests":"Solicitações","no_operations":"Nenhuma operação","paid_action":"Eu paguei","cancel_action":"Cancelar","payment_in_bot_stars":"Pagamento no bot · Stars","done_count":"Concluídos","total_pay":"Total a pagar","terms_prefix":"Ao continuar, você concorda com os ","terms_link":"termos de serviço","terms_suffix":"","verification":"Verificação","verification_passed":"Verificação aprovada","verification_completed":"Verificação concluída","passport":"Passaporte","full":"Completa","no_data":"Sem dados","passport_status":"Status do passaporte","passport_verification":"Verificação do passaporte","email_password":"Senha e e-mail","password_saved":"A senha e o e-mail estão salvos.","username_bot":"Nome de usuário do bot","delete_listing_btn":"Excluir anúncio","views":"Visualizações","favorite":"Nos favoritos","favorite_add":"Adicionar aos favoritos","write":"Escrever","buy":"Comprar","publish":"Publicar","unpublish":"Retirar da publicação","moderation":"Em moderação","refund_moderation":"Em moderação: reembolso da transação. Exclusão indisponível até a decisão.","delete_history_confirm":"Excluir o anúncio do histórico?","sale":"Venda","files":"Arquivos"},"pt-BR":{"statistics_partners":"Estatísticas dos parceiros","ads_spend_1":"Gastos com depósitos primários","ads_spend_2":"Gastos com depósitos secundários","status_awaiting":"Pagamento pendente","tx_pending":"Pendente","tx_done":"Concluído","status_cancelled":"Cancelado","requests":"Solicitações","no_operations":"Nenhuma operação","paid_action":"Eu paguei","cancel_action":"Cancelar","payment_in_bot_stars":"Pagamento no bot · Stars","done_count":"Concluídos","total_pay":"Total a pagar","terms_prefix":"Ao continuar, você concorda com os ","terms_link":"termos de serviço","terms_suffix":"","verification":"Verificação","verification_passed":"Verificação aprovada","verification_completed":"Verificação concluída","passport":"Passaporte","full":"Completa","no_data":"Sem dados","passport_status":"Status do passaporte","passport_verification":"Verificação do passaporte","email_password":"Senha e e-mail","password_saved":"A senha e o e-mail estão salvos.","username_bot":"Nome de usuário do bot","delete_listing_btn":"Excluir anúncio","views":"Visualizações","favorite":"Nos favoritos","favorite_add":"Adicionar aos favoritos","write":"Escrever","buy":"Comprar","publish":"Publicar","unpublish":"Retirar da publicação","moderation":"Em moderação","refund_moderation":"Em moderação: reembolso da transação. Exclusão indisponível até a decisão.","delete_history_confirm":"Excluir o anúncio do histórico?","sale":"Venda","files":"Arquivos"},"tr":{"statistics_partners":"İş ortağı istatistikleri","ads_spend_1":"Birincil yatırımlar için harcama","ads_spend_2":"İkincil yatırımlar için harcama","status_awaiting":"Ödeme bekleniyor","tx_pending":"Beklemede","tx_done":"Tamamlandı","status_cancelled":"İptal edildi","requests":"Talepler","no_operations":"İşlem yok","paid_action":"Ödeme yaptım","cancel_action":"İptal","payment_in_bot_stars":"Botta ödeme · Stars","done_count":"Tamamlanan","total_pay":"Ödenecek toplam","terms_prefix":"Devam ederek ","terms_link":"hizmet şartlarını","terms_suffix":" kabul etmiş olursunuz","verification":"Doğrulama","verification_passed":"Doğrulama başarılı","verification_completed":"Doğrulama tamamlandı","passport":"Pasaport","full":"Tam","no_data":"Veri yok","passport_status":"Pasaport durumu","passport_verification":"Pasaport doğrulaması","email_password":"Şifre ve e-posta","password_saved":"Şifre ve e-posta kaydedildi.","username_bot":"Bot kullanıcı adı","delete_listing_btn":"İlanı sil","views":"Görüntülenme","favorite":"Favorilerde","favorite_add":"Favorilere ekle","write":"Yaz","buy":"Satın al","publish":"Yayınla","unpublish":"Yayından kaldır","moderation":"Moderasyonda","refund_moderation":"Moderasyonda: işlem iadesi. Moderasyon kararı verilene kadar silme kullanılamaz.","delete_history_confirm":"İlan geçmişten silinsin mi?","sale":"Satış","files":"Dosyalar"},"id":{"statistics_partners":"Statistik mitra","ads_spend_1":"Pengeluaran untuk deposit primer","ads_spend_2":"Pengeluaran untuk deposit sekunder","status_awaiting":"Menunggu pembayaran","tx_pending":"Tertunda","tx_done":"Selesai","status_cancelled":"Dibatalkan","requests":"Permintaan","no_operations":"Tidak ada operasi","paid_action":"Saya sudah membayar","cancel_action":"Batal","payment_in_bot_stars":"Pembayaran di bot · Stars","done_count":"Selesai","total_pay":"Total yang harus dibayar","terms_prefix":"Dengan melanjutkan, Anda menyetujui ","terms_link":"ketentuan layanan","terms_suffix":"","verification":"Verifikasi","verification_passed":"Verifikasi berhasil","verification_completed":"Verifikasi selesai","passport":"Paspor","full":"Lengkap","no_data":"Tidak ada data","passport_status":"Status paspor","passport_verification":"Verifikasi paspor","email_password":"Kata sandi dan email","password_saved":"Kata sandi dan email tersimpan.","username_bot":"Nama pengguna bot","delete_listing_btn":"Hapus listing","views":"Dilihat","favorite":"Di favorit","favorite_add":"Tambahkan ke favorit","write":"Tulis","buy":"Beli","publish":"Publikasikan","unpublish":"Batalkan publikasi","moderation":"Dalam moderasi","refund_moderation":"Dalam moderasi: pengembalian transaksi. Penghapusan tidak tersedia sampai keputusan moderasi.","delete_history_confirm":"Hapus listing dari riwayat?","sale":"Penjualan","files":"File"},"ar":{"statistics_partners":"إحصائيات الشركاء","ads_spend_1":"الإنفاق على الإيداعات الأولية","ads_spend_2":"الإنفاق على الإيداعات الثانوية","status_awaiting":"بانتظار الدفع","tx_pending":"قيد الانتظار","tx_done":"مكتمل","status_cancelled":"ملغى","requests":"الطلبات","no_operations":"لا توجد عمليات","paid_action":"لقد دفعت","cancel_action":"إلغاء","payment_in_bot_stars":"الدفع في البوت · Stars","done_count":"مكتملة","total_pay":"الإجمالي المطلوب دفعه","terms_prefix":"بالمتابعة، أنت توافق على ","terms_link":"شروط الخدمة","terms_suffix":"","verification":"التحقق","verification_passed":"تم اجتياز التحقق","verification_completed":"اكتمل التحقق","passport":"جواز السفر","full":"كامل","no_data":"لا توجد بيانات","passport_status":"حالة جواز السفر","passport_verification":"التحقق من جواز السفر","email_password":"كلمة المرور والبريد الإلكتروني","password_saved":"تم حفظ كلمة المرور والبريد الإلكتروني.","username_bot":"اسم مستخدم البوت","delete_listing_btn":"حذف الإعلان","views":"المشاهدات","favorite":"في المفضلة","favorite_add":"إضافة إلى المفضلة","write":"مراسلة","buy":"شراء","publish":"نشر","unpublish":"إلغاء النشر","moderation":"قيد المراجعة","refund_moderation":"قيد المراجعة: استرداد المعاملة. الحذف غير متاح حتى قرار المراجعة.","delete_history_confirm":"حذف الإعلان من السجل؟","sale":"بيع","files":"الملفات"},"zh":{"statistics_partners":"合作伙伴统计","ads_spend_1":"首次充值广告支出","ads_spend_2":"二次充值广告支出","status_awaiting":"等待付款","tx_pending":"待处理","tx_done":"已完成","status_cancelled":"已取消","requests":"请求","no_operations":"暂无操作","paid_action":"我已付款","cancel_action":"取消","payment_in_bot_stars":"机器人内付款 · Stars","done_count":"已完成","total_pay":"应付总额","terms_prefix":"继续即表示您同意 ","terms_link":"服务条款","terms_suffix":"","verification":"验证","verification_passed":"验证通过","verification_completed":"验证完成","passport":"护照","full":"完整","no_data":"暂无数据","passport_status":"护照状态","passport_verification":"护照验证","email_password":"密码和邮箱","password_saved":"密码和邮箱已保存。","username_bot":"机器人用户名","delete_listing_btn":"删除公告","views":"浏览量","favorite":"已收藏","favorite_add":"加入收藏","write":"联系","buy":"购买","publish":"发布","unpublish":"取消发布","moderation":"审核中","refund_moderation":"审核中：交易退款。在审核决定前无法删除。","delete_history_confirm":"从历史记录中删除公告？","sale":"出售","files":"文件"},"ja":{"statistics_partners":"パートナー統計","ads_spend_1":"初回入金への広告費","ads_spend_2":"2回目以降の入金への広告費","status_awaiting":"支払い待ち","tx_pending":"保留中","tx_done":"完了","status_cancelled":"キャンセル済み","requests":"リクエスト","no_operations":"操作はありません","paid_action":"支払いました","cancel_action":"キャンセル","payment_in_bot_stars":"ボット内決済 · Stars","done_count":"完了","total_pay":"支払合計","terms_prefix":"続行すると、","terms_link":"利用規約","terms_suffix":"に同意したものとします","verification":"認証","verification_passed":"認証済み","verification_completed":"認証完了","passport":"パスポート","full":"完全","no_data":"データなし","passport_status":"パスポートの状態","passport_verification":"パスポート認証","email_password":"パスワードとメール","password_saved":"パスワードとメールが保存されました。","username_bot":"ボットのユーザー名","delete_listing_btn":"掲載を削除","views":"閲覧数","favorite":"お気に入り登録済み","favorite_add":"お気に入りに追加","write":"メッセージ","buy":"購入","publish":"公開","unpublish":"公開を停止","moderation":"審査中","refund_moderation":"審査中：取引の返金。審査決定まで削除できません。","delete_history_confirm":"掲載を履歴から削除しますか？","sale":"販売","files":"ファイル"},"ko":{"statistics_partners":"파트너 통계","ads_spend_1":"첫 입금 광고 지출","ads_spend_2":"두 번째 입금 광고 지출","status_awaiting":"결제 대기","tx_pending":"대기 중","tx_done":"완료","status_cancelled":"취소됨","requests":"요청","no_operations":"작업이 없습니다","paid_action":"결제했습니다","cancel_action":"취소","payment_in_bot_stars":"봇에서 결제 · Stars","done_count":"완료","total_pay":"총 결제 금액","terms_prefix":"계속하면 ","terms_link":"서비스 약관","terms_suffix":"에 동의합니다","verification":"인증","verification_passed":"인증 완료","verification_completed":"인증이 완료되었습니다","passport":"여권","full":"전체","no_data":"데이터 없음","passport_status":"여권 상태","passport_verification":"여권 인증","email_password":"비밀번호 및 이메일","password_saved":"비밀번호와 이메일이 저장되었습니다.","username_bot":"봇 사용자 이름","delete_listing_btn":"게시물 삭제","views":"조회수","favorite":"즐겨찾기됨","favorite_add":"즐겨찾기에 추가","write":"메시지","buy":"구매","publish":"게시","unpublish":"게시 취소","moderation":"검수 중","refund_moderation":"검수 중: 거래 환불. 검수 결정 전에는 삭제할 수 없습니다.","delete_history_confirm":"게시물을 기록에서 삭제할까요?","sale":"판매","files":"파일"}};Object.keys(X34).forEach(function(lang){if(!I18N[lang])I18N[lang]={};Object.keys(X34[lang]).forEach(function(k){I18N[lang][k]=X34[lang][k];});});}catch(e){}})();
+(function(){try{var X34={"ru":{"statistics_partners":"Статистика партнёров","ads_spend_1":"Расходы на первичные пополнения","ads_spend_2":"Расходы на вторичные пополнения","status_awaiting":"Ожидает оплаты","tx_pending":"В ожидании","tx_done":"Завершено","status_cancelled":"Отменено","requests":"Заявки","no_operations":"Нет операций","paid_action":"Я оплатил","cancel_action":"Отменить","payment_in_bot_stars":"Оплата в боте · Stars","done_count":"Завершённые","total_pay":"Итого к оплате: {total} $","terms_prefix":"Продолжая, вы даёте ","terms_link":"пользовательское соглашение","terms_suffix":" с правилами сервиса","verification":"Верификация","verification_passed":"Верификация пройдена","verification_completed":"Верификация завершена","passport":"Паспорт","full":"Полная","no_data":"Нет данных","passport_status":"Статус паспорта","passport_verification":"Верификация паспорта","email_password":"Пароль и почта","password_saved":"Пароль и почта сохранены","username_bot":"Username бота","delete_listing_btn":"Удалить объявление","views":"Просмотры","favorite":"В избранном","favorite_add":"В избранное","write":"Написать","buy":"Купить","publish":"Опубликовать","unpublish":"Снять с публикации","moderation":"На модерации","refund_moderation":"На модерации: возврат средств по сделке. Удаление недоступно до решения модерации.","delete_history_confirm":"Удалить объявление из истории?","sale":"Продажа","files":"Файлы"},"en":{"statistics_partners":"Partner statistics","ads_spend_1":"Spend on primary deposits","ads_spend_2":"Spend on secondary deposits","status_awaiting":"Awaiting payment","tx_pending":"Pending","tx_done":"Completed","status_cancelled":"Cancelled","requests":"Requests","no_operations":"No operations","paid_action":"I paid","cancel_action":"Cancel","payment_in_bot_stars":"Payment in bot · Stars","done_count":"Completed","total_pay":"Total to pay: {total} $","terms_prefix":"By continuing, you agree to the ","terms_link":"Terms of Service","terms_suffix":"","verification":"Verification","verification_passed":"Verification passed","verification_completed":"Verification completed","passport":"Passport","full":"Full","no_data":"No data","passport_status":"Passport status","passport_verification":"Passport verification","email_password":"Password and email","password_saved":"Password and email are saved.","username_bot":"Bot username","delete_listing_btn":"Delete listing","views":"Views","favorite":"In favorites","favorite_add":"Add to favorites","write":"Message","buy":"Buy","publish":"Publish","unpublish":"Unpublish","moderation":"Under moderation","refund_moderation":"Under moderation: transaction refund. Deletion is unavailable until the moderation decision.","delete_history_confirm":"Delete this listing from history?","sale":"Sale","files":"Files"},"de":{"statistics_partners":"Partnerstatistik","ads_spend_1":"Ausgaben für primäre Einzahlungen","ads_spend_2":"Ausgaben für sekundäre Einzahlungen","status_awaiting":"Zahlung ausstehend","tx_pending":"Ausstehend","tx_done":"Abgeschlossen","status_cancelled":"Storniert","requests":"Anfragen","no_operations":"Keine Vorgänge","paid_action":"Ich habe bezahlt","cancel_action":"Abbrechen","payment_in_bot_stars":"Zahlung im Bot · Stars","done_count":"Abgeschlossen","total_pay":"Gesamt zu zahlen: {total} $","terms_prefix":"Durch Fortfahren stimmen Sie den ","terms_link":"Nutzungsbedingungen","terms_suffix":" zu","verification":"Verifizierung","verification_passed":"Verifizierung bestanden","verification_completed":"Verifizierung abgeschlossen","passport":"Reisepass","full":"Vollständig","no_data":"Keine Daten","passport_status":"Passstatus","passport_verification":"Passverifizierung","email_password":"Passwort und E-Mail","password_saved":"Passwort und E-Mail sind gespeichert.","username_bot":"Bot-Benutzername","delete_listing_btn":"Anzeige löschen","views":"Aufrufe","favorite":"In Favoriten","favorite_add":"Zu Favoriten","write":"Nachricht","buy":"Kaufen","publish":"Veröffentlichen","unpublish":"Veröffentlichung aufheben","moderation":"In Moderation","refund_moderation":"In Moderation: Rückerstattung der Transaktion. Löschen ist bis zur Moderationsentscheidung nicht möglich.","delete_history_confirm":"Anzeige aus dem Verlauf löschen?","sale":"Verkauf","files":"Dateien"},"fr":{"statistics_partners":"Statistiques des partenaires","ads_spend_1":"Dépenses sur les dépôts primaires","ads_spend_2":"Dépenses sur les dépôts secondaires","status_awaiting":"Paiement en attente","tx_pending":"En attente","tx_done":"Terminé","status_cancelled":"Annulé","requests":"Demandes","no_operations":"Aucune opération","paid_action":"J’ai payé","cancel_action":"Annuler","payment_in_bot_stars":"Paiement dans le bot · Stars","done_count":"Terminées","total_pay":"Total à payer : {total} $","terms_prefix":"En continuant, vous acceptez les ","terms_link":"conditions d’utilisation","terms_suffix":"","verification":"Vérification","verification_passed":"Vérification réussie","verification_completed":"Vérification terminée","passport":"Passeport","full":"Complète","no_data":"Aucune donnée","passport_status":"Statut du passeport","passport_verification":"Vérification du passeport","email_password":"Mot de passe et e-mail","password_saved":"Le mot de passe et l’e-mail sont enregistrés.","username_bot":"Nom d’utilisateur du bot","delete_listing_btn":"Supprimer l’annonce","views":"Vues","favorite":"Dans les favoris","favorite_add":"Ajouter aux favoris","write":"Écrire","buy":"Acheter","publish":"Publier","unpublish":"Retirer de la publication","moderation":"En modération","refund_moderation":"En modération : remboursement de la transaction. Suppression indisponible jusqu’à la décision.","delete_history_confirm":"Supprimer l’annonce de l’historique ?","sale":"Vente","files":"Fichiers"},"es":{"statistics_partners":"Estadísticas de socios","ads_spend_1":"Gasto en depósitos primarios","ads_spend_2":"Gasto en depósitos secundarios","status_awaiting":"Pago pendiente","tx_pending":"Pendiente","tx_done":"Completado","status_cancelled":"Cancelado","requests":"Solicitudes","no_operations":"No hay operaciones","paid_action":"He pagado","cancel_action":"Cancelar","payment_in_bot_stars":"Pago en el bot · Stars","done_count":"Completados","total_pay":"Total a pagar: {total} $","terms_prefix":"Al continuar, aceptas los ","terms_link":"términos de servicio","terms_suffix":"","verification":"Verificación","verification_passed":"Verificación superada","verification_completed":"Verificación completada","passport":"Pasaporte","full":"Completa","no_data":"Sin datos","passport_status":"Estado del pasaporte","passport_verification":"Verificación del pasaporte","email_password":"Contraseña y correo electrónico","password_saved":"La contraseña y el correo están guardados.","username_bot":"Nombre de usuario del bot","delete_listing_btn":"Eliminar anuncio","views":"Vistas","favorite":"En favoritos","favorite_add":"Añadir a favoritos","write":"Escribir","buy":"Comprar","publish":"Publicar","unpublish":"Retirar de publicación","moderation":"En moderación","refund_moderation":"En moderación: reembolso de la transacción. No se puede eliminar hasta la decisión.","delete_history_confirm":"¿Eliminar el anuncio del historial?","sale":"Venta","files":"Archivos"},"uk":{"statistics_partners":"Статистика партнерів","ads_spend_1":"Витрати на первинні поповнення","ads_spend_2":"Витрати на вторинні поповнення","status_awaiting":"Очікує оплати","tx_pending":"В очікуванні","tx_done":"Завершено","status_cancelled":"Скасовано","requests":"Заявки","no_operations":"Немає операцій","paid_action":"Я оплатив","cancel_action":"Скасувати","payment_in_bot_stars":"Оплата в боті · Stars","done_count":"Завершені","total_pay":"Разом до сплати: {total} $","terms_prefix":"Продовжуючи, ви погоджуєтеся з ","terms_link":"умовами користування","terms_suffix":"","verification":"Верифікація","verification_passed":"Верифікацію пройдено","verification_completed":"Верифікацію завершено","passport":"Паспорт","full":"Повна","no_data":"Немає даних","passport_status":"Статус паспорта","passport_verification":"Верифікація паспорта","email_password":"Пароль і пошта","password_saved":"Пароль і пошту збережено.","username_bot":"Username бота","delete_listing_btn":"Видалити оголошення","views":"Перегляди","favorite":"В обраному","favorite_add":"Додати в обране","write":"Написати","buy":"Купити","publish":"Опублікувати","unpublish":"Зняти з публікації","moderation":"На модерації","refund_moderation":"На модерації: повернення коштів за угодою. Видалення недоступне до рішення модерації.","delete_history_confirm":"Видалити оголошення з історії?","sale":"Продаж","files":"Файли"},"it":{"statistics_partners":"Statistiche dei partner","ads_spend_1":"Spesa per i depositi primari","ads_spend_2":"Spesa per i depositi secondari","status_awaiting":"Pagamento in attesa","tx_pending":"In attesa","tx_done":"Completato","status_cancelled":"Annullato","requests":"Richieste","no_operations":"Nessuna operazione","paid_action":"Ho pagato","cancel_action":"Annulla","payment_in_bot_stars":"Pagamento nel bot · Stars","done_count":"Completati","total_pay":"Totale da pagare: {total} $","terms_prefix":"Continuando, accetti i ","terms_link":"termini di servizio","terms_suffix":"","verification":"Verifica","verification_passed":"Verifica superata","verification_completed":"Verifica completata","passport":"Passaporto","full":"Completa","no_data":"Nessun dato","passport_status":"Stato del passaporto","passport_verification":"Verifica del passaporto","email_password":"Password ed e-mail","password_saved":"Password ed e-mail sono salvate.","username_bot":"Nome utente del bot","delete_listing_btn":"Elimina annuncio","views":"Visualizzazioni","favorite":"Nei preferiti","favorite_add":"Aggiungi ai preferiti","write":"Scrivi","buy":"Acquista","publish":"Pubblica","unpublish":"Rimuovi dalla pubblicazione","moderation":"In moderazione","refund_moderation":"In moderazione: rimborso della transazione. Eliminazione non disponibile fino alla decisione.","delete_history_confirm":"Eliminare l’annuncio dalla cronologia?","sale":"Vendita","files":"File"},"pt":{"statistics_partners":"Estatísticas dos parceiros","ads_spend_1":"Gastos com depósitos primários","ads_spend_2":"Gastos com depósitos secundários","status_awaiting":"Pagamento pendente","tx_pending":"Pendente","tx_done":"Concluído","status_cancelled":"Cancelado","requests":"Solicitações","no_operations":"Nenhuma operação","paid_action":"Eu paguei","cancel_action":"Cancelar","payment_in_bot_stars":"Pagamento no bot · Stars","done_count":"Concluídos","total_pay":"Total a pagar: {total} $","terms_prefix":"Ao continuar, você concorda com os ","terms_link":"termos de serviço","terms_suffix":"","verification":"Verificação","verification_passed":"Verificação aprovada","verification_completed":"Verificação concluída","passport":"Passaporte","full":"Completa","no_data":"Sem dados","passport_status":"Status do passaporte","passport_verification":"Verificação do passaporte","email_password":"Senha e e-mail","password_saved":"A senha e o e-mail estão salvos.","username_bot":"Nome de usuário do bot","delete_listing_btn":"Excluir anúncio","views":"Visualizações","favorite":"Nos favoritos","favorite_add":"Adicionar aos favoritos","write":"Escrever","buy":"Comprar","publish":"Publicar","unpublish":"Retirar da publicação","moderation":"Em moderação","refund_moderation":"Em moderação: reembolso da transação. Exclusão indisponível até a decisão.","delete_history_confirm":"Excluir o anúncio do histórico?","sale":"Venda","files":"Arquivos"},"pt-BR":{"statistics_partners":"Estatísticas dos parceiros","ads_spend_1":"Gastos com depósitos primários","ads_spend_2":"Gastos com depósitos secundários","status_awaiting":"Pagamento pendente","tx_pending":"Pendente","tx_done":"Concluído","status_cancelled":"Cancelado","requests":"Solicitações","no_operations":"Nenhuma operação","paid_action":"Eu paguei","cancel_action":"Cancelar","payment_in_bot_stars":"Pagamento no bot · Stars","done_count":"Concluídos","total_pay":"Total a pagar: {total} $","terms_prefix":"Ao continuar, você concorda com os ","terms_link":"termos de serviço","terms_suffix":"","verification":"Verificação","verification_passed":"Verificação aprovada","verification_completed":"Verificação concluída","passport":"Passaporte","full":"Completa","no_data":"Sem dados","passport_status":"Status do passaporte","passport_verification":"Verificação do passaporte","email_password":"Senha e e-mail","password_saved":"A senha e o e-mail estão salvos.","username_bot":"Nome de usuário do bot","delete_listing_btn":"Excluir anúncio","views":"Visualizações","favorite":"Nos favoritos","favorite_add":"Adicionar aos favoritos","write":"Escrever","buy":"Comprar","publish":"Publicar","unpublish":"Retirar da publicação","moderation":"Em moderação","refund_moderation":"Em moderação: reembolso da transação. Exclusão indisponível até a decisão.","delete_history_confirm":"Excluir o anúncio do histórico?","sale":"Venda","files":"Arquivos"},"tr":{"statistics_partners":"İş ortağı istatistikleri","ads_spend_1":"Birincil yatırımlar için harcama","ads_spend_2":"İkincil yatırımlar için harcama","status_awaiting":"Ödeme bekleniyor","tx_pending":"Beklemede","tx_done":"Tamamlandı","status_cancelled":"İptal edildi","requests":"Talepler","no_operations":"İşlem yok","paid_action":"Ödeme yaptım","cancel_action":"İptal","payment_in_bot_stars":"Botta ödeme · Stars","done_count":"Tamamlanan","total_pay":"Ödenecek toplam: {total} $","terms_prefix":"Devam ederek ","terms_link":"hizmet şartlarını","terms_suffix":" kabul etmiş olursunuz","verification":"Doğrulama","verification_passed":"Doğrulama başarılı","verification_completed":"Doğrulama tamamlandı","passport":"Pasaport","full":"Tam","no_data":"Veri yok","passport_status":"Pasaport durumu","passport_verification":"Pasaport doğrulaması","email_password":"Şifre ve e-posta","password_saved":"Şifre ve e-posta kaydedildi.","username_bot":"Bot kullanıcı adı","delete_listing_btn":"İlanı sil","views":"Görüntülenme","favorite":"Favorilerde","favorite_add":"Favorilere ekle","write":"Yaz","buy":"Satın al","publish":"Yayınla","unpublish":"Yayından kaldır","moderation":"Moderasyonda","refund_moderation":"Moderasyonda: işlem iadesi. Moderasyon kararı verilene kadar silme kullanılamaz.","delete_history_confirm":"İlan geçmişten silinsin mi?","sale":"Satış","files":"Dosyalar"},"id":{"statistics_partners":"Statistik mitra","ads_spend_1":"Pengeluaran untuk deposit primer","ads_spend_2":"Pengeluaran untuk deposit sekunder","status_awaiting":"Menunggu pembayaran","tx_pending":"Tertunda","tx_done":"Selesai","status_cancelled":"Dibatalkan","requests":"Permintaan","no_operations":"Tidak ada operasi","paid_action":"Saya sudah membayar","cancel_action":"Batal","payment_in_bot_stars":"Pembayaran di bot · Stars","done_count":"Selesai","total_pay":"Total yang harus dibayar: {total} $","terms_prefix":"Dengan melanjutkan, Anda menyetujui ","terms_link":"ketentuan layanan","terms_suffix":"","verification":"Verifikasi","verification_passed":"Verifikasi berhasil","verification_completed":"Verifikasi selesai","passport":"Paspor","full":"Lengkap","no_data":"Tidak ada data","passport_status":"Status paspor","passport_verification":"Verifikasi paspor","email_password":"Kata sandi dan email","password_saved":"Kata sandi dan email tersimpan.","username_bot":"Nama pengguna bot","delete_listing_btn":"Hapus listing","views":"Dilihat","favorite":"Di favorit","favorite_add":"Tambahkan ke favorit","write":"Tulis","buy":"Beli","publish":"Publikasikan","unpublish":"Batalkan publikasi","moderation":"Dalam moderasi","refund_moderation":"Dalam moderasi: pengembalian transaksi. Penghapusan tidak tersedia sampai keputusan moderasi.","delete_history_confirm":"Hapus listing dari riwayat?","sale":"Penjualan","files":"File"},"ar":{"statistics_partners":"إحصائيات الشركاء","ads_spend_1":"الإنفاق على الإيداعات الأولية","ads_spend_2":"الإنفاق على الإيداعات الثانوية","status_awaiting":"بانتظار الدفع","tx_pending":"قيد الانتظار","tx_done":"مكتمل","status_cancelled":"ملغى","requests":"الطلبات","no_operations":"لا توجد عمليات","paid_action":"لقد دفعت","cancel_action":"إلغاء","payment_in_bot_stars":"الدفع في البوت · Stars","done_count":"مكتملة","total_pay":"الإجمالي المطلوب دفعه: {total} $","terms_prefix":"بالمتابعة، أنت توافق على ","terms_link":"شروط الخدمة","terms_suffix":"","verification":"التحقق","verification_passed":"تم اجتياز التحقق","verification_completed":"اكتمل التحقق","passport":"جواز السفر","full":"كامل","no_data":"لا توجد بيانات","passport_status":"حالة جواز السفر","passport_verification":"التحقق من جواز السفر","email_password":"كلمة المرور والبريد الإلكتروني","password_saved":"تم حفظ كلمة المرور والبريد الإلكتروني.","username_bot":"اسم مستخدم البوت","delete_listing_btn":"حذف الإعلان","views":"المشاهدات","favorite":"في المفضلة","favorite_add":"إضافة إلى المفضلة","write":"مراسلة","buy":"شراء","publish":"نشر","unpublish":"إلغاء النشر","moderation":"قيد المراجعة","refund_moderation":"قيد المراجعة: استرداد المعاملة. الحذف غير متاح حتى قرار المراجعة.","delete_history_confirm":"حذف الإعلان من السجل؟","sale":"بيع","files":"الملفات"},"zh":{"statistics_partners":"合作伙伴统计","ads_spend_1":"首次充值广告支出","ads_spend_2":"二次充值广告支出","status_awaiting":"等待付款","tx_pending":"待处理","tx_done":"已完成","status_cancelled":"已取消","requests":"请求","no_operations":"暂无操作","paid_action":"我已付款","cancel_action":"取消","payment_in_bot_stars":"机器人内付款 · Stars","done_count":"已完成","total_pay":"应付总额：{total} $","terms_prefix":"继续即表示您同意 ","terms_link":"服务条款","terms_suffix":"","verification":"验证","verification_passed":"验证通过","verification_completed":"验证完成","passport":"护照","full":"完整","no_data":"暂无数据","passport_status":"护照状态","passport_verification":"护照验证","email_password":"密码和邮箱","password_saved":"密码和邮箱已保存。","username_bot":"机器人用户名","delete_listing_btn":"删除公告","views":"浏览量","favorite":"已收藏","favorite_add":"加入收藏","write":"联系","buy":"购买","publish":"发布","unpublish":"取消发布","moderation":"审核中","refund_moderation":"审核中：交易退款。在审核决定前无法删除。","delete_history_confirm":"从历史记录中删除公告？","sale":"出售","files":"文件"},"ja":{"statistics_partners":"パートナー統計","ads_spend_1":"初回入金への広告費","ads_spend_2":"2回目以降の入金への広告費","status_awaiting":"支払い待ち","tx_pending":"保留中","tx_done":"完了","status_cancelled":"キャンセル済み","requests":"リクエスト","no_operations":"操作はありません","paid_action":"支払いました","cancel_action":"キャンセル","payment_in_bot_stars":"ボット内決済 · Stars","done_count":"完了","total_pay":"支払合計：{total} $","terms_prefix":"続行すると、","terms_link":"利用規約","terms_suffix":"に同意したものとします","verification":"認証","verification_passed":"認証済み","verification_completed":"認証完了","passport":"パスポート","full":"完全","no_data":"データなし","passport_status":"パスポートの状態","passport_verification":"パスポート認証","email_password":"パスワードとメール","password_saved":"パスワードとメールが保存されました。","username_bot":"ボットのユーザー名","delete_listing_btn":"掲載を削除","views":"閲覧数","favorite":"お気に入り登録済み","favorite_add":"お気に入りに追加","write":"メッセージ","buy":"購入","publish":"公開","unpublish":"公開を停止","moderation":"審査中","refund_moderation":"審査中：取引の返金。審査決定まで削除できません。","delete_history_confirm":"掲載を履歴から削除しますか？","sale":"販売","files":"ファイル"},"ko":{"statistics_partners":"파트너 통계","ads_spend_1":"첫 입금 광고 지출","ads_spend_2":"두 번째 입금 광고 지출","status_awaiting":"결제 대기","tx_pending":"대기 중","tx_done":"완료","status_cancelled":"취소됨","requests":"요청","no_operations":"작업이 없습니다","paid_action":"결제했습니다","cancel_action":"취소","payment_in_bot_stars":"봇에서 결제 · Stars","done_count":"완료","total_pay":"총 결제 금액: {total} $","terms_prefix":"계속하면 ","terms_link":"서비스 약관","terms_suffix":"에 동의합니다","verification":"인증","verification_passed":"인증 완료","verification_completed":"인증이 완료되었습니다","passport":"여권","full":"전체","no_data":"데이터 없음","passport_status":"여권 상태","passport_verification":"여권 인증","email_password":"비밀번호 및 이메일","password_saved":"비밀번호와 이메일이 저장되었습니다.","username_bot":"봇 사용자 이름","delete_listing_btn":"게시물 삭제","views":"조회수","favorite":"즐겨찾기됨","favorite_add":"즐겨찾기에 추가","write":"메시지","buy":"구매","publish":"게시","unpublish":"게시 취소","moderation":"검수 중","refund_moderation":"검수 중: 거래 환불. 검수 결정 전에는 삭제할 수 없습니다.","delete_history_confirm":"게시물을 기록에서 삭제할까요?","sale":"판매","files":"파일"}};Object.keys(X34).forEach(function(lang){if(!I18N[lang])I18N[lang]={};Object.keys(X34[lang]).forEach(function(k){I18N[lang][k]=X34[lang][k];});});}catch(e){}})();
 
 
 /* XCOD_BUILD 2026-09-05-v35-verification-complete */
@@ -22784,15 +22768,13 @@ function updateDepositTotals() {
     total = Math.round(original * (1 - pct / 100) * 100) / 100;
   }
   if (line) {
-    var payLabel = (tBlock('total_pay') || tBlock('total_to_pay') || 'Итого к оплате');
-    payLabel = String(payLabel).replace(/\{total\}/g,'').replace(/\s*[:：]?\s*\$\s*$/,'').replace(/\s*[:：]\s*$/,'').trim() || 'Итого к оплате';
     if (pct > 0 && total < original) {
-      line.innerHTML = payLabel + ': ' +
+      line.innerHTML = (tBlock('total_pay') || 'Итого к оплате') + ': ' +
         '<span style="text-decoration:line-through;opacity:.55;font-size:13px;margin-right:6px;">' + original.toFixed(2) + ' $</span>' +
         '<span style="color:#34c759;font-size:12px;margin-right:6px;">−' + pct + '%</span>' +
         '<b>' + total.toFixed(2) + ' $</b>';
     } else {
-      line.innerHTML = payLabel + ': <b>' + total.toFixed(2) + ' $</b>';
+      line.innerHTML = (tBlock('total_pay') || 'Итого к оплате') + ': <b>' + total.toFixed(2) + ' $</b>';
     }
   }
   var hint = document.getElementById('deposit-fee-hint');
@@ -22848,6 +22830,91 @@ async function payDepositStars() {
   }
 }
 
+var __depositWatchTimer = null;
+var __depositWatchStartedAt = 0;
+
+function savePendingDeposit(ref, credit) {
+  try {
+    sessionStorage.setItem('xcod_pending_deposit', JSON.stringify({
+      payment_ref: String(ref || ''),
+      credit: Number(credit || 0),
+      started_at: Date.now()
+    }));
+  } catch (e) {}
+}
+function clearPendingDeposit() {
+  try { sessionStorage.removeItem('xcod_pending_deposit'); } catch (e) {}
+  if (__depositWatchTimer) { clearInterval(__depositWatchTimer); __depositWatchTimer = null; }
+}
+
+async function watchDepositPayment(paymentRef, credit) {
+  if (!paymentRef) return;
+  clearPendingDeposit();
+  savePendingDeposit(paymentRef, credit);
+  __depositWatchStartedAt = Date.now();
+  var done = false;
+  async function tick() {
+    if (done) return;
+    try {
+      var st = await apiGet('/api/deposit/status?payment_ref=' + encodeURIComponent(paymentRef));
+      if (st && (st.status === 'CONFIRMED' || st.credited)) {
+        done = true;
+        clearPendingDeposit();
+        try { setBalance(st.balance); } catch (e1) { try { await refreshBalance(); } catch(e2){} }
+        try { tg.showAlert('✅ ' + (tBlock('deposit_success') || 'Funds credited successfully')); } catch (e3) {}
+        try { showPage('balance'); } catch (e4) {}
+        return;
+      }
+      if (st && ['CANCELED','CHARGEBACKED','CANCELLED'].indexOf(String(st.status || '').toUpperCase()) >= 0) {
+        done = true;
+        clearPendingDeposit();
+        try { tg.showAlert(tBlock('deposit_fail') || 'Payment failed. Funds were not credited'); } catch (e5) {}
+        return;
+      }
+    } catch (e) {}
+    // Stop polling after 30 minutes; the webhook itself remains authoritative.
+    if (Date.now() - __depositWatchStartedAt > 30 * 60 * 1000) {
+      done = true;
+      clearPendingDeposit();
+    }
+  }
+  await tick();
+  if (!done) __depositWatchTimer = setInterval(tick, 3000);
+}
+
+function resumePendingDepositWatch() {
+  try {
+    var raw = sessionStorage.getItem('xcod_pending_deposit');
+    if (!raw) return;
+    var p = JSON.parse(raw);
+    if (!p || !p.payment_ref) return;
+    watchDepositPayment(p.payment_ref, Number(p.credit || 0));
+  } catch (e) {}
+}
+
+function openPlategaPayment(url) {
+  if (!url) return;
+  try { openExternal(url); } catch (e) {
+    try { window.open(url, '_blank', 'noopener,noreferrer'); } catch (e2) { location.href = url; }
+  }
+}
+
+async function payDepositPlatega(paymentUrl) {
+  openPlategaPayment(paymentUrl);
+}
+
+async function confirmDepositPaid() {
+  try {
+    var raw = sessionStorage.getItem('xcod_pending_deposit');
+    var p = raw ? JSON.parse(raw) : null;
+    if (p && p.payment_ref) {
+      await watchDepositPayment(p.payment_ref, Number(p.credit || 0));
+      return;
+    }
+  } catch (e) {}
+  try { tg.showAlert(tBlock('deposit_fail') || 'Payment status is not available yet'); } catch (e2) {}
+}
+
 async function startDeposit() {
   var amount = parseFloat(document.getElementById('deposit-amount').value);
   var promo = ((document.getElementById('deposit-promo') || {}).value || '').trim().toUpperCase();
@@ -22856,65 +22923,67 @@ async function startDeposit() {
   if (dTerms && !dTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Accept the terms'); return; }
   if (!amount || amount < 1) { tg.showAlert(tBlock('min_1')); return; }
   if (!selectedDepositMethod) { tg.showAlert(tBlock('err_method') || 'Select a payment method'); return; }
-  await ensureUsdRate(true);
-  var feeInfo = calcFee(amount, selectedDepositMethod, 'deposit');
-  var methodLabel = selectedDepositMethod === 'card' ? (tBlock('sbp') || 'SBP')
-    : (selectedDepositMethod === 'crypto' ? (tBlock('crypto') || 'Crypto') : (tBlock('stars') || 'Telegram Stars'));
-  var payUsd = feeInfo.total;
-  var originalPay = payUsd;
-  var discPct = 0;
-  if (promo) {
-    try {
-      var vd = await apiPost('/api/referral/validate-promo', { code: promo, amount: amount, method: selectedDepositMethod });
-      if (vd && vd.valid) {
-        discPct = Number(vd.discount_pct || 0);
-        if (discPct > 0) payUsd = Number(vd.new_total != null ? vd.new_total : (originalPay * (1 - discPct / 100)));
-        try { await apiPost('/api/deposit', { amount: amount, method: selectedDepositMethod, promo: promo }); } catch (eBind) {}
-      } else if (vd && vd.error === 'max_uses') {
-        tg.showAlert(vd.message || tBlock('promo_max_uses') || 'Промокод использован максимальное количество раз');
-        return;
-      } else if (vd && !vd.valid) {
-        tg.showAlert(vd.message || tBlock('promo_not_found') || 'Промокод не найден');
-        return;
-      }
-    } catch (eP) {
-      tg.showAlert(eP.message || tBlock('promo_not_found') || 'Промокод не найден');
-      return;
-    }
-  }
-  window._lastDepositPromo = promo && discPct > 0 ? { code: promo, pct: discPct } : null;
-  var creditUsd = feeInfo.credit;
-  var payRub = rubOf(payUsd);
-  var creditRub = rubOf(creditUsd);
-  var payLine = (discPct > 0 && payUsd < originalPay)
-    ? ('<span style="text-decoration:line-through;opacity:.55;font-size:13px;margin-right:6px;">' + fmtUsd(originalPay) + '$</span>' +
-       '<span style="color:#34c759;font-size:12px;margin-right:6px;">−' + discPct + '%</span>' +
-       '<b>' + fmtUsd(payUsd) + '$ (~' + fmtRub(payRub) + ' ₽)</b>')
-    : (fmtRub(payRub) + ' ₽ (~' + fmtUsd(payUsd) + '$)');
 
-  var html = '<div class="payment-card">' +
-    '<div class="row"><span class="label">' + (tBlock('to_pay') || 'К оплате') + '</span><span class="value">' + payLine + '</span></div>' +
-    '<div class="row"><span class="label">' + (tBlock('to_credit') || 'К зачислению') + '</span><span class="value">' + fmtUsd(creditUsd) + '$ (~' + fmtRub(creditRub) + ' ₽)</span></div>' +
-    '<div class="row"><span class="label">' + (tBlock('pay_method') || 'Способ') + '</span><span class="value">' + methodLabel +
-    (feeInfo.rate ? (' · ' + (feeInfo.rate * 100).toFixed(1).replace(/\.0$/, '') + '%') : ' · 0%') + '</span></div>' +
-    (discPct > 0 ? ('<div class="row"><span class="label">' + (tBlock('promo_code') || 'Промокод') + '</span><span class="value" style="color:#34c759;">' + promo + ' (−' + discPct + '%)</span></div>') : '') +
-    '</div>';
-
+  // Stars keep their existing Telegram invoice flow and are not sent to Platega.
   if (selectedDepositMethod === 'stars') {
-    html += '<div id="stars-pay-status" class="list-item" style="margin-top:12px;"><div class="subtitle">' + (tBlock('press_pay_stars') || 'Press Pay — invoice will be sent in the bot') + '</div></div>';
-    html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" onclick="payDepositStars()">' + (tBlock('pay_btn') || 'Оплатить') + '</button>';
-  } else {
-    html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" onclick="payDepositUnavailable()">' + (tBlock('pay_btn') || 'Оплатить') + '</button>';
+    try { await payDepositStars(); } catch (e) {}
+    return;
   }
-  html += '<button class="btn btn-secondary" style="margin-top:10px;" id="deposit-paid-btn" onclick="confirmDepositPaid()">' + (tBlock('btn_i_paid') || 'I paid') + '</button>';
-  html += '<button class="btn btn-secondary" style="margin-top:8px;" onclick="showPage(\'balance\');">' + (tBlock('back_to_balance') || tBlock('back') || '← Back to balance') + '</button>';
 
-  document.getElementById('deposit-result-content').innerHTML = html;
-  var titleEl = document.querySelector('#page-deposit-result .section-title');
-  if (titleEl) titleEl.textContent = tBlock('payment_details') || 'Оплата';
-  showPage('deposit-result');
+  if (btn) { btn.disabled = true; btn.textContent = tBlock('creating') || 'Creating...'; }
+  try {
+    await ensureUsdRate(true);
+
+    // Validate promo first, then let the server calculate the authoritative final amount.
+    if (promo) {
+      var vd = await apiPost('/api/referral/validate-promo', { code: promo, amount: amount, method: selectedDepositMethod });
+      if (vd && vd.error === 'max_uses') throw new Error(vd.message || tBlock('promo_max_uses') || 'Promo code used maximum times');
+      if (vd && vd.valid === false) throw new Error(vd.message || tBlock('promo_not_found') || 'Promo code not found');
+    }
+
+    var result = await apiPost('/api/deposit', {
+      amount: amount,
+      method: selectedDepositMethod,
+      promo: promo
+    });
+    if (!result || !result.payment_url) throw new Error((result && result.error) || 'Payment link was not returned');
+
+    var creditUsd = Number(result.credit != null ? result.credit : amount);
+    var payUsd = Number(result.total != null ? result.total : amount);
+    var payRub = Number(result.pay_rub || rubOf(payUsd));
+    var methodLabel = selectedDepositMethod === 'card' ? (tBlock('sbp') || 'SBP') : (tBlock('crypto') || 'Crypto');
+    var currencyLabel = result.provider_currency === 'USDT' ? 'USDT' : '₽';
+    var providerAmount = Number(result.provider_amount || (result.provider_currency === 'USDT' ? payUsd : payRub));
+    var discPct = Number(result.discount_pct || 0);
+
+    savePendingDeposit(result.payment_ref, creditUsd);
+
+    var payDisplay = result.provider_currency === 'USDT'
+      ? fmtUsd(providerAmount) + ' USDT'
+      : fmtRub(providerAmount) + ' ₽';
+    var html = '<div class="payment-card">' +
+      '<div class="row"><span class="label">' + (tBlock('to_pay') || 'To pay') + '</span><span class="value"><b>' + payDisplay + '</b></span></div>' +
+      '<div class="row"><span class="label">' + (tBlock('to_credit') || 'To credit') + '</span><span class="value">' + fmtUsd(creditUsd) + '$</span></div>' +
+      '<div class="row"><span class="label">' + (tBlock('pay_method') || 'Method') + '</span><span class="value">' + methodLabel + (result.fee_rate ? ' · ' + (Number(result.fee_rate) * 100).toFixed(1).replace(/\.0$/, '') + '%' : '') + '</span></div>' +
+      (discPct > 0 ? '<div class="row"><span class="label">' + (tBlock('promo_code') || 'Promo code') + '</span><span class="value" style="color:#34c759;">' + promo + ' (−' + discPct + '%)</span></div>' : '') +
+      '</div>';
+
+    html += '<div class="list-item" style="margin-top:12px;"><div class="subtitle">' + (tBlock('awaiting_payment') || 'Awaiting payment') + '</div></div>';
+    html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" onclick="payDepositPlatega(' + JSON.stringify(String(result.payment_url)) + ')">' + (tBlock('pay_btn') || 'Pay') + '</button>';
+    html += '<button class="btn btn-secondary" style="margin-top:10px;" id="deposit-paid-btn" onclick="confirmDepositPaid()">' + (tBlock('btn_i_paid') || 'Check payment') + '</button>';
+    html += '<button class="btn btn-secondary" style="margin-top:8px;" onclick="showPage(\'balance\');">' + (tBlock('back_to_balance') || tBlock('back') || '← Back to balance') + '</button>';
+
+    document.getElementById('deposit-result-content').innerHTML = html;
+    var titleEl = document.querySelector('#page-deposit-result .section-title');
+    if (titleEl) titleEl.textContent = tBlock('payment_details') || 'Payment';
+    showPage('deposit-result');
+    watchDepositPayment(result.payment_ref, creditUsd);
+  } catch (e) {
+    try { tg.showAlert(e.message || 'Payment creation failed'); } catch (e2) { alert(e.message || 'Payment creation failed'); }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = tBlock('continue_btn') || 'Continue'; }
+  }
 }
-
 
 async function startWithdraw() {
  var amount = parseFloat(document.getElementById('withdraw-amount').value);
@@ -22957,6 +23026,7 @@ async function loadRequests() {
  var txs = txData.transactions || [];
 
  var statusMap = {
+ awaiting_payment: [tBlock('status_awaiting') || 'Awaiting payment', 'badge-pending'],
  pending: [tBlock('status_awaiting') || tBlock('tx_pending') || 'Pending', 'badge-pending'],
  processing: [tBlock('tx_pending') || 'Processing', 'badge-processing'],
  completed: [tBlock('tx_done') || 'Completed', 'badge-completed'],
@@ -22981,7 +23051,7 @@ async function loadRequests() {
  var st = statusMap[r.status] || [r.status, 'badge-pending'];
  var typeName = typeLabel[r.type] || r.type;
  var actions = '';
- if ((r.status === 'pending' || r.status === 'processing') && r.type === 'deposit' && r.method !== 'stars') {
+ if ((r.status === 'pending' || r.status === 'processing') && r.type === 'deposit' && r.method !== 'stars' && r.method !== 'card' && r.method !== 'crypto') {
  actions = '<div class="actions">' +
  '<button class="btn btn-success" onclick="confirmRequest(' + r.id + ')">✅ Я оплатил</button>' +
  '<button class="btn btn-danger" onclick="cancelRequest(' + r.id + ')">❌ Отменить</button></div>';
@@ -23309,23 +23379,22 @@ async function openVisitsAnalytics() {
  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
  try {
  var d = await apiGet('/api/admin/analytics/visits');
- function line(l, v) {
- return '• ' + l + ': <b>' + v + '</b><br>';
+ function row(label, val) {
+ return '<div class="list-item" style="padding:10px 12px;"><div class="top"><div class="title" style="font-size:13px;">' + label + '</div>' +
+ '<div style="font-weight:600;font-size:14px;">' + val + '</div></div></div>';
  }
- var html = '<div class="info-block" style="line-height:1.55;margin-bottom:10px;font-size:12px;opacity:.85;">' + (tBlock('analytics_live') || 'Данные обновляются в реальном времени из БД') + '</div>';
- html += '<div class="info-block" style="line-height:1.55;">';
- html += line(tBlock('stat_registered') || 'Зарегистрировано людей', d.registered != null ? d.registered : 0);
- html += line(tBlock('stat_passport') || 'Верифицировано паспортов', d.passport_verified != null ? d.passport_verified : 0);
- html += line(tBlock('stat_full_verify') || 'Верифицировано полностью', d.full_verified != null ? d.full_verified : 0);
- html += line(tBlock('stat_active_10d') || 'В сети за последние 10 дней', d.active_10d != null ? d.active_10d : 0);
- html += line(tBlock('stat_listings_all') || 'Объявлений за всё время',
-   (d.listings_total != null ? d.listings_total : 0) + ' (' + (tBlock('sale')||'продажа') + ': ' + (d.listings_sale||0) + ', ' + (tBlock('freelance')||'фриланс') + ': ' + (d.listings_freelance||0) + ')');
- html += line(tBlock('stat_listings_active') || 'Объявлений сейчас активно',
-   (d.active_total != null ? d.active_total : 0) + ' (' + (tBlock('sale')||'продажа') + ': ' + (d.active_sale||0) + ', ' + (tBlock('freelance')||'фриланс') + ': ' + (d.active_freelance||0) + ')');
- html += line(tBlock('stat_sales_all') || 'Продаж за всё время',
-   (d.sales_count != null ? d.sales_count : 0) + ' (' + Number(d.sales_sum||0).toLocaleString('ru-RU') + ' $)');
- html += line(tBlock('stat_online_now') || 'Пользователей онлайн сейчас', d.online_now != null ? d.online_now : 0);
- html += '</div>';
+ var html = '<div class="info-block" style="margin-bottom:10px;font-size:12px;opacity:.8;">' + (tBlock('analytics_live') || 'Данные обновляются в реальном времени из БД') + '</div>';
+ html += row(tBlock('stat_registered') || 'Зарегистрировано людей', d.registered);
+ html += row(tBlock('stat_passport') || 'Верифицировано паспортов', d.passport_verified);
+ html += row(tBlock('stat_full_verify') || 'Верифицировано полностью', d.full_verified);
+ html += row(tBlock('stat_active_10d') || 'В сети за последние 10 дней', d.active_10d);
+ html += row(tBlock('stat_listings_all') || 'Объявлений за всё время',
+   d.listings_total + ' <span style="font-weight:400;opacity:.75;font-size:12px;">(' + (tBlock('sale')||'продажа') + ': ' + d.listings_sale + ', ' + (tBlock('freelance')||'фриланс') + ': ' + d.listings_freelance + ')</span>');
+ html += row(tBlock('stat_listings_active') || 'Объявлений сейчас активно',
+   d.active_total + ' <span style="font-weight:400;opacity:.75;font-size:12px;">(' + (tBlock('sale')||'продажа') + ': ' + d.active_sale + ', ' + (tBlock('freelance')||'фриланс') + ': ' + d.active_freelance + ')</span>');
+ html += row(tBlock('stat_sales_all') || 'Продаж за всё время',
+   d.sales_count + ' <span style="font-weight:400;opacity:.75;font-size:12px;">(' + Number(d.sales_sum||0).toLocaleString('ru-RU') + ' $)</span>');
+ html += row(tBlock('stat_online_now') || 'Пользователей онлайн сейчас', d.online_now);
  box.innerHTML = html;
  } catch (e) {
  box.innerHTML = '<div class="empty">' + (e.message || tBlock('error')) + '</div>';
@@ -23349,7 +23418,6 @@ async function openAnalytics(kind) {
  return;
  }
 
- setAdminSectionBack(function(){ openAdminSection('analytics'); });
  var titles = { expenses: tBlock('analytics_exp'), income: tBlock('analytics_inc'), listings: tBlock('analytics_list') };
  document.getElementById('admin-section-title').textContent = titles[kind] || 'Аналитика';
  var p = defaultPeriod();
@@ -23526,12 +23594,12 @@ async function searchBlockUser() {
  var data = await apiGet('/api/users/' + id + '/profile');
  var u = data.user || data;
  var name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || (u.username ? '@' + u.username : ('ID ' + id));
- var foundRoleName = roleName(u.role) || "";
+ var roleName = roleName(u.role) || "";
  window._blockFoundName = name;
  box.innerHTML =
  '<div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openBlockUserActions(' + id + ')">' +
  '<div class="top"><div class="title">' + String(name).replace(/</g,'&lt;') + '</div>' +
- (foundRoleName ? '<span class="badge badge-gray">' + String(foundRoleName).replace(/</g,'&lt;') + '</span>' : '') +
+ (roleName ? '<span class="badge badge-gray">' + String(roleName).replace(/</g,'&lt;') + '</span>' : '') +
  '</div><div class="subtitle">ID ' + id + (u.username ? (' · @' + String(u.username).replace(/</g,'&lt;')) : '') + '</div></div>';
  } catch (e) {
  box.innerHTML = '<div class="empty">' + (e.message || 'Пользователь не найден') + '</div>';
@@ -25364,159 +25432,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
-<!-- XCOD FINAL MICRO-I18N OVERRIDE: ratings + FAQ + role_owner all 14 -->
+<!-- XCOD FINAL MICRO-I18N OVERRIDE: active tab + profile ratings + FAQ -->
 <script>
 (function(){try{
 var X={
-ru:{seller_rating:'Рейтинг продавца',buyer_rating:'Рейтинг покупателя',staff_rating:'Рейтинг сотрудника',faq:'FAQ',role_owner:'Создатель'},
-en:{seller_rating:'Seller rating',buyer_rating:'Buyer rating',staff_rating:'Staff rating',faq:'FAQ',role_owner:'Founder'},
-uk:{seller_rating:'Рейтинг продавця',buyer_rating:'Рейтинг покупця',staff_rating:'Рейтинг співробітника',faq:'Часті запитання',role_owner:'Засновник'},
-de:{seller_rating:'Verkäuferbewertung',buyer_rating:'Käuferbewertung',staff_rating:'Mitarbeiterbewertung',faq:'Häufig gestellte Fragen',role_owner:'Gründer'},
-fr:{seller_rating:'Note du vendeur',buyer_rating:'Note de l’acheteur',staff_rating:'Note du personnel',faq:'Questions fréquentes',role_owner:'Fondateur'},
-es:{seller_rating:'Valoración del vendedor',buyer_rating:'Valoración del comprador',staff_rating:'Valoración del personal',faq:'Preguntas frecuentes',role_owner:'Fundador'},
-it:{seller_rating:'Valutazione venditore',buyer_rating:'Valutazione acquirente',staff_rating:'Valutazione staff',faq:'Domande frequenti',role_owner:'Fondatore'},
-pt:{seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',faq:'Perguntas frequentes',role_owner:'Fundador'},
-'pt-BR':{seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',faq:'Perguntas frequentes',role_owner:'Fundador'},
-zh:{seller_rating:'卖家评分',buyer_rating:'买家评分',staff_rating:'员工评分',faq:'常见问题',role_owner:'创始人'},
-tr:{seller_rating:'Satıcı puanı',buyer_rating:'Alıcı puanı',staff_rating:'Personel puanı',faq:'Sıkça sorulan sorular',role_owner:'Kurucu'},
-id:{seller_rating:'Peringkat penjual',buyer_rating:'Peringkat pembeli',staff_rating:'Peringkat staf',faq:'Pertanyaan yang sering diajukan',role_owner:'Pendiri'},
-ar:{seller_rating:'تقييم البائع',buyer_rating:'تقييم المشتري',staff_rating:'تقييم الموظف',faq:'الأسئلة الشائعة',role_owner:'مؤسس'},
-ja:{seller_rating:'出品者評価',buyer_rating:'購入者評価',staff_rating:'スタッフ評価',faq:'よくある質問',role_owner:'創設者'},
-ko:{seller_rating:'판매자 평점',buyer_rating:'구매자 평점',staff_rating:'직원 평점',faq:'자주 묻는 질문',role_owner:'창립자'}
+ru:{active_tab:'Активные',active_listings:'Активные',seller_rating:'Рейтинг продавца',buyer_rating:'Рейтинг покупателя',staff_rating:'Рейтинг сотрудника',faq:'Часто задаваемые вопросы'},
+en:{active_tab:'Active',active_listings:'Active',seller_rating:'Seller rating',buyer_rating:'Buyer rating',staff_rating:'Staff rating',faq:'FAQ'},
+de:{active_tab:'Aktiv',active_listings:'Aktiv',seller_rating:'Verkäuferbewertung',buyer_rating:'Käuferbewertung',staff_rating:'Mitarbeiterbewertung',faq:'Häufig gestellte Fragen'},
+fr:{active_tab:'Actifs',active_listings:'Actifs',seller_rating:'Note du vendeur',buyer_rating:'Note de l’acheteur',staff_rating:'Note du personnel',faq:'Questions fréquentes'},
+es:{active_tab:'Activos',active_listings:'Activos',seller_rating:'Valoración del vendedor',buyer_rating:'Valoración del comprador',staff_rating:'Valoración del personal',faq:'Preguntas frecuentes'},
+zh:{active_tab:'活跃',active_listings:'活跃',seller_rating:'卖家评分',buyer_rating:'买家评分',staff_rating:'员工评分',faq:'常见问题'},
+uk:{active_tab:'Активні',active_listings:'Активні',seller_rating:'Рейтинг продавця',buyer_rating:'Рейтинг покупця',staff_rating:'Рейтинг працівника',faq:'Часті запитання'},
+it:{active_tab:'Attivi',active_listings:'Attivi',seller_rating:'Valutazione del venditore',buyer_rating:'Valutazione dell’acquirente',staff_rating:'Valutazione del personale',faq:'Domande frequenti'},
+pt:{active_tab:'Ativos',active_listings:'Ativos',seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',faq:'Perguntas frequentes'},
+'pt-BR':{active_tab:'Ativos',active_listings:'Ativos',seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',faq:'Perguntas frequentes'},
+tr:{active_tab:'Aktif',active_listings:'Aktif',seller_rating:'Satıcı puanı',buyer_rating:'Alıcı puanı',staff_rating:'Personel puanı',faq:'Sıkça sorulan sorular'},
+id:{active_tab:'Aktif',active_listings:'Aktif',seller_rating:'Rating penjual',buyer_rating:'Rating pembeli',staff_rating:'Rating staf',faq:'Pertanyaan yang sering diajukan'},
+ar:{active_tab:'نشط',active_listings:'نشط',seller_rating:'تقييم البائع',buyer_rating:'تقييم المشتري',staff_rating:'تقييم الموظف',faq:'الأسئلة الشائعة'},
+ja:{active_tab:'アクティブ',active_listings:'アクティブ',seller_rating:'販売者評価',buyer_rating:'購入者評価',staff_rating:'スタッフ評価',faq:'よくある質問'},
+ko:{active_tab:'활성',active_listings:'활성',seller_rating:'판매자 평점',buyer_rating:'구매자 평점',staff_rating:'직원 평점',faq:'자주 묻는 질문'}
 };
-Object.keys(X).forEach(function(l){
-  if (typeof I18N==='undefined') return;
-  if (!I18N[l]) I18N[l]={};
-  Object.keys(X[l]).forEach(function(k){ I18N[l][k]=X[l][k]; });
-});
+Object.keys(X).forEach(function(l){if(!I18N[l])I18N[l]={};Object.assign(I18N[l],X[l]);});
 }catch(e){}})();
-</script>
-<!-- XCOD FINAL MICRO-I18N OVERRIDE: ratings + FAQ + role_owner all 14 langs -->
-<script>
-(function(){try{
-var X={
-ru:{seller_rating:'Рейтинг продавца',buyer_rating:'Рейтинг покупателя',staff_rating:'Рейтинг сотрудника',faq:'FAQ',role_owner:'Создатель'},
-en:{seller_rating:'Seller rating',buyer_rating:'Buyer rating',staff_rating:'Staff rating',faq:'FAQ',role_owner:'Founder'},
-uk:{seller_rating:'Рейтинг продавця',buyer_rating:'Рейтинг покупця',staff_rating:'Рейтинг співробітника',faq:'Часті запитання',role_owner:'Засновник'},
-de:{seller_rating:'Verkäuferbewertung',buyer_rating:'Käuferbewertung',staff_rating:'Mitarbeiterbewertung',faq:'Häufig gestellte Fragen',role_owner:'Gründer'},
-fr:{seller_rating:'Note du vendeur',buyer_rating:'Note de l’acheteur',staff_rating:'Note du personnel',faq:'Questions fréquentes',role_owner:'Fondateur'},
-es:{seller_rating:'Valoración del vendedor',buyer_rating:'Valoración del comprador',staff_rating:'Valoración del personal',faq:'Preguntas frecuentes',role_owner:'Fundador'},
-it:{seller_rating:'Valutazione venditore',buyer_rating:'Valutazione acquirente',staff_rating:'Valutazione staff',faq:'Domande frequenti',role_owner:'Fondatore'},
-pt:{seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',faq:'Perguntas frequentes',role_owner:'Fundador'},
-'pt-BR':{seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação da equipe',faq:'Perguntas frequentes',role_owner:'Fundador'},
-zh:{seller_rating:'卖家评分',buyer_rating:'买家评分',staff_rating:'员工评分',faq:'常见问题',role_owner:'创始人'},
-tr:{seller_rating:'Satıcı puanı',buyer_rating:'Alıcı puanı',staff_rating:'Personel puanı',faq:'Sıkça sorulan sorular',role_owner:'Kurucu'},
-id:{seller_rating:'Peringkat penjual',buyer_rating:'Peringkat pembeli',staff_rating:'Peringkat staf',faq:'Pertanyaan yang sering diajukan',role_owner:'Pendiri'},
-ar:{seller_rating:'تقييم البائع',buyer_rating:'تقييم المشتري',staff_rating:'تقييم الموظف',faq:'الأسئلة الشائعة',role_owner:'مؤسس'},
-ja:{seller_rating:'出品者評価',buyer_rating:'購入者評価',staff_rating:'スタッフ評価',faq:'よくある質問',role_owner:'創設者'},
-ko:{seller_rating:'판매자 평점',buyer_rating:'구매자 평점',staff_rating:'직원 평점',faq:'자주 묻는 질문',role_owner:'창립자'}
-};
-Object.keys(X).forEach(function(l){
-  if (typeof I18N === 'undefined') return;
-  if (!I18N[l]) I18N[l] = {};
-  Object.keys(X[l]).forEach(function(k){ I18N[l][k] = X[l][k]; });
-});
-}catch(e){}})();
-
-/* ===== XCOD I18N PATCH: FAQ + ratings + roles across all supported languages ===== */
-(function(){try{
-var XP={
-"ru":{
-  "support_faq":"FAQ","faq":"FAQ","seller_rating":"Рейтинг продавца","buyer_rating":"Рейтинг покупателя","staff_rating":"Рейтинг персонала",
-  "role_label":"Роль","your_role":"Ваша роль","role_user":"Пользователь","role_partner":"Партнёр","role_corp":"Корпоративный","role_intern":"Стажёр","role_mod":"Модератор","role_admin":"Администратор","role_owner":"Создатель"
-},
-"en":{
-  "support_faq":"FAQ","faq":"FAQ","seller_rating":"Seller rating","buyer_rating":"Buyer rating","staff_rating":"Staff rating",
-  "role_label":"Role","your_role":"Your role","role_user":"User","role_partner":"Partner","role_corp":"Corporate","role_intern":"Intern","role_mod":"Moderator","role_admin":"Administrator","role_owner":"Owner"
-},
-"uk":{
-  "support_faq":"Поширені запитання","faq":"Поширені запитання","seller_rating":"Рейтинг продавця","buyer_rating":"Рейтинг покупця","staff_rating":"Рейтинг персоналу",
-  "role_label":"Роль","your_role":"Ваша роль","role_user":"Користувач","role_partner":"Партнер","role_corp":"Корпоративний","role_intern":"Стажер","role_mod":"Модератор","role_admin":"Адміністратор","role_owner":"Власник"
-},
-"de":{
-  "support_faq":"Häufig gestellte Fragen","faq":"Häufig gestellte Fragen","seller_rating":"Verkäuferbewertung","buyer_rating":"Käuferbewertung","staff_rating":"Mitarbeiterbewertung",
-  "role_label":"Rolle","your_role":"Ihre Rolle","role_user":"Benutzer","role_partner":"Partner","role_corp":"Unternehmen","role_intern":"Praktikant","role_mod":"Moderator","role_admin":"Administrator","role_owner":"Inhaber"
-},
-"fr":{
-  "support_faq":"Questions fréquentes","faq":"Questions fréquentes","seller_rating":"Évaluation du vendeur","buyer_rating":"Évaluation de l’acheteur","staff_rating":"Évaluation du personnel",
-  "role_label":"Rôle","your_role":"Votre rôle","role_user":"Utilisateur","role_partner":"Partenaire","role_corp":"Entreprise","role_intern":"Stagiaire","role_mod":"Modérateur","role_admin":"Administrateur","role_owner":"Propriétaire"
-},
-"es":{
-  "support_faq":"Preguntas frecuentes","faq":"Preguntas frecuentes","seller_rating":"Valoración del vendedor","buyer_rating":"Valoración del comprador","staff_rating":"Valoración del personal",
-  "role_label":"Rol","your_role":"Tu rol","role_user":"Usuario","role_partner":"Socio","role_corp":"Corporativo","role_intern":"Becario","role_mod":"Moderador","role_admin":"Administrador","role_owner":"Propietario"
-},
-"it":{
-  "support_faq":"Domande frequenti","faq":"Domande frequenti","seller_rating":"Valutazione del venditore","buyer_rating":"Valutazione dell’acquirente","staff_rating":"Valutazione del personale",
-  "role_label":"Ruolo","your_role":"Il tuo ruolo","role_user":"Utente","role_partner":"Partner","role_corp":"Aziendale","role_intern":"Stagista","role_mod":"Moderatore","role_admin":"Amministratore","role_owner":"Proprietario"
-},
-"pt":{
-  "support_faq":"Perguntas frequentes","faq":"Perguntas frequentes","seller_rating":"Avaliação do vendedor","buyer_rating":"Avaliação do comprador","staff_rating":"Avaliação da equipa",
-  "role_label":"Função","your_role":"A sua função","role_user":"Utilizador","role_partner":"Parceiro","role_corp":"Corporativo","role_intern":"Estagiário","role_mod":"Moderador","role_admin":"Administrador","role_owner":"Proprietário"
-},
-"pt-BR":{
-  "support_faq":"Perguntas frequentes","faq":"Perguntas frequentes","seller_rating":"Avaliação do vendedor","buyer_rating":"Avaliação do comprador","staff_rating":"Avaliação da equipe",
-  "role_label":"Função","your_role":"Sua função","role_user":"Usuário","role_partner":"Parceiro","role_corp":"Corporativo","role_intern":"Estagiário","role_mod":"Moderador","role_admin":"Administrador","role_owner":"Proprietário"
-},
-"tr":{
-  "support_faq":"Sıkça sorulan sorular","faq":"Sıkça sorulan sorular","seller_rating":"Satıcı puanı","buyer_rating":"Alıcı puanı","staff_rating":"Personel puanı",
-  "role_label":"Rol","your_role":"Rolünüz","role_user":"Kullanıcı","role_partner":"Partner","role_corp":"Kurumsal","role_intern":"Stajyer","role_mod":"Moderatör","role_admin":"Yönetici","role_owner":"Sahip"
-},
-"id":{
-  "support_faq":"Pertanyaan yang sering diajukan","faq":"Pertanyaan yang sering diajukan","seller_rating":"Rating penjual","buyer_rating":"Rating pembeli","staff_rating":"Rating staf",
-  "role_label":"Peran","your_role":"Peran Anda","role_user":"Pengguna","role_partner":"Partner","role_corp":"Korporat","role_intern":"Magang","role_mod":"Moderator","role_admin":"Administrator","role_owner":"Pemilik"
-},
-"ar":{
-  "support_faq":"الأسئلة الشائعة","faq":"الأسئلة الشائعة","seller_rating":"تقييم البائع","buyer_rating":"تقييم المشتري","staff_rating":"تقييم الموظفين",
-  "role_label":"الدور","your_role":"دورك","role_user":"مستخدم","role_partner":"شريك","role_corp":"مؤسسي","role_intern":"متدرب","role_mod":"مشرف","role_admin":"مسؤول","role_owner":"المالك"
-},
-"zh":{
-  "support_faq":"常见问题","faq":"常见问题","seller_rating":"卖家评分","buyer_rating":"买家评分","staff_rating":"员工评分",
-  "role_label":"角色","your_role":"您的角色","role_user":"用户","role_partner":"合作伙伴","role_corp":"企业","role_intern":"实习生","role_mod":"版主","role_admin":"管理员","role_owner":"所有者"
-},
-"ja":{
-  "support_faq":"よくある質問","faq":"よくある質問","seller_rating":"販売者評価","buyer_rating":"購入者評価","staff_rating":"スタッフ評価",
-  "role_label":"役割","your_role":"あなたの役割","role_user":"ユーザー","role_partner":"パートナー","role_corp":"法人","role_intern":"インターン","role_mod":"モデレーター","role_admin":"管理者","role_owner":"所有者"
-},
-"ko":{
-  "support_faq":"자주 묻는 질문","faq":"자주 묻는 질문","seller_rating":"판매자 평점","buyer_rating":"구매자 평점","staff_rating":"직원 평점",
-  "role_label":"역할","your_role":"내 역할","role_user":"사용자","role_partner":"파트너","role_corp":"법인","role_intern":"인턴","role_mod":"모더레이터","role_admin":"관리자","role_owner":"소유자"
-}
-};
-Object.keys(XP).forEach(function(lang){
-  if(!I18N[lang]) I18N[lang]={};
-  Object.keys(XP[lang]).forEach(function(k){ I18N[lang][k]=XP[lang][k]; });
-});
-}catch(e){console.warn('I18N FAQ/ratings/roles patch',e);}})();
-
-/* ===== XCOD FINAL ROLE + PROFILE RATING I18N OVERRIDE ===== */
-(function(){try{
-  var XR={
-    ru:{seller_rating:'Рейтинг продавца',buyer_rating:'Рейтинг покупателя',staff_rating:'Рейтинг сотрудника',role_user:'Пользователь',role_partner:'Партнёр',role_corp:'Юрлицо',role_intern:'Стажёр',role_mod:'Модератор',role_admin:'Администратор',role_owner:'Создатель'},
-    en:{seller_rating:'Seller rating',buyer_rating:'Buyer rating',staff_rating:'Employee rating',role_user:'User',role_partner:'Partner',role_corp:'Corporate',role_intern:'Intern',role_mod:'Moderator',role_admin:'Administrator',role_owner:'Founder'},
-    uk:{seller_rating:'Рейтинг продавця',buyer_rating:'Рейтинг покупця',staff_rating:'Рейтинг співробітника',role_user:'Користувач',role_partner:'Партнер',role_corp:'Юридична особа',role_intern:'Стажер',role_mod:'Модератор',role_admin:'Адміністратор',role_owner:'Засновник'},
-    de:{seller_rating:'Verkäuferbewertung',buyer_rating:'Käuferbewertung',staff_rating:'Mitarbeiterbewertung',role_user:'Benutzer',role_partner:'Partner',role_corp:'Unternehmen',role_intern:'Praktikant',role_mod:'Moderator',role_admin:'Administrator',role_owner:'Gründer'},
-    fr:{seller_rating:'Évaluation du vendeur',buyer_rating:'Évaluation de l’acheteur',staff_rating:'Évaluation de l’employé',role_user:'Utilisateur',role_partner:'Partenaire',role_corp:'Entreprise',role_intern:'Stagiaire',role_mod:'Modérateur',role_admin:'Administrateur',role_owner:'Fondateur'},
-    es:{seller_rating:'Valoración del vendedor',buyer_rating:'Valoración del comprador',staff_rating:'Valoración del empleado',role_user:'Usuario',role_partner:'Socio',role_corp:'Empresa',role_intern:'Becario',role_mod:'Moderador',role_admin:'Administrador',role_owner:'Fundador'},
-    it:{seller_rating:'Valutazione del venditore',buyer_rating:'Valutazione dell’acquirente',staff_rating:'Valutazione del dipendente',role_user:'Utente',role_partner:'Partner',role_corp:'Aziendale',role_intern:'Stagista',role_mod:'Moderatore',role_admin:'Amministratore',role_owner:'Fondatore'},
-    pt:{seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação do funcionário',role_user:'Utilizador',role_partner:'Parceiro',role_corp:'Empresarial',role_intern:'Estagiário',role_mod:'Moderador',role_admin:'Administrador',role_owner:'Fundador'},
-    'pt-BR':{seller_rating:'Avaliação do vendedor',buyer_rating:'Avaliação do comprador',staff_rating:'Avaliação do funcionário',role_user:'Usuário',role_partner:'Parceiro',role_corp:'Empresarial',role_intern:'Estagiário',role_mod:'Moderador',role_admin:'Administrador',role_owner:'Fundador'},
-    tr:{seller_rating:'Satıcı puanı',buyer_rating:'Alıcı puanı',staff_rating:'Çalışan puanı',role_user:'Kullanıcı',role_partner:'Partner',role_corp:'Kurumsal',role_intern:'Stajyer',role_mod:'Moderatör',role_admin:'Yönetici',role_owner:'Kurucu'},
-    id:{seller_rating:'Rating penjual',buyer_rating:'Rating pembeli',staff_rating:'Rating karyawan',role_user:'Pengguna',role_partner:'Mitra',role_corp:'Korporat',role_intern:'Magang',role_mod:'Moderator',role_admin:'Administrator',role_owner:'Pendiri'},
-    ar:{seller_rating:'تقييم البائع',buyer_rating:'تقييم المشتري',staff_rating:'تقييم الموظف',role_user:'مستخدم',role_partner:'شريك',role_corp:'مؤسسي',role_intern:'متدرب',role_mod:'مشرف',role_admin:'مسؤول',role_owner:'مؤسس'},
-    zh:{seller_rating:'卖家评分',buyer_rating:'买家评分',staff_rating:'员工评分',role_user:'用户',role_partner:'合作伙伴',role_corp:'企业',role_intern:'实习生',role_mod:'版主',role_admin:'管理员',role_owner:'创始人'},
-    ja:{seller_rating:'販売者評価',buyer_rating:'購入者評価',staff_rating:'従業員評価',role_user:'ユーザー',role_partner:'パートナー',role_corp:'法人',role_intern:'インターン',role_mod:'モデレーター',role_admin:'管理者',role_owner:'創設者'},
-    ko:{seller_rating:'판매자 평점',buyer_rating:'구매자 평점',staff_rating:'직원 평점',role_user:'사용자',role_partner:'파트너',role_corp:'기업',role_intern:'인턴',role_mod:'모더레이터',role_admin:'관리자',role_owner:'창립자'}
-  };
-  Object.keys(XR).forEach(function(lang){
-    if(!I18N[lang]) I18N[lang]={};
-    Object.keys(XR[lang]).forEach(function(k){ I18N[lang][k]=XR[lang][k]; });
-  });
-  roleName=function(role){
-    var r=parseInt(role,10);
-    if(isNaN(r)) r=0;
-    var key=r>=6?'role_owner':r>=5?'role_admin':r>=4?'role_mod':r>=3?'role_intern':r>=2?'role_corp':r>=1?'role_partner':'role_user';
-    return tBlock(key);
-  };
-}catch(e){console.warn('final role/profile rating i18n',e);}})();
 </script>
 </body>
