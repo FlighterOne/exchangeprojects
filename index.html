@@ -22781,6 +22781,14 @@ function fmtRub(n) {
   n = Number(n) || 0;
   return Math.round(n).toLocaleString('ru-RU');
 }
+/** RUB with exactly 2 decimal places (for deposit amounts matching Platega) */
+function fmtRub2(n) {
+  n = Number(n) || 0;
+  var s = (Math.round(n * 100) / 100).toFixed(2);
+  var parts = s.split('.');
+  var intPart = Number(parts[0]).toLocaleString('ru-RU');
+  return intPart + ',' + parts[1];
+}
 function rubOf(usd) {
   return (Number(usd) || 0) * (_usdRubRate || 90);
 }
@@ -22811,8 +22819,15 @@ function updateDepositTotals() {
     pct = _depositPromo.pct;
     total = Math.round(original * (1 - pct / 100) * 100) / 100;
   }
-  // Hint next to input: approximate RUB for entered credit (no commission)
-  if (rub) rub.textContent = amount > 0 ? '~' + fmtRub(rubOf(amount)) + ' ₽' : '~0 ₽';
+  // RUB amounts: same 2-step rounding as server/Platega
+  // baseRub = round(credit × rate, 2); payRub = round(baseRub × (1+fee), 2)
+  var feeRate = feeInfo.rate || 0;
+  var baseRub = Math.round(amount * (_usdRubRate || 90) * 100) / 100;
+  var payRubExact = Math.round(baseRub * (1 + feeRate) * 100) / 100;
+  if (pct > 0) {
+    payRubExact = Math.round(payRubExact * (1 - pct / 100) * 100) / 100;
+  }
+  if (rub) rub.textContent = amount > 0 ? '~' + fmtRub2(baseRub) + ' ₽' : '~0,00 ₽';
   // Red min error under field
   if (minErr) {
     if (raw !== '' && amount > 0 && amount < 0.1) {
@@ -22823,12 +22838,12 @@ function updateDepositTotals() {
       minErr.textContent = '';
     }
   }
-  // Only "Итого к оплате" — strip any leftover {total} from i18n
+  // Only "Итого к оплате"
   if (line) {
     var label = (tBlock('total_pay') || 'Итого к оплате');
     label = String(label).replace(/\{\s*total\s*\}/gi, '').replace(/:\s*$/, '').trim();
     if (!label) label = 'Итого к оплате';
-    var rubTotal = fmtRub(rubOf(total));
+    var rubTotal = fmtRub2(payRubExact);
     if (amount <= 0) {
       line.innerHTML = label + ': <b>0.00 $</b>';
     } else if (pct > 0 && total < original) {
@@ -23050,26 +23065,25 @@ async function startDeposit() {
     });
     if (!result || !result.payment_url) throw new Error((result && result.error) || 'Payment link was not returned');
 
-    // Customer pays credit + commission. Platega receives only the base (without fee).
-    // Show exact provider amount (as sent to Platega) — no extra rounding.
+    // Display amounts must match what the user sees on Platega.
+    // We still SEND base (without fee) to Platega; Platega adds its % on the payment page.
+    // "К оплате" = credit + commission in RUB (pay_rub) — same number Platega shows.
+    // "К зачислению" = exact amount the user entered.
     var creditUsd = Number(result.credit != null ? result.credit : amount);
-    var providerAmt = Number(result.provider_amount);
     var usdRate = Number(result.usd_rub || _usdRubRate || 90);
     var isUsdt = String(result.provider_currency || '').toUpperCase() === 'USDT';
     var payDisplay;
     if (isUsdt) {
-      // exact USDT amount
-      payDisplay = (Number.isFinite(providerAmt) ? providerAmt : creditUsd).toFixed(2) + ' USDT';
+      var payUsdt = Number(result.total != null ? result.total : creditUsd);
+      payDisplay = (Math.round(payUsdt * 100) / 100).toFixed(2) + ' USDT';
     } else {
-      // exact RUB as sent to Platega (e.g. 92.67 — keep decimals)
-      var rubExact = Number.isFinite(providerAmt) ? providerAmt : (creditUsd * usdRate);
-      // show up to 2 decimal places without forcing Math.round to integer
-      var rubStr = (Math.round(rubExact * 100) / 100).toFixed(2);
-      // trim trailing .00 for whole rubles, keep .67 etc.
-      if (rubStr.indexOf('.') >= 0) {
-        rubStr = rubStr.replace(/0+$/, '').replace(/\.$/, '');
+      // Prefer server pay_rub (total with fee × rate). Fallback: total USD × rate.
+      var rubExact = Number(result.pay_rub);
+      if (!(rubExact > 0)) {
+        var totalUsd = Number(result.total != null ? result.total : creditUsd);
+        rubExact = totalUsd * usdRate;
       }
-      payDisplay = rubStr + ' ₽';
+      payDisplay = fmtRub2(rubExact) + ' ₽';
     }
     var methodLabel = selectedDepositMethod === 'card' ? (tBlock('sbp') || 'SBP') : (tBlock('crypto') || 'Crypto');
     var discPct = Number(result.discount_pct || 0);
