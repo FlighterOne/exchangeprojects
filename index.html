@@ -2069,14 +2069,13 @@ button.btn.btn-compact,
  <button class="back-link" onclick="showPage('balance')" data-i18n="back">← Назад</button>
  <div class="section-title" data-i18n="withdrawal">Вывод</div>
 
- <div class="min-hint" data-i18n="min_5">Минимум 5$</div>
-
  <div class="form-group">
- <label class="form-label" data-i18n="amount_usdt">Сумма (USDT)</label>
+ <label class="form-label" data-i18n="amount_usd">Сумма ($)</label>
  <div class="amount-with-rub">
- <input class="form-input" type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01" oninput="updateWithdrawTotals()">
+ <input class="form-input" type="number" id="withdraw-amount" placeholder="0.00" min="5" step="0.01" oninput="updateWithdrawTotals()">
  <span class="amount-rub-hint" id="withdraw-amount-rub">~0 ₽</span>
  </div>
+ <div id="withdraw-min-error" style="display:none;color:#ff3b30;font-size:12px;margin-top:6px;"></div>
  <div class="field-hint">Доступно: <span id="withdraw-available">0.00</span> $</div>
  <div class="total-pay-line" id="withdraw-total-line">Итого к списанию: 0.00 $</div>
  <div class="field-hint" id="withdraw-fee-hint" style="display:none;"></div>
@@ -22858,16 +22857,27 @@ function updateDepositTotals() {
 
 function updateWithdrawTotals() {
   try {
-    var amount = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+    var raw = ((document.getElementById('withdraw-amount') || {}).value) || '';
+    var amount = parseFloat(raw) || 0;
     var method = selectedWithdrawMethod || null;
     var rubEl = document.getElementById('withdraw-amount-rub');
-    if (rubEl) rubEl.textContent = amount > 0 ? ('~' + fmtRub(rubOf(amount)) + ' ₽') : '~0 ₽';
+    if (rubEl) rubEl.textContent = amount > 0 ? ('~' + fmtRub2(rubOf(amount)) + ' ₽') : '~0,00 ₽';
+    var minErr = document.getElementById('withdraw-min-error');
+    if (minErr) {
+      if (raw !== '' && amount > 0 && amount < 5) {
+        minErr.style.display = '';
+        minErr.textContent = (tBlock('min_5') || 'Минимальная сумма 5$');
+      } else {
+        minErr.style.display = 'none';
+        minErr.textContent = '';
+      }
+    }
     var line = document.getElementById('withdraw-total-line');
     if (!line) return;
     var info = calcFee(amount, method, 'withdraw');
     var pay = method ? info.total : amount;
     var txt = (typeof tBlock === 'function' ? (tBlock('total_to_debit') || 'Итого к списанию') : 'Итого к списанию');
-    line.textContent = txt + ': ' + fmtUsd(pay) + '$ (~' + fmtRub(rubOf(pay)) + ' ₽)';
+    line.textContent = txt + ': ' + fmtUsd(pay) + '$ (~' + fmtRub2(rubOf(pay)) + ' ₽)';
   } catch (e) {}
 }
 
@@ -23104,14 +23114,10 @@ async function startDeposit() {
       }
       payDisplay = fmtRub2(rubExact) + ' ₽';
     }
-    var methodLabel = selectedDepositMethod === 'card' ? (tBlock('sbp') || 'SBP') : (tBlock('crypto') || 'Crypto');
     var discPct = Number(result.discount_pct || 0);
-    var feePctLabel = result.fee_rate ? (' · ' + (Number(result.fee_rate) * 100).toFixed(1).replace(/\.0$/, '') + '%') : '';
-
     var html = '<div class="payment-card">' +
       '<div class="row"><span class="label">' + (tBlock('to_pay') || 'К оплате') + '</span><span class="value"><b>' + payDisplay + '</b></span></div>' +
-      '<div class="row"><span class="label">' + (tBlock('to_credit') || 'К зачислению') + '</span><span class="value">' + Number(creditUsd).toFixed(2) + ' $</span></div>' +
-      '<div class="row"><span class="label">' + (tBlock('pay_method') || 'Способ') + '</span><span class="value">' + methodLabel + feePctLabel + '</span></div>' +
+      '<div class="row"><span class="label">' + (tBlock('to_credit') || 'К зачислению') + '</span><span class="value">' + Number(creditUsd).toFixed(2) + ' $</span></div>'
       (discPct > 0 ? '<div class="row"><span class="label">' + (tBlock('promo_code') || 'Промокод') + '</span><span class="value" style="color:#34c759;">' + promo + ' (−' + discPct + '%)</span></div>' : '') +
       '</div>';
 
