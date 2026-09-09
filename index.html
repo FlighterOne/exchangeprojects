@@ -1999,7 +1999,7 @@ button.btn.btn-compact,
  <div class="wallet-action-icon plus">+</div>
  <div class="wallet-action-label" data-i18n="topup">Пополнить</div>
  </button>
- <button class="wallet-action" id="balance-withdraw-btn" onclick="showPage('withdraw')" style="display:none !important;" aria-hidden="true">
+ <button class="wallet-action" id="balance-withdraw-btn" onclick="showPage('withdraw')">
  <div class="wallet-action-icon minus">−</div>
  <div class="wallet-action-label" data-i18n="withdraw">Withdraw</div>
  </button>
@@ -2168,10 +2168,7 @@ button.btn.btn-compact,
 
  <!-- SUPPORT -->
  <div id="page-support" class="page">
- <div class="section-title" style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
- <span data-i18n="support">Поддержка</span>
- <span style="font-size:13px;font-weight:500;opacity:.55;letter-spacing:0.02em;">mellivora</span>
- </div>
+ <div class="section-title" data-i18n="support">Поддержка</div>
  <div class="support-grid">
  <button type="button" class="support-tile" onclick="openSupportChat()">
  <div class="support-tile-icon">💬</div>
@@ -22926,19 +22923,41 @@ async function watchDepositPayment(paymentRef, credit) {
       if (st && (st.status === 'CONFIRMED' || st.credited)) {
         done = true;
         clearPendingDeposit();
+        var credited = Number(st.credit != null ? st.credit : credit) || 0;
         try { setBalance(st.balance); } catch (e1) { try { await refreshBalance(); } catch(e2){} }
-        try { tg.showAlert('✅ ' + (tBlock('deposit_success') || 'Funds credited successfully')); } catch (e3) {}
-        try { showPage('balance'); } catch (e4) {}
+        // MiniApp: replace preview with success screen
+        try {
+          var box = document.getElementById('deposit-result-content');
+          if (box) {
+            box.innerHTML =
+              '<div style="text-align:center;padding:28px 12px 8px;">' +
+              '<div style="font-size:48px;line-height:1;margin-bottom:12px;">✅</div>' +
+              '<div style="font-size:18px;font-weight:700;margin-bottom:8px;">' + (tBlock('deposit_success') || 'Успешная оплата') + '</div>' +
+              '<div style="font-size:15px;opacity:.85;margin-bottom:4px;">' + (tBlock('to_credit') || 'К зачислению') + '</div>' +
+              '<div style="font-size:22px;font-weight:700;">' + Number(credited).toFixed(2) + ' $</div>' +
+              '</div>' +
+              '<button class="btn" style="margin-top:18px;" type="button" id="deposit-success-back">' + (tBlock('back_to_balance') || '← К балансу') + '</button>';
+            var b = document.getElementById('deposit-success-back');
+            if (b) b.onclick = function(){ showPage('balance'); };
+            var titleEl = document.querySelector('#page-deposit-result .section-title');
+            if (titleEl) titleEl.textContent = tBlock('deposit_success') || 'Успешная оплата';
+            showPage('deposit-result');
+          } else {
+            try { tg.showAlert('✅ ' + (tBlock('deposit_success') || 'Успешная оплата') + '\n' + credited.toFixed(2) + ' $'); } catch(e3) {}
+            showPage('balance');
+          }
+        } catch (e4) {
+          try { showPage('balance'); } catch (e5) {}
+        }
         return;
       }
       if (st && ['CANCELED','CHARGEBACKED','CANCELLED'].indexOf(String(st.status || '').toUpperCase()) >= 0) {
         done = true;
         clearPendingDeposit();
-        try { tg.showAlert(tBlock('deposit_fail') || 'Payment failed. Funds were not credited'); } catch (e5) {}
+        try { tg.showAlert(tBlock('deposit_fail') || 'Payment failed. Funds were not credited'); } catch (e6) {}
         return;
       }
     } catch (e) {}
-    // Stop polling after 30 minutes; the webhook itself remains authoritative.
     if (Date.now() - __depositWatchStartedAt > 30 * 60 * 1000) {
       done = true;
       clearPendingDeposit();
