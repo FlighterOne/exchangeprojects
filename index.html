@@ -2013,6 +2013,7 @@ button.btn.btn-compact,
  <div class="section-title" data-i18n="deposit">Пополнение</div>
 
  <div class="min-hint" data-i18n="min_01">Минимум 0.1$</div>
+ <div id="deposit-rate-hint" style="font-size:12px;opacity:.75;margin:4px 0 10px;">1$ ≈ … ₽</div>
 
  <div class="form-group">
  <label class="form-label" data-i18n="amount_usd">Сумма ($)</label>
@@ -4989,7 +4990,7 @@ function showPage(name) {
  if (name === 'collaborate' || name === 'support-hire') { try { setCollabTab('ads'); } catch (e) { try { renderHireInfo(); } catch(e2){} } }
  if (name === 'job-form' || name === 'admin-add-staff' || name === 'support-chat' || name === 'admin-support-chat') { try { applyI18n(); } catch (e) {} }
  if (name === 'listing-create' || name === 'listing-edit' || name === 'create-freelance') { try { applyTermsLabels(); applyI18n(); } catch (eLc) {} }
- if (name === 'deposit' || name === 'withdraw') { try { ensureUsdRate(true).then(function(){ if(name==='deposit') updateDepositTotals(); else updateWithdrawTotals(); }); } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
+ if (name === 'deposit' || name === 'withdraw') { try { if (name==='deposit') startRatePolling(); else { stopRatePolling(); ensureUsdRate(true).then(function(){ updateWithdrawTotals(); }); } } catch (e) {} try { applyTermsLabels(); applyI18n(); } catch (e2) {} }
  if (name === 'home') loadListings();
  if (name === 'profile') { loadOwnProfileListings(); try { updateProfileLogoutVisibility(); } catch (e) {}
  try { fillProfileSettingsI18n(); } catch (e) {} }
@@ -22728,6 +22729,9 @@ var PLATFORM_FEE_RATE = 0.025;
 var DEPOSIT_FEE_RATES = { card: 0.085, crypto: 0.05, stars: 0 };
 var WITHDRAW_FEE_RATES = { card: 0.085, crypto: 0.05 };
 var _usdRubRate = 90;
+var _usdRubSource = '';
+var _usdRubUpdatedAt = 0;
+var __ratePollTimer = null;
 
 async function ensureUsdRate(force) {
   try {
@@ -22735,10 +22739,40 @@ async function ensureUsdRate(force) {
     var d = await apiGet(path);
     if (d && d.usd_rub) {
       var r = Number(d.usd_rub);
-      if (r && r > 1 && r < 500) _usdRubRate = r;
+      if (r && r > 1 && r < 500) {
+        _usdRubRate = r;
+        _usdRubSource = d.source || '';
+        _usdRubUpdatedAt = Date.now();
+      }
     }
   } catch (e) {}
+  try { updateRateHint(); } catch (e2) {}
   return _usdRubRate;
+}
+
+function updateRateHint() {
+  var el = document.getElementById('deposit-rate-hint');
+  if (!el) return;
+  var r = _usdRubRate || 0;
+  if (r > 0) {
+    el.textContent = '1$ ≈ ' + (Math.round(r * 100) / 100).toFixed(2) + ' ₽' + (_usdRubSource ? ' · ' + _usdRubSource : '');
+    el.style.display = '';
+  }
+}
+
+function startRatePolling() {
+  stopRatePolling();
+  ensureUsdRate(true);
+  __ratePollTimer = setInterval(function() {
+    try {
+      var page = document.getElementById('page-deposit');
+      if (page && page.classList.contains('active')) ensureUsdRate(true).then(function(){ try { updateDepositTotals(); } catch(e){} });
+      else stopRatePolling();
+    } catch (e) { stopRatePolling(); }
+  }, 30000); // every 30s while on deposit page
+}
+function stopRatePolling() {
+  if (__ratePollTimer) { clearInterval(__ratePollTimer); __ratePollTimer = null; }
 }
 
 function fmtUsd(n) {
@@ -22915,41 +22949,52 @@ function resumePendingDepositWatch() {
 function openPlategaPayment(url) {
   if (!url) {
     try { tg.showAlert((typeof tBlock === 'function' ? tBlock('pay_unavailable') : null) || 'Payment link is missing'); } catch (e) { alert('Payment link is missing'); }
-    return;
+    return false;
   }
   url = String(url).trim();
   if (!/^https?:\/\//i.test(url)) {
-    try { tg.showAlert('Invalid payment link'); } catch (e) { alert('Invalid payment link'); }
-    return;
+    if (url.indexOf('//') === 0) url = 'https:' + url;
+    else if (url.indexOf('pay.') === 0 || url.indexOf('app.') === 0) url = 'https://' + url;
   }
-  // Telegram Mini App: prefer official openLink (opens external browser / in-app browser)
-  try {
-    if (window.tg && typeof tg.openLink === 'function') {
-      try { tg.openLink(url, { try_instant_view: false }); } catch (e0) { tg.openLink(url); }
-      return;
-    }
-  } catch (e1) {}
-  try {
-    if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.openLink === 'function') {
-      try { Telegram.WebApp.openLink(url, { try_instant_view: false }); } catch (e2) { Telegram.WebApp.openLink(url); }
-      return;
-    }
-  } catch (e3) {}
-  // Fallback for browser / desktop
-  try {
-    var a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function() { try { a.remove(); } catch (e4) {} }, 500);
-    return;
-  } catch (e5) {}
-  try { window.open(url, '_blank', 'noopener,noreferrer'); } catch (e6) {
-    try { location.href = url; } catch (e7) {}
+  if (!/^https?:\/\//i.test(url)) {
+    try { tg.showAlert('Invalid payment link: ' + url); } catch (e) { alert('Invalid payment link'); }
+    return false;
   }
+  var opened = false;
+  // 1) Telegram Mini App official API
+  try {
+    var w = window.tg || (window.Telegram && Telegram.WebApp) || null;
+    if (w && typeof w.openLink === 'function') {
+      try { w.openLink(url, { try_instant_view: false }); opened = true; }
+      catch (e0) { try { w.openLink(url); opened = true; } catch (e1) {} }
+    }
+  } catch (e2) {}
+  // 2) Visible <a> click (works better with user gesture)
+  if (!opened) {
+    try {
+      var a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.cssText = 'position:fixed;left:-9999px;';
+      document.body.appendChild(a);
+      a.click();
+      opened = true;
+      setTimeout(function() { try { a.remove(); } catch (e3) {} }, 800);
+    } catch (e4) {}
+  }
+  // 3) window.open
+  if (!opened) {
+    try {
+      var win = window.open(url, '_blank');
+      if (win) opened = true;
+    } catch (e5) {}
+  }
+  // 4) Last resort — navigate current webview
+  if (!opened) {
+    try { window.location.href = url; opened = true; } catch (e6) {}
+  }
+  return opened;
 }
 
 async function payDepositPlatega(paymentUrl) {
@@ -23028,45 +23073,49 @@ async function startDeposit() {
       (discPct > 0 ? '<div class="row"><span class="label">' + (tBlock('promo_code') || 'Промокод') + '</span><span class="value" style="color:#34c759;">' + promo + ' (−' + discPct + '%)</span></div>' : '') +
       '</div>';
 
-    html += '<div class="list-item" style="margin-top:12px;"><div class="subtitle">' + (tBlock('awaiting_payment') || 'Awaiting payment') + '</div></div>';
-    html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" type="button">' + (tBlock('pay_btn') || 'Pay') + '</button>';
-    html += '<button class="btn btn-secondary" style="margin-top:8px;" type="button" id="deposit-back-btn">' + (tBlock('back_to_balance') || tBlock('back') || '← Back to balance') + '</button>';
+    var payUrl = String(result.payment_url || '').trim();
+    html += '<div class="list-item" style="margin-top:12px;"><div class="subtitle">' + (tBlock('awaiting_payment') || 'Ожидание оплаты') + '</div></div>';
+    html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" type="button">' + (tBlock('pay_btn') || 'Оплатить') + '</button>';
+    html += '<button class="btn btn-secondary" style="margin-top:8px;" id="deposit-back-btn" type="button">' + (tBlock('back_to_balance') || tBlock('back') || '← К балансу') + '</button>';
+    if (payUrl) {
+      html += '<div style="margin-top:14px;padding:10px 12px;border-radius:10px;background:rgba(46,166,255,.08);word-break:break-all;font-size:12px;line-height:1.4;">' +
+        '<div style="opacity:.7;margin-bottom:4px;">' + (tBlock('open_payment_link') || 'Ссылка на оплату') + ':</div>' +
+        '<a id="deposit-pay-link" href="' + payUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener noreferrer" style="color:var(--link,#2ea6ff);text-decoration:underline;">' + payUrl.replace(/</g,'&lt;') + '</a>' +
+        '</div>';
+    } else {
+      html += '<div style="margin-top:12px;color:#ff3b30;font-size:13px;">' + (tBlock('pay_unavailable') || 'Ссылка на оплату не получена') + '</div>';
+    }
 
     document.getElementById('deposit-result-content').innerHTML = html;
+    window.__lastPayUrl = payUrl;
     var payBtn = document.getElementById('deposit-pay-btn');
-    var payUrl = String(result.payment_url || '');
     if (payBtn) {
-      payBtn.setAttribute('data-pay-url', payUrl);
-      payBtn.onclick = function() {
-        var u = payBtn.getAttribute('data-pay-url') || payUrl;
-        openPlategaPayment(u);
+      payBtn.onclick = function(ev) {
+        try { if (ev) { ev.preventDefault(); ev.stopPropagation(); } } catch (e0) {}
+        var u = window.__lastPayUrl || payUrl;
+        if (!u) {
+          try { tg.showAlert(tBlock('pay_unavailable') || 'Payment link missing'); } catch (e1) { alert('Payment link missing'); }
+          return;
+        }
+        var ok = openPlategaPayment(u);
+        if (!ok) {
+          try { tg.showAlert((tBlock('open_payment_link') || 'Open link') + ':\n' + u); } catch (e2) { alert(u); }
+        }
       };
     }
     var backBtn = document.getElementById('deposit-back-btn');
-    if (backBtn) {
-      backBtn.onclick = function() { showPage('balance'); };
+    if (backBtn) backBtn.onclick = function() { showPage('balance'); };
+    var payLink = document.getElementById('deposit-pay-link');
+    if (payLink) {
+      payLink.addEventListener('click', function(ev) {
+        try { ev.preventDefault(); } catch (e3) {}
+        openPlategaPayment(payUrl);
+      });
     }
-    // Auto-open Platega payment page once (user can re-open via the button)
+    // Auto-open once after short delay (user already pressed Continue = gesture chain)
     if (payUrl) {
-      try { setTimeout(function(){ openPlategaPayment(payUrl); }, 350); } catch (eAuto) {}
+      try { setTimeout(function(){ openPlategaPayment(payUrl); }, 200); } catch (eAuto) {}
     }
-    // Visible fallback link if Telegram blocks openLink
-    try {
-      var wrap = document.getElementById('deposit-result-content');
-      if (wrap && payUrl) {
-        var a = document.createElement('a');
-        a.href = payUrl;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.className = 'terms-link';
-        a.style.cssText = 'display:block;text-align:center;margin-top:12px;font-size:13px;';
-        a.textContent = (typeof tBlock === 'function' ? (tBlock('open_payment_link') || 'Open payment page') : 'Open payment page');
-        a.onclick = function(ev) {
-          try { ev.preventDefault(); openPlategaPayment(payUrl); } catch (eL) {}
-        };
-        wrap.appendChild(a);
-      }
-    } catch (eLink) {}
     var titleEl = document.querySelector('#page-deposit-result .section-title');
     if (titleEl) titleEl.textContent = tBlock('payment_details') || 'Payment';
     showPage('deposit-result');
