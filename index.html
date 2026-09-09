@@ -5331,7 +5331,7 @@ var I18N = {
  price: 'Цена', from: 'с', to: 'до', type: 'Тип', product_type: 'Вид товара',
  rating_from: 'Рейтинг сотрудника от', service_type: 'Вид услуги', order_svc: 'Заказать', execute_svc: 'Исполнять',
  partner: 'Партнёр', own_product: 'Свой товар', deposit: 'Пополнение', withdrawal: 'Вывод',
- salary: 'Зарплата', freelance_publish: 'Публикация фриланс', tx_done: 'Выполнено',
+ salary: 'Зарплата', admin_credit: 'Начисление администратором', purchase: 'Покупка', freelance_publish: 'Публикация фриланс', tx_done: 'Выполнено',
  tx_pending: 'В обработке', status_awaiting: 'Ожидает', sbp_card: 'СБП / карта', deal: 'Сделка', tx_rejected: 'Отклонено', lang_changed: 'Язык изменён',
  original: 'оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
  insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: tBlock('mod_tx') || 'Transaction moderation',
@@ -6120,7 +6120,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  price: 'Price', from: 'from', to: 'to', type: 'Type', product_type: 'Product type',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'Own product', deposit: 'Deposit', withdrawal: 'Withdrawal',
- salary: 'Salary', freelance_publish: 'Freelance publish', tx_done: 'Completed',
+ salary: 'Salary', admin_credit: 'Admin credit', purchase: 'Purchase', freelance_publish: 'Freelance publish', tx_done: 'Completed',
  tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Language updated',
  original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Insufficient funds', listings: 'Listings', transactions: 'Transactions'
@@ -23167,71 +23167,138 @@ async function startWithdraw() {
 }
 
 async function loadRequests() {
- var box = document.getElementById('requests-list');
- box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
- try {
- var data = await apiGet('/api/requests');
- var reqs = data.requests || [];
- var txData = { transactions: [] };
- try { txData = await apiGet('/api/transactions'); } catch (e) {}
- var txs = txData.transactions || [];
+  var box = document.getElementById('requests-list');
+  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var data = await apiGet('/api/requests');
+    var reqs = data.requests || [];
+    var txData = { transactions: [] };
+    try { txData = await apiGet('/api/transactions'); } catch (e) {}
+    var txs = txData.transactions || [];
 
- var statusMap = {
- awaiting_payment: [tBlock('status_awaiting') || 'Awaiting payment', 'badge-pending'],
- pending: [tBlock('status_awaiting') || tBlock('tx_pending') || 'Pending', 'badge-pending'],
- processing: [tBlock('tx_pending') || 'Processing', 'badge-processing'],
- completed: [tBlock('tx_done') || 'Completed', 'badge-completed'],
- cancelled: [tBlock('status_cancelled') || tBlock('tx_rejected') || 'Cancelled', 'badge-cancelled']
- };
- var methodMap = {
- card: tBlock('sbp') || 'СБП',
- crypto: 'USDT',
- stars: tBlock('stars') || 'Stars',
- order: tBlock('deal') || 'Deal'
- };
- var typeLabel = {
- deposit: tBlock('deposit'), withdraw: tBlock('withdrawal'), refund: tBlock('refund_deal'),
- income: tBlock('income'), purchase_hold: tBlock('purchase_hold'), purchase_release: tBlock('sale'),
- purchase_refund: tBlock('purchase_refund')
- };
+    // Only these operation types (no "ожидание" / "в обработке" statuses)
+    var typeLabel = {
+      deposit: tBlock('deposit') || 'Пополнение',
+      withdraw: tBlock('withdrawal') || 'Вывод',
+      withdrawal: tBlock('withdrawal') || 'Вывод',
+      sale: tBlock('sale') || 'Продажа',
+      purchase: tBlock('purchase') || tBlock('buy') || 'Покупка',
+      purchase_release: tBlock('sale') || 'Продажа',
+      purchase_hold: tBlock('purchase') || tBlock('buy') || 'Покупка',
+      salary: tBlock('salary') || 'Зарплата',
+      admin: tBlock('admin_credit') || 'Начисление администратором',
+      admin_credit: tBlock('admin_credit') || 'Начисление администратором',
+      admin_adjust: tBlock('admin_credit') || 'Начисление администратором',
+      income: tBlock('admin_credit') || 'Начисление администратором'
+    };
+    var allowedTypes = {
+      deposit: 1, withdraw: 1, withdrawal: 1, sale: 1, purchase: 1,
+      purchase_release: 1, purchase_hold: 1, salary: 1,
+      admin: 1, admin_credit: 1, admin_adjust: 1, income: 1
+    };
+    var methodMap = {
+      card: tBlock('sbp') || 'СБП',
+      crypto: 'USDT',
+      stars: tBlock('stars') || 'Stars',
+      order: tBlock('deal') || 'Сделка'
+    };
 
- var html = '';
- if (reqs.length) {
- html += '<div class="section-title" style="font-size:15px;">' + tBlock('requests') + '</div>';
- html += reqs.map(function(r) {
- var st = statusMap[r.status] || [r.status, 'badge-pending'];
- var typeName = typeLabel[r.type] || r.type;
- var actions = '';
- if ((r.status === 'pending' || r.status === 'processing') && r.type === 'deposit' && r.method !== 'stars' && r.method !== 'card' && r.method !== 'crypto') {
- actions = '<div class="actions">' +
- '<button class="btn btn-success" onclick="confirmRequest(' + r.id + ')">✅ Я оплатил</button>' +
- '<button class="btn btn-danger" onclick="cancelRequest(' + r.id + ')">❌ Отменить</button></div>';
- } else if ((r.status === 'pending' || r.status === 'processing') && r.type === 'deposit' && r.method === 'stars') {
- actions = '<div class="subtitle" style="margin-top:6px;">Оплата в боте · Stars</div>';
- }
- return '<div class="list-item"><div class="top"><div class="title">' + typeName +
- ' #' + r.id + '</div><span class="badge ' + st[1] + '">' + st[0] +
- '</span></div><div class="subtitle">' + (methodMap[r.method]||r.method||'') +
- ' · ' + r.amount + ' $</div>' + actions + '</div>';
- }).join('');
- }
- if (txs.length) {
- html += '<div class="section-title" style="font-size:15px;margin-top:16px;">' + tBlock('operations') + '</div>';
- html += txs.map(function(tx) {
- var typeName = typeLabel[tx.type] || tx.type;
- var sign = '';
- if (['purchase_hold','withdraw'].indexOf(tx.type) >= 0) sign = '−';
- else if (['income','purchase_release','purchase_refund','deposit'].indexOf(tx.type) >= 0) sign = '+';
- return '<div class="list-item"><div class="top"><div class="title">' + typeName +
- '</div><span style="font-weight:700;">' + sign + Number(tx.amount).toLocaleString('ru-RU') + ' $</span></div>' +
- '<div class="subtitle">' + String(tx.description || '').replace(/</g,'&lt;') +
- '<br>' + String(tx.created_at || '').slice(0, 19).replace('T', ' ') + '</div></div>';
- }).join('');
- }
- if (!html) html = '<div class="empty"><div class="icon">📭</div>' + tBlock('no_operations') + '</div>';
- box.innerHTML = html;
- } catch(e) { box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>'; }
+    function mapType(raw, desc) {
+      var k = String(raw || '').toLowerCase();
+      var d = String(desc || '').toLowerCase();
+      if (k === 'purchase_release') return 'sale';
+      if (k === 'purchase_hold' || k === 'buy') return 'purchase';
+      if (k === 'withdrawal' || k === 'withdraw') return 'withdraw';
+      if (k === 'admin' || k === 'admin_adjust' || k === 'admin_credit') return 'admin_credit';
+      if (k === 'salary') return 'salary';
+      if (k === 'deposit') return 'deposit';
+      // deposits often stored as income / Platega deposit
+      if (k === 'income' && (d.indexOf('пополн') >= 0 || d.indexOf('deposit') >= 0 || d.indexOf('platega') >= 0)) return 'deposit';
+      if (k === 'income') return 'admin_credit';
+      if (k === 'referral_bonus' || k === 'referral_earn') return null; // hide referral internals
+      if (k === 'freelance_publish' || k === 'expense' || k === 'refund' || k === 'purchase_refund') return null;
+      return k;
+    }
+
+    var items = [];
+
+    // Completed withdraw requests only (no pending/awaiting deposits)
+    reqs.forEach(function(r) {
+      var st = String(r.status || '').toLowerCase();
+      var tp = mapType(r.type, r.comment || r.description || '');
+      if (!tp || (!allowedTypes[tp] && !allowedTypes[r.type])) return;
+      // Skip deposits that are waiting / processing / cancelled — only completed deposits via transactions
+      if (tp === 'deposit' && st !== 'completed') return;
+      // Skip incomplete withdrawals from this list? Show only completed for consistency
+      if ((tp === 'withdraw' || tp === 'withdrawal') && st !== 'completed' && st !== 'approved') return;
+      if (st === 'cancelled' || st === 'canceled' || st === 'rejected') return;
+      if (st === 'awaiting_payment' || st === 'pending' || st === 'processing') return;
+      items.push({
+        type: tp,
+        amount: Number(r.amount) || 0,
+        method: r.method || '',
+        description: '',
+        created_at: r.updated_at || r.created_at || '',
+        id: r.id,
+        sign: (tp === 'deposit' || tp === 'salary' || tp === 'admin_credit' || tp === 'sale') ? '+' : (tp === 'withdraw' || tp === 'purchase' ? '−' : '')
+      });
+    });
+
+    txs.forEach(function(tx) {
+      var tp = mapType(tx.type, tx.description || '');
+      if (!tp || (!allowedTypes[tp] && !allowedTypes[tx.type])) return;
+      var sign = '+';
+      if (tp === 'withdraw' || tp === 'purchase' || tp === 'purchase_hold') sign = '−';
+      else if (tp === 'deposit' || tp === 'salary' || tp === 'admin_credit' || tp === 'sale' || tp === 'purchase_release') sign = '+';
+      else if (['income', 'admin', 'admin_credit', 'admin_adjust', 'deposit', 'salary', 'sale'].indexOf(String(tx.type).toLowerCase()) >= 0) sign = '+';
+      else if (Number(tx.amount) < 0) sign = '−';
+      items.push({
+        type: tp,
+        amount: Math.abs(Number(tx.amount) || 0),
+        method: '',
+        description: tx.description || '',
+        created_at: tx.created_at || '',
+        id: tx.id,
+        sign: sign
+      });
+    });
+
+    // Newest first
+    items.sort(function(a, b) {
+      return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+    });
+
+    // Dedupe deposit completed request + matching transaction by amount+time roughly
+    var seen = {};
+    items = items.filter(function(it) {
+      var key = it.type + '|' + it.amount + '|' + String(it.created_at || '').slice(0, 16);
+      if (seen[key]) return false;
+      seen[key] = 1;
+      return true;
+    });
+
+    var html = '';
+    if (items.length) {
+      html = items.map(function(it) {
+        var typeName = typeLabel[it.type] || typeLabel[mapType(it.type)] || it.type;
+        var sub = [];
+        if (it.method && methodMap[it.method]) sub.push(methodMap[it.method]);
+        else if (it.method) sub.push(it.method);
+        if (it.description) sub.push(String(it.description).replace(/</g, '&lt;'));
+        if (it.created_at) sub.push(String(it.created_at).slice(0, 19).replace('T', ' '));
+        return '<div class="list-item"><div class="top"><div class="title">' + typeName +
+          '</div><span style="font-weight:700;">' + (it.sign || '') + Number(it.amount).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $</span></div>' +
+          (sub.length ? '<div class="subtitle">' + sub.join(' · ') + '</div>' : '') +
+          '</div>';
+      }).join('');
+    }
+    if (!html) html = '<div class="empty"><div class="icon">📭</div>' + (tBlock('no_operations') || tBlock('no_transactions') || 'Нет операций') + '</div>';
+    box.innerHTML = html;
+  } catch (e) {
+    box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + (e.message || 'Error') + '</div>';
+  }
 }
+
 
 async function confirmRequest(id) {
  try {
