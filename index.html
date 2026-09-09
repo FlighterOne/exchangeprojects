@@ -23117,7 +23117,7 @@ async function startDeposit() {
     var discPct = Number(result.discount_pct || 0);
     var html = '<div class="payment-card">' +
       '<div class="row"><span class="label">' + (tBlock('to_pay') || 'К оплате') + '</span><span class="value"><b>' + payDisplay + '</b></span></div>' +
-      '<div class="row"><span class="label">' + (tBlock('to_credit') || 'К зачислению') + '</span><span class="value">' + Number(creditUsd).toFixed(2) + ' $</span></div>'
+      '<div class="row"><span class="label">' + (tBlock('to_credit') || 'К зачислению') + '</span><span class="value">' + Number(creditUsd).toFixed(2) + ' $</span></div>' +
       (discPct > 0 ? '<div class="row"><span class="label">' + (tBlock('promo_code') || 'Промокод') + '</span><span class="value" style="color:#34c759;">' + promo + ' (−' + discPct + '%)</span></div>' : '') +
       '</div>';
 
