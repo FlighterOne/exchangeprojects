@@ -2019,7 +2019,7 @@ button.btn.btn-compact,
  <span class="amount-rub-hint" id="deposit-amount-rub">~0 ₽</span>
  </div>
  <div id="deposit-min-error" style="display:none;color:#ff3b30;font-size:12px;margin-top:6px;"></div>
- <div class="total-pay-line" id="deposit-total-line">Итого к оплате: 0.00 $</div>
+ <div class="total-pay-line" id="deposit-total-line"><span data-i18n="total_to_pay_label">Итого к оплате</span>: 0.00 $</div>
  <div class="field-hint" id="deposit-fee-hint" style="display:none;"></div>
  </div>
 
@@ -2033,7 +2033,7 @@ button.btn.btn-compact,
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'deposit')">
  <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="30" r="16" fill="#F5B800"/><circle cx="40" cy="36" r="14" fill="#E8A317" stroke="#F5B800" stroke-width="2"/><path d="M38 30v-3h2.2c1.6 0 2.6.7 2.6 1.9 0 1-.6 1.6-1.5 1.8l1.8 2.5h-2.3l-1.5-2.2H38zm0 0h2c.7 0 1.1-.3 1.1-.9S40.7 28 40 28H38v2z" fill="#6B4E00"/><path d="M24 24v-3h2.5c1.8 0 3 .8 3 2.2 0 1.1-.7 1.8-1.7 2.1l2 2.9H27.5l-1.7-2.5H24zm0 0h2.2c.8 0 1.3-.4 1.3-1s-.5-1-1.3-1H24v2z" fill="#6B4E00"/></svg></div>
- <div class="title" data-i18n="crypto">Криптовалюта</div>
+ <div class="title" data-i18n="crypto">Crypto</div>
  <span class="method-fee">5%</span>
  </div>
  <div class="method-item" data-method="stars" onclick="selectMethod(this,'deposit')">
@@ -2076,8 +2076,8 @@ button.btn.btn-compact,
  <span class="amount-rub-hint" id="withdraw-amount-rub">~0 ₽</span>
  </div>
  <div id="withdraw-min-error" style="display:none;color:#ff3b30;font-size:12px;margin-top:6px;"></div>
- <div class="field-hint">Доступно: <span id="withdraw-available">0.00</span> $</div>
- <div class="total-pay-line" id="withdraw-total-line">Итого к списанию: 0.00 $</div>
+ <div class="field-hint"><span data-i18n="available">Доступно</span>: <span id="withdraw-available">0.00</span> $</div>
+ <div class="total-pay-line" id="withdraw-total-line"><span data-i18n="total_to_withdraw_label">Итого к списанию</span>: 0.00 $</div>
  <div class="field-hint" id="withdraw-fee-hint" style="display:none;"></div>
  </div>
 
@@ -2091,7 +2091,7 @@ button.btn.btn-compact,
  </div>
  <div class="method-item" data-method="crypto" onclick="selectMethod(this,'withdraw')">
  <div class="method-icon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="30" r="16" fill="#F5B800"/><circle cx="40" cy="36" r="14" fill="#E8A317" stroke="#F5B800" stroke-width="2"/><path d="M38 30v-3h2.2c1.6 0 2.6.7 2.6 1.9 0 1-.6 1.6-1.5 1.8l1.8 2.5h-2.3l-1.5-2.2H38zm0 0h2c.7 0 1.1-.3 1.1-.9S40.7 28 40 28H38v2z" fill="#6B4E00"/><path d="M24 24v-3h2.5c1.8 0 3 .8 3 2.2 0 1.1-.7 1.8-1.7 2.1l2 2.9H27.5l-1.7-2.5H24zm0 0h2.2c.8 0 1.3-.4 1.3-1s-.5-1-1.3-1H24v2z" fill="#6B4E00"/></svg></div>
- <div class="title">USDT TRC20</div>
+ <div class="title" data-i18n="crypto">Crypto</div>
  <span class="method-fee">5%</span>
  </div>
  </div>
@@ -22826,9 +22826,12 @@ function updateDepositTotals() {
   if (rub) rub.textContent = amount > 0 ? '~' + fmtRub2(baseRub) + ' ₽' : '~0,00 ₽';
   // Red min error under field
   if (minErr) {
-    if (raw !== '' && amount > 0 && amount < 0.1) {
+    var minNeed = (method === 'stars') ? 1 : 0.1;
+    if (raw !== '' && amount > 0 && amount < minNeed) {
       minErr.style.display = '';
-      minErr.textContent = (tBlock('min_01') || 'Минимальная сумма 0.1$');
+      minErr.textContent = method === 'stars'
+        ? (tBlock('min_1_stars') || 'Минимальная сумма для Stars: 1$')
+        : (tBlock('min_01') || 'Минимальная сумма 0.1$');
     } else {
       minErr.style.display = 'none';
       minErr.textContent = '';
@@ -22896,10 +22899,54 @@ function payDepositUnavailable() {
 
 
 async function payDepositStars() {
+  var amount = parseFloat((document.getElementById('deposit-amount') || {}).value) || 0;
+  if (amount < 1) {
+    try { tg.showAlert(tBlock('min_1_stars') || 'Минимальная сумма для Stars: 1$'); } catch (e) { alert('Min 1$'); }
+    return;
+  }
+  var btn = document.getElementById('deposit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = tBlock('creating') || 'Creating...'; }
   try {
-    tg.showAlert(tBlock('section_in_dev') || 'This section is under development');
+    var result = await apiPost('/api/deposit/stars-invoice', { amount: amount });
+    if (!result || result.error) throw new Error((result && result.error) || 'Stars invoice failed');
+    var starsAmt = Number(result.stars_amount || Math.round(amount * 100));
+    var box = document.getElementById('deposit-result-content');
+    var html =
+      '<div class="payment-card">' +
+      '<div class="row"><span class="label">' + (tBlock('to_credit') || 'К зачислению') + '</span><span class="value"><b>' + Number(amount).toFixed(2) + ' $</b></span></div>' +
+      '<div class="row"><span class="label">' + (tBlock('to_pay') || 'К оплате') + '</span><span class="value"><b>' + starsAmt + ' ⭐</b></span></div>' +
+      '<div class="row"><span class="label">Курс</span><span class="value">1$ = 100 ⭐</span></div>' +
+      '</div>' +
+      '<div class="list-item" style="margin-top:12px;"><div class="subtitle">' +
+      (tBlock('stars_invoice_hint') || 'Счёт Stars отправлен в бот. Оплатите его в чате с ботом — баланс зачислится автоматически.') +
+      '</div></div>' +
+      '<button class="btn btn-secondary" style="margin-top:14px;" type="button" id="deposit-back-btn">' +
+      (tBlock('back_to_balance') || '← К балансу') + '</button>';
+    if (box) box.innerHTML = html;
+    var backBtn = document.getElementById('deposit-back-btn');
+    if (backBtn) backBtn.onclick = function(){ showPage('balance'); };
+    var titleEl = document.querySelector('#page-deposit-result .section-title');
+    if (titleEl) titleEl.textContent = tBlock('deposit_stars') || 'Telegram Stars';
+    showPage('deposit-result');
+    try {
+      tg.showAlert((tBlock('stars_invoice_sent') || 'Счёт на {stars}⭐ отправлен в бот. Откройте чат с ботом и оплатите.').replace('{stars}', String(starsAmt)));
+    } catch (e2) {}
+    // Poll balance / request completion lightly
+    try {
+      var rid = result.request_id;
+      var started = Date.now();
+      var tmr = setInterval(async function() {
+        try {
+          if (Date.now() - started > 30 * 60 * 1000) { clearInterval(tmr); return; }
+          await refreshBalance();
+          // if balance grew enough, show success
+        } catch (e3) {}
+      }, 4000);
+    } catch (e4) {}
   } catch (e) {
-    alert('This section is under development');
+    try { tg.showAlert(e.message || 'Stars payment failed'); } catch (e5) { alert(e.message || 'Stars failed'); }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = tBlock('continue_btn') || 'Continue'; }
   }
 }
 
@@ -23070,10 +23117,14 @@ async function startDeposit() {
   var btn = document.getElementById('deposit-btn');
   var dTerms = document.getElementById('deposit-terms-agree');
   if (dTerms && !dTerms.checked) { tg.showAlert(tBlock('err_terms') || 'Accept the terms'); return; }
-  if (!amount || amount < 0.1) { tg.showAlert(tBlock('min_01') || 'Minimum 0.1$'); return; }
   if (!selectedDepositMethod) { tg.showAlert(tBlock('err_method') || 'Select a payment method'); return; }
+  if (selectedDepositMethod === 'stars') {
+    if (!amount || amount < 1) { tg.showAlert(tBlock('min_1_stars') || 'Минимальная сумма для Stars: 1$'); return; }
+  } else if (!amount || amount < 0.1) {
+    tg.showAlert(tBlock('min_01') || 'Minimum 0.1$'); return;
+  }
 
-  // Stars keep their existing Telegram invoice flow and are not sent to Platega.
+  // Stars: Telegram invoice in bot, not Platega
   if (selectedDepositMethod === 'stars') {
     try { await payDepositStars(); } catch (e) {}
     return;
@@ -23148,10 +23199,7 @@ async function startDeposit() {
     }
     var backBtn = document.getElementById('deposit-back-btn');
     if (backBtn) backBtn.onclick = function() { showPage('balance'); };
-    // Auto-open Platega once
-    if (payUrl) {
-      try { setTimeout(function(){ openPlategaPayment(payUrl); }, 200); } catch (eAuto) {}
-    }
+    // Open Platega only when user taps "Оплатить" (not on Continue)
     var titleEl = document.querySelector('#page-deposit-result .section-title');
     if (titleEl) titleEl.textContent = tBlock('payment_details') || 'Payment';
     showPage('deposit-result');
@@ -25699,6 +25747,15 @@ ja:{active_tab:'アクティブ',active_listings:'アクティブ',seller_rating
 ko:{active_tab:'활성',active_listings:'활성',seller_rating:'판매자 평점',buyer_rating:'구매자 평점',staff_rating:'직원 평점',faq:'자주 묻는 질문'}
 };
 Object.keys(X).forEach(function(l){if(!I18N[l])I18N[l]={};Object.assign(I18N[l],X[l]);});
+}catch(e){}})();
+</script>
+<script>
+/* XCOD FINAL I18N: deposit / withdraw / transaction / confirmation UI */
+(function(){try{
+var X={"ru":{"available":"Доступно","total_to_pay_label":"Итого к оплате","total_to_withdraw_label":"Итого к списанию","pay_method":"Способ оплаты","withdraw_method":"Способ вывода","details":"Реквизиты","to_pay":"К оплате","to_credit":"К зачислению","fee_label":"Комиссия","payment_details":"Подтверждение оплаты","awaiting_payment":"Ожидание оплаты","pay_btn":"Оплатить","back_to_balance":"← К балансу","amount_usd":"Сумма ($)","promo_code":"Промокод","continue_btn":"Продолжить","deposit":"Пополнение","withdrawal":"Вывод","my_tx":"Мои транзакции","no_operations":"Нет операций","enter_details":"Введите реквизиты","err_method":"Выберите способ оплаты","err_terms":"Примите пользовательское соглашение","creating":"Создание…","request_id":"Заявка","deposit_success":"Средства успешно зачислены","deposit_fail":"Ошибка оплаты. Средства не зачислены","pending_status":"В ожидании","rejected_status":"Отклонено","sbp":"СБП","crypto":"Криптовалюта","stars":"Telegram Stars","purchase":"Покупка","salary":"Зарплата","admin_credit":"Начисление администратором"},"en":{"available":"Available","total_to_pay_label":"Total to pay","total_to_withdraw_label":"Total to withdraw","pay_method":"Payment method","withdraw_method":"Withdrawal method","details":"Payment details","to_pay":"To pay","to_credit":"To credit","fee_label":"Fee","payment_details":"Payment confirmation","awaiting_payment":"Awaiting payment","pay_btn":"Pay","back_to_balance":"← Back to balance","amount_usd":"Amount ($)","promo_code":"Promo code","continue_btn":"Continue","deposit":"Deposit","withdrawal":"Withdraw","my_tx":"My transactions","no_operations":"No operations","enter_details":"Enter details","err_method":"Select a payment method","err_terms":"Accept the terms of service","creating":"Creating…","request_id":"Request","deposit_success":"Funds credited successfully","deposit_fail":"Payment error. Funds were not credited","pending_status":"Pending","rejected_status":"Rejected","sbp":"SBP","crypto":"Cryptocurrency","stars":"Telegram Stars","purchase":"Purchase","salary":"Salary","admin_credit":"Admin credit"},"de":{"available":"Verfügbar","total_to_pay_label":"Gesamt zu zahlen","total_to_withdraw_label":"Gesamt zur Auszahlung","pay_method":"Zahlungsmethode","withdraw_method":"Auszahlungsmethode","details":"Zahlungsdetails","to_pay":"Zu zahlen","to_credit":"Gutschrift","fee_label":"Gebühr","payment_details":"Zahlungsbestätigung","awaiting_payment":"Zahlung ausstehend","pay_btn":"Bezahlen","back_to_balance":"← Zum Guthaben","amount_usd":"Betrag ($)","promo_code":"Promo-Code","continue_btn":"Weiter","deposit":"Einzahlung","withdrawal":"Auszahlung","my_tx":"Meine Transaktionen","no_operations":"Keine Vorgänge","enter_details":"Daten eingeben","err_method":"Zahlungsmethode auswählen","err_terms":"Nutzungsbedingungen akzeptieren","creating":"Wird erstellt…","request_id":"Anfrage","deposit_success":"Guthaben erfolgreich gutgeschrieben","deposit_fail":"Zahlungsfehler. Guthaben wurde nicht gutgeschrieben","pending_status":"Ausstehend","rejected_status":"Abgelehnt","sbp":"SBP","crypto":"Kryptowährung","stars":"Telegram Stars","purchase":"Kauf","salary":"Gehalt","admin_credit":"Gutschrift durch Admin"},"fr":{"available":"Disponible","total_to_pay_label":"Total à payer","total_to_withdraw_label":"Total à retirer","pay_method":"Mode de paiement","withdraw_method":"Mode de retrait","details":"Détails du paiement","to_pay":"À payer","to_credit":"À créditer","fee_label":"Frais","payment_details":"Confirmation du paiement","awaiting_payment":"Paiement en attente","pay_btn":"Payer","back_to_balance":"← Retour au solde","amount_usd":"Montant ($)","promo_code":"Code promo","continue_btn":"Continuer","deposit":"Dépôt","withdrawal":"Retrait","my_tx":"Mes transactions","no_operations":"Aucune opération","enter_details":"Saisissez les informations","err_method":"Sélectionnez un mode de paiement","err_terms":"Acceptez les conditions","creating":"Création…","request_id":"Demande","deposit_success":"Fonds crédités avec succès","deposit_fail":"Erreur de paiement. Les fonds n’ont pas été crédités","pending_status":"En attente","rejected_status":"Rejeté","sbp":"SBP","crypto":"Cryptomonnaie","stars":"Telegram Stars","purchase":"Achat","salary":"Salaire","admin_credit":"Crédit administrateur"},"es":{"available":"Disponible","total_to_pay_label":"Total a pagar","total_to_withdraw_label":"Total a retirar","pay_method":"Método de pago","withdraw_method":"Método de retiro","details":"Detalles del pago","to_pay":"A pagar","to_credit":"A acreditar","fee_label":"Comisión","payment_details":"Confirmación del pago","awaiting_payment":"Pago pendiente","pay_btn":"Pagar","back_to_balance":"← Volver al saldo","amount_usd":"Importe ($)","promo_code":"Código promocional","continue_btn":"Continuar","deposit":"Depósito","withdrawal":"Retiro","my_tx":"Mis transacciones","no_operations":"No hay operaciones","enter_details":"Introduce los datos","err_method":"Selecciona un método de pago","err_terms":"Acepta los términos","creating":"Creando…","request_id":"Solicitud","deposit_success":"Fondos acreditados correctamente","deposit_fail":"Error de pago. Los fondos no se acreditaron","pending_status":"Pendiente","rejected_status":"Rechazado","sbp":"SBP","crypto":"Criptomoneda","stars":"Telegram Stars","purchase":"Compra","salary":"Salario","admin_credit":"Abono del administrador"},"uk":{"available":"Доступно","total_to_pay_label":"Разом до сплати","total_to_withdraw_label":"Разом до списання","pay_method":"Спосіб оплати","withdraw_method":"Спосіб виведення","details":"Реквізити","to_pay":"До сплати","to_credit":"До зарахування","fee_label":"Комісія","payment_details":"Підтвердження оплати","awaiting_payment":"Очікування оплати","pay_btn":"Оплатити","back_to_balance":"← До балансу","amount_usd":"Сума ($)","promo_code":"Промокод","continue_btn":"Продовжити","deposit":"Поповнення","withdrawal":"Виведення","my_tx":"Мої транзакції","no_operations":"Немає операцій","enter_details":"Введіть реквізити","err_method":"Оберіть спосіб оплати","err_terms":"Прийміть умови користування","creating":"Створення…","request_id":"Заявка","deposit_success":"Кошти успішно зараховано","deposit_fail":"Помилка оплати. Кошти не зараховано","pending_status":"В очікуванні","rejected_status":"Відхилено","sbp":"СБП","crypto":"Криптовалюта","stars":"Telegram Stars","purchase":"Покупка","salary":"Зарплата","admin_credit":"Нарахування адміністратором"},"it":{"available":"Disponibile","total_to_pay_label":"Totale da pagare","total_to_withdraw_label":"Totale da prelevare","pay_method":"Metodo di pagamento","withdraw_method":"Metodo di prelievo","details":"Dettagli del pagamento","to_pay":"Da pagare","to_credit":"Da accreditare","fee_label":"Commissione","payment_details":"Conferma del pagamento","awaiting_payment":"Pagamento in attesa","pay_btn":"Paga","back_to_balance":"← Torna al saldo","amount_usd":"Importo ($)","promo_code":"Codice promozionale","continue_btn":"Continua","deposit":"Deposito","withdrawal":"Prelievo","my_tx":"Le mie transazioni","no_operations":"Nessuna operazione","enter_details":"Inserisci i dati","err_method":"Seleziona un metodo di pagamento","err_terms":"Accetta i termini","creating":"Creazione…","request_id":"Richiesta","deposit_success":"Fondi accreditati con successo","deposit_fail":"Errore di pagamento. I fondi non sono stati accreditati","pending_status":"In attesa","rejected_status":"Rifiutato","sbp":"SBP","crypto":"Criptovaluta","stars":"Telegram Stars","purchase":"Acquisto","salary":"Stipendio","admin_credit":"Accredito amministratore"},"pt":{"available":"Disponível","total_to_pay_label":"Total a pagar","total_to_withdraw_label":"Total a levantar","pay_method":"Método de pagamento","withdraw_method":"Método de levantamento","details":"Detalhes do pagamento","to_pay":"A pagar","to_credit":"A creditar","fee_label":"Taxa","payment_details":"Confirmação do pagamento","awaiting_payment":"Pagamento pendente","pay_btn":"Pagar","back_to_balance":"← Voltar ao saldo","amount_usd":"Valor ($)","promo_code":"Código promocional","continue_btn":"Continuar","deposit":"Depósito","withdrawal":"Levantamento","my_tx":"Minhas transações","no_operations":"Sem operações","enter_details":"Introduza os dados","err_method":"Selecione um método de pagamento","err_terms":"Aceite os termos","creating":"A criar…","request_id":"Pedido","deposit_success":"Fundos creditados com sucesso","deposit_fail":"Erro de pagamento. Os fundos não foram creditados","pending_status":"Pendente","rejected_status":"Rejeitado","sbp":"SBP","crypto":"Criptomoeda","stars":"Telegram Stars","purchase":"Compra","salary":"Salário","admin_credit":"Crédito do administrador"},"pt-BR":{"available":"Disponível","total_to_pay_label":"Total a pagar","total_to_withdraw_label":"Total a sacar","pay_method":"Método de pagamento","withdraw_method":"Método de saque","details":"Detalhes do pagamento","to_pay":"A pagar","to_credit":"A creditar","fee_label":"Taxa","payment_details":"Confirmação do pagamento","awaiting_payment":"Pagamento pendente","pay_btn":"Pagar","back_to_balance":"← Voltar ao saldo","amount_usd":"Valor ($)","promo_code":"Código promocional","continue_btn":"Continuar","deposit":"Depósito","withdrawal":"Saque","my_tx":"Minhas transações","no_operations":"Sem operações","enter_details":"Informe os dados","err_method":"Selecione um método de pagamento","err_terms":"Aceite os termos","creating":"Criando…","request_id":"Solicitação","deposit_success":"Fundos creditados com sucesso","deposit_fail":"Erro de pagamento. Os fundos não foram creditados","pending_status":"Pendente","rejected_status":"Rejeitado","sbp":"SBP","crypto":"Criptomoeda","stars":"Telegram Stars","purchase":"Compra","salary":"Salário","admin_credit":"Crédito do administrador"},"tr":{"available":"Mevcut","total_to_pay_label":"Ödenecek toplam","total_to_withdraw_label":"Çekilecek toplam","pay_method":"Ödeme yöntemi","withdraw_method":"Çekim yöntemi","details":"Ödeme ayrıntıları","to_pay":"Ödenecek","to_credit":"Hesaba yatırılacak","fee_label":"Komisyon","payment_details":"Ödeme onayı","awaiting_payment":"Ödeme bekleniyor","pay_btn":"Öde","back_to_balance":"← Bakiyeye dön","amount_usd":"Tutar ($)","promo_code":"Promosyon kodu","continue_btn":"Devam","deposit":"Yatırma","withdrawal":"Çekim","my_tx":"İşlemlerim","no_operations":"İşlem yok","enter_details":"Bilgileri girin","err_method":"Bir ödeme yöntemi seçin","err_terms":"Koşulları kabul edin","creating":"Oluşturuluyor…","request_id":"Talep","deposit_success":"Para başarıyla yatırıldı","deposit_fail":"Ödeme hatası. Para yatırılmadı","pending_status":"Beklemede","rejected_status":"Reddedildi","sbp":"SBP","crypto":"Kripto para","stars":"Telegram Stars","purchase":"Satın alma","salary":"Maaş","admin_credit":"Yönetici kredisi"},"id":{"available":"Tersedia","total_to_pay_label":"Total yang harus dibayar","total_to_withdraw_label":"Total yang ditarik","pay_method":"Metode pembayaran","withdraw_method":"Metode penarikan","details":"Detail pembayaran","to_pay":"Harus dibayar","to_credit":"Dikreditkan","fee_label":"Biaya","payment_details":"Konfirmasi pembayaran","awaiting_payment":"Menunggu pembayaran","pay_btn":"Bayar","back_to_balance":"← Kembali ke saldo","amount_usd":"Jumlah ($)","promo_code":"Kode promo","continue_btn":"Lanjutkan","deposit":"Deposit","withdrawal":"Penarikan","my_tx":"Transaksi saya","no_operations":"Tidak ada transaksi","enter_details":"Masukkan detail","err_method":"Pilih metode pembayaran","err_terms":"Terima ketentuan","creating":"Membuat…","request_id":"Permintaan","deposit_success":"Dana berhasil dikreditkan","deposit_fail":"Kesalahan pembayaran. Dana tidak dikreditkan","pending_status":"Menunggu","rejected_status":"Ditolak","sbp":"SBP","crypto":"Mata uang kripto","stars":"Telegram Stars","purchase":"Pembelian","salary":"Gaji","admin_credit":"Kredit admin"},"ar":{"available":"متاح","total_to_pay_label":"الإجمالي للدفع","total_to_withdraw_label":"إجمالي السحب","pay_method":"طريقة الدفع","withdraw_method":"طريقة السحب","details":"تفاصيل الدفع","to_pay":"المبلغ للدفع","to_credit":"المبلغ للإيداع","fee_label":"العمولة","payment_details":"تأكيد الدفع","awaiting_payment":"بانتظار الدفع","pay_btn":"دفع","back_to_balance":"← العودة إلى الرصيد","amount_usd":"المبلغ ($)","promo_code":"رمز ترويجي","continue_btn":"متابعة","deposit":"إيداع","withdrawal":"سحب","my_tx":"معاملاتي","no_operations":"لا توجد عمليات","enter_details":"أدخل التفاصيل","err_method":"اختر طريقة دفع","err_terms":"وافق على الشروط","creating":"جارٍ الإنشاء…","request_id":"الطلب","deposit_success":"تم إيداع الأموال بنجاح","deposit_fail":"خطأ في الدفع. لم تتم إضافة الأموال","pending_status":"قيد الانتظار","rejected_status":"مرفوض","sbp":"SBP","crypto":"العملة المشفرة","stars":"Telegram Stars","purchase":"شراء","salary":"راتب","admin_credit":"رصيد من المسؤول"},"zh":{"available":"可用","total_to_pay_label":"应付总额","total_to_withdraw_label":"扣除总额","pay_method":"支付方式","withdraw_method":"提现方式","details":"支付详情","to_pay":"应付","to_credit":"到账","fee_label":"手续费","payment_details":"支付确认","awaiting_payment":"等待付款","pay_btn":"支付","back_to_balance":"← 返回余额","amount_usd":"金额（$）","promo_code":"优惠码","continue_btn":"继续","deposit":"充值","withdrawal":"提现","my_tx":"我的交易","no_operations":"暂无交易","enter_details":"请输入信息","err_method":"请选择支付方式","err_terms":"请接受服务条款","creating":"创建中…","request_id":"申请","deposit_success":"资金已成功到账","deposit_fail":"支付失败，资金未到账","pending_status":"等待中","rejected_status":"已拒绝","sbp":"SBP","crypto":"加密货币","stars":"Telegram Stars","purchase":"购买","salary":"工资","admin_credit":"管理员入账"},"ja":{"available":"利用可能","total_to_pay_label":"支払総額","total_to_withdraw_label":"出金総額","pay_method":"支払い方法","withdraw_method":"出金方法","details":"支払い詳細","to_pay":"支払額","to_credit":"入金額","fee_label":"手数料","payment_details":"支払い確認","awaiting_payment":"支払い待ち","pay_btn":"支払う","back_to_balance":"← 残高へ","amount_usd":"金額（$）","promo_code":"プロモーションコード","continue_btn":"続行","deposit":"入金","withdrawal":"出金","my_tx":"取引履歴","no_operations":"取引はありません","enter_details":"情報を入力してください","err_method":"支払い方法を選択してください","err_terms":"利用規約に同意してください","creating":"作成中…","request_id":"申請","deposit_success":"入金が完了しました","deposit_fail":"支払いエラー。入金されませんでした","pending_status":"保留中","rejected_status":"拒否されました","sbp":"SBP","crypto":"暗号資産","stars":"Telegram Stars","purchase":"購入","salary":"給与","admin_credit":"管理者による入金"},"ko":{"available":"사용 가능","total_to_pay_label":"총 결제 금액","total_to_withdraw_label":"총 출금 금액","pay_method":"결제 방법","withdraw_method":"출금 방법","details":"결제 정보","to_pay":"결제 금액","to_credit":"입금 금액","fee_label":"수수료","payment_details":"결제 확인","awaiting_payment":"결제 대기 중","pay_btn":"결제하기","back_to_balance":"← 잔액으로","amount_usd":"금액 ($)","promo_code":"프로모션 코드","continue_btn":"계속","deposit":"입금","withdrawal":"출금","my_tx":"내 거래","no_operations":"거래가 없습니다","enter_details":"정보를 입력하세요","err_method":"결제 방법을 선택하세요","err_terms":"이용약관에 동의하세요","creating":"생성 중…","request_id":"요청","deposit_success":"잔액에 성공적으로 입금되었습니다","deposit_fail":"결제 오류. 금액이 입금되지 않았습니다","pending_status":"대기 중","rejected_status":"거부됨","sbp":"SBP","crypto":"암호화폐","stars":"Telegram Stars","purchase":"구매","salary":"급여","admin_credit":"관리자 입금"}};
+Object.keys(X).forEach(function(l){if(!I18N[l])I18N[l]={};Object.assign(I18N[l],X[l]);});
+if(typeof applyI18n==='function') applyI18n();
+if(typeof applyTermsLabels==='function') applyTermsLabels();
 }catch(e){}})();
 </script>
 </body>
