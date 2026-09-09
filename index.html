@@ -2015,7 +2015,7 @@ button.btn.btn-compact,
  <div class="min-hint" data-i18n="min_01">Минимум 0.1$</div>
 
  <div class="form-group">
- <label class="form-label" data-i18n="amount_usdt">Сумма (USDT)</label>
+ <label class="form-label" data-i18n="amount_usd">Сумма ($)</label>
  <div class="amount-with-rub">
  <input class="form-input" type="number" id="deposit-amount" placeholder="0.00" min="0.1" step="0.01" oninput="updateDepositTotals()">
  <span class="amount-rub-hint" id="deposit-amount-rub">~0 ₽</span>
@@ -5654,6 +5654,7 @@ total_to_pay: 'Итого к оплате',
  press_pay_stars: 'Нажмите «Оплатить» — счёт придёт в бота',
  err_method: 'Выберите способ оплаты',
  amount_usdt: 'Сумма (USDT)',
+ amount_usd: 'Сумма ($)',
  fee_label: 'Комиссия',
  method_fee_sbp: '8.5%',
  method_fee_crypto: '5%',
@@ -6438,6 +6439,7 @@ total_to_pay: 'Total to pay',
  press_pay_stars: 'Press Pay — the invoice will be sent in the bot',
  err_method: 'Select a payment method',
  amount_usdt: 'Amount (USDT)',
+ amount_usd: 'Amount ($)',
  fee_label: 'Fee',
  method_fee_sbp: '8.5%',
  method_fee_crypto: '5%',
@@ -22768,7 +22770,6 @@ function updateDepositTotals() {
   var feeInfo = (typeof calcFee === 'function') ? calcFee(amount, method, 'deposit') : { total: amount, fee: 0, rate: 0, credit: amount };
   var line = document.getElementById('deposit-total-line');
   var rub = document.getElementById('deposit-amount-rub');
-  var rate = (typeof _usdRubRate === 'number' && _usdRubRate > 0) ? _usdRubRate : 0;
   var original = feeInfo.total;
   var total = original;
   var pct = 0;
@@ -22776,23 +22777,33 @@ function updateDepositTotals() {
     pct = _depositPromo.pct;
     total = Math.round(original * (1 - pct / 100) * 100) / 100;
   }
-  if (rub) rub.textContent = amount > 0 ? '~' + fmtRub(rubOf(total)) + ' ₽' : '~0 ₽';
+  // Next to input: base credit converted to RUB (WITHOUT commission)
+  if (rub) rub.textContent = amount > 0 ? '~' + fmtRub(rubOf(amount)) + ' ₽' : '~0 ₽';
+  // Total line: what user pays = credit + % commission, in $ and RUB
   if (line) {
-    if (pct > 0 && total < original) {
-      line.innerHTML = (tBlock('total_pay') || 'Итого к оплате') + ': ' +
-        '<span style="text-decoration:line-through;opacity:.55;font-size:13px;margin-right:6px;">' + original.toFixed(2) + ' $</span>' +
-        '<span style="color:#34c759;font-size:12px;margin-right:6px;">−' + pct + '%</span>' +
-        '<b>' + total.toFixed(2) + ' $</b>';
+    var ratePct = Math.round((feeInfo.rate || 0) * 1000) / 10; // 8.5
+    var rubTotal = fmtRub(rubOf(total));
+    var rubBase = fmtRub(rubOf(amount));
+    if (amount <= 0) {
+      line.innerHTML = (tBlock('total_pay') || 'Итого к оплате') + ': <b>0.00 $</b>';
+    } else if (pct > 0 && total < original) {
+      line.innerHTML =
+        '<div style="line-height:1.45">' +
+        '<div>' + (tBlock('to_credit') || 'К зачислению') + ': <b>' + amount.toFixed(2) + ' $</b> <span style="opacity:.7">(~' + rubBase + ' ₽)</span></div>' +
+        '<div style="font-size:12px;opacity:.8">' + (tBlock('fee_label') || 'Комиссия') + ' ' + ratePct + '% → <s>' + original.toFixed(2) + ' $</s> <span style="color:#34c759">−' + pct + '%</span></div>' +
+        '<div>' + (tBlock('total_pay') || 'Итого к оплате') + ': <b>' + total.toFixed(2) + ' $</b> <span style="opacity:.75">(~' + rubTotal + ' ₽)</span></div>' +
+        '</div>';
     } else {
-      line.innerHTML = (tBlock('total_pay') || 'Итого к оплате') + ': <b>' + total.toFixed(2) + ' $</b>';
+      line.innerHTML =
+        '<div style="line-height:1.45">' +
+        '<div>' + (tBlock('to_credit') || 'К зачислению') + ': <b>' + amount.toFixed(2) + ' $</b> <span style="opacity:.7">(~' + rubBase + ' ₽)</span></div>' +
+        (ratePct > 0 ? '<div style="font-size:12px;opacity:.8">' + (tBlock('fee_label') || 'Комиссия') + ' ' + ratePct + '%</div>' : '') +
+        '<div>' + (tBlock('total_pay') || 'Итого к оплате') + ': <b>' + total.toFixed(2) + ' $</b> <span style="opacity:.75">(~' + rubTotal + ' ₽)</span></div>' +
+        '</div>';
     }
   }
   var hint = document.getElementById('deposit-fee-hint');
-  if (hint) {
-    // fee already shown on method buttons — do not duplicate under total
-    hint.style.display = 'none';
-    hint.textContent = '';
-  }
+  if (hint) { hint.style.display = 'none'; hint.textContent = ''; }
 }
 
 function updateWithdrawTotals() {
@@ -22902,26 +22913,47 @@ function resumePendingDepositWatch() {
 }
 
 function openPlategaPayment(url) {
-  if (!url) return;
-  try { openExternal(url); } catch (e) {
-    try { window.open(url, '_blank', 'noopener,noreferrer'); } catch (e2) { location.href = url; }
+  if (!url) {
+    try { tg.showAlert((typeof tBlock === 'function' ? tBlock('pay_unavailable') : null) || 'Payment link is missing'); } catch (e) { alert('Payment link is missing'); }
+    return;
+  }
+  url = String(url).trim();
+  if (!/^https?:\/\//i.test(url)) {
+    try { tg.showAlert('Invalid payment link'); } catch (e) { alert('Invalid payment link'); }
+    return;
+  }
+  // Telegram Mini App: prefer official openLink (opens external browser / in-app browser)
+  try {
+    if (window.tg && typeof tg.openLink === 'function') {
+      try { tg.openLink(url, { try_instant_view: false }); } catch (e0) { tg.openLink(url); }
+      return;
+    }
+  } catch (e1) {}
+  try {
+    if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.openLink === 'function') {
+      try { Telegram.WebApp.openLink(url, { try_instant_view: false }); } catch (e2) { Telegram.WebApp.openLink(url); }
+      return;
+    }
+  } catch (e3) {}
+  // Fallback for browser / desktop
+  try {
+    var a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() { try { a.remove(); } catch (e4) {} }, 500);
+    return;
+  } catch (e5) {}
+  try { window.open(url, '_blank', 'noopener,noreferrer'); } catch (e6) {
+    try { location.href = url; } catch (e7) {}
   }
 }
 
 async function payDepositPlatega(paymentUrl) {
-  // The payment URL is created in advance by /api/deposit.
-  // Only after the user explicitly presses Pay do we open Platega and start
-  // watching the payment status. The actual balance credit is performed
-  // server-side only after Platega sends a successful webhook callback.
-  if (!paymentUrl) return;
   openPlategaPayment(paymentUrl);
-  try {
-    var raw = sessionStorage.getItem('xcod_pending_deposit');
-    var p = raw ? JSON.parse(raw) : null;
-    if (p && p.payment_ref) {
-      watchDepositPayment(p.payment_ref, Number(p.credit || 0));
-    }
-  } catch (e) {}
 }
 
 async function confirmDepositPaid() {
@@ -22979,30 +23011,66 @@ async function startDeposit() {
 
     savePendingDeposit(result.payment_ref, creditUsd);
 
-    // Preview the amount the customer will pay. The API request sent to Platega
-    // contains only the base amount; Platega adds its own commission at checkout.
-    var customerTotal = Number(result.total != null ? result.total : payUsd);
+    // Customer pays credit + commission. Platega receives only the base (without fee).
+    var customerTotalUsd = Number(result.total != null ? result.total : payUsd);
+    var payRubVal = Number(result.pay_rub);
+    if (!(payRubVal > 0)) {
+      payRubVal = customerTotalUsd * Number(result.usd_rub || _usdRubRate || 90);
+    }
     var payDisplay = result.provider_currency === 'USDT'
-      ? fmtUsd(customerTotal) + ' USDT'
-      : fmtRub(customerTotal * Number(result.usd_rub || _usdRubRate || 90)) + ' ₽';
+      ? fmtUsd(customerTotalUsd) + ' USDT'
+      : fmtRub(payRubVal) + ' ₽';
+    var feePctLabel = result.fee_rate ? (' · ' + (Number(result.fee_rate) * 100).toFixed(1).replace(/\.0$/, '') + '%') : '';
     var html = '<div class="payment-card">' +
-      '<div class="row"><span class="label">' + (tBlock('to_pay') || 'To pay') + '</span><span class="value"><b>' + payDisplay + '</b></span></div>' +
-      '<div class="row"><span class="label">' + (tBlock('to_credit') || 'To credit') + '</span><span class="value">' + fmtUsd(creditUsd) + '$</span></div>' +
-      '<div class="row"><span class="label">' + (tBlock('pay_method') || 'Method') + '</span><span class="value">' + methodLabel + (result.fee_rate ? ' · ' + (Number(result.fee_rate) * 100).toFixed(1).replace(/\.0$/, '') + '%' : '') + '</span></div>' +
-      (discPct > 0 ? '<div class="row"><span class="label">' + (tBlock('promo_code') || 'Promo code') + '</span><span class="value" style="color:#34c759;">' + promo + ' (−' + discPct + '%)</span></div>' : '') +
+      '<div class="row"><span class="label">' + (tBlock('to_pay') || 'К оплате') + '</span><span class="value"><b>' + payDisplay + '</b></span></div>' +
+      '<div class="row"><span class="label">' + (tBlock('to_credit') || 'К зачислению') + '</span><span class="value">' + fmtUsd(creditUsd) + '$</span></div>' +
+      '<div class="row"><span class="label">' + (tBlock('pay_method') || 'Способ') + '</span><span class="value">' + methodLabel + feePctLabel + '</span></div>' +
+      (discPct > 0 ? '<div class="row"><span class="label">' + (tBlock('promo_code') || 'Промокод') + '</span><span class="value" style="color:#34c759;">' + promo + ' (−' + discPct + '%)</span></div>' : '') +
       '</div>';
 
     html += '<div class="list-item" style="margin-top:12px;"><div class="subtitle">' + (tBlock('awaiting_payment') || 'Awaiting payment') + '</div></div>';
-    html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" onclick="payDepositPlatega(' + JSON.stringify(String(result.payment_url)) + ')">' + (tBlock('pay_btn') || 'Pay') + '</button>';
-    html += '<button class="btn btn-secondary" style="margin-top:8px;" onclick="showPage(\'balance\');">' + (tBlock('back_to_balance') || tBlock('back') || '← Back to balance') + '</button>';
+    html += '<button class="btn" style="margin-top:14px;" id="deposit-pay-btn" type="button">' + (tBlock('pay_btn') || 'Pay') + '</button>';
+    html += '<button class="btn btn-secondary" style="margin-top:8px;" type="button" id="deposit-back-btn">' + (tBlock('back_to_balance') || tBlock('back') || '← Back to balance') + '</button>';
 
     document.getElementById('deposit-result-content').innerHTML = html;
+    var payBtn = document.getElementById('deposit-pay-btn');
+    var payUrl = String(result.payment_url || '');
+    if (payBtn) {
+      payBtn.setAttribute('data-pay-url', payUrl);
+      payBtn.onclick = function() {
+        var u = payBtn.getAttribute('data-pay-url') || payUrl;
+        openPlategaPayment(u);
+      };
+    }
+    var backBtn = document.getElementById('deposit-back-btn');
+    if (backBtn) {
+      backBtn.onclick = function() { showPage('balance'); };
+    }
+    // Auto-open Platega payment page once (user can re-open via the button)
+    if (payUrl) {
+      try { setTimeout(function(){ openPlategaPayment(payUrl); }, 350); } catch (eAuto) {}
+    }
+    // Visible fallback link if Telegram blocks openLink
+    try {
+      var wrap = document.getElementById('deposit-result-content');
+      if (wrap && payUrl) {
+        var a = document.createElement('a');
+        a.href = payUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'terms-link';
+        a.style.cssText = 'display:block;text-align:center;margin-top:12px;font-size:13px;';
+        a.textContent = (typeof tBlock === 'function' ? (tBlock('open_payment_link') || 'Open payment page') : 'Open payment page');
+        a.onclick = function(ev) {
+          try { ev.preventDefault(); openPlategaPayment(payUrl); } catch (eL) {}
+        };
+        wrap.appendChild(a);
+      }
+    } catch (eLink) {}
     var titleEl = document.querySelector('#page-deposit-result .section-title');
     if (titleEl) titleEl.textContent = tBlock('payment_details') || 'Payment';
     showPage('deposit-result');
-    // Do not start the payment flow automatically. The link is already
-    // prepared; it will be opened only by the Pay button above.
-    // The webhook remains authoritative for the actual balance credit.
+    watchDepositPayment(result.payment_ref, creditUsd);
   } catch (e) {
     try { tg.showAlert(e.message || 'Payment creation failed'); } catch (e2) { alert(e.message || 'Payment creation failed'); }
   } finally {
