@@ -22920,9 +22920,35 @@ function clearPendingDeposit() {
   if (__depositWatchTimer) { clearInterval(__depositWatchTimer); __depositWatchTimer = null; }
 }
 
+function renderDepositSuccess(credited) {
+  try {
+    var box = document.getElementById('deposit-result-content');
+    if (!box) {
+      try { tg.showAlert('✅ ' + (tBlock('deposit_success') || 'Успешная оплата') + '\n' + Number(credited).toFixed(2) + ' $'); } catch (e0) {}
+      try { showPage('balance'); } catch (e1) {}
+      return;
+    }
+    box.innerHTML =
+      '<div style="text-align:center;padding:28px 12px 8px;">' +
+      '<div style="font-size:48px;line-height:1;margin-bottom:12px;">✅</div>' +
+      '<div style="font-size:18px;font-weight:700;margin-bottom:8px;">' + (tBlock('deposit_success') || 'Успешная оплата') + '</div>' +
+      '<div style="font-size:15px;opacity:.85;margin-bottom:4px;">' + (tBlock('to_credit') || 'К зачислению') + '</div>' +
+      '<div style="font-size:22px;font-weight:700;">' + Number(credited || 0).toFixed(2) + ' $</div>' +
+      '</div>' +
+      '<button class="btn" style="margin-top:18px;" type="button" id="deposit-success-back">' + (tBlock('back_to_balance') || '← К балансу') + '</button>';
+    var b = document.getElementById('deposit-success-back');
+    if (b) b.onclick = function(){ showPage('balance'); };
+    var titleEl = document.querySelector('#page-deposit-result .section-title');
+    if (titleEl) titleEl.textContent = tBlock('deposit_success') || 'Успешная оплата';
+    showPage('deposit-result');
+  } catch (e) {
+    try { showPage('balance'); } catch (e2) {}
+  }
+}
+
 async function watchDepositPayment(paymentRef, credit) {
   if (!paymentRef) return;
-  clearPendingDeposit();
+  if (__depositWatchTimer) { try { clearInterval(__depositWatchTimer); } catch (e) {} __depositWatchTimer = null; }
   savePendingDeposit(paymentRef, credit);
   __depositWatchStartedAt = Date.now();
   var done = false;
@@ -22930,35 +22956,12 @@ async function watchDepositPayment(paymentRef, credit) {
     if (done) return;
     try {
       var st = await apiGet('/api/deposit/status?payment_ref=' + encodeURIComponent(paymentRef));
-      if (st && (st.status === 'CONFIRMED' || st.credited)) {
+      if (st && (String(st.status || '').toUpperCase() === 'CONFIRMED' || st.credited === true)) {
         done = true;
         clearPendingDeposit();
         var credited = Number(st.credit != null ? st.credit : credit) || 0;
-        try { setBalance(st.balance); } catch (e1) { try { await refreshBalance(); } catch(e2){} }
-        // MiniApp: replace preview with success screen
-        try {
-          var box = document.getElementById('deposit-result-content');
-          if (box) {
-            box.innerHTML =
-              '<div style="text-align:center;padding:28px 12px 8px;">' +
-              '<div style="font-size:48px;line-height:1;margin-bottom:12px;">✅</div>' +
-              '<div style="font-size:18px;font-weight:700;margin-bottom:8px;">' + (tBlock('deposit_success') || 'Успешная оплата') + '</div>' +
-              '<div style="font-size:15px;opacity:.85;margin-bottom:4px;">' + (tBlock('to_credit') || 'К зачислению') + '</div>' +
-              '<div style="font-size:22px;font-weight:700;">' + Number(credited).toFixed(2) + ' $</div>' +
-              '</div>' +
-              '<button class="btn" style="margin-top:18px;" type="button" id="deposit-success-back">' + (tBlock('back_to_balance') || '← К балансу') + '</button>';
-            var b = document.getElementById('deposit-success-back');
-            if (b) b.onclick = function(){ showPage('balance'); };
-            var titleEl = document.querySelector('#page-deposit-result .section-title');
-            if (titleEl) titleEl.textContent = tBlock('deposit_success') || 'Успешная оплата';
-            showPage('deposit-result');
-          } else {
-            try { tg.showAlert('✅ ' + (tBlock('deposit_success') || 'Успешная оплата') + '\n' + credited.toFixed(2) + ' $'); } catch(e3) {}
-            showPage('balance');
-          }
-        } catch (e4) {
-          try { showPage('balance'); } catch (e5) {}
-        }
+        try { setBalance(st.balance); } catch (e1) { try { await refreshBalance(); } catch (e2) {} }
+        renderDepositSuccess(credited);
         return;
       }
       if (st && ['CANCELED','CHARGEBACKED','CANCELLED'].indexOf(String(st.status || '').toUpperCase()) >= 0) {
@@ -22974,7 +22977,7 @@ async function watchDepositPayment(paymentRef, credit) {
     }
   }
   await tick();
-  if (!done) __depositWatchTimer = setInterval(tick, 3000);
+  if (!done) __depositWatchTimer = setInterval(tick, 2000);
 }
 
 function resumePendingDepositWatch() {
