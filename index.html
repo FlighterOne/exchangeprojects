@@ -22839,7 +22839,7 @@ function updateDepositTotals() {
   }
   // Only "Итого к оплате"
   if (line) {
-    var label = (tBlock('total_pay') || 'Итого к оплате');
+    var label = (tBlock('total_to_pay') || tBlock('total_pay') || 'Итого к оплате');
     label = String(label).replace(/\{\s*total\s*\}/gi, '').replace(/:\s*$/, '').trim();
     if (!label) label = 'Итого к оплате';
     var rubTotal = fmtRub2(payRubExact);
@@ -23361,9 +23361,9 @@ function openTxDetail(id) {
     };
     var typeName = typeLabel[it.type] || it.type;
     var method = it.method_label || it.method || '—';
-    if (it.method === 'card') method = 'СБП';
-    if (it.method === 'crypto') method = 'Crypto';
-    if (it.method === 'stars') method = 'Telegram Stars';
+    if (it.method === 'card') method = (tBlock('sbp_card') || tBlock('deposit_sbp') || 'СБП');
+    if (it.method === 'crypto') method = (tBlock('crypto') || tBlock('deposit_crypto') || 'Crypto');
+    if (it.method === 'stars') method = (tBlock('deposit_stars') || 'Telegram Stars');
     var dt = String(it.created_at || '').slice(0, 19).replace('T', ' ') || '—';
     var opId = it.provider_id || it.id || '—';
     var credit = Number(it.amount) || 0;
@@ -23390,9 +23390,7 @@ function openTxDetail(id) {
     function L(key, fallback) {
       try {
         var v = (typeof tBlock === 'function') ? tBlock(key) : '';
-        if (!v || v === key || String(v).indexOf('_') >= 0 && v === key) return fallback;
-        // if tBlock returns the key itself, use fallback
-        if (v === key) return fallback;
+        if (!v || v === key) return fallback;
         return v;
       } catch (e) { return fallback; }
     }
@@ -25715,16 +25713,22 @@ function termsLabelHtml() {
   var url = (typeof TERMS_URL !== 'undefined' && TERMS_URL) ? TERMS_URL : 'https://clossr.site/terms.html';
   return prefix + '<a href="' + url + '" target="_blank" rel="noopener" class="terms-link">' + link + '</a>' + suffix;
 }
+
 function applyTermsLabels() {
-  try { refreshSearchPlaceholders(); } catch (eR) {}
   try {
-    var html = termsLabelHtml();
-    ['listing-terms-label', 'fl-terms-label', 'deposit-terms-label', 'withdraw-terms-label'].forEach(function (id) {
+    var ids = ['deposit-terms-label', 'withdraw-terms-label', 'listing-terms-label', 'fl-terms-label', 'vf-terms-label'];
+    var prefix = tBlock('terms_prefix') || '';
+    var link = tBlock('terms_link') || '';
+    var suffix = tBlock('terms_suffix') || '';
+    var href = (typeof TERMS_URL !== 'undefined' && TERMS_URL) ? TERMS_URL : 'https://clossr.site/terms.html';
+    var html = prefix + '<a href="' + href + '" target="_blank" rel="noopener" class="terms-link">' + link + '</a>' + suffix;
+    ids.forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.innerHTML = html;
     });
   } catch (e) {}
 }
+
 
 function showPrivacyOverlay(policyUrl) {
  var ov = document.getElementById('privacy-overlay');
@@ -25809,6 +25813,26 @@ ko:{active_tab:'활성',active_listings:'활성',seller_rating:'판매자 평점
 Object.keys(X).forEach(function(l){if(!I18N[l])I18N[l]={};Object.assign(I18N[l],X[l]);});
 }catch(e){}})();
 </script>
+
+<script>
+(function(){
+  try {
+    var XTX = {"ru": {"tx_type": "Тип", "pay_method": "Способ оплаты", "date_time": "Дата и время", "operation_id": "Id операции", "credit_amount": "Сумма поступления", "pay_amount_label": "Сумма оплаты", "close": "Закрыть", "amount_usd": "Сумма ($)", "total_to_pay": "Итого к оплате", "total_pay": "Итого к оплате", "total_to_debit": "Итого к списанию", "promo_code": "Промокод", "promo_placeholder": "Введите промокод", "terms_prefix": "Продолжая, вы даёте ", "terms_link": "пользовательское соглашение", "terms_suffix": " с правилами сервиса", "deposit": "Пополнение", "withdrawal": "Вывод"}, "en": {"tx_type": "Type", "pay_method": "Payment method", "date_time": "Date and time", "operation_id": "Operation ID", "credit_amount": "Credited amount", "pay_amount_label": "Payment amount", "close": "Close", "amount_usd": "Amount ($)", "total_to_pay": "Total to pay", "total_pay": "Total to pay", "total_to_debit": "Total to debit", "promo_code": "Promo code", "promo_placeholder": "Enter promo code", "terms_prefix": "By continuing, you accept the ", "terms_link": "terms of service", "terms_suffix": " and the service rules"}, "uk": {"tx_type": "Тип", "pay_method": "Спосіб оплати", "date_time": "Дата і час", "operation_id": "Id операції", "credit_amount": "Сума надходження", "pay_amount_label": "Сума оплати", "close": "Закрити", "amount_usd": "Сума ($)", "total_to_pay": "Разом до сплати", "total_pay": "Разом до сплати", "total_to_debit": "Разом до списання", "promo_code": "Промокод", "promo_placeholder": "Введіть промокод", "terms_prefix": "Продовжуючи, ви приймаєте ", "terms_link": "умови користування", "terms_suffix": " з правилами сервісу"}, "de": {"tx_type": "Typ", "pay_method": "Zahlungsmethode", "date_time": "Datum und Uhrzeit", "operation_id": "Vorgangs-ID", "credit_amount": "Gutschrift", "pay_amount_label": "Zahlungsbetrag", "close": "Schließen", "amount_usd": "Betrag ($)", "total_to_pay": "Gesamt zu zahlen", "total_pay": "Gesamt zu zahlen", "total_to_debit": "Gesamt abzubuchen", "promo_code": "Promo-Code", "promo_placeholder": "Promo-Code eingeben", "terms_prefix": "Mit dem Fortfahren akzeptieren Sie die ", "terms_link": "Nutzungsbedingungen", "terms_suffix": " und die Regeln des Dienstes"}, "fr": {"tx_type": "Type", "pay_method": "Mode de paiement", "date_time": "Date et heure", "operation_id": "ID de l'opération", "credit_amount": "Montant crédité", "pay_amount_label": "Montant du paiement", "close": "Fermer", "amount_usd": "Montant ($)", "total_to_pay": "Total à payer", "total_pay": "Total à payer", "total_to_debit": "Total à débiter", "promo_code": "Code promo", "promo_placeholder": "Entrez le code promo", "terms_prefix": "En continuant, vous acceptez les ", "terms_link": "conditions d'utilisation", "terms_suffix": " et les règles du service"}, "es": {"tx_type": "Tipo", "pay_method": "Método de pago", "date_time": "Fecha y hora", "operation_id": "ID de operación", "credit_amount": "Importe acreditado", "pay_amount_label": "Importe del pago", "close": "Cerrar", "amount_usd": "Importe ($)", "total_to_pay": "Total a pagar", "total_pay": "Total a pagar", "total_to_debit": "Total a debitar", "promo_code": "Código promocional", "promo_placeholder": "Introduce el código promocional", "terms_prefix": "Al continuar, aceptas el ", "terms_link": "acuerdo de usuario", "terms_suffix": " y las reglas del servicio"}, "it": {"tx_type": "Tipo", "pay_method": "Metodo di pagamento", "date_time": "Data e ora", "operation_id": "ID operazione", "credit_amount": "Importo accreditato", "pay_amount_label": "Importo del pagamento", "close": "Chiudi", "amount_usd": "Importo ($)", "total_to_pay": "Totale da pagare", "total_pay": "Totale da pagare", "total_to_debit": "Totale da addebitare", "promo_code": "Codice promo", "promo_placeholder": "Inserisci il codice promo", "terms_prefix": "Continuando, accetti i ", "terms_link": "termini di servizio", "terms_suffix": " e le regole del servizio"}, "pt": {"tx_type": "Tipo", "pay_method": "Método de pagamento", "date_time": "Data e hora", "operation_id": "ID da operação", "credit_amount": "Valor creditado", "pay_amount_label": "Valor do pagamento", "close": "Fechar", "amount_usd": "Valor ($)", "total_to_pay": "Total a pagar", "total_pay": "Total a pagar", "total_to_debit": "Total a debitar", "promo_code": "Código promocional", "promo_placeholder": "Introduza o código promocional", "terms_prefix": "Ao continuar, aceita o ", "terms_link": "acordo de utilizador", "terms_suffix": " e as regras do serviço"}, "tr": {"tx_type": "Tür", "pay_method": "Ödeme yöntemi", "date_time": "Tarih ve saat", "operation_id": "İşlem kimliği", "credit_amount": "Yatırılan tutar", "pay_amount_label": "Ödeme tutarı", "close": "Kapat", "amount_usd": "Tutar ($)", "total_to_pay": "Ödenecek toplam", "total_pay": "Ödenecek toplam", "total_to_debit": "Kesilecek toplam", "promo_code": "Promosyon kodu", "promo_placeholder": "Promosyon kodunu girin", "terms_prefix": "Devam ederek ", "terms_link": "kullanım koşullarını", "terms_suffix": " ve hizmet kurallarını kabul edersiniz"}, "id": {"tx_type": "Jenis", "pay_method": "Metode pembayaran", "date_time": "Tanggal dan waktu", "operation_id": "ID operasi", "credit_amount": "Jumlah dikreditkan", "pay_amount_label": "Jumlah pembayaran", "close": "Tutup", "amount_usd": "Jumlah ($)", "total_to_pay": "Total bayar", "total_pay": "Total bayar", "total_to_debit": "Total didebit", "promo_code": "Kode promo", "promo_placeholder": "Masukkan kode promo", "terms_prefix": "Dengan melanjutkan, Anda menerima ", "terms_link": "ketentuan layanan", "terms_suffix": " dan aturan layanan"}, "ar": {"tx_type": "النوع", "pay_method": "طريقة الدفع", "date_time": "التاريخ والوقت", "operation_id": "معرّف العملية", "credit_amount": "المبلغ المودع", "pay_amount_label": "مبلغ الدفع", "close": "إغلاق", "amount_usd": "المبلغ ($)", "total_to_pay": "الإجمالي للدفع", "total_pay": "الإجمالي للدفع", "total_to_debit": "الإجمالي للخصم", "promo_code": "رمز ترويجي", "promo_placeholder": "أدخل الرمز الترويجي", "terms_prefix": "بالمتابعة فإنك توافق على ", "terms_link": "شروط الخدمة", "terms_suffix": " وقواعد الخدمة"}, "zh": {"tx_type": "类型", "pay_method": "支付方式", "date_time": "日期和时间", "operation_id": "操作编号", "credit_amount": "到账金额", "pay_amount_label": "支付金额", "close": "关闭", "amount_usd": "金额 ($)", "total_to_pay": "应付总额", "total_pay": "应付总额", "total_to_debit": "扣款总额", "promo_code": "优惠码", "promo_placeholder": "请输入优惠码", "terms_prefix": "继续即表示您同意", "terms_link": "服务条款", "terms_suffix": "及服务规则"}, "ja": {"tx_type": "種類", "pay_method": "支払い方法", "date_time": "日時", "operation_id": "操作ID", "credit_amount": "入金額", "pay_amount_label": "支払金額", "close": "閉じる", "amount_usd": "金額 ($)", "total_to_pay": "お支払い合計", "total_pay": "お支払い合計", "total_to_debit": "引き落とし合計", "promo_code": "プロモコード", "promo_placeholder": "プロモコードを入力", "terms_prefix": "続行すると、", "terms_link": "利用規約", "terms_suffix": "およびサービス規則に同意したことになります"}, "ko": {"tx_type": "유형", "pay_method": "결제 수단", "date_time": "날짜 및 시간", "operation_id": "작업 ID", "credit_amount": "입금 금액", "pay_amount_label": "결제 금액", "close": "닫기", "amount_usd": "금액 ($)", "total_to_pay": "결제 합계", "total_pay": "결제 합계", "total_to_debit": "차감 합계", "promo_code": "프로모 코드", "promo_placeholder": "프로모 코드를 입력하세요", "terms_prefix": "계속하면 ", "terms_link": "서비스 약관", "terms_suffix": "에 동의합니다"}};
+    if (typeof I18N === 'undefined' || !I18N) return;
+    Object.keys(XTX).forEach(function(lang){
+      if (!I18N[lang]) I18N[lang] = {};
+      Object.keys(XTX[lang]).forEach(function(k){
+        I18N[lang][k] = XTX[lang][k];
+      });
+    });
+    if (I18N.pt) {
+      if (!I18N['pt-BR']) I18N['pt-BR'] = {};
+      Object.keys(XTX.pt || {}).forEach(function(k){ I18N['pt-BR'][k] = XTX.pt[k]; });
+    }
+  } catch (e) {}
+})();
+</script>
+
 </body>
 <script>
 (function(){try{var M={"ru":"Минимум 0.1$","en":"Minimum 0.1$","de":"Mindestens 0,1$","fr":"Minimum 0,1$","es":"Mínimo 0,1$","zh":"最低 0.1$","uk":"Мінімум 0,1$","it":"Minimo 0,1$","pt":"Mínimo 0,1$","pt-BR":"Mínimo 0,1$","tr":"Minimum 0,1$","id":"Minimum 0,1$","ar":"الحد الأدنى 0.1$","ja":"最小 0.1$","ko":"최소 0.1$"};if(typeof I18N==='object'){Object.keys(M).forEach(function(k){if(!I18N[k])I18N[k]={};I18N[k].min_01=M[k];});}if(typeof applyI18n==='function'){try{applyI18n();}catch(e1){}}}catch(e){}})();
