@@ -22975,12 +22975,15 @@ function renderDepositSuccess(credited) {
       try { showPage('balance'); } catch (e1) {}
       return;
     }
+    var usdRub = 0;
+    try { usdRub = Number(window.__usdRubRate || 0); } catch (eRate) {}
+    var creditedRub = usdRub > 0 ? Number(credited || 0) * usdRub : 0;
+    var rubText = creditedRub > 0 ? ' (~' + creditedRub.toLocaleString('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₽)' : '';
     box.innerHTML =
       '<div style="text-align:center;padding:28px 12px 8px;">' +
       '<div style="font-size:48px;line-height:1;margin-bottom:12px;">✅</div>' +
       '<div style="font-size:18px;font-weight:700;margin-bottom:8px;">' + (tBlock('deposit_success') || 'Успешная оплата') + '</div>' +
-      '<div style="font-size:15px;opacity:.85;margin-bottom:4px;">' + (tBlock('to_credit') || 'К зачислению') + '</div>' +
-      '<div style="font-size:22px;font-weight:700;">' + Number(credited || 0).toFixed(2) + ' $</div>' +
+      '<div style="font-size:22px;font-weight:700;">+' + Number(credited || 0).toFixed(2) + ' $' + rubText + '</div>' +
       '</div>' +
       '<button class="btn" style="margin-top:18px;" type="button" id="deposit-success-back">' + (tBlock('back_to_balance') || '← К балансу') + '</button>';
     var b = document.getElementById('deposit-success-back');
@@ -23007,7 +23010,14 @@ async function watchDepositPayment(paymentRef, credit) {
         done = true;
         clearPendingDeposit();
         var credited = Number(st.credit != null ? st.credit : credit) || 0;
-        try { setBalance(st.balance); } catch (e1) { try { await refreshBalance(); } catch (e2) {} }
+        try {
+          var rateResp = await apiGet('/api/rates');
+          window.__usdRubRate = Number(rateResp.usd_rub || rateResp.rate || 0) || 0;
+        } catch (eRate) {}
+        try {
+          await refreshBalance();
+          if (st.balance != null && Number(st.balance) >= 0) setBalance(Number(st.balance));
+        } catch (e1) {}
         renderDepositSuccess(credited);
         return;
       }
@@ -23331,8 +23341,8 @@ async function loadRequests() {
       items.push({
         type: tp,
         amount: Math.abs(Number(tx.amount) || 0),
-        method: '',
-        description: tx.description || '',
+        method: tx.method || tx.payment_method || '',
+        description: '',
         created_at: tx.created_at || '',
         id: tx.id,
         sign: sign
@@ -23353,18 +23363,32 @@ async function loadRequests() {
       return true;
     });
 
+    function txDate(value) {
+      if (!value) return '';
+      var d = new Date(String(value));
+      if (isNaN(d.getTime())) return String(value).slice(0, 16).replace('T', ' ');
+      var dd = String(d.getDate()).padStart(2, '0');
+      var mm = String(d.getMonth() + 1).padStart(2, '0');
+      var hh = String(d.getHours()).padStart(2, '0');
+      var mi = String(d.getMinutes()).padStart(2, '0');
+      return dd + '.' + mm + '.' + d.getFullYear() + ' ' + hh + ':' + mi;
+    }
+
     var html = '';
     if (items.length) {
       html = items.map(function(it) {
-        var typeName = typeLabel[it.type] || typeLabel[mapType(it.type)] || it.type;
-        var sub = [];
-        if (it.method && methodMap[it.method]) sub.push(methodMap[it.method]);
-        else if (it.method) sub.push(it.method);
-        if (it.description) sub.push(String(it.description).replace(/</g, '&lt;'));
-        if (it.created_at) sub.push(String(it.created_at).slice(0, 19).replace('T', ' '));
-        return '<div class="list-item"><div class="top"><div class="title">' + typeName +
-          '</div><span style="font-weight:700;">' + (it.sign || '') + Number(it.amount).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $</span></div>' +
-          (sub.length ? '<div class="subtitle">' + sub.join(' · ') + '</div>' : '') +
+        var method = '';
+        var rawMethod = String(it.method == null ? '' : it.method).toLowerCase();
+        if (rawMethod === '2' || rawMethod === 'card') method = tBlock('sbp') || 'СБП';
+        else if (rawMethod === '13' || rawMethod === 'crypto') method = 'USDT';
+        else if (rawMethod === 'stars') method = tBlock('stars') || 'Stars';
+        else if (rawMethod === 'order') method = tBlock('deal') || 'Сделка';
+        else if (rawMethod) method = String(it.method);
+        else method = typeLabel[it.type] || typeLabel[mapType(it.type)] || '';
+        var sub = [method, txDate(it.created_at)].filter(Boolean);
+        return '<div class="list-item tx-row"><div class="top"><div></div>' +
+          '<span class="tx-amount">' + (it.sign || '') + Number(it.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $</span></div>' +
+          '<div class="subtitle tx-meta">' + sub.map(function(x){ return String(x).replace(/</g, '&lt;'); }).join(' · ') + '</div>' +
           '</div>';
       }).join('');
     }
