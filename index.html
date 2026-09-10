@@ -2019,7 +2019,7 @@ button.btn.btn-compact,
  <span class="amount-rub-hint" id="deposit-amount-rub">~0 ₽</span>
  </div>
  <div id="deposit-min-error" style="display:none;color:#ff3b30;font-size:12px;margin-top:6px;"></div>
- <div class="total-pay-line" id="deposit-total-line"><span data-i18n="total_to_pay_label">Итого к оплате</span>: 0.00 $</div>
+ <div class="total-pay-line" id="deposit-total-line">Итого к оплате: 0.00 $</div>
  <div class="field-hint" id="deposit-fee-hint" style="display:none;"></div>
  </div>
 
@@ -2076,8 +2076,8 @@ button.btn.btn-compact,
  <span class="amount-rub-hint" id="withdraw-amount-rub">~0 ₽</span>
  </div>
  <div id="withdraw-min-error" style="display:none;color:#ff3b30;font-size:12px;margin-top:6px;"></div>
- <div class="field-hint"><span data-i18n="available">Доступно</span>: <span id="withdraw-available">0.00</span> $</div>
- <div class="total-pay-line" id="withdraw-total-line"><span data-i18n="total_to_withdraw_label">Итого к списанию</span>: 0.00 $</div>
+ <div class="field-hint">Доступно: <span id="withdraw-available">0.00</span> $</div>
+ <div class="total-pay-line" id="withdraw-total-line">Итого к списанию: 0.00 $</div>
  <div class="field-hint" id="withdraw-fee-hint" style="display:none;"></div>
  </div>
 
@@ -22975,15 +22975,12 @@ function renderDepositSuccess(credited) {
       try { showPage('balance'); } catch (e1) {}
       return;
     }
-    var usdRub = 0;
-    try { usdRub = Number(window.__usdRubRate || 0); } catch (eRate) {}
-    var creditedRub = usdRub > 0 ? Number(credited || 0) * usdRub : 0;
-    var rubText = creditedRub > 0 ? ' (~' + creditedRub.toLocaleString('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₽)' : '';
     box.innerHTML =
       '<div style="text-align:center;padding:28px 12px 8px;">' +
       '<div style="font-size:48px;line-height:1;margin-bottom:12px;">✅</div>' +
       '<div style="font-size:18px;font-weight:700;margin-bottom:8px;">' + (tBlock('deposit_success') || 'Успешная оплата') + '</div>' +
-      '<div style="font-size:22px;font-weight:700;">+' + Number(credited || 0).toFixed(2) + ' $' + rubText + '</div>' +
+      '<div style="font-size:15px;opacity:.85;margin-bottom:4px;">' + (tBlock('to_credit') || 'К зачислению') + '</div>' +
+      '<div style="font-size:22px;font-weight:700;">' + Number(credited || 0).toFixed(2) + ' $</div>' +
       '</div>' +
       '<button class="btn" style="margin-top:18px;" type="button" id="deposit-success-back">' + (tBlock('back_to_balance') || '← К балансу') + '</button>';
     var b = document.getElementById('deposit-success-back');
@@ -23010,14 +23007,7 @@ async function watchDepositPayment(paymentRef, credit) {
         done = true;
         clearPendingDeposit();
         var credited = Number(st.credit != null ? st.credit : credit) || 0;
-        try {
-          var rateResp = await apiGet('/api/rates');
-          window.__usdRubRate = Number(rateResp.usd_rub || rateResp.rate || 0) || 0;
-        } catch (eRate) {}
-        try {
-          await refreshBalance();
-          if (st.balance != null && Number(st.balance) >= 0) setBalance(Number(st.balance));
-        } catch (e1) {}
+        try { setBalance(st.balance); } catch (e1) { try { await refreshBalance(); } catch (e2) {} }
         renderDepositSuccess(credited);
         return;
       }
@@ -23256,13 +23246,11 @@ async function loadRequests() {
   var box = document.getElementById('requests-list');
   box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   try {
-    var data = await apiGet('/api/requests');
-    var reqs = data.requests || [];
     var txData = { transactions: [] };
     try { txData = await apiGet('/api/transactions'); } catch (e) {}
     var txs = txData.transactions || [];
 
-    // Only these operation types (no "ожидание" / "в обработке" statuses)
+    // Only completed ledger entries — do not mix requests (caused +0.00 duplicates)
     var typeLabel = {
       deposit: tBlock('deposit') || 'Пополнение',
       withdraw: tBlock('withdrawal') || 'Вывод',
@@ -23275,18 +23263,12 @@ async function loadRequests() {
       admin: tBlock('admin_credit') || 'Начисление администратором',
       admin_credit: tBlock('admin_credit') || 'Начисление администратором',
       admin_adjust: tBlock('admin_credit') || 'Начисление администратором',
-      income: tBlock('admin_credit') || 'Начисление администратором'
+      income: tBlock('deposit') || 'Пополнение'
     };
     var allowedTypes = {
       deposit: 1, withdraw: 1, withdrawal: 1, sale: 1, purchase: 1,
       purchase_release: 1, purchase_hold: 1, salary: 1,
       admin: 1, admin_credit: 1, admin_adjust: 1, income: 1
-    };
-    var methodMap = {
-      card: tBlock('sbp') || 'СБП',
-      crypto: 'USDT',
-      stars: tBlock('stars') || 'Stars',
-      order: tBlock('deal') || 'Сделка'
     };
 
     function mapType(raw, desc) {
@@ -23298,97 +23280,59 @@ async function loadRequests() {
       if (k === 'admin' || k === 'admin_adjust' || k === 'admin_credit') return 'admin_credit';
       if (k === 'salary') return 'salary';
       if (k === 'deposit') return 'deposit';
-      // deposits often stored as income / Platega deposit
-      if (k === 'income' && (d.indexOf('пополн') >= 0 || d.indexOf('deposit') >= 0 || d.indexOf('platega') >= 0)) return 'deposit';
+      if (k === 'income' && (d.indexOf('пополн') >= 0 || d.indexOf('deposit') >= 0 || d.indexOf('platega') >= 0 || d.indexOf('stars') >= 0)) return 'deposit';
       if (k === 'income') return 'admin_credit';
-      if (k === 'referral_bonus' || k === 'referral_earn') return null; // hide referral internals
+      if (k === 'referral_bonus' || k === 'referral_earn') return null;
       if (k === 'freelance_publish' || k === 'expense' || k === 'refund' || k === 'purchase_refund') return null;
       return k;
     }
 
+    window.__txCache = {};
     var items = [];
-
-    // Completed withdraw requests only (no pending/awaiting deposits)
-    reqs.forEach(function(r) {
-      var st = String(r.status || '').toLowerCase();
-      var tp = mapType(r.type, r.comment || r.description || '');
-      if (!tp || (!allowedTypes[tp] && !allowedTypes[r.type])) return;
-      // Skip deposits that are waiting / processing / cancelled — only completed deposits via transactions
-      if (tp === 'deposit' && st !== 'completed') return;
-      // Skip incomplete withdrawals from this list? Show only completed for consistency
-      if ((tp === 'withdraw' || tp === 'withdrawal') && st !== 'completed' && st !== 'approved') return;
-      if (st === 'cancelled' || st === 'canceled' || st === 'rejected') return;
-      if (st === 'awaiting_payment' || st === 'pending' || st === 'processing') return;
-      items.push({
-        type: tp,
-        amount: Number(r.amount) || 0,
-        method: r.method || '',
-        description: '',
-        created_at: r.updated_at || r.created_at || '',
-        id: r.id,
-        sign: (tp === 'deposit' || tp === 'salary' || tp === 'admin_credit' || tp === 'sale') ? '+' : (tp === 'withdraw' || tp === 'purchase' ? '−' : '')
-      });
-    });
-
     txs.forEach(function(tx) {
+      var amt = Math.abs(Number(tx.amount) || 0);
+      if (amt < 0.0001) return; // drop +0.00 noise
       var tp = mapType(tx.type, tx.description || '');
-      if (!tp || (!allowedTypes[tp] && !allowedTypes[tx.type])) return;
+      if (!tp || !allowedTypes[tp]) return;
       var sign = '+';
-      if (tp === 'withdraw' || tp === 'purchase' || tp === 'purchase_hold') sign = '−';
-      else if (tp === 'deposit' || tp === 'salary' || tp === 'admin_credit' || tp === 'sale' || tp === 'purchase_release') sign = '+';
-      else if (['income', 'admin', 'admin_credit', 'admin_adjust', 'deposit', 'salary', 'sale'].indexOf(String(tx.type).toLowerCase()) >= 0) sign = '+';
+      if (tp === 'withdraw' || tp === 'purchase') sign = '−';
+      else if (tp === 'deposit' || tp === 'salary' || tp === 'admin_credit' || tp === 'sale') sign = '+';
       else if (Number(tx.amount) < 0) sign = '−';
-      items.push({
+      var it = {
         type: tp,
-        amount: Math.abs(Number(tx.amount) || 0),
-        method: tx.method || tx.payment_method || '',
-        description: '',
+        amount: amt,
+        method: tx.method || '',
+        method_label: tx.method_label || '',
+        description: tx.description || '',
         created_at: tx.created_at || '',
         id: tx.id,
+        provider_id: tx.provider_id || '',
+        pay_amount: tx.pay_amount,
+        pay_currency: tx.pay_currency || '',
+        credit_rub: tx.credit_rub,
+        pay_rub: tx.pay_rub,
         sign: sign
-      });
+      };
+      window.__txCache[String(tx.id)] = it;
+      items.push(it);
     });
 
-    // Newest first
     items.sort(function(a, b) {
       return String(b.created_at || '').localeCompare(String(a.created_at || ''));
     });
 
-    // Dedupe deposit completed request + matching transaction by amount+time roughly
-    var seen = {};
-    items = items.filter(function(it) {
-      var key = it.type + '|' + it.amount + '|' + String(it.created_at || '').slice(0, 16);
-      if (seen[key]) return false;
-      seen[key] = 1;
-      return true;
-    });
-
-    function txDate(value) {
-      if (!value) return '';
-      var d = new Date(String(value));
-      if (isNaN(d.getTime())) return String(value).slice(0, 16).replace('T', ' ');
-      var dd = String(d.getDate()).padStart(2, '0');
-      var mm = String(d.getMonth() + 1).padStart(2, '0');
-      var hh = String(d.getHours()).padStart(2, '0');
-      var mi = String(d.getMinutes()).padStart(2, '0');
-      return dd + '.' + mm + '.' + d.getFullYear() + ' ' + hh + ':' + mi;
-    }
-
     var html = '';
     if (items.length) {
       html = items.map(function(it) {
-        var method = '';
-        var rawMethod = String(it.method == null ? '' : it.method).toLowerCase();
-        if (rawMethod === '2' || rawMethod === 'card') method = tBlock('sbp') || 'СБП';
-        else if (rawMethod === '13' || rawMethod === 'crypto') method = 'USDT';
-        else if (rawMethod === 'stars') method = tBlock('stars') || 'Stars';
-        else if (rawMethod === 'order') method = tBlock('deal') || 'Сделка';
-        else if (rawMethod) method = String(it.method);
-        else method = typeLabel[it.type] || typeLabel[mapType(it.type)] || '';
-        var sub = [method, txDate(it.created_at)].filter(Boolean);
-        return '<div class="list-item tx-row"><div class="top"><div></div>' +
-          '<span class="tx-amount">' + (it.sign || '') + Number(it.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $</span></div>' +
-          '<div class="subtitle tx-meta">' + sub.map(function(x){ return String(x).replace(/</g, '&lt;'); }).join(' · ') + '</div>' +
+        var typeName = typeLabel[it.type] || it.type;
+        var sub = [];
+        if (it.method_label) sub.push(it.method_label);
+        else if (it.method) sub.push(it.method);
+        if (it.created_at) sub.push(String(it.created_at).slice(0, 19).replace('T', ' '));
+        return '<div class="list-item" style="cursor:pointer;" onclick="openTxDetail(' + Number(it.id) + ')">' +
+          '<div class="top"><div class="title">' + typeName +
+          '</div><span style="font-weight:700;">' + (it.sign || '') + Number(it.amount).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $</span></div>' +
+          (sub.length ? '<div class="subtitle">' + sub.join(' · ') + '</div>' : '') +
           '</div>';
       }).join('');
     }
@@ -23396,6 +23340,85 @@ async function loadRequests() {
     box.innerHTML = html;
   } catch (e) {
     box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + (e.message || 'Error') + '</div>';
+  }
+}
+
+function openTxDetail(id) {
+  try {
+    var it = (window.__txCache || {})[String(id)];
+    if (!it) return;
+    var typeLabel = {
+      deposit: tBlock('deposit') || 'Пополнение',
+      withdraw: tBlock('withdrawal') || 'Вывод',
+      sale: tBlock('sale') || 'Продажа',
+      purchase: tBlock('purchase') || 'Покупка',
+      salary: tBlock('salary') || 'Зарплата',
+      admin_credit: tBlock('admin_credit') || 'Начисление администратором'
+    };
+    var typeName = typeLabel[it.type] || it.type;
+    var method = it.method_label || it.method || '—';
+    if (it.method === 'card') method = 'СБП';
+    if (it.method === 'crypto') method = 'Crypto';
+    if (it.method === 'stars') method = 'Telegram Stars';
+    var dt = String(it.created_at || '').slice(0, 19).replace('T', ' ') || '—';
+    var opId = it.provider_id || it.id || '—';
+    var credit = Number(it.amount) || 0;
+    var creditRub = (it.credit_rub != null) ? Number(it.credit_rub) : null;
+    var payRub = (it.pay_rub != null) ? Number(it.pay_rub) : null;
+    var payLine = '—';
+    if (it.method === 'stars' && it.pay_amount != null) {
+      payLine = (it.sign || '+') + Number(it.pay_amount) + ' ⭐';
+    } else if (payRub != null && !isNaN(payRub)) {
+      // payment total in RUB (with fee)
+      var payUsd = credit;
+      if (it.method === 'card') payUsd = Math.round(credit * 1.085 * 100) / 100;
+      else if (it.method === 'crypto') payUsd = Math.round(credit * 1.05 * 100) / 100;
+      payLine = (it.sign || '+') + payUsd.toFixed(2) + ' $ (~' + payRub.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽)';
+    } else if (it.pay_amount != null && it.pay_currency) {
+      payLine = (it.sign || '+') + Number(it.pay_amount).toFixed(2) + ' ' + it.pay_currency;
+    }
+
+    var creditLine = (it.sign || '+') + credit.toFixed(2) + ' $';
+    if (creditRub != null && !isNaN(creditRub)) {
+      creditLine += ' (~' + creditRub.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽)';
+    }
+
+    var rows = [
+      ['Тип', typeName],
+      [(tBlock('pay_method') || 'Способ оплаты'), method],
+      [(tBlock('date_time') || 'Дата и время'), dt],
+      [(tBlock('operation_id') || 'Id операции'), String(opId)],
+      [(tBlock('credit_amount') || 'Сумма поступления'), creditLine]
+    ];
+    if (it.type === 'deposit') {
+      rows.push([(tBlock('pay_amount_label') || 'Сумма оплаты'), payLine]);
+    }
+
+    var body = rows.map(function(r) {
+      return '<div class="row" style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--hint,rgba(128,128,128,.25));">' +
+        '<span class="label" style="opacity:.75;font-size:13px;">' + r[0] + '</span>' +
+        '<span class="value" style="font-weight:600;text-align:right;font-size:13px;">' + r[1] + '</span></div>';
+    }).join('');
+
+    var overlay = document.getElementById('tx-detail-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'tx-detail-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;padding:16px;';
+      overlay.onclick = function(e){ if (e.target === overlay) overlay.style.display = 'none'; };
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML =
+      '<div style="background:var(--bg,var(--secondary-bg,#1c1c1e));color:var(--text,#fff);border-radius:16px 16px 12px 12px;width:100%;max-width:480px;padding:18px 16px 20px;box-shadow:0 -4px 24px rgba(0,0,0,.25);">' +
+      '<div style="font-size:17px;font-weight:700;margin-bottom:12px;">' + typeName + '</div>' +
+      body +
+      '<button class="btn btn-secondary" style="margin-top:16px;width:100%;" type="button" id="tx-detail-close">' + (tBlock('close') || 'Закрыть') + '</button>' +
+      '</div>';
+    overlay.style.display = 'flex';
+    var cl = document.getElementById('tx-detail-close');
+    if (cl) cl.onclick = function(){ overlay.style.display = 'none'; };
+  } catch (e) {
+    try { tg.showAlert(e.message || 'Error'); } catch (e2) {}
   }
 }
 
@@ -25771,15 +25794,6 @@ ja:{active_tab:'アクティブ',active_listings:'アクティブ',seller_rating
 ko:{active_tab:'활성',active_listings:'활성',seller_rating:'판매자 평점',buyer_rating:'구매자 평점',staff_rating:'직원 평점',faq:'자주 묻는 질문'}
 };
 Object.keys(X).forEach(function(l){if(!I18N[l])I18N[l]={};Object.assign(I18N[l],X[l]);});
-}catch(e){}})();
-</script>
-<script>
-/* XCOD FINAL I18N: deposit / withdraw / transaction / confirmation UI */
-(function(){try{
-var X={"ru":{"available":"Доступно","total_to_pay_label":"Итого к оплате","total_to_withdraw_label":"Итого к списанию","pay_method":"Способ оплаты","withdraw_method":"Способ вывода","details":"Реквизиты","to_pay":"К оплате","to_credit":"К зачислению","fee_label":"Комиссия","payment_details":"Подтверждение оплаты","awaiting_payment":"Ожидание оплаты","pay_btn":"Оплатить","back_to_balance":"← К балансу","amount_usd":"Сумма ($)","promo_code":"Промокод","continue_btn":"Продолжить","deposit":"Пополнение","withdrawal":"Вывод","my_tx":"Мои транзакции","no_operations":"Нет операций","enter_details":"Введите реквизиты","err_method":"Выберите способ оплаты","err_terms":"Примите пользовательское соглашение","creating":"Создание…","request_id":"Заявка","deposit_success":"Средства успешно зачислены","deposit_fail":"Ошибка оплаты. Средства не зачислены","pending_status":"В ожидании","rejected_status":"Отклонено","sbp":"СБП","crypto":"Криптовалюта","stars":"Telegram Stars","purchase":"Покупка","salary":"Зарплата","admin_credit":"Начисление администратором"},"en":{"available":"Available","total_to_pay_label":"Total to pay","total_to_withdraw_label":"Total to withdraw","pay_method":"Payment method","withdraw_method":"Withdrawal method","details":"Payment details","to_pay":"To pay","to_credit":"To credit","fee_label":"Fee","payment_details":"Payment confirmation","awaiting_payment":"Awaiting payment","pay_btn":"Pay","back_to_balance":"← Back to balance","amount_usd":"Amount ($)","promo_code":"Promo code","continue_btn":"Continue","deposit":"Deposit","withdrawal":"Withdraw","my_tx":"My transactions","no_operations":"No operations","enter_details":"Enter details","err_method":"Select a payment method","err_terms":"Accept the terms of service","creating":"Creating…","request_id":"Request","deposit_success":"Funds credited successfully","deposit_fail":"Payment error. Funds were not credited","pending_status":"Pending","rejected_status":"Rejected","sbp":"SBP","crypto":"Cryptocurrency","stars":"Telegram Stars","purchase":"Purchase","salary":"Salary","admin_credit":"Admin credit"},"de":{"available":"Verfügbar","total_to_pay_label":"Gesamt zu zahlen","total_to_withdraw_label":"Gesamt zur Auszahlung","pay_method":"Zahlungsmethode","withdraw_method":"Auszahlungsmethode","details":"Zahlungsdetails","to_pay":"Zu zahlen","to_credit":"Gutschrift","fee_label":"Gebühr","payment_details":"Zahlungsbestätigung","awaiting_payment":"Zahlung ausstehend","pay_btn":"Bezahlen","back_to_balance":"← Zum Guthaben","amount_usd":"Betrag ($)","promo_code":"Promo-Code","continue_btn":"Weiter","deposit":"Einzahlung","withdrawal":"Auszahlung","my_tx":"Meine Transaktionen","no_operations":"Keine Vorgänge","enter_details":"Daten eingeben","err_method":"Zahlungsmethode auswählen","err_terms":"Nutzungsbedingungen akzeptieren","creating":"Wird erstellt…","request_id":"Anfrage","deposit_success":"Guthaben erfolgreich gutgeschrieben","deposit_fail":"Zahlungsfehler. Guthaben wurde nicht gutgeschrieben","pending_status":"Ausstehend","rejected_status":"Abgelehnt","sbp":"SBP","crypto":"Kryptowährung","stars":"Telegram Stars","purchase":"Kauf","salary":"Gehalt","admin_credit":"Gutschrift durch Admin"},"fr":{"available":"Disponible","total_to_pay_label":"Total à payer","total_to_withdraw_label":"Total à retirer","pay_method":"Mode de paiement","withdraw_method":"Mode de retrait","details":"Détails du paiement","to_pay":"À payer","to_credit":"À créditer","fee_label":"Frais","payment_details":"Confirmation du paiement","awaiting_payment":"Paiement en attente","pay_btn":"Payer","back_to_balance":"← Retour au solde","amount_usd":"Montant ($)","promo_code":"Code promo","continue_btn":"Continuer","deposit":"Dépôt","withdrawal":"Retrait","my_tx":"Mes transactions","no_operations":"Aucune opération","enter_details":"Saisissez les informations","err_method":"Sélectionnez un mode de paiement","err_terms":"Acceptez les conditions","creating":"Création…","request_id":"Demande","deposit_success":"Fonds crédités avec succès","deposit_fail":"Erreur de paiement. Les fonds n’ont pas été crédités","pending_status":"En attente","rejected_status":"Rejeté","sbp":"SBP","crypto":"Cryptomonnaie","stars":"Telegram Stars","purchase":"Achat","salary":"Salaire","admin_credit":"Crédit administrateur"},"es":{"available":"Disponible","total_to_pay_label":"Total a pagar","total_to_withdraw_label":"Total a retirar","pay_method":"Método de pago","withdraw_method":"Método de retiro","details":"Detalles del pago","to_pay":"A pagar","to_credit":"A acreditar","fee_label":"Comisión","payment_details":"Confirmación del pago","awaiting_payment":"Pago pendiente","pay_btn":"Pagar","back_to_balance":"← Volver al saldo","amount_usd":"Importe ($)","promo_code":"Código promocional","continue_btn":"Continuar","deposit":"Depósito","withdrawal":"Retiro","my_tx":"Mis transacciones","no_operations":"No hay operaciones","enter_details":"Introduce los datos","err_method":"Selecciona un método de pago","err_terms":"Acepta los términos","creating":"Creando…","request_id":"Solicitud","deposit_success":"Fondos acreditados correctamente","deposit_fail":"Error de pago. Los fondos no se acreditaron","pending_status":"Pendiente","rejected_status":"Rechazado","sbp":"SBP","crypto":"Criptomoneda","stars":"Telegram Stars","purchase":"Compra","salary":"Salario","admin_credit":"Abono del administrador"},"uk":{"available":"Доступно","total_to_pay_label":"Разом до сплати","total_to_withdraw_label":"Разом до списання","pay_method":"Спосіб оплати","withdraw_method":"Спосіб виведення","details":"Реквізити","to_pay":"До сплати","to_credit":"До зарахування","fee_label":"Комісія","payment_details":"Підтвердження оплати","awaiting_payment":"Очікування оплати","pay_btn":"Оплатити","back_to_balance":"← До балансу","amount_usd":"Сума ($)","promo_code":"Промокод","continue_btn":"Продовжити","deposit":"Поповнення","withdrawal":"Виведення","my_tx":"Мої транзакції","no_operations":"Немає операцій","enter_details":"Введіть реквізити","err_method":"Оберіть спосіб оплати","err_terms":"Прийміть умови користування","creating":"Створення…","request_id":"Заявка","deposit_success":"Кошти успішно зараховано","deposit_fail":"Помилка оплати. Кошти не зараховано","pending_status":"В очікуванні","rejected_status":"Відхилено","sbp":"СБП","crypto":"Криптовалюта","stars":"Telegram Stars","purchase":"Покупка","salary":"Зарплата","admin_credit":"Нарахування адміністратором"},"it":{"available":"Disponibile","total_to_pay_label":"Totale da pagare","total_to_withdraw_label":"Totale da prelevare","pay_method":"Metodo di pagamento","withdraw_method":"Metodo di prelievo","details":"Dettagli del pagamento","to_pay":"Da pagare","to_credit":"Da accreditare","fee_label":"Commissione","payment_details":"Conferma del pagamento","awaiting_payment":"Pagamento in attesa","pay_btn":"Paga","back_to_balance":"← Torna al saldo","amount_usd":"Importo ($)","promo_code":"Codice promozionale","continue_btn":"Continua","deposit":"Deposito","withdrawal":"Prelievo","my_tx":"Le mie transazioni","no_operations":"Nessuna operazione","enter_details":"Inserisci i dati","err_method":"Seleziona un metodo di pagamento","err_terms":"Accetta i termini","creating":"Creazione…","request_id":"Richiesta","deposit_success":"Fondi accreditati con successo","deposit_fail":"Errore di pagamento. I fondi non sono stati accreditati","pending_status":"In attesa","rejected_status":"Rifiutato","sbp":"SBP","crypto":"Criptovaluta","stars":"Telegram Stars","purchase":"Acquisto","salary":"Stipendio","admin_credit":"Accredito amministratore"},"pt":{"available":"Disponível","total_to_pay_label":"Total a pagar","total_to_withdraw_label":"Total a levantar","pay_method":"Método de pagamento","withdraw_method":"Método de levantamento","details":"Detalhes do pagamento","to_pay":"A pagar","to_credit":"A creditar","fee_label":"Taxa","payment_details":"Confirmação do pagamento","awaiting_payment":"Pagamento pendente","pay_btn":"Pagar","back_to_balance":"← Voltar ao saldo","amount_usd":"Valor ($)","promo_code":"Código promocional","continue_btn":"Continuar","deposit":"Depósito","withdrawal":"Levantamento","my_tx":"Minhas transações","no_operations":"Sem operações","enter_details":"Introduza os dados","err_method":"Selecione um método de pagamento","err_terms":"Aceite os termos","creating":"A criar…","request_id":"Pedido","deposit_success":"Fundos creditados com sucesso","deposit_fail":"Erro de pagamento. Os fundos não foram creditados","pending_status":"Pendente","rejected_status":"Rejeitado","sbp":"SBP","crypto":"Criptomoeda","stars":"Telegram Stars","purchase":"Compra","salary":"Salário","admin_credit":"Crédito do administrador"},"pt-BR":{"available":"Disponível","total_to_pay_label":"Total a pagar","total_to_withdraw_label":"Total a sacar","pay_method":"Método de pagamento","withdraw_method":"Método de saque","details":"Detalhes do pagamento","to_pay":"A pagar","to_credit":"A creditar","fee_label":"Taxa","payment_details":"Confirmação do pagamento","awaiting_payment":"Pagamento pendente","pay_btn":"Pagar","back_to_balance":"← Voltar ao saldo","amount_usd":"Valor ($)","promo_code":"Código promocional","continue_btn":"Continuar","deposit":"Depósito","withdrawal":"Saque","my_tx":"Minhas transações","no_operations":"Sem operações","enter_details":"Informe os dados","err_method":"Selecione um método de pagamento","err_terms":"Aceite os termos","creating":"Criando…","request_id":"Solicitação","deposit_success":"Fundos creditados com sucesso","deposit_fail":"Erro de pagamento. Os fundos não foram creditados","pending_status":"Pendente","rejected_status":"Rejeitado","sbp":"SBP","crypto":"Criptomoeda","stars":"Telegram Stars","purchase":"Compra","salary":"Salário","admin_credit":"Crédito do administrador"},"tr":{"available":"Mevcut","total_to_pay_label":"Ödenecek toplam","total_to_withdraw_label":"Çekilecek toplam","pay_method":"Ödeme yöntemi","withdraw_method":"Çekim yöntemi","details":"Ödeme ayrıntıları","to_pay":"Ödenecek","to_credit":"Hesaba yatırılacak","fee_label":"Komisyon","payment_details":"Ödeme onayı","awaiting_payment":"Ödeme bekleniyor","pay_btn":"Öde","back_to_balance":"← Bakiyeye dön","amount_usd":"Tutar ($)","promo_code":"Promosyon kodu","continue_btn":"Devam","deposit":"Yatırma","withdrawal":"Çekim","my_tx":"İşlemlerim","no_operations":"İşlem yok","enter_details":"Bilgileri girin","err_method":"Bir ödeme yöntemi seçin","err_terms":"Koşulları kabul edin","creating":"Oluşturuluyor…","request_id":"Talep","deposit_success":"Para başarıyla yatırıldı","deposit_fail":"Ödeme hatası. Para yatırılmadı","pending_status":"Beklemede","rejected_status":"Reddedildi","sbp":"SBP","crypto":"Kripto para","stars":"Telegram Stars","purchase":"Satın alma","salary":"Maaş","admin_credit":"Yönetici kredisi"},"id":{"available":"Tersedia","total_to_pay_label":"Total yang harus dibayar","total_to_withdraw_label":"Total yang ditarik","pay_method":"Metode pembayaran","withdraw_method":"Metode penarikan","details":"Detail pembayaran","to_pay":"Harus dibayar","to_credit":"Dikreditkan","fee_label":"Biaya","payment_details":"Konfirmasi pembayaran","awaiting_payment":"Menunggu pembayaran","pay_btn":"Bayar","back_to_balance":"← Kembali ke saldo","amount_usd":"Jumlah ($)","promo_code":"Kode promo","continue_btn":"Lanjutkan","deposit":"Deposit","withdrawal":"Penarikan","my_tx":"Transaksi saya","no_operations":"Tidak ada transaksi","enter_details":"Masukkan detail","err_method":"Pilih metode pembayaran","err_terms":"Terima ketentuan","creating":"Membuat…","request_id":"Permintaan","deposit_success":"Dana berhasil dikreditkan","deposit_fail":"Kesalahan pembayaran. Dana tidak dikreditkan","pending_status":"Menunggu","rejected_status":"Ditolak","sbp":"SBP","crypto":"Mata uang kripto","stars":"Telegram Stars","purchase":"Pembelian","salary":"Gaji","admin_credit":"Kredit admin"},"ar":{"available":"متاح","total_to_pay_label":"الإجمالي للدفع","total_to_withdraw_label":"إجمالي السحب","pay_method":"طريقة الدفع","withdraw_method":"طريقة السحب","details":"تفاصيل الدفع","to_pay":"المبلغ للدفع","to_credit":"المبلغ للإيداع","fee_label":"العمولة","payment_details":"تأكيد الدفع","awaiting_payment":"بانتظار الدفع","pay_btn":"دفع","back_to_balance":"← العودة إلى الرصيد","amount_usd":"المبلغ ($)","promo_code":"رمز ترويجي","continue_btn":"متابعة","deposit":"إيداع","withdrawal":"سحب","my_tx":"معاملاتي","no_operations":"لا توجد عمليات","enter_details":"أدخل التفاصيل","err_method":"اختر طريقة دفع","err_terms":"وافق على الشروط","creating":"جارٍ الإنشاء…","request_id":"الطلب","deposit_success":"تم إيداع الأموال بنجاح","deposit_fail":"خطأ في الدفع. لم تتم إضافة الأموال","pending_status":"قيد الانتظار","rejected_status":"مرفوض","sbp":"SBP","crypto":"العملة المشفرة","stars":"Telegram Stars","purchase":"شراء","salary":"راتب","admin_credit":"رصيد من المسؤول"},"zh":{"available":"可用","total_to_pay_label":"应付总额","total_to_withdraw_label":"扣除总额","pay_method":"支付方式","withdraw_method":"提现方式","details":"支付详情","to_pay":"应付","to_credit":"到账","fee_label":"手续费","payment_details":"支付确认","awaiting_payment":"等待付款","pay_btn":"支付","back_to_balance":"← 返回余额","amount_usd":"金额（$）","promo_code":"优惠码","continue_btn":"继续","deposit":"充值","withdrawal":"提现","my_tx":"我的交易","no_operations":"暂无交易","enter_details":"请输入信息","err_method":"请选择支付方式","err_terms":"请接受服务条款","creating":"创建中…","request_id":"申请","deposit_success":"资金已成功到账","deposit_fail":"支付失败，资金未到账","pending_status":"等待中","rejected_status":"已拒绝","sbp":"SBP","crypto":"加密货币","stars":"Telegram Stars","purchase":"购买","salary":"工资","admin_credit":"管理员入账"},"ja":{"available":"利用可能","total_to_pay_label":"支払総額","total_to_withdraw_label":"出金総額","pay_method":"支払い方法","withdraw_method":"出金方法","details":"支払い詳細","to_pay":"支払額","to_credit":"入金額","fee_label":"手数料","payment_details":"支払い確認","awaiting_payment":"支払い待ち","pay_btn":"支払う","back_to_balance":"← 残高へ","amount_usd":"金額（$）","promo_code":"プロモーションコード","continue_btn":"続行","deposit":"入金","withdrawal":"出金","my_tx":"取引履歴","no_operations":"取引はありません","enter_details":"情報を入力してください","err_method":"支払い方法を選択してください","err_terms":"利用規約に同意してください","creating":"作成中…","request_id":"申請","deposit_success":"入金が完了しました","deposit_fail":"支払いエラー。入金されませんでした","pending_status":"保留中","rejected_status":"拒否されました","sbp":"SBP","crypto":"暗号資産","stars":"Telegram Stars","purchase":"購入","salary":"給与","admin_credit":"管理者による入金"},"ko":{"available":"사용 가능","total_to_pay_label":"총 결제 금액","total_to_withdraw_label":"총 출금 금액","pay_method":"결제 방법","withdraw_method":"출금 방법","details":"결제 정보","to_pay":"결제 금액","to_credit":"입금 금액","fee_label":"수수료","payment_details":"결제 확인","awaiting_payment":"결제 대기 중","pay_btn":"결제하기","back_to_balance":"← 잔액으로","amount_usd":"금액 ($)","promo_code":"프로모션 코드","continue_btn":"계속","deposit":"입금","withdrawal":"출금","my_tx":"내 거래","no_operations":"거래가 없습니다","enter_details":"정보를 입력하세요","err_method":"결제 방법을 선택하세요","err_terms":"이용약관에 동의하세요","creating":"생성 중…","request_id":"요청","deposit_success":"잔액에 성공적으로 입금되었습니다","deposit_fail":"결제 오류. 금액이 입금되지 않았습니다","pending_status":"대기 중","rejected_status":"거부됨","sbp":"SBP","crypto":"암호화폐","stars":"Telegram Stars","purchase":"구매","salary":"급여","admin_credit":"관리자 입금"}};
-Object.keys(X).forEach(function(l){if(!I18N[l])I18N[l]={};Object.assign(I18N[l],X[l]);});
-if(typeof applyI18n==='function') applyI18n();
-if(typeof applyTermsLabels==='function') applyTermsLabels();
 }catch(e){}})();
 </script>
 </body>
