@@ -5327,7 +5327,7 @@ var I18N = {
  price: 'Цена', from: 'с', to: 'до', type: 'Тип', product_type: 'Вид товара',
  rating_from: 'Рейтинг сотрудника от', service_type: 'Вид услуги', order_svc: 'Заказать', execute_svc: 'Исполнять',
  partner: 'Партнёр', own_product: 'Свой товар', deposit: 'Пополнение', withdrawal: 'Вывод',
- salary: 'Зарплата', admin_credit: 'Начисление администратором', purchase: 'Покупка', freelance_publish: 'Публикация фриланс', tx_done: 'Выполнено',
+ salary: 'Зарплата', admin_credit: 'Начисление администратором', admin_zero: 'Обнуление админом', date_time: 'Дата и время', operation_id: 'Id операции', credit_amount: 'Сумма поступления', pay_amount_label: 'Сумма оплаты', tx_type: 'Тип', purchase: 'Покупка', freelance_publish: 'Публикация фриланс', tx_done: 'Выполнено',
  tx_pending: 'В обработке', status_awaiting: 'Ожидает', sbp_card: 'СБП / карта', deal: 'Сделка', tx_rejected: 'Отклонено', lang_changed: 'Язык изменён',
  original: 'оригинал', category: 'Категория', buy_confirm: 'Подтвердите покупку',
  insufficient: 'Недостаточно средств', listings: 'Объявления', transactions: tBlock('mod_tx') || 'Transaction moderation',
@@ -6116,7 +6116,7 @@ terms_prefix: 'Продолжая, вы даёте ',
  price: 'Price', from: 'from', to: 'to', type: 'Type', product_type: 'Product type',
  rating_from: 'Staff rating from', service_type: 'Service type', order_svc: 'Order', execute_svc: 'Provide',
  partner: 'Partner', own_product: 'Own product', deposit: 'Deposit', withdrawal: 'Withdrawal',
- salary: 'Salary', admin_credit: 'Admin credit', purchase: 'Purchase', freelance_publish: 'Freelance publish', tx_done: 'Completed',
+ salary: 'Salary', admin_credit: 'Admin credit', admin_zero: 'Admin zero', date_time: 'Date and time', operation_id: 'Operation ID', credit_amount: 'Credited amount', pay_amount_label: 'Payment amount', tx_type: 'Type', purchase: 'Purchase', freelance_publish: 'Freelance publish', tx_done: 'Completed',
  tx_pending: 'Processing', status_awaiting: 'Pending', sbp_card: 'SBP / card', deal: 'Deal', tx_rejected: 'Rejected', lang_changed: 'Language updated',
  original: 'original', category: 'Category', buy_confirm: 'Confirm purchase',
  insufficient: 'Insufficient funds', listings: 'Listings', transactions: 'Transactions'
@@ -23263,12 +23263,13 @@ async function loadRequests() {
       admin: tBlock('admin_credit') || 'Начисление администратором',
       admin_credit: tBlock('admin_credit') || 'Начисление администратором',
       admin_adjust: tBlock('admin_credit') || 'Начисление администратором',
+      admin_zero: tBlock('admin_zero') || 'Обнуление админом',
       income: tBlock('deposit') || 'Пополнение'
     };
     var allowedTypes = {
       deposit: 1, withdraw: 1, withdrawal: 1, sale: 1, purchase: 1,
       purchase_release: 1, purchase_hold: 1, salary: 1,
-      admin: 1, admin_credit: 1, admin_adjust: 1, income: 1
+      admin: 1, admin_credit: 1, admin_adjust: 1, admin_zero: 1, income: 1
     };
 
     function mapType(raw, desc) {
@@ -23277,6 +23278,7 @@ async function loadRequests() {
       if (k === 'purchase_release') return 'sale';
       if (k === 'purchase_hold' || k === 'buy') return 'purchase';
       if (k === 'withdrawal' || k === 'withdraw') return 'withdraw';
+      if (k === 'admin_zero') return 'admin_zero';
       if (k === 'admin' || k === 'admin_adjust' || k === 'admin_credit') return 'admin_credit';
       if (k === 'salary') return 'salary';
       if (k === 'deposit') return 'deposit';
@@ -23297,6 +23299,7 @@ async function loadRequests() {
       var sign = '+';
       if (tp === 'withdraw' || tp === 'purchase') sign = '−';
       else if (tp === 'deposit' || tp === 'salary' || tp === 'admin_credit' || tp === 'sale') sign = '+';
+      else if (tp === 'admin_zero') sign = '−';
       else if (Number(tx.amount) < 0) sign = '−';
       var it = {
         type: tp,
@@ -23353,7 +23356,8 @@ function openTxDetail(id) {
       sale: tBlock('sale') || 'Продажа',
       purchase: tBlock('purchase') || 'Покупка',
       salary: tBlock('salary') || 'Зарплата',
-      admin_credit: tBlock('admin_credit') || 'Начисление администратором'
+      admin_credit: tBlock('admin_credit') || 'Начисление администратором',
+      admin_zero: tBlock('admin_zero') || 'Обнуление админом'
     };
     var typeName = typeLabel[it.type] || it.type;
     var method = it.method_label || it.method || '—';
@@ -23383,15 +23387,24 @@ function openTxDetail(id) {
       creditLine += ' (~' + creditRub.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽)';
     }
 
+    function L(key, fallback) {
+      try {
+        var v = (typeof tBlock === 'function') ? tBlock(key) : '';
+        if (!v || v === key || String(v).indexOf('_') >= 0 && v === key) return fallback;
+        // if tBlock returns the key itself, use fallback
+        if (v === key) return fallback;
+        return v;
+      } catch (e) { return fallback; }
+    }
     var rows = [
-      ['Тип', typeName],
-      [(tBlock('pay_method') || 'Способ оплаты'), method],
-      [(tBlock('date_time') || 'Дата и время'), dt],
-      [(tBlock('operation_id') || 'Id операции'), String(opId)],
-      [(tBlock('credit_amount') || 'Сумма поступления'), creditLine]
+      [L('tx_type', 'Тип'), typeName],
+      [L('pay_method', 'Способ оплаты'), method],
+      [L('date_time', 'Дата и время'), dt],
+      [L('operation_id', 'Id операции'), String(opId)],
+      [L('credit_amount', 'Сумма поступления'), creditLine]
     ];
     if (it.type === 'deposit') {
-      rows.push([(tBlock('pay_amount_label') || 'Сумма оплаты'), payLine]);
+      rows.push([L('pay_amount_label', 'Сумма оплаты'), payLine]);
     }
 
     var body = rows.map(function(r) {
