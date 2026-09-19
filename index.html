@@ -3111,6 +3111,12 @@ async function handleTelegramLogin(user) {
  last_name: data.last_name,
  photo_url: data.photo_url
  });
+ try {
+   if (!window.userData) window.userData = {};
+   if (data.photo_url) userData.photo_url = data.photo_url;
+   if (data.username) userData.username = data.username;
+   if (data.first_name) userData.first_name = data.first_name;
+ } catch (eMeta) {}
  hideLoginOverlay();
  // privacy if first time
  if (!data.privacy_miniapp) {
@@ -4741,13 +4747,17 @@ async function requestVerifyUpgrade() {
 
 
 function renderMain() {
- var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
- var first = tgUser.first_name || userData.first_name || '';
- var last = tgUser.last_name || userData.last_name || '';
- var fullName = (first + ' ' + last).trim() || userData.username || 'User';
- var username = tgUser.username || userData.username || '';
+ var tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
+ var first = tgUser.first_name || (userData && userData.first_name) || '';
+ var last = tgUser.last_name || (userData && userData.last_name) || '';
+ var fullName = (first + ' ' + last).trim() || (userData && userData.username) || 'User';
+ var username = tgUser.username || (userData && userData.username) || '';
  var initial = fullName.charAt(0).toUpperCase();
- var photo = tgUser.photo_url || null;
+ // миниапп: photo из Telegram WebApp; сайт/приложение: photo_url с API / сессии
+ var photo = tgUser.photo_url || (userData && userData.photo_url) || null;
+ try {
+   if (!photo && userData && userData.user && userData.user.photo_url) photo = userData.user.photo_url;
+ } catch (eP) {}
 
  // Top bar avatar
  var topEl = document.getElementById('top-avatar');
