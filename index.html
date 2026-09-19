@@ -4887,7 +4887,7 @@ var PAGE_PATH_MAP = {
   login: 'login',
   'app-install': 'download',
   'app-install-detail': 'download',
-  'support-chat': 'support/moderatorchat',
+  'support-chat': 'support/chat',
   main: 'home',
   support: 'support',
   balance: 'balance',
@@ -4896,7 +4896,7 @@ var PAGE_PATH_MAP = {
   freelance: 'freelance',
   favorites: 'favorites',
   settings: 'settings',
-  'settings-lang': 'settings/lang',
+  'settings-lang': 'settings/languages',
   'settings-theme': 'settings/theme',
   orders: 'orders',
   requests: 'requests',
@@ -4907,7 +4907,8 @@ var PAGE_PATH_MAP = {
   'deposit-result': 'deposit',
   profile: 'profile',
   admin: 'admin',
-  collaborate: 'collaborate',
+  collaborate: 'advanced',
+  'job-form': 'job',
   'listing-create': 'create-sale-listing',
   'create-freelance': 'create-freelance-listing',
   'listing-detail': null,
@@ -4972,6 +4973,20 @@ var PATH_PAGE_MAP = {
   '': '__root__',
   '/': '__root__',
   'login': 'login',
+  'settings/languages': 'settings-lang',
+  'settings/language': 'settings-lang',
+  'settings/lang': 'settings-lang',
+  'settings/theme': 'settings-theme',
+  'settings/themes': 'settings-theme',
+  'support/chat': '__support_chat__',
+  'support/moderatorchat': '__support_chat__',
+  'support/moderator-chat': '__support_chat__',
+  'moderatorchat': '__support_chat__',
+  'advanced': 'collaborate',
+  'collaborate': 'collaborate',
+  'job': 'job-form',
+  'jobs': 'job-form',
+  'job-form': 'job-form',
   'download': 'app-install',
   'download/android': '__download_android__',
   'download/ios': '__download_ios__',
@@ -5243,14 +5258,48 @@ function applyRouteFromPath() {
       return true;
     }
 
-    // support/moderatorchat
-    if (/^support\/moderator[-_]?chat$/i.test(rawPath) || /^moderator[-_]?chat$/i.test(rawPath)) {
+    // settings/languages | settings/theme
+    if (/^settings\/(languages|language|lang)$/i.test(rawPath)) {
+      if (!requireAuthOrRedirect(rawPath)) return true;
+      __pathNavLock = true;
+      try { showPage('settings-lang'); } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+    if (/^settings\/themes?$/i.test(rawPath)) {
+      if (!requireAuthOrRedirect(rawPath)) return true;
+      __pathNavLock = true;
+      try { showPage('settings-theme'); } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+
+    // support/chat | support/moderatorchat
+    if (/^support\/(chat|moderator[-_]?chat)$/i.test(rawPath) || /^moderator[-_]?chat$/i.test(rawPath)) {
       if (!requireAuthOrRedirect(rawPath)) return true;
       __pathNavLock = true;
       try {
         if (typeof openSupportChat === 'function') openSupportChat();
         else showPage('support-chat');
       } catch (e) { try { showPage('support-chat'); } catch (e2) {} }
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+
+    // advanced (сотрудничество / реклама)
+    if (/^advanced$/i.test(rawPath) || /^collaborate$/i.test(rawPath)) {
+      if (!requireAuthOrRedirect(rawPath)) return true;
+      __pathNavLock = true;
+      try { showPage('collaborate'); } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+
+    // job (сотрудничество / работа)
+    if (/^jobs?$/i.test(rawPath) || /^job-form$/i.test(rawPath)) {
+      if (!requireAuthOrRedirect(rawPath)) return true;
+      __pathNavLock = true;
+      try { showPage('job-form'); } catch (e) {}
       setTimeout(function(){ __pathNavLock = false; }, 50);
       return true;
     }
@@ -5303,7 +5352,7 @@ function applyRouteFromPath() {
       setTimeout(function(){ __pathNavLock = false; }, 50);
       return true;
     }
-    if (page === '__support_moderatorchat__') {
+    if (page === '__support_chat__' || page === '__support_moderatorchat__') {
       if (!requireAuthOrRedirect(rawPath)) return true;
       __pathNavLock = true;
       try {
