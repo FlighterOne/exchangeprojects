@@ -3122,7 +3122,7 @@ async function continueAfterAuth() {
  __authReady = true;
  window.__xcodBootOk = true;
  try { updateTopSideButton(); } catch (eTB) {}
- try { if (!isTelegramMiniApp()) applyRouteFromHash(); } catch (eRoute) {}
+ try { if (!isMiniAppShell()) applyRouteFromHash(); else { /* /miniapp: intact shell, no site path tabs */ } } catch (eRoute) {}
  try { if (typeof renderMain === 'function') renderMain(); } catch (e) {}
   if (box) box.style.display = 'none';
   try {
@@ -4813,8 +4813,49 @@ function setBalance(bal) {
 }
 
 
-/* ========== HASH ROUTING (site deep links) ========== */
+/* ========== PATH ROUTING (site) + intact /miniapp shell ========== */
 var __hashNavLock = false;
+var __pathNavLock = false;
+
+/** /miniapp — единый цельный миниапп без URL-вкладок сайта */
+function isMiniAppShell() {
+  try {
+    var p = (location.pathname || '/').replace(/\/+$/, '') || '/';
+    if (p === '/miniapp' || p.indexOf('/miniapp/') === 0) return true;
+  } catch (e) {}
+  try { if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) return true; } catch (e2) {}
+  return false;
+}
+
+var PAGE_PATH_MAP = {
+  home: 'home',
+  main: 'home',
+  support: 'support',
+  balance: 'balance',
+  news: 'news',
+  exchange: 'exchange',
+  freelance: 'freelance',
+  favorites: 'favorites',
+  settings: 'settings',
+  'settings-lang': 'settings/lang',
+  'settings-theme': 'settings/theme',
+  orders: 'orders',
+  requests: 'requests',
+  'my-listings': 'my-listings',
+  mylistings: 'my-listings',
+  deposit: 'deposit',
+  withdraw: 'withdraw',
+  'deposit-result': 'deposit',
+  profile: 'profile',
+  admin: 'admin',
+  collaborate: 'collaborate',
+  'listing-create': 'create-sale-listing',
+  'create-freelance': 'create-freelance-listing',
+  'listing-detail': null,
+  'listing-edit': null
+};
+
+// legacy hash maps kept for # → path redirects
 var PAGE_HASH_MAP = {
   home: 'main',
   main: 'main',
@@ -4868,96 +4909,204 @@ var HASH_PAGE_MAP = {
   'create-sale-listing': '__create_sale__',
   'create-freelance-listing': '__create_freelance__'
 };
+var PATH_PAGE_MAP = {
+  '': 'home',
+  '/': 'home',
+  'home': 'home',
+  'main': 'home',
+  'support': 'support',
+  'balance': 'balance',
+  'news': 'news',
+  'exchange': 'exchange',
+  'freelance': 'freelance',
+  'favorites': 'favorites',
+  'settings': 'settings',
+  'settings/lang': 'settings-lang',
+  'settings/theme': 'settings-theme',
+  'settingslang': 'settings-lang',
+  'settingstheme': 'settings-theme',
+  'orders': 'orders',
+  'requests': 'requests',
+  'my-listings': 'my-listings',
+  'mylistings': 'my-listings',
+  'deposit': 'deposit',
+  'withdraw': 'withdraw',
+  'profile': 'profile',
+  'admin': 'admin',
+  'collaborate': 'collaborate',
+  'create-sale-listing': '__create_sale__',
+  'createsalelisting': '__create_sale__',
+  'create-freelance-listing': '__create_freelance__',
+  'createfreelancelisting': '__create_freelance__'
+};
 
 function setRouteHash(hash) {
+  // legacy no-op for miniapp; website uses setRoutePath
   try {
-    if (__hashNavLock) return;
+    if (isMiniAppShell()) return;
     var h = String(hash || '').replace(/^#/, '');
     if (!h) return;
-    var cur = (location.hash || '').replace(/^#/, '');
-    if (cur === h) return;
-    __hashNavLock = true;
-    if (history && history.replaceState) {
-      history.replaceState(null, '', '#' + h);
-    } else {
-      location.hash = h;
+    // map legacy hash key to path
+    var key = h.toLowerCase().replace(/[^a-z0-9\-\/]/g, '');
+    var mProf = h.match(/^profile[\/_\-]?(\d+)$/i);
+    if (mProf) { setRoutePath('profile/' + mProf[1]); return; }
+    var mList = h.match(/^listing[\/_\-]?(\d+)$/i);
+    if (mList) { setRoutePath('listing/' + mList[1]); return; }
+    if (key === 'profile' || key.indexOf('profile') === 0) {
+      var uid = (userData && (userData.user_id || userData.id)) ? (userData.user_id || userData.id) : '';
+      setRoutePath(uid ? ('profile/' + uid) : 'profile');
+      return;
     }
-    setTimeout(function(){ __hashNavLock = false; }, 0);
-  } catch (e) { __hashNavLock = false; }
+    var page = HASH_PAGE_MAP[key] || HASH_PAGE_MAP[h.toLowerCase()];
+    if (page === '__create_sale__') { setRoutePath('create-sale-listing'); return; }
+    if (page === '__create_freelance__') { setRoutePath('create-freelance-listing'); return; }
+    var pathKey = PAGE_PATH_MAP[page] || PAGE_PATH_MAP[key] || key;
+    if (pathKey) setRoutePath(pathKey);
+  } catch (e) {}
 }
 
-function applyRouteFromHash() {
+function setRoutePath(path) {
   try {
-    var raw = (location.hash || '').replace(/^#/, '').trim();
-    if (!raw) return false;
+    if (isMiniAppShell()) return; // миниапп не дробим на URL-вкладки сайта
+    if (__pathNavLock || __hashNavLock) return;
+    var p = String(path || '').replace(/^\/+/, '').replace(/\/+$/, '');
+    if (!p) p = 'home';
+    var target = '/' + p;
+    var cur = (location.pathname || '/').replace(/\/+$/, '') || '/';
+    if (cur === target || (cur === '/' && target === '/home')) return;
+    __pathNavLock = true;
+    try {
+      if (history && history.pushState) {
+        history.pushState({ spa: true, path: p }, '', target);
+      } else {
+        location.pathname = target;
+      }
+    } catch (e1) {
+      try { location.href = target; } catch (e2) {}
+    }
+    setTimeout(function(){ __pathNavLock = false; }, 0);
+  } catch (e) { __pathNavLock = false; }
+}
 
-    // #profile123456 or #profile/123456
-    var mProf = raw.match(/^profile[\/_\-]?(\d+)$/i);
+function applyRouteFromPath() {
+  try {
+    if (isMiniAppShell()) return false; // /miniapp — без path-навигации вкладок
+
+    var rawPath = (location.pathname || '/').replace(/^\/+/, '').replace(/\/+$/, '');
+    // ignore API and static-ish
+    if (/^(api|static|assets|favicon|robots|sitemap)(\/|$)/i.test(rawPath)) return false;
+
+    // /profile/123 or /profile-123
+    var mProf = rawPath.match(/^profile[\/_\-]?(\d+)$/i);
     if (mProf) {
       var pid = parseInt(mProf[1], 10);
       if (pid) {
-        __hashNavLock = true;
+        __pathNavLock = true;
         try { openUserProfile(pid); } catch (e) {}
-        setTimeout(function(){ __hashNavLock = false; }, 50);
+        setTimeout(function(){ __pathNavLock = false; }, 50);
         return true;
       }
     }
 
-    // #listing17 or #listing/17
-    var mList = raw.match(/^listing[\/_\-]?(\d+)$/i);
+    // /listing/17
+    var mList = rawPath.match(/^listing[\/_\-]?(\d+)$/i);
     if (mList) {
       var lid = parseInt(mList[1], 10);
       if (lid) {
-        __hashNavLock = true;
+        __pathNavLock = true;
         try { openListing(lid); } catch (e) {}
-        setTimeout(function(){ __hashNavLock = false; }, 50);
+        setTimeout(function(){ __pathNavLock = false; }, 50);
         return true;
       }
     }
 
-    var key = raw.toLowerCase().replace(/[^a-z0-9\-]/g, '');
-    // aliases
-    if (key === 'createsalelisting' || key === 'create-sale-listing' || key === 'createsale') key = 'createsalelisting';
-    if (key === 'createfreelancelisting' || key === 'create-freelance-listing' || key === 'createfreelance') key = 'createfreelancelisting';
+    var key = rawPath.toLowerCase();
+    if (!key || key === 'index.html') key = 'home';
 
-    var page = HASH_PAGE_MAP[key] || HASH_PAGE_MAP[raw.toLowerCase()];
-    if (key === 'profile' || raw === 'profile') {
-      __hashNavLock = true;
+    // aliases
+    if (key === 'createsalelisting' || key === 'create-sale-listing' || key === 'createsale') key = 'create-sale-listing';
+    if (key === 'createfreelancelisting' || key === 'create-freelance-listing' || key === 'createfreelance') key = 'create-freelance-listing';
+
+    var page = PATH_PAGE_MAP[key] || PATH_PAGE_MAP[key.replace(/_/g, '-')];
+    if (key === 'profile') {
+      __pathNavLock = true;
       try {
         showPage('profile');
         var uid = (userData && (userData.user_id || userData.id)) ? (userData.user_id || userData.id) : '';
-        if (uid) setRouteHash('profile-' + uid);
+        if (uid) setRoutePath('profile/' + uid);
       } catch (e) {}
-      setTimeout(function(){ __hashNavLock = false; }, 50);
+      setTimeout(function(){ __pathNavLock = false; }, 50);
       return true;
     }
     if (page === '__create_sale__') {
-      __hashNavLock = true;
-      try { startSaleCreate(); setRouteHash('createsalelisting'); } catch (e) {}
-      setTimeout(function(){ __hashNavLock = false; }, 80);
+      __pathNavLock = true;
+      try { startSaleCreate(); setRoutePath('create-sale-listing'); } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 80);
       return true;
     }
     if (page === '__create_freelance__') {
-      __hashNavLock = true;
-      try { startFreelanceCreate(); setRouteHash('createfreelancelisting'); } catch (e) {}
-      setTimeout(function(){ __hashNavLock = false; }, 80);
+      __pathNavLock = true;
+      try { startFreelanceCreate(); setRoutePath('create-freelance-listing'); } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 80);
       return true;
     }
     if (page && page.indexOf('__') !== 0) {
-      __hashNavLock = true;
+      __pathNavLock = true;
       try { showPage(page); } catch (e) {}
-      setTimeout(function(){ __hashNavLock = false; }, 50);
+      setTimeout(function(){ __pathNavLock = false; }, 50);
       return true;
     }
-  } catch (e) {}
-  return false;
+    return false;
+  } catch (e) { return false; }
+}
+
+// legacy name used elsewhere
+function applyRouteFromHash() {
+  try {
+    // migrate old #balance → /balance on website
+    if (!isMiniAppShell()) {
+      var raw = (location.hash || '').replace(/^#/, '').trim();
+      if (raw) {
+        var mProf = raw.match(/^profile[\/_\-]?(\d+)$/i);
+        if (mProf) {
+          history.replaceState(null, '', '/profile/' + mProf[1]);
+          location.hash = '';
+          return applyRouteFromPath();
+        }
+        var mList = raw.match(/^listing[\/_\-]?(\d+)$/i);
+        if (mList) {
+          history.replaceState(null, '', '/listing/' + mList[1]);
+          location.hash = '';
+          return applyRouteFromPath();
+        }
+        var key = raw.toLowerCase().replace(/[^a-z0-9\-]/g, '');
+        var page = HASH_PAGE_MAP[key] || HASH_PAGE_MAP[raw.toLowerCase()];
+        var pathKey = null;
+        if (page === '__create_sale__') pathKey = 'create-sale-listing';
+        else if (page === '__create_freelance__') pathKey = 'create-freelance-listing';
+        else if (page && page.indexOf('__') !== 0) pathKey = PAGE_PATH_MAP[page] || page;
+        else if (key === 'profile') pathKey = 'profile';
+        if (pathKey) {
+          history.replaceState(null, '', '/' + pathKey);
+          try { location.hash = ''; } catch (e0) {}
+          return applyRouteFromPath();
+        }
+      }
+      return applyRouteFromPath();
+    }
+    return false;
+  } catch (e) { return false; }
 }
 
 function bindHashRouting() {
   try {
+    window.addEventListener('popstate', function() {
+      if (__pathNavLock || __hashNavLock) return;
+      applyRouteFromPath();
+    });
     window.addEventListener('hashchange', function() {
-      if (__hashNavLock) return;
-      applyRouteFromHash();
+      if (__pathNavLock || __hashNavLock) return;
+      if (!isMiniAppShell()) applyRouteFromHash();
     });
   } catch (e) {}
 }
@@ -4969,14 +5118,14 @@ function showPage(name) {
  var page = document.getElementById('page-' + name);
  if (page) page.classList.add('active');
  try {
-  if (!__hashNavLock) {
-    var h = PAGE_HASH_MAP[name];
+  if (!__hashNavLock && !__pathNavLock && !isMiniAppShell()) {
     if (name === 'profile') {
       var uid = (userData && (userData.user_id || userData.id)) ? (userData.user_id || userData.id) : '';
-      if (uid) setRouteHash('profile-' + uid);
-      else setRouteHash('profile');
-    } else if (h) {
-      setRouteHash(h);
+      if (uid) setRoutePath('profile/' + uid);
+      else setRoutePath('profile');
+    } else {
+      var pathKey = PAGE_PATH_MAP[name];
+      if (pathKey) setRoutePath(pathKey);
     }
   }
  } catch (eH) {}
@@ -25785,6 +25934,8 @@ async function acceptPrivacyMiniapp() {
  try { maybeShowVerifyPrompt(); } catch(e) {}
 }
 document.addEventListener('DOMContentLoaded', function() {
+ try { if (typeof bindHashRouting === 'function') bindHashRouting(); } catch (eBind) {}
+ try { if (typeof applyRouteFromHash === 'function' && typeof isMiniAppShell === 'function' && !isMiniAppShell()) applyRouteFromHash(); } catch (eRoute0) {}
  var btn = document.getElementById('privacy-accept-btn');
  if (btn) btn.addEventListener('click', function() { acceptPrivacyMiniapp(); });
 });
