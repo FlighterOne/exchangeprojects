@@ -2998,6 +2998,14 @@ function showLoginOverlay() {
  var ov = document.getElementById('login-overlay');
  if (ov) ov.style.display = 'flex';
  try { document.body.style.overflow = 'hidden'; } catch (e) {}
+ try {
+   if (typeof isMiniAppShell === 'function' && !isMiniAppShell()) {
+     var cur = (location.pathname || '/').replace(/\/+$/, '') || '/';
+     if (cur !== '/login') {
+       if (history && history.replaceState) history.replaceState({ spa: true, path: 'login' }, '', '/login');
+     }
+   }
+ } catch (ePath) {}
  loadTelegramLoginWidget();
 }
 
@@ -3122,11 +3130,12 @@ async function continueAfterAuth() {
  __authReady = true;
  window.__xcodBootOk = true;
  try { updateTopSideButton(); } catch (eTB) {}
- try { if (!isMiniAppShell()) applyRouteFromHash(); else { /* /miniapp: intact shell, no site path tabs */ } } catch (eRoute) {}
+ try { if (isMiniAppShell()) { /* /miniapp: intact shell */ } } catch (eRoute) {}
  try { if (typeof renderMain === 'function') renderMain(); } catch (e) {}
   if (box) box.style.display = 'none';
   try {
-    if (typeof showPage === 'function') showPage('home');
+    if (typeof goAfterLogin === 'function' && !isMiniAppShell()) goAfterLogin();
+    else if (typeof showPage === 'function') showPage('home');
     else if (typeof loadListings === 'function') loadListings();
   } catch (e) {}
  } catch (e) {
@@ -4829,6 +4838,10 @@ function isMiniAppShell() {
 
 var PAGE_PATH_MAP = {
   home: 'home',
+  login: 'login',
+  'app-install': 'download',
+  'app-install-detail': 'download',
+  'support-chat': 'support/moderatorchat',
   main: 'home',
   support: 'support',
   balance: 'balance',
@@ -4910,8 +4923,23 @@ var HASH_PAGE_MAP = {
   'create-freelance-listing': '__create_freelance__'
 };
 var PATH_PAGE_MAP = {
-  '': 'home',
-  '/': 'home',
+  '': '__root__',
+  '/': '__root__',
+  'login': 'login',
+  'download': 'app-install',
+  'download/android': '__download_android__',
+  'download/ios': '__download_ios__',
+  'download/pc': '__download_pc__',
+  'android': '__download_android__',
+  'ios': '__download_ios__',
+  'pc': '__download_pc__',
+  'windows': '__download_pc__',
+  'macos': '__download_pc__',
+  'linux': '__download_pc__',
+  'app-install': 'app-install',
+  'support/moderatorchat': '__support_moderatorchat__',
+  'support/moderator-chat': '__support_moderatorchat__',
+  'moderatorchat': '__support_moderatorchat__',
   'home': 'home',
   'main': 'home',
   'support': 'support',
@@ -4937,8 +4965,78 @@ var PATH_PAGE_MAP = {
   'create-sale-listing': '__create_sale__',
   'createsalelisting': '__create_sale__',
   'create-freelance-listing': '__create_freelance__',
-  'createfreelancelisting': '__create_freelance__'
+  'createfreelancelisting': '__create_freelance__',
+  'login': 'login'
 };
+
+
+/** Save deep-link to restore after login */
+function saveReturnPath(path) {
+  try {
+    var p = String(path || '').replace(/^\/+/, '').replace(/\/+$/, '');
+    if (!p || p === 'login' || p === 'home' || p === 'main') return;
+    sessionStorage.setItem('xcod_return_path', p);
+  } catch (e) {}
+}
+function consumeReturnPath() {
+  try {
+    var p = sessionStorage.getItem('xcod_return_path') || '';
+    sessionStorage.removeItem('xcod_return_path');
+    return p ? String(p).replace(/^\/+/, '').replace(/\/+$/, '') : '';
+  } catch (e) { return ''; }
+}
+function hasWebAuth() {
+  try { return !!(typeof getAuthToken === 'function' && getAuthToken()); } catch (e) { return false; }
+}
+/** Paths that guests can open without login */
+function isPublicSitePath(rawPath) {
+  var p = String(rawPath || '').toLowerCase().replace(/^\/+/, '').replace(/\/+$/, '');
+  if (!p || p === 'login' || p === 'home' || p === 'main' || p === 'index.html') return true;
+  if (p === 'download' || p.indexOf('download/') === 0) return true;
+  if (p === 'android' || p === 'ios' || p === 'pc' || p === 'windows' || p === 'macos' || p === 'linux') return true;
+  if (p === 'support' || p.indexOf('support/') === 0) return true;
+  if (p === 'news' || p.indexOf('news/') === 0) return true;
+  if (p === 'app-install' || p.indexOf('app-install') === 0) return true;
+  return false;
+}
+function requireAuthOrRedirect(rawPath) {
+  if (isMiniAppShell()) return true;
+  if (hasWebAuth()) return true;
+  if (isPublicSitePath(rawPath)) return true;
+  saveReturnPath(rawPath);
+  try {
+    if (history && history.replaceState) history.replaceState({ spa: true, path: 'login' }, '', '/login');
+    else location.replace('/login');
+  } catch (e) {}
+  try { if (typeof showLoginOverlay === 'function') showLoginOverlay(); } catch (e2) {}
+  return false;
+}
+function goAfterLogin() {
+  var ret = consumeReturnPath();
+  if (ret) {
+    try {
+      if (history && history.replaceState) history.replaceState({ spa: true, path: ret }, '', '/' + ret);
+      else location.replace('/' + ret);
+    } catch (e) {}
+    try { applyRouteFromPath(); } catch (e2) {
+      try { showPage('home'); } catch (e3) {}
+    }
+    return;
+  }
+  // Уже на целевом path (например /listing/23 при живой сессии) — не сбрасывать на home
+  try {
+    var cur = (location.pathname || '/').replace(/^\/+/, '').replace(/\/+$/, '');
+    if (cur && cur !== 'login' && cur !== 'index.html') {
+      try { applyRouteFromPath(); } catch (eA) {}
+      return;
+    }
+  } catch (eC) {}
+  try {
+    if (history && history.replaceState) history.replaceState({ spa: true, path: 'home' }, '', '/home');
+    else if (typeof setRoutePath === 'function') setRoutePath('home');
+  } catch (e4) {}
+  try { showPage('home'); } catch (e5) {}
+}
 
 function setRouteHash(hash) {
   // legacy no-op for miniapp; website uses setRoutePath
@@ -4996,9 +5094,50 @@ function applyRouteFromPath() {
     // ignore API and static-ish
     if (/^(api|static|assets|favicon|robots|sitemap)(\/|$)/i.test(rawPath)) return false;
 
+    // / → /login (гость) или /home (авторизован)
+    if (!rawPath || rawPath === 'index.html') {
+      var hasSess = false;
+      try { hasSess = !!(typeof getAuthToken === 'function' && getAuthToken()); } catch (eS) {}
+      if (!hasSess) {
+        try {
+          if (history && history.replaceState) history.replaceState({ spa: true, path: 'login' }, '', '/login');
+          else location.replace('/login');
+        } catch (eR) {}
+        try { if (typeof showLoginOverlay === 'function') showLoginOverlay(); } catch (eL) {}
+        return true;
+      }
+      try {
+        if (history && history.replaceState) history.replaceState({ spa: true, path: 'home' }, '', '/home');
+        else location.replace('/home');
+      } catch (eH) {}
+      __pathNavLock = true;
+      try { showPage('home'); } catch (eP) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+
+    // /login
+    if (rawPath.toLowerCase() === 'login') {
+      var hasSess2 = false;
+      try { hasSess2 = !!(typeof getAuthToken === 'function' && getAuthToken()); } catch (eS2) {}
+      if (hasSess2) {
+        try {
+          if (history && history.replaceState) history.replaceState({ spa: true, path: 'home' }, '', '/home');
+          else location.replace('/home');
+        } catch (eH2) {}
+        __pathNavLock = true;
+        try { hideLoginOverlay(); showPage('home'); } catch (eP2) {}
+        setTimeout(function(){ __pathNavLock = false; }, 50);
+        return true;
+      }
+      try { if (typeof showLoginOverlay === 'function') showLoginOverlay(); } catch (eL2) {}
+      return true;
+    }
+
     // /profile/123 or /profile-123
     var mProf = rawPath.match(/^profile[\/_\-]?(\d+)$/i);
     if (mProf) {
+      if (!requireAuthOrRedirect(rawPath)) return true;
       var pid = parseInt(mProf[1], 10);
       if (pid) {
         __pathNavLock = true;
@@ -5011,6 +5150,7 @@ function applyRouteFromPath() {
     // /listing/17
     var mList = rawPath.match(/^listing[\/_\-]?(\d+)$/i);
     if (mList) {
+      if (!requireAuthOrRedirect(rawPath)) return true;
       var lid = parseInt(mList[1], 10);
       if (lid) {
         __pathNavLock = true;
@@ -5018,6 +5158,48 @@ function applyRouteFromPath() {
         setTimeout(function(){ __pathNavLock = false; }, 50);
         return true;
       }
+    }
+
+    // download / android / ios / pc
+    var dlKey = rawPath.toLowerCase();
+    if (dlKey === 'download' || dlKey === 'app-install') {
+      __pathNavLock = true;
+      try { showPage('app-install'); } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+    if (dlKey === 'android' || dlKey === 'download/android') {
+      __pathNavLock = true;
+      try { openAppInstallDetail('android'); } catch (e) { try { showPage('app-install'); } catch (e2) {} }
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+    if (dlKey === 'ios' || dlKey === 'download/ios') {
+      __pathNavLock = true;
+      try { openAppInstallDetail('ios'); } catch (e) { try { showPage('app-install'); } catch (e2) {} }
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+    if (dlKey === 'pc' || dlKey === 'download/pc' || dlKey === 'windows' || dlKey === 'macos' || dlKey === 'linux') {
+      __pathNavLock = true;
+      try {
+        showPage('app-install');
+        setTimeout(function(){ try { toggleAppInstallPc(); } catch (e3) {} }, 30);
+      } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+
+    // support/moderatorchat
+    if (/^support\/moderator[-_]?chat$/i.test(rawPath) || /^moderator[-_]?chat$/i.test(rawPath)) {
+      if (!requireAuthOrRedirect(rawPath)) return true;
+      __pathNavLock = true;
+      try {
+        if (typeof openSupportChat === 'function') openSupportChat();
+        else showPage('support-chat');
+      } catch (e) { try { showPage('support-chat'); } catch (e2) {} }
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
     }
 
     var key = rawPath.toLowerCase();
@@ -5050,7 +5232,36 @@ function applyRouteFromPath() {
       setTimeout(function(){ __pathNavLock = false; }, 80);
       return true;
     }
+    if (page === '__download_android__') {
+      __pathNavLock = true;
+      try { openAppInstallDetail('android'); } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+    if (page === '__download_ios__') {
+      __pathNavLock = true;
+      try { openAppInstallDetail('ios'); } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+    if (page === '__download_pc__') {
+      __pathNavLock = true;
+      try { showPage('app-install'); setTimeout(function(){ try { toggleAppInstallPc(); } catch (e3) {} }, 30); } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
+    if (page === '__support_moderatorchat__') {
+      if (!requireAuthOrRedirect(rawPath)) return true;
+      __pathNavLock = true;
+      try {
+        if (typeof openSupportChat === 'function') openSupportChat();
+        else showPage('support-chat');
+      } catch (e) {}
+      setTimeout(function(){ __pathNavLock = false; }, 50);
+      return true;
+    }
     if (page && page.indexOf('__') !== 0) {
+      if (!requireAuthOrRedirect(rawPath)) return true;
       __pathNavLock = true;
       try { showPage(page); } catch (e) {}
       setTimeout(function(){ __pathNavLock = false; }, 50);
