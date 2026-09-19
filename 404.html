@@ -2964,7 +2964,14 @@ function loadWebSession() {
  return null;
  }
  }
- // refresh local expiry window display (server does sliding)
+ // также не старше 24ч по last_auth_at (если есть)
+ try {
+   var la = obj.last_auth_at ? Date.parse(obj.last_auth_at) : 0;
+   if (la && (Date.now() - la) > 24 * 3600 * 1000) {
+     // сессия ещё валидна по token expiry, но «свежий вход» протух —
+     // token оставляем: auto-login без Telegram-виджета, 2FA по своему окну
+   }
+ } catch (eLa) {}
  __webSessionToken = obj.token;
  return obj;
  } catch (e) { return null; }
@@ -2976,15 +2983,28 @@ function saveWebSession(token, expiresAt, userMeta) {
  if (!exp) {
  exp = new Date(Date.now() + WEB_SESSION_DAYS * 86400000).toISOString();
  }
- var obj = { token: token, expires_at: exp, saved_at: new Date().toISOString() };
+ var obj = { token: token, expires_at: exp, saved_at: new Date().toISOString(), last_auth_at: new Date().toISOString() };
  if (userMeta) obj.user = userMeta;
  localStorage.setItem(WEB_SESSION_KEY, JSON.stringify(obj));
  __webSessionToken = token;
  } catch (e) {}
 }
 
+function touchWebSessionAuth() {
+ try {
+   var raw = localStorage.getItem(WEB_SESSION_KEY);
+   if (!raw) return;
+   var obj = JSON.parse(raw);
+   if (!obj) return;
+   obj.last_auth_at = new Date().toISOString();
+   localStorage.setItem(WEB_SESSION_KEY, JSON.stringify(obj));
+ } catch (e) {}
+}
+
 function clearWebSession() {
  try { localStorage.removeItem(WEB_SESSION_KEY); } catch (e) {}
+ try { localStorage.removeItem('xcod_2fa_ok_at'); } catch (e2) {}
+ try { sessionStorage.removeItem('xcod_2fa_ok'); } catch (e3) {}
  __webSessionToken = null;
 }
 
@@ -2992,6 +3012,29 @@ function getAuthToken() {
  if (__webSessionToken) return __webSessionToken;
  var s = loadWebSession();
  return s ? s.token : null;
+}
+
+/** 2FA/пароль помним 24 часа (все вкладки через localStorage) */
+var FA2_OK_KEY = 'xcod_2fa_ok_at';
+var FA2_OK_TTL_MS = 24 * 3600 * 1000;
+function isFa2OkRecent() {
+  try {
+    var ts = parseInt(localStorage.getItem(FA2_OK_KEY) || '0', 10) || 0;
+    if (ts && (Date.now() - ts) < FA2_OK_TTL_MS) return true;
+  } catch (e) {}
+  try {
+    if (sessionStorage.getItem('xcod_2fa_ok') === '1') return true;
+  } catch (e2) {}
+  return false;
+}
+function markFa2Ok() {
+  try { localStorage.setItem(FA2_OK_KEY, String(Date.now())); } catch (e) {}
+  try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch (e2) {}
+  try { touchWebSessionAuth(); } catch (e3) {}
+}
+function clearFa2Ok() {
+  try { localStorage.removeItem(FA2_OK_KEY); } catch (e) {}
+  try { sessionStorage.removeItem('xcod_2fa_ok'); } catch (e2) {}
 }
 
 function showLoginOverlay() {
@@ -3090,28 +3133,15 @@ async function continueAfterAuth() {
  showPrivacyOverlay(userData.privacy_policy_url || '');
  return;
  }
- // 2FA gate for site (not miniapp): only if has_2fa and not yet verified this browser session
+ // 2FA: пароль нужен только если has_2fa и нет отметки за последние 24ч
  try {
-   var fa2ok = '';
-   try { fa2ok = sessionStorage.getItem('xcod_2fa_ok') || ''; } catch(e){}
-   var need2fa = !!window.__xcodNeed2fa;
    var isWebBrowser = (typeof isTelegramMiniApp === 'function' && !isTelegramMiniApp());
-   if (userData.has_2fa && fa2ok !== '1' && isWebBrowser) {
-     // For web login, a refresh invalidates the local password confirmation.
-     // The user must start again with Telegram and then enter the password.
-     if (need2fa) {
-       show2faGate('login');
-       return;
-     }
-     clearWebSession();
-     try { sessionStorage.removeItem('xcod_2fa_ok'); } catch(eClear2fa) {}
-     if (box) box.style.display = 'none';
-     showLoginOverlay();
+   if (userData.has_2fa && isWebBrowser && !isFa2OkRecent()) {
+     show2faGate('login');
      return;
    }
-   // miniapp uses Telegram as first factor
    if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
-     try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
+     try { markFa2Ok(); } catch(e){}
    }
  } catch (e2) {}
  // lang/theme sync
@@ -3336,18 +3366,15 @@ async function init() {
  showPrivacyOverlay(userData.privacy_policy_url || '');
  return;
  }
- // 2FA gate for site (not miniapp): only if has_2fa and not yet verified this browser session
+ // 2FA: пароль нужен только если has_2fa и нет отметки за последние 24ч
  try {
-   var fa2ok = '';
-   try { fa2ok = sessionStorage.getItem('xcod_2fa_ok') || ''; } catch(e){}
-   var need2fa = !!window.__xcodNeed2fa;
-   if (userData.has_2fa && fa2ok !== '1' && need2fa && typeof isTelegramMiniApp === 'function' && !isTelegramMiniApp()) {
+   var isWebBrowser = (typeof isTelegramMiniApp === 'function' && !isTelegramMiniApp());
+   if (userData.has_2fa && isWebBrowser && !isFa2OkRecent()) {
      show2faGate('login');
      return;
    }
-   // miniapp uses Telegram as first factor
    if (typeof isTelegramMiniApp === 'function' && isTelegramMiniApp()) {
-     try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
+     try { markFa2Ok(); } catch(e){}
    }
  } catch (e2) {}
  // sync lang + theme from bot/server
@@ -3390,7 +3417,10 @@ async function init() {
  }
 
  try { renderMain(); } catch (re) {}
- showPage('home');
+ try {
+   if (typeof goAfterLogin === 'function' && typeof usesPathRouting === 'function' && usesPathRouting()) goAfterLogin();
+   else if (typeof showPage === 'function') showPage('home');
+ } catch (eNav) { try { showPage('home'); } catch (eH) {} }
  try { resumePendingDepositWatch(); } catch (ePayResume) {}
  window.__xcodBootOk = true;
  try { updateTopSideButton(); } catch (eTB) {}
@@ -4017,7 +4047,7 @@ async function submit2faLogin() {
   try {
     var pwd = (document.getElementById('fa2-pwd') || {}).value || '';
     await apiPost('/api/auth/2fa', { password: pwd });
-    try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
+    try { markFa2Ok(); } catch(e){}
     window.__xcodNeed2fa = false;
     hide2faGate();
     await continueAfterAuth();
@@ -4081,7 +4111,7 @@ async function submit2faForgot() {
       return;
     }
     await apiPost('/api/auth/2fa/forgot', { code: code, password: p1, password2: p2 });
-    try { sessionStorage.setItem('xcod_2fa_ok', '1'); } catch(e){}
+    try { markFa2Ok(); } catch(e){}
     window.__forgotEmailCode = '';
     hide2faGate();
     try { tg.showAlert(tBlock('password_updated') || 'Пароль обновлён'); } catch(e){}
@@ -4990,15 +5020,22 @@ var PATH_PAGE_MAP = {
 function saveReturnPath(path) {
   try {
     var p = String(path || '').replace(/^\/+/, '').replace(/\/+$/, '');
-    if (!p || p === 'login' || p === 'home' || p === 'main') return;
-    sessionStorage.setItem('xcod_return_path', p);
+    if (!p || p === 'login' || p === 'home' || p === 'main' || p === 'index.html') return;
+    localStorage.setItem('xcod_return_path', p);
+    try { sessionStorage.setItem('xcod_return_path', p); } catch (e0) {}
   } catch (e) {}
 }
 function consumeReturnPath() {
   try {
-    var p = sessionStorage.getItem('xcod_return_path') || '';
-    sessionStorage.removeItem('xcod_return_path');
+    var p = localStorage.getItem('xcod_return_path') || sessionStorage.getItem('xcod_return_path') || '';
+    try { localStorage.removeItem('xcod_return_path'); } catch (e1) {}
+    try { sessionStorage.removeItem('xcod_return_path'); } catch (e2) {}
     return p ? String(p).replace(/^\/+/, '').replace(/\/+$/, '') : '';
+  } catch (e) { return ''; }
+}
+function peekReturnPath() {
+  try {
+    return localStorage.getItem('xcod_return_path') || sessionStorage.getItem('xcod_return_path') || '';
   } catch (e) { return ''; }
 }
 function hasWebAuth() {
