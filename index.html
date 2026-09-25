@@ -336,7 +336,209 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 }
 
 </style>
-<style id="profile-back-logout-horizontal-fix">#screen-profile .profile-top-bar{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;}#screen-profile .profile-top-bar>*{margin:0!important;}#screen-profile #profile-logout-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;}</style></head>
+
+<style id="layout-authoritative-fix">
+/*
+  AUTHORITATIVE LAYOUT FIX
+  Settings is the visual reference. All main screens now live inside the
+  same .content container, so no screen needs its own fake viewport width.
+*/
+
+/* Same heading geometry as Settings. */
+#screen-settings .section-title,
+#screen-support .section-title,
+#screen-panel .section-title,
+#screen-balance .section-title,
+#screen-projects .section-title{
+  margin:0 0 12px !important;
+  padding:0 !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+  line-height:1.25 !important;
+}
+
+/* Settings grid is the reference width. */
+#screen-settings .tile-grid,
+#screen-support .tile-grid,
+#screen-panel .tile-grid{
+  width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-sizing:border-box !important;
+}
+
+/* Support: same tile style/width as Settings, stacked because there are >2. */
+#screen-support .tile-grid{
+  grid-template-columns:1fr !important;
+  gap:10px !important;
+}
+#screen-support .tile{
+  width:100% !important;
+  min-width:0 !important;
+  aspect-ratio:auto !important;
+  min-height:58px !important;
+  height:auto !important;
+  padding:14px 12px !important;
+  box-sizing:border-box !important;
+}
+#screen-support #sup-other{
+  width:100% !important;
+  margin:12px 0 0 !important;
+}
+
+/* Panel: same content width as Settings. */
+#screen-panel .role-panel{
+  width:100% !important;
+  margin:0 0 12px !important;
+  box-sizing:border-box !important;
+}
+#screen-panel .tile-grid{
+  grid-template-columns:1fr !important;
+  gap:10px !important;
+}
+#screen-panel .tile{
+  width:100% !important;
+  min-width:0 !important;
+  aspect-ratio:auto !important;
+  min-height:58px !important;
+  height:auto !important;
+  padding:14px 12px !important;
+  box-sizing:border-box !important;
+}
+#screen-panel .tile[data-panel="analytics"]{
+  grid-column:auto !important;
+  min-height:58px !important;
+  aspect-ratio:auto !important;
+}
+
+/* Role badge stays inside the same white role card and sits at the right. */
+#screen-panel .role-panel-row{
+  display:flex;
+  align-items:center;
+  width:100%;
+  min-width:0;
+}
+#screen-panel .role-badge{
+  margin-left:auto !important;
+  margin-right:0 !important;
+}
+
+/* Balance: same content width as Settings; no horizontal stretching. */
+#screen-balance .panel,
+#screen-balance .btn-row{
+  width:100% !important;
+  max-width:none !important;
+  box-sizing:border-box !important;
+}
+#screen-balance .btn-row{
+  gap:10px !important;
+  margin-top:10px !important;
+}
+#screen-balance > .panel:last-child{
+  margin-top:12px !important;
+}
+
+/* Projects: same content width as Settings. */
+#screen-projects .list{
+  width:100% !important;
+  max-width:none !important;
+  box-sizing:border-box !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+}
+
+/* Keep Mini App, web and iPhone on the same universal .app/.content geometry. */
+.app{
+  width:100%;
+  max-width:480px;
+  margin-left:auto;
+  margin-right:auto;
+  box-sizing:border-box;
+}
+.content{
+  width:100%;
+  box-sizing:border-box;
+}
+</style>
+
+
+<style id="panel-support-square-tiles">
+/* Panel + Support: exact square tile geometry like Settings */
+#screen-support .tile-grid,
+#screen-panel .tile-grid{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:10px !important;
+  width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-sizing:border-box !important;
+}
+
+#screen-support .tile,
+#screen-panel .tile{
+  aspect-ratio:1 !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  height:auto !important;
+  padding:16px 12px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  box-sizing:border-box !important;
+}
+
+/* No special wide tile: Analytics follows normal left-to-right/top-to-bottom order. */
+#screen-panel .tile[data-panel="analytics"]{
+  grid-column:auto !important;
+  aspect-ratio:1 !important;
+  min-height:0 !important;
+  height:auto !important;
+}
+
+/* Keep Support's last extra button full width, as it is outside the tile grid. */
+#screen-support #sup-other{
+  width:100% !important;
+  margin:12px 0 0 !important;
+}
+</style>
+
+
+<style id="support-last-three-and-profile-role-fix">
+/* Support: make the last three actions slightly smaller so long labels fit cleanly. */
+#screen-support #sup-privacy .t-title,
+#screen-support #sup-terms .t-title,
+#screen-support #sup-other{
+  font-size:13px !important;
+}
+
+/* Profile: make the role/privilege badge border more vivid and noticeable. */
+#screen-profile #p-role{
+  border-color:var(--brand) !important;
+  color:var(--brand) !important;
+  background:var(--brand-soft) !important;
+  box-shadow:0 0 0 1px rgba(0,106,210,.10) !important;
+}
+[data-theme="dark"] #screen-profile #p-role{
+  border-color:#4DA3FF !important;
+  color:#FFFFFF !important;
+  background:rgba(77,163,255,.14) !important;
+  box-shadow:0 0 0 1px rgba(77,163,255,.16) !important;
+}
+</style>
+
+<style id="project-detail-card-styles">
+#screen-project .panel .section-title{display:none !important;}
+#screen-project #pd-body{font-size:14px;line-height:1.48;}
+#screen-project .project-detail-name{font-size:17px;line-height:1.3;margin-bottom:10px;}
+#screen-project .project-detail-link{font-weight:800;color:var(--text);text-decoration:none;cursor:pointer;}
+#screen-project .project-detail-link:hover{text-decoration:underline;}
+#screen-project .project-detail-link.no-link{cursor:default;}
+#screen-project .project-detail-dash{font-weight:600;}
+</style>
+</head>
 <body>
 
 <div id="login-overlay" class="login-overlay" aria-hidden="true">
@@ -481,7 +683,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
           </div>
         </div>
       </div>
-    </div>
 
     <div id="screen-balance" class="screen">
       <div class="section-title" data-i18n="balance">Баланс</div>
@@ -610,26 +811,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
       <div class="section-title" data-i18n="help">Помощь</div>
         <p class="muted" data-i18n="help_body">Mini App синхронизирован с ботом. Баланс и проекты загружаются с сервера.</p>
       </div>
-    </div>
 
     <div id="screen-support" class="screen">
       <div class="section-title" data-i18n="support">Поддержка</div>
       <div class="tile-grid">
         <button type="button" class="tile" id="sup-chat">
           <div class="t-title" data-i18n="support_ticket">Написать обращение</div>
-          <div class="t-sub" data-i18n="support_chat_manager">Чат с менеджером</div>
         </button>
         <button type="button" class="tile" id="sup-manager">
           <div class="t-title" data-i18n="support_manager">Менеджер в Telegram</div>
-          <div class="t-sub">@mediamanagering</div>
         </button>
         <button type="button" class="tile" id="sup-bot">
           <div class="t-title" data-i18n="support_bot">Бот поддержки</div>
-          <div class="t-sub">@clossrsuppbot</div>
         </button>
         <button type="button" class="tile" id="sup-mail">
           <div class="t-title" data-i18n="support_mail">Написать на почту</div>
-          <div class="t-sub">clossr.support@gmail.com</div>
         </button>
         <button type="button" class="tile" id="sup-hire">
           <div class="t-title" data-i18n="support_hire">Сотрудничать</div>
@@ -815,7 +1011,7 @@ help_body:"Mini App синхронизирован с ботом. Баланс �
 support_manager:"Менеджер",support_bot:"Бот",support_email:"Почта",support_faq:"FAQ",soon:"Скоро",
 staff:"Сотрудники",mod_sell:"Продажа",mod_buy:"Покупка",mod_tx:"Транзакции",analytics:"Аналитика",
 prev:"Назад",next:"Вперёд",
-roles:{user:"Пользователь",partner:"Партнер",corp:"Корпоративный",intern:"Стажер",mod:"Модератор",admin:"Админ",owner:"Владелец"}}),
+roles:{user:"Пользователь",partner:"Партнер",corp:"Корпоративный",intern:"Стажер",mod:"Модератор",admin:"Админ",owner:"Владелец"},collab_work_hint:"<strong>Модератор</strong><br><br>• Зарплата: <strong>25$ / 12 ч</strong><br>• Требуется: <strong>3 смены в неделю</strong><br><br><strong>Стажировка</strong><br><br>• Период: <strong>1 месяц</strong><br>• Смена стажёра: <strong>6 ч</strong><br>• Оплата за смену стажёра: <strong>10$</strong><br><br><strong>Обязанности</strong><br><br>• Модерация объявлений<br>• Модерация жалоб<br>• Модерация обращений в поддержку<br>• Аналитика (просмотр)<br>• Рабочий центр / смены<br>• Контроль смен (только просмотр)"}),
 en:baseI18n({logout:"Log out",ref_my_code:"My referral code",save:"Save",apply:"Apply",ref_stats_line:"Level: {level} · Refs: {total} · 10d: {d10} · Earned: {earn} ₽",ref_apply_title:"Apply promo code",back:"Back",balance:"Balance",settings:"Settings",projects:"Projects",help:"Help",support:"Support",panel:"Panel",
 language:"Language",theme:"Theme",theme_light:"Light",theme_dark:"Dark",theme_auto:"As in Telegram",original:"Original",collab_ads:"Ads",collab_work:"Jobs",write_manager:"Message manager",application_form:"Application form",job_form_title:"Application",fio:"Full name",age_min16:"Age (min 16)",employment:"Employment",school:"School",student:"Student",working:"Employed",retired:"Retired",searching:"Looking for work",username:"Username",phone_number:"Phone",email:"Email",submit_app:"Submit",role_mod:"Moderator",salary:"Salary",hours:"h",hire_shifts_req:"Shifts",hire_shifts_week:"per week",internship:"Internship",period:"Period",month:"mo.",intern_shift:"Intern shift",intern_pay:"Intern pay",hire_duties:"Duties",duty_mod_listings:"Listing moderation",duty_mod_complaints:"Complaint moderation",job_form_required:"Fill required fields",job_form_sent:"Application sent",collab_ads_hint:"Ads and partner materials — message the manager.",support_ticket:"Submit a request",support_chat_manager:"Chat with manager",support_manager:"Manager on Telegram",support_bot:"Support bot",support_mail:"Email us",support_hire:"Collaborate",ads_and_jobs:"Ads and jobs",support_faq:"FAQ",support_privacy:"Privacy policy",support_terms:"Terms of service",support_other_info:"Other information",support_other_info_empty:"Section under development",manager_eta:"*manager will reply within 96h",message_ph:"Message...",send:"Send",support_chat_empty:"Write the first message",on_moderation:"on moderation",status:"Status",no_projects:"No projects",btn_start:"Start",btn_stop:"Stop",my_transactions:"My transactions",no_transactions:"No transactions",transaction:"Transaction",close:"Close",tx_type:"Type",date_time:"Date and time",operation_id:"Operation ID",tx_deposit:"Deposit",tx_withdraw:"Withdraw",tx_purchase:"Purchase",tx_monetization:"Monetization",tx_salary:"Salary",tx_admin:"Admin balance change",
 role:"Role",deposit:"Deposit",withdraw:"Withdraw",my_requests:"My requests",no_requests:"No requests",
@@ -826,7 +1022,7 @@ pay_placeholder:"Payment will be available after acquiring is connected.",
 terms_prefix:"By continuing you accept the ",terms_link:"terms of service",terms_suffix:" and service rules",
 help_body:"Mini App is synced with the bot.",support_manager:"Manager",support_bot:"Bot",support_email:"Email",support_faq:"FAQ",soon:"Soon",
 staff:"Staff",mod_sell:"Sell",mod_buy:"Buy",mod_tx:"Transactions",analytics:"Analytics",prev:"Prev",next:"Next",
-roles:{user:"User",partner:"Partner",corp:"Corporate",intern:"Intern",mod:"Moderator",admin:"Admin",owner:"Owner"}}),
+roles:{user:"User",partner:"Partner",corp:"Corporate",intern:"Intern",mod:"Moderator",admin:"Admin",owner:"Owner"},collab_work_hint:"<strong>Moderator</strong><br><br>• Salary: <strong>25$ / 12 h</strong><br>• Required: <strong>3 shifts per week</strong><br><br><strong>Internship</strong><br><br>• Period: <strong>1 Month</strong><br>• Intern shift: <strong>6 h</strong><br>• Pay per internship shift: <strong>10$</strong><br><br><strong>Responsibilities</strong><br><br>• Listings moderation<br>• Complaints moderation<br>• Support tickets moderation<br>• Analytics (view)<br>• Work center / shifts<br>• Shift control (view only)"}),
 uk:baseI18n({logout:"Вийти",ref_my_code:"Мій реферальний код",save:"Зберегти",apply:"Застосувати",ref_stats_line:"Рівень: {level} · Рефералів: {total} · За 10 днів: {d10} · Зароблено: {earn} ₽",ref_apply_title:"Застосувати промокод",back:"Назад",balance:"Баланс",settings:"Налаштування",projects:"Проєкти",help:"Допомога",support:"Підтримка",panel:"Панель",
 language:"Мова",theme:"Тема",theme_light:"Світла",theme_dark:"Темна",theme_auto:"Як у Telegram",original:"Оригінал",on_moderation:"на модерації",status:"Статус",no_projects:"Немає проєктів",btn_start:"Запустити",btn_stop:"Зупинити",my_transactions:"Мої транзакції",no_transactions:"Немає транзакцій",transaction:"Транзакція",close:"Закрити",tx_type:"Тип",date_time:"Дата і час",operation_id:"Id операції",tx_deposit:"Поповнення",tx_withdraw:"Вивід",tx_purchase:"Покупка",tx_monetization:"Монетизація",tx_salary:"Зарплата",tx_admin:"Зміна балансу адміном",
 role:"Роль",deposit:"Поповнення",withdraw:"Вивід",my_requests:"Мої заявки",no_requests:"Немає заявок",
@@ -837,7 +1033,7 @@ pay_placeholder:"Оплата буде доступна після підклю�
 terms_prefix:"Продовжуючи, ви приймаєте ",terms_link:"умови користування",terms_suffix:" і правила сервісу",
 help_body:"Mini App синхронізовано з ботом.",support_manager:"Менеджер",support_bot:"Бот",support_email:"Пошта",support_faq:"FAQ",soon:"Незабаром",
 staff:"Співробітники",mod_sell:"Продаж",mod_buy:"Купівля",mod_tx:"Транзакції",analytics:"Аналітика",prev:"Назад",next:"Вперед",
-roles:{user:"Користувач",partner:"Партнер",corp:"Корпоративний",intern:"Стажер",mod:"Модератор",admin:"Адмін",owner:"Власник"}}),
+roles:{user:"Користувач",partner:"Партнер",corp:"Корпоративний",intern:"Стажер",mod:"Модератор",admin:"Адмін",owner:"Власник"},collab_work_hint:"<strong>Модератор</strong><br><br>• Зарплата: <strong>25$ / 12 год</strong><br>• Потрібно: <strong>3 зміни на тиждень</strong><br><br><strong>Стажування</strong><br><br>• Період: <strong>1 місяць</strong><br>• Зміна стажера: <strong>6 год</strong><br>• Оплата за зміну стажера: <strong>10$</strong><br><br><strong>Обов’язки</strong><br><br>• Модерація оголошень<br>• Модерація скарг<br>• Модерація звернень у підтримку<br>• Аналітика (перегляд)<br>• Робочий центр / зміни<br>• Контроль змін (лише перегляд)"}),
 de:baseI18n({logout:"Abmelden",ref_my_code:"Mein Empfehlungscode",save:"Speichern",apply:"Anwenden",ref_stats_line:"Stufe: {level} · Refs: {total} · 10T: {d10} · Verdient: {earn} ₽",ref_apply_title:"Promo-Code anwenden",back:"Zurück",balance:"Guthaben",settings:"Einstellungen",projects:"Projekte",help:"Hilfe",support:"Support",panel:"Panel",
 language:"Sprache",theme:"Design",theme_light:"Hell",theme_dark:"Dunkel",theme_auto:"Wie in Telegram",original:"Original",on_moderation:"in Moderation",status:"Status",no_projects:"Keine Projekte",btn_start:"Starten",btn_stop:"Stoppen",my_transactions:"Meine Transaktionen",no_transactions:"Keine Transaktionen",transaction:"Transaktion",close:"Schließen",tx_type:"Typ",date_time:"Datum und Uhrzeit",operation_id:"Vorgangs-ID",tx_deposit:"Einzahlung",tx_withdraw:"Auszahlung",tx_purchase:"Kauf",tx_monetization:"Monetarisierung",tx_salary:"Gehalt",tx_admin:"Admin-Saldönderung",
 role:"Rolle",deposit:"Einzahlung",withdraw:"Auszahlung",my_requests:"Meine Anfragen",no_requests:"Keine Anfragen",
@@ -848,7 +1044,7 @@ pay_placeholder:"Zahlung nach Anbindung des Acquiring.",
 terms_prefix:"Mit dem Fortfahren akzeptieren Sie die ",terms_link:"Nutzungsbedingungen",terms_suffix:" und Regeln",
 help_body:"Mini App ist mit dem Bot synchronisiert.",support_manager:"Manager",support_bot:"Bot",support_email:"E-Mail",support_faq:"FAQ",soon:"Bald",
 staff:"Personal",mod_sell:"Verkauf",mod_buy:"Kauf",mod_tx:"Transaktionen",analytics:"Analyse",prev:"Zurück",next:"Weiter",
-roles:{user:"Benutzer",partner:"Partner",corp:"Unternehmen",intern:"Praktikant",mod:"Moderator",admin:"Admin",owner:"Inhaber"}}),
+roles:{user:"Benutzer",partner:"Partner",corp:"Unternehmen",intern:"Praktikant",mod:"Moderator",admin:"Admin",owner:"Inhaber"},collab_work_hint:"<strong>Moderator</strong><br><br>• Gehalt: <strong>25$ / 12 Std.</strong><br>• Erforderlich: <strong>3 Schichten pro Woche</strong><br><br><strong>Praktikum</strong><br><br>• Dauer: <strong>1 Monat</strong><br>• Praktikumsschicht: <strong>6 Std.</strong><br>• Vergütung pro Praktikumsschicht: <strong>10$</strong><br><br><strong>Aufgaben</strong><br><br>• Moderation von Anzeigen<br>• Moderation von Beschwerden<br>• Moderation von Support-Tickets<br>• Analysen (Ansicht)<br>• Arbeitszentrum / Schichten<br>• Schichtkontrolle (nur Ansicht)"}),
 fr:baseI18n({logout:"Déconnexion",ref_my_code:"Mon code de parrainage",save:"Enregistrer",apply:"Appliquer",ref_stats_line:"Niveau: {level} · Refs: {total} · 10j: {d10} · Gagné: {earn} ₽",ref_apply_title:"Appliquer le code promo",back:"Retour",balance:"Solde",settings:"Paramètres",projects:"Projets",help:"Aide",support:"Support",panel:"Panneau",
 language:"Langue",theme:"Thème",theme_light:"Clair",theme_dark:"Sombre",theme_auto:"Comme Telegram",original:"Original",on_moderation:"en modération",status:"Statut",no_projects:"Aucun projet",btn_start:"Démarrer",btn_stop:"Arrêter",my_transactions:"Mes transactions",no_transactions:"Aucune transaction",transaction:"Transaction",close:"Fermer",tx_type:"Type",date_time:"Date et heure",operation_id:"ID opération",tx_deposit:"Dépôt",tx_withdraw:"Retrait",tx_purchase:"Achat",tx_monetization:"Monétisation",tx_salary:"Salaire",tx_admin:"Modification admin",
 role:"Rôle",deposit:"Dépôt",withdraw:"Retrait",my_requests:"Mes demandes",no_requests:"Aucune demande",
@@ -859,7 +1055,7 @@ pay_placeholder:"Paiement disponible après connexion de l'acquiring.",
 terms_prefix:"En continuant, vous acceptez les ",terms_link:"conditions d'utilisation",terms_suffix:" et les règles",
 help_body:"Mini App synchronisée avec le bot.",support_manager:"Manager",support_bot:"Bot",support_email:"E-mail",support_faq:"FAQ",soon:"Bientôt",
 staff:"Personnel",mod_sell:"Vente",mod_buy:"Achat",mod_tx:"Transactions",analytics:"Analytique",prev:"Préc.",next:"Suiv.",
-roles:{user:"Utilisateur",partner:"Partenaire",corp:"Entreprise",intern:"Stagiaire",mod:"Modérateur",admin:"Admin",owner:"Propriétaire"}}),
+roles:{user:"Utilisateur",partner:"Partenaire",corp:"Entreprise",intern:"Stagiaire",mod:"Modérateur",admin:"Admin",owner:"Propriétaire"},collab_work_hint:"<strong>Modérateur</strong><br><br>• Salaire : <strong>25$ / 12 h</strong><br>• Requis : <strong>3 shifts par semaine</strong><br><br><strong>Stage</strong><br><br>• Durée : <strong>1 mois</strong><br>• Shift de stagiaire : <strong>6 h</strong><br>• Rémunération par shift de stage : <strong>10$</strong><br><br><strong>Responsabilités</strong><br><br>• Modération des annonces<br>• Modération des réclamations<br>• Modération des tickets de support<br>• Analytique (consultation)<br>• Centre de travail / shifts<br>• Contrôle des shifts (consultation uniquement)"}),
 es:baseI18n({logout:"Cerrar sesión",ref_my_code:"Mi código de referido",save:"Guardar",apply:"Aplicar",ref_stats_line:"Nivel: {level} · Refs: {total} · 10d: {d10} · Ganado: {earn} ₽",ref_apply_title:"Aplicar código promo",back:"Atrás",balance:"Saldo",settings:"Ajustes",projects:"Proyectos",help:"Ayuda",support:"Soporte",panel:"Panel",
 language:"Idioma",theme:"Tema",theme_light:"Claro",theme_dark:"Oscuro",theme_auto:"Como en Telegram",original:"Original",on_moderation:"en moderación",status:"Estado",no_projects:"Sin proyectos",btn_start:"Iniciar",btn_stop:"Detener",my_transactions:"Mis transacciones",no_transactions:"Sin transacciones",transaction:"Transacción",close:"Cerrar",tx_type:"Tipo",date_time:"Fecha y hora",operation_id:"ID de operación",tx_deposit:"Depósito",tx_withdraw:"Retiro",tx_purchase:"Compra",tx_monetization:"Monetización",tx_salary:"Salario",tx_admin:"Cambio de saldo admin",
 role:"Rol",deposit:"Depósito",withdraw:"Retiro",my_requests:"Mis solicitudes",no_requests:"Sin solicitudes",
@@ -870,7 +1066,7 @@ pay_placeholder:"El pago estará disponible tras conectar el acquiring.",
 terms_prefix:"Al continuar aceptas el ",terms_link:"acuerdo de usuario",terms_suffix:" y las reglas",
 help_body:"Mini App sincronizado con el bot.",support_manager:"Manager",support_bot:"Bot",support_email:"Correo",support_faq:"FAQ",soon:"Pronto",
 staff:"Personal",mod_sell:"Venta",mod_buy:"Compra",mod_tx:"Transacciones",analytics:"Analítica",prev:"Atrás",next:"Adelante",
-roles:{user:"Usuario",partner:"Socio",corp:"Corporativo",intern:"Interno",mod:"Moderador",admin:"Admin",owner:"Propietario"}}),
+roles:{user:"Usuario",partner:"Socio",corp:"Corporativo",intern:"Interno",mod:"Moderador",admin:"Admin",owner:"Propietario"},collab_work_hint:"<strong>Moderador</strong><br><br>• Salario: <strong>25$ / 12 h</strong><br>• Requerido: <strong>3 turnos por semana</strong><br><br><strong>Prácticas</strong><br><br>• Duración: <strong>1 mes</strong><br>• Turno del becario: <strong>6 h</strong><br>• Pago por turno de prácticas: <strong>10$</strong><br><br><strong>Responsabilidades</strong><br><br>• Moderación de anuncios<br>• Moderación de reclamaciones<br>• Moderación de tickets de soporte<br>• Analítica (consulta)<br>• Centro de trabajo / turnos<br>• Control de turnos (solo consulta)"}),
 it:baseI18n({logout:"Esci",ref_my_code:"Il mio codice referral",save:"Salva",apply:"Applica",ref_stats_line:"Livello: {level} · Ref: {total} · 10g: {d10} · Guadagno: {earn} ₽",ref_apply_title:"Applica codice promo",back:"Indietro",balance:"Saldo",settings:"Impostazioni",projects:"Progetti",help:"Aiuto",support:"Supporto",panel:"Pannello",
 language:"Lingua",theme:"Tema",theme_light:"Chiaro",theme_dark:"Scuro",theme_auto:"Come Telegram",original:"Originale",on_moderation:"in moderazione",status:"Stato",no_projects:"Nessun progetto",btn_start:"Avvia",btn_stop:"Ferma",my_transactions:"Le mie transazioni",no_transactions:"Nessuna transazione",transaction:"Transazione",close:"Chiudi",tx_type:"Tipo",date_time:"Data e ora",operation_id:"ID operazione",tx_deposit:"Deposito",tx_withdraw:"Prelievo",tx_purchase:"Acquisto",tx_monetization:"Monetizzazione",tx_salary:"Stipendio",tx_admin:"Modifica saldo admin",
 role:"Ruolo",deposit:"Deposito",withdraw:"Prelievo",my_requests:"Le mie richieste",no_requests:"Nessuna richiesta",
@@ -881,7 +1077,7 @@ pay_placeholder:"Pagamento disponibile dopo l'acquisizione.",
 terms_prefix:"Continuando accetti i ",terms_link:"termini di servizio",terms_suffix:" e le regole",
 help_body:"Mini App sincronizzata con il bot.",support_manager:"Manager",support_bot:"Bot",support_email:"Email",support_faq:"FAQ",soon:"Presto",
 staff:"Personale",mod_sell:"Vendita",mod_buy:"Acquisto",mod_tx:"Transazioni",analytics:"Analitica",prev:"Indietro",next:"Avanti",
-roles:{user:"Utente",partner:"Partner",corp:"Aziendale",intern:"Stagista",mod:"Moderatore",admin:"Admin",owner:"Proprietario"}}),
+roles:{user:"Utente",partner:"Partner",corp:"Aziendale",intern:"Stagista",mod:"Moderatore",admin:"Admin",owner:"Proprietario"},collab_work_hint:"<strong>Moderatore</strong><br><br>• Stipendio: <strong>25$ / 12 h</strong><br>• Richiesto: <strong>3 turni a settimana</strong><br><br><strong>Tirocinio</strong><br><br>• Durata: <strong>1 mese</strong><br>• Turno del tirocinante: <strong>6 h</strong><br>• Compenso per turno di tirocinio: <strong>10$</strong><br><br><strong>Responsabilità</strong><br><br>• Moderazione degli annunci<br>• Moderazione dei reclami<br>• Moderazione dei ticket di supporto<br>• Analisi (visualizzazione)<br>• Centro di lavoro / turni<br>• Controllo dei turni (solo visualizzazione)"}),
 pt:baseI18n({logout:"Sair",ref_my_code:"Meu código de indicação",save:"Salvar",apply:"Aplicar",ref_stats_line:"Nível: {level} · Refs: {total} · 10d: {d10} · Ganho: {earn} ₽",ref_apply_title:"Aplicar código promo",back:"Voltar",balance:"Saldo",settings:"Definições",projects:"Projetos",help:"Ajuda",support:"Suporte",panel:"Painel",
 language:"Idioma",theme:"Tema",theme_light:"Claro",theme_dark:"Escuro",theme_auto:"Como no Telegram",original:"Original",on_moderation:"em moderação",status:"Estado",no_projects:"Sem projetos",btn_start:"Iniciar",btn_stop:"Parar",my_transactions:"As minhas transações",no_transactions:"Sem transações",transaction:"Transação",close:"Fechar",tx_type:"Tipo",date_time:"Data e hora",operation_id:"ID da operação",tx_deposit:"Depósito",tx_withdraw:"Levantamento",tx_purchase:"Compra",tx_monetization:"Monetização",tx_salary:"Salário",tx_admin:"Alteração admin",
 role:"Função",deposit:"Depósito",withdraw:"Levantamento",my_requests:"Os meus pedidos",no_requests:"Sem pedidos",
@@ -892,7 +1088,7 @@ pay_placeholder:"Pagamento disponível após o acquiring.",
 terms_prefix:"Ao continuar aceita o ",terms_link:"acordo de utilizador",terms_suffix:" e as regras",
 help_body:"Mini App sincronizado com o bot.",support_manager:"Manager",support_bot:"Bot",support_email:"E-mail",support_faq:"FAQ",soon:"Em breve",
 staff:"Pessoal",mod_sell:"Venda",mod_buy:"Compra",mod_tx:"Transações",analytics:"Analítica",prev:"Anterior",next:"Seguinte",
-roles:{user:"Utilizador",partner:"Parceiro",corp:"Empresarial",intern:"Estagiário",mod:"Moderador",admin:"Admin",owner:"Proprietário"}}),
+roles:{user:"Utilizador",partner:"Parceiro",corp:"Empresarial",intern:"Estagiário",mod:"Moderador",admin:"Admin",owner:"Proprietário"},collab_work_hint:"<strong>Moderador</strong><br><br>• Salário: <strong>25$ / 12 h</strong><br>• Necessário: <strong>3 turnos por semana</strong><br><br><strong>Estágio</strong><br><br>• Período: <strong>1 mês</strong><br>• Turno do estagiário: <strong>6 h</strong><br>• Pagamento por turno de estágio: <strong>10$</strong><br><br><strong>Responsabilidades</strong><br><br>• Moderação de anúncios<br>• Moderação de reclamações<br>• Moderação de tickets de suporte<br>• Análises (visualização)<br>• Centro de trabalho / turnos<br>• Controle de turnos (somente visualização)"}),
 "pt-BR":baseI18n({back:"Voltar",balance:"Saldo",settings:"Configurações",projects:"Projetos",help:"Ajuda",support:"Suporte",panel:"Painel",
 language:"Idioma",theme:"Tema",theme_light:"Claro",theme_dark:"Escuro",theme_auto:"Como no Telegram",original:"Original",on_moderation:"em moderação",status:"Status",no_projects:"Sem projetos",btn_start:"Iniciar",btn_stop:"Parar",my_transactions:"Minhas transações",no_transactions:"Sem transações",transaction:"Transação",close:"Fechar",tx_type:"Tipo",date_time:"Data e hora",operation_id:"ID da operação",tx_deposit:"Depósito",tx_withdraw:"Saque",tx_purchase:"Compra",tx_monetization:"Monetização",tx_salary:"Salário",tx_admin:"Alteração admin",
 role:"Função",deposit:"Depósito",withdraw:"Saque",my_requests:"Meus pedidos",no_requests:"Sem pedidos",
@@ -903,7 +1099,7 @@ pay_placeholder:"Pagamento disponível após o acquiring.",
 terms_prefix:"Ao continuar você aceita o ",terms_link:"termo de uso",terms_suffix:" e as regras",
 help_body:"Mini App sincronizado com o bot.",support_manager:"Manager",support_bot:"Bot",support_email:"E-mail",support_faq:"FAQ",soon:"Em breve",
 staff:"Equipe",mod_sell:"Venda",mod_buy:"Compra",mod_tx:"Transações",analytics:"Analítica",prev:"Anterior",next:"Próximo",
-roles:{user:"Usuário",partner:"Parceiro",corp:"Corporativo",intern:"Estagiário",mod:"Moderador",admin:"Admin",owner:"Proprietário"}}),
+roles:{user:"Usuário",partner:"Parceiro",corp:"Corporativo",intern:"Estagiário",mod:"Moderador",admin:"Admin",owner:"Proprietário"},collab_work_hint:"<strong>Moderador</strong><br><br>• Salário: <strong>25$ / 12 h</strong><br>• Necessário: <strong>3 turnos por semana</strong><br><br><strong>Estágio</strong><br><br>• Período: <strong>1 mês</strong><br>• Turno do estagiário: <strong>6 h</strong><br>• Pagamento por turno de estágio: <strong>10$</strong><br><br><strong>Responsabilidades</strong><br><br>• Moderação de anúncios<br>• Moderação de reclamações<br>• Moderação de tickets de suporte<br>• Análises (visualização)<br>• Centro de trabalho / turnos<br>• Controle de turnos (somente visualização)"}),
 tr:baseI18n({logout:"Çıkış",ref_my_code:"Referans kodum",save:"Kaydet",apply:"Uygula",ref_stats_line:"Seviye: {level} · Ref: {total} · 10g: {d10} · Kazanç: {earn} ₽",ref_apply_title:"Promosyon kodu uygula",back:"Geri",balance:"Bakiye",settings:"Ayarlar",projects:"Projeler",help:"Yardım",support:"Destek",panel:"Panel",
 language:"Dil",theme:"Tema",theme_light:"Açık",theme_dark:"Koyu",theme_auto:"Telegram gibi",original:"Orijinal",on_moderation:"moderasyonda",status:"Durum",no_projects:"Proje yok",btn_start:"Başlat",btn_stop:"Durdur",my_transactions:"İşlemlerim",no_transactions:"İşlem yok",transaction:"İşlem",close:"Kapat",tx_type:"Tür",date_time:"Tarih ve saat",operation_id:"İşlem kimliği",tx_deposit:"Yatırma",tx_withdraw:"Çekme",tx_purchase:"Satın alma",tx_monetization:"Monetizasyon",tx_salary:"Maaş",tx_admin:"Admin bakiye değişikliği",
 role:"Rol",deposit:"Yatırma",withdraw:"Çekme",my_requests:"Taleplerim",no_requests:"Talep yok",
@@ -914,7 +1110,7 @@ pay_placeholder:"Ödeme, acquiring bağlantısından sonra.",
 terms_prefix:"Devam ederek ",terms_link:"kullanım koşullarını",terms_suffix:" kabul edersiniz",
 help_body:"Mini App bot ile senkron.",support_manager:"Yönetici",support_bot:"Bot",support_email:"E-posta",support_faq:"SSS",soon:"Yakında",
 staff:"Personel",mod_sell:"Satış",mod_buy:"Alış",mod_tx:"İşlemler",analytics:"Analitik",prev:"Geri",next:"İleri",
-roles:{user:"Kullanıcı",partner:"Partner",corp:"Kurumsal",intern:"Stajyer",mod:"Moderatör",admin:"Admin",owner:"Sahip"}}),
+roles:{user:"Kullanıcı",partner:"Partner",corp:"Kurumsal",intern:"Stajyer",mod:"Moderatör",admin:"Admin",owner:"Sahip"},collab_work_hint:"<strong>Moderatör</strong><br><br>• Maaş: <strong>25$ / 12 saat</strong><br>• Gereken: <strong>haftada 3 vardiya</strong><br><br><strong>Staj</strong><br><br>• Süre: <strong>1 ay</strong><br>• Staj vardiyası: <strong>6 saat</strong><br>• Staj vardiyası başına ödeme: <strong>10$</strong><br><br><strong>Sorumluluklar</strong><br><br>• İlan moderasyonu<br>• Şikâyet moderasyonu<br>• Destek taleplerinin moderasyonu<br>• Analitik (görüntüleme)<br>• Çalışma merkezi / vardiyalar<br>• Vardiya kontrolü (yalnızca görüntüleme)"}),
 id:baseI18n({logout:"Keluar",ref_my_code:"Kode referral saya",save:"Simpan",apply:"Terapkan",ref_stats_line:"Level: {level} · Ref: {total} · 10h: {d10} · Diperoleh: {earn} ₽",ref_apply_title:"Terapkan kode promo",back:"Kembali",balance:"Saldo",settings:"Pengaturan",projects:"Proyek",help:"Bantuan",support:"Dukungan",panel:"Panel",
 language:"Bahasa",theme:"Tema",theme_light:"Terang",theme_dark:"Gelap",theme_auto:"Seperti Telegram",original:"Asli",on_moderation:"moderasi",status:"Status",no_projects:"Tidak ada proyek",btn_start:"Mulai",btn_stop:"Stop",my_transactions:"Transaksi saya",no_transactions:"Tidak ada transaksi",transaction:"Transaksi",close:"Tutup",tx_type:"Jenis",date_time:"Tanggal dan waktu",operation_id:"ID operasi",tx_deposit:"Deposit",tx_withdraw:"Penarikan",tx_purchase:"Pembelian",tx_monetization:"Monetisasi",tx_salary:"Gaji",tx_admin:"Perubahan saldo admin",
 role:"Peran",deposit:"Deposit",withdraw:"Penarikan",my_requests:"Permintaan saya",no_requests:"Tidak ada",
@@ -925,7 +1121,7 @@ pay_placeholder:"Pembayaran setelah acquiring terhubung.",
 terms_prefix:"Dengan melanjutkan Anda menerima ",terms_link:"ketentuan layanan",terms_suffix:"",
 help_body:"Mini App tersinkron dengan bot.",support_manager:"Manajer",support_bot:"Bot",support_email:"Email",support_faq:"FAQ",soon:"Segera",
 staff:"Staf",mod_sell:"Jual",mod_buy:"Beli",mod_tx:"Transaksi",analytics:"Analitik",prev:"Sebelumnya",next:"Berikutnya",
-roles:{user:"Pengguna",partner:"Mitra",corp:"Korporat",intern:"Magang",mod:"Moderator",admin:"Admin",owner:"Pemilik"}}),
+roles:{user:"Pengguna",partner:"Mitra",corp:"Korporat",intern:"Magang",mod:"Moderator",admin:"Admin",owner:"Pemilik"},collab_work_hint:"<strong>Moderator</strong><br><br>• Gaji: <strong>25$ / 12 jam</strong><br>• Wajib: <strong>3 shift per minggu</strong><br><br><strong>Magang</strong><br><br>• Periode: <strong>1 bulan</strong><br>• Shift magang: <strong>6 jam</strong><br>• Bayaran per shift magang: <strong>10$</strong><br><br><strong>Tanggung Jawab</strong><br><br>• Moderasi listing<br>• Moderasi keluhan<br>• Moderasi tiket dukungan<br>• Analitik (lihat)<br>• Pusat kerja / shift<br>• Kontrol shift (hanya lihat)"}),
 ar:baseI18n({logout:"تسجيل الخروج",ref_my_code:"رمز الإحالة الخاص بي",save:"حفظ",apply:"تطبيق",ref_stats_line:"المستوى: {level} · الإحالات: {total} · 10 أيام: {d10} · الأرباح: {earn} ₽",ref_apply_title:"تطبيق رمز ترويجي",back:"رجوع",balance:"الرصيد",settings:"الإعدادات",projects:"المشاريع",help:"مساعدة",support:"الدعم",panel:"اللوحة",
 language:"اللغة",theme:"المظهر",theme_light:"فاتح",theme_dark:"داكن",theme_auto:"مثل تيليجرام",original:"أصلي",on_moderation:"قيد المراجعة",status:"الحالة",no_projects:"لا مشاريع",btn_start:"تشغيل",btn_stop:"إيقاف",my_transactions:"معاملاتي",no_transactions:"لا معاملات",transaction:"معاملة",close:"إغلاق",tx_type:"النوع",date_time:"التاريخ والوقت",operation_id:"معرّف العملية",tx_deposit:"إيداع",tx_withdraw:"سحب",tx_purchase:"شراء",tx_monetization:"تحقيق الدخل",tx_salary:"راتب",tx_admin:"تعديل الرصيد من المشرف",
 role:"الدور",deposit:"إيداع",withdraw:"سحب",my_requests:"طلباتي",no_requests:"لا طلبات",
@@ -936,7 +1132,7 @@ pay_placeholder:"الدفع بعد ربط خدمة التحصيل.",
 terms_prefix:"بالمتابعة فإنك توافق على ",terms_link:"شروط الخدمة",terms_suffix:"",
 help_body:"التطبيق متزامن مع البوت.",support_manager:"المدير",support_bot:"البوت",support_email:"البريد",support_faq:"الأسئلة",soon:"قريباً",
 staff:"الموظفون",mod_sell:"بيع",mod_buy:"شراء",mod_tx:"المعاملات",analytics:"تحليلات",prev:"السابق",next:"التالي",
-roles:{user:"مستخدم",partner:"شريك",corp:"شركات",intern:"متدرب",mod:"مشرف",admin:"مسؤول",owner:"مالك"}}),
+roles:{user:"مستخدم",partner:"شريك",corp:"شركات",intern:"متدرب",mod:"مشرف",admin:"مسؤول",owner:"مالك"},collab_work_hint:"<strong>مشرف</strong><br><br>• الراتب: <strong>25$ / 12 ساعة</strong><br>• المطلوب: <strong>3 نوبات أسبوعيًا</strong><br><br><strong>التدريب</strong><br><br>• المدة: <strong>شهر واحد</strong><br>• نوبة المتدرب: <strong>6 ساعات</strong><br>• أجر نوبة التدريب: <strong>10$</strong><br><br><strong>المسؤوليات</strong><br><br>• الإشراف على الإعلانات<br>• الإشراف على الشكاوى<br>• الإشراف على تذاكر الدعم<br>• التحليلات (عرض فقط)<br>• مركز العمل / النوبات<br>• التحكم في النوبات (عرض فقط)"}),
 zh:baseI18n({logout:"退出",ref_my_code:"我的推荐码",save:"保存",apply:"应用",ref_stats_line:"等级: {level} · 推荐: {total} · 10天: {d10} · 收益: {earn} ₽",ref_apply_title:"应用优惠码",back:"返回",balance:"余额",settings:"设置",projects:"项目",help:"帮助",support:"支持",panel:"面板",
 language:"语言",theme:"主题",theme_light:"浅色",theme_dark:"深色",theme_auto:"跟随 Telegram",original:"原版",on_moderation:"审核中",status:"状态",no_projects:"暂无项目",btn_start:"启动",btn_stop:"停止",my_transactions:"我的交易",no_transactions:"暂无交易",transaction:"交易",close:"关闭",tx_type:"类型",date_time:"日期和时间",operation_id:"操作编号",tx_deposit:"充值",tx_withdraw:"提现",tx_purchase:"购买",tx_monetization:"变现",tx_salary:"工资",tx_admin:"管理员调整余额",
 role:"角色",deposit:"充值",withdraw:"提现",my_requests:"我的申请",no_requests:"暂无申请",
@@ -947,7 +1143,7 @@ pay_placeholder:"接入收单后可支付。",
 terms_prefix:"继续即表示同意",terms_link:"服务条款",terms_suffix:"",
 help_body:"小程序已与机器人同步。",support_manager:"经理",support_bot:"机器人",support_email:"邮箱",support_faq:"常见问题",soon:"即将推出",
 staff:"员工",mod_sell:"出售",mod_buy:"购买",mod_tx:"交易",analytics:"分析",prev:"上一页",next:"下一页",
-roles:{user:"用户",partner:"合作伙伴",corp:"企业",intern:"实习",mod:"版主",admin:"管理员",owner:"所有者"}}),
+roles:{user:"用户",partner:"合作伙伴",corp:"企业",intern:"实习",mod:"版主",admin:"管理员",owner:"所有者"},collab_work_hint:"<strong>审核员</strong><br><br>• 薪资：<strong>25$ / 12 小时</strong><br>• 要求：<strong>每周 3 个班次</strong><br><br><strong>实习</strong><br><br>• 期限：<strong>1 个月</strong><br>• 实习班次：<strong>6 小时</strong><br>• 每个实习班次报酬：<strong>10$</strong><br><br><strong>职责</strong><br><br>• 信息发布审核<br>• 投诉审核<br>• 客服工单审核<br>• 数据分析（仅查看）<br>• 工作中心 / 班次<br>• 班次管理（仅查看）"}),
 ja:baseI18n({logout:"ログアウト",ref_my_code:"紹介コード",save:"保存",apply:"適用",ref_stats_line:"レベル: {level} · 紹介: {total} · 10日: {d10} · 収益: {earn} ₽",ref_apply_title:"プロモコードを適用",back:"戻る",balance:"残高",settings:"設定",projects:"プロジェクト",help:"ヘルプ",support:"サポート",panel:"パネル",
 language:"言語",theme:"テーマ",theme_light:"ライト",theme_dark:"ダーク",theme_auto:"Telegramと同じ",original:"オリジナル",on_moderation:"審査中",status:"ステータス",no_projects:"プロジェクトなし",btn_start:"開始",btn_stop:"停止",my_transactions:"取引履歴",no_transactions:"取引なし",transaction:"取引",close:"閉じる",tx_type:"種類",date_time:"日時",operation_id:"操作ID",tx_deposit:"入金",tx_withdraw:"出金",tx_purchase:"購入",tx_monetization:"収益化",tx_salary:"給与",tx_admin:"管理者による残高変更",
 role:"ロール",deposit:"入金",withdraw:"出金",my_requests:"申請一覧",no_requests:"申請なし",
@@ -958,7 +1154,7 @@ pay_placeholder:"アクワイアリング接続後に支払い可能。",
 terms_prefix:"続行すると",terms_link:"利用規約",terms_suffix:"に同意したことになります",
 help_body:"Mini Appはボットと同期しています。",support_manager:"マネージャー",support_bot:"ボット",support_email:"メール",support_faq:"FAQ",soon:"近日",
 staff:"スタッフ",mod_sell:"販売",mod_buy:"購入",mod_tx:"取引",analytics:"分析",prev:"前へ",next:"次へ",
-roles:{user:"ユーザー",partner:"パートナー",corp:"法人",intern:"インターン",mod:"モデレーター",admin:"管理者",owner:"オーナー"}}),
+roles:{user:"ユーザー",partner:"パートナー",corp:"法人",intern:"インターン",mod:"モデレーター",admin:"管理者",owner:"オーナー"},collab_work_hint:"<strong>モデレーター</strong><br><br>• 給与：<strong>25$ / 12時間</strong><br>• 必須：<strong>週3シフト</strong><br><br><strong>インターンシップ</strong><br><br>• 期間：<strong>1か月</strong><br>• インターンのシフト：<strong>6時間</strong><br>• インターン1シフトの報酬：<strong>10$</strong><br><br><strong>業務内容</strong><br><br>• 掲載情報のモデレーション<br>• 苦情のモデレーション<br>• サポートチケットのモデレーション<br>• 分析（閲覧）<br>• ワークセンター / シフト<br>• シフト管理（閲覧のみ）"}),
 ko:baseI18n({logout:"로그아웃",ref_my_code:"내 추천 코드",save:"저장",apply:"적용",ref_stats_line:"레벨: {level} · 추천: {total} · 10일: {d10} · 수익: {earn} ₽",ref_apply_title:"프로모 코드 적용",back:"뒤로",balance:"잔액",settings:"설정",projects:"프로젝트",help:"도움말",support:"지원",panel:"패널",
 language:"언어",theme:"테마",theme_light:"라이트",theme_dark:"다크",theme_auto:"텔레그램과 동일",original:"원본",on_moderation:"검토 중",status:"상태",no_projects:"프로젝트 없음",btn_start:"시작",btn_stop:"중지",my_transactions:"내 거래",no_transactions:"거래 없음",transaction:"거래",close:"닫기",tx_type:"유형",date_time:"날짜 및 시간",operation_id:"작업 ID",tx_deposit:"입금",tx_withdraw:"출금",tx_purchase:"구매",tx_monetization:"수익화",tx_salary:"급여",tx_admin:"관리자 잔액 변경",
 role:"역할",deposit:"입금",withdraw:"출금",my_requests:"내 요청",no_requests:"요청 없음",
@@ -969,7 +1165,7 @@ pay_placeholder:"결제 연동 후 이용 가능합니다.",
 terms_prefix:"계속하면 ",terms_link:"서비스 약관",terms_suffix:"에 동의합니다",
 help_body:"미니앱이 봇과 동기화됩니다.",support_manager:"매니저",support_bot:"봇",support_email:"이메일",support_faq:"FAQ",soon:"곧",
 staff:"직원",mod_sell:"판매",mod_buy:"구매",mod_tx:"거래",analytics:"분석",prev:"이전",next:"다음",
-roles:{user:"사용자",partner:"파트너",corp:"기업",intern:"인턴",mod:"모더레이터",admin:"관리자",owner:"소유자"}}),
+roles:{user:"사용자",partner:"파트너",corp:"기업",intern:"인턴",mod:"모더레이터",admin:"관리자",owner:"소유자"},collab_work_hint:"<strong>모더레이터</strong><br><br>• 급여: <strong>25$ / 12시간</strong><br>• 필수: <strong>주 3회 근무</strong><br><br><strong>인턴십</strong><br><br>• 기간: <strong>1개월</strong><br>• 인턴 근무: <strong>6시간</strong><br>• 인턴 근무 1회 급여: <strong>10$</strong><br><br><strong>업무</strong><br><br>• 게시물 검토<br>• 신고 검토<br>• 지원 티켓 검토<br>• 분석 (조회)<br>• 업무 센터 / 근무<br>• 근무 관리 (조회만 가능)"}),
 };
 
 const tg=window.Telegram&&window.Telegram.WebApp?window.Telegram.WebApp:null;
@@ -1267,7 +1463,7 @@ function money(n){return fmt(n)+" ₽"}
 
 function termsHtml(){return t("terms_prefix")+'<a href="'+TERMS_URL+'" target="_blank" rel="noopener">'+t("terms_link")+"</a>"+t("terms_suffix")}
 function applyI18n(){
-  document.querySelectorAll("[data-i18n]").forEach(el=>{el.textContent=t(el.getAttribute("data-i18n"))});
+  document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n"); if(k==="collab_work_hint") el.innerHTML=t(k); else el.textContent=t(k);});
   const dl=document.getElementById("dep-terms-label");if(dl)dl.innerHTML=termsHtml();
   const wl=document.getElementById("wd-terms-label");if(wl)wl.innerHTML=termsHtml();
   updateLangTile();updateThemeTile();renderLangList();
@@ -1882,7 +2078,7 @@ async function loadProjects(){
       }else{
         right='<button type="button" class="toggle'+(en?" on":"")+'" data-toggle="'+p.id+'" aria-label="toggle"></button>';
       }
-      const name=(p.name||("#"+p.id)).replace(/[\s\-–—]+$/g,"").replace(/</g,"");
+      const name=(p.name||("#"+p.id)).replace(/</g,"");
       return '<div class="item proj-item" data-pid="'+p.id+'"><div class="left"><div class="name">'+name+'</div><div class="sub">'+roleLabel+'</div></div><div class="right">'+right+'</div></div>';
     }).join("");
     list.querySelectorAll("[data-pid]").forEach(el=>{
@@ -1907,33 +2103,91 @@ async function loadProjects(){
         btn.disabled=false;
       };
     });
-  }catch(e){list.innerHTML='<div class="empty">err</div>';meta.textContent=String(e.message||e)}
+  }catch(e){list.innerHTML='<div class="empty">err</div>';if(meta)meta.textContent=String(e.message||e)}
+}
+const PROJECT_DETAIL_I18N={
+  ru:{coop:"Тип сотрудничества",resource:"Тип ресурса",topic:"Тематика канала",admin:"Статус администратора",subs:"Подписчики",cr:"CR подписчиков",price:"Цена за подписчика",themes:"Тематики узконаправленных подписчиков",allThemes:"все тематики",snippet:"Сниппет",subscribed:"Подписавшихся",profit:"Прибыль за одну подписку",myAds:"Реклама моих проектов",unknown:"Неизвестно",installed:"Установлен",notSet:"Не указана",channel:"📣 Канал",bot:"🤖 Бот",buy:"Покупка трафика",sell:"Продажа трафика"},
+  en:{coop:"Cooperation type",resource:"Resource type",topic:"Channel topic",admin:"Administrator status",subs:"Subscribers",cr:"Subscriber CR",price:"Price per subscriber",themes:"Niche subscriber topics",allThemes:"all topics",snippet:"Snippet",subscribed:"Subscribers",profit:"Profit per subscription",myAds:"Advertising my projects",unknown:"Unknown",installed:"Installed",notSet:"Not specified",channel:"📣 Channel",bot:"🤖 Bot",buy:"Traffic purchase",sell:"Traffic sales"},
+  uk:{coop:"Тип співпраці",resource:"Тип ресурсу",topic:"Тематика каналу",admin:"Статус адміністратора",subs:"Підписники",cr:"CR підписників",price:"Ціна за підписника",themes:"Тематики вузькоспрямованих підписників",allThemes:"усі тематики",snippet:"Сніпет",subscribed:"Підписалися",profit:"Прибуток за одну підписку",myAds:"Реклама моїх проєктів",unknown:"Невідомо",installed:"Встановлено",notSet:"Не вказана",channel:"📣 Канал",bot:"🤖 Бот",buy:"Купівля трафіку",sell:"Продаж трафіку"},
+  de:{coop:"Kooperationstyp",resource:"Ressourcentyp",topic:"Kanalthema",admin:"Administratorstatus",subs:"Abonnenten",cr:"Abonnenten-CR",price:"Preis pro Abonnent",themes:"Themen der zielgerichteten Abonnenten",allThemes:"alle Themen",snippet:"Snippet",subscribed:"Abonnenten",profit:"Gewinn pro Abonnent",myAds:"Werbung für meine Projekte",unknown:"Unbekannt",installed:"Installiert",notSet:"Nicht angegeben",channel:"📣 Kanal",bot:"🤖 Bot",buy:"Traffic-Kauf",sell:"Traffic-Verkauf"},
+  fr:{coop:"Type de collaboration",resource:"Type de ressource",topic:"Thématique du canal",admin:"Statut de l’administrateur",subs:"Abonnés",cr:"CR des abonnés",price:"Prix par abonné",themes:"Thématiques des abonnés ciblés",allThemes:"toutes les thématiques",snippet:"Snippet",subscribed:"Abonnés",profit:"Bénéfice par abonnement",myAds:"Publicité de mes projets",unknown:"Inconnu",installed:"Installé",notSet:"Non indiquée",channel:"📣 Canal",bot:"🤖 Bot",buy:"Achat de trafic",sell:"Vente de trafic"},
+  es:{coop:"Tipo de colaboración",resource:"Tipo de recurso",topic:"Temática del canal",admin:"Estado del administrador",subs:"Suscriptores",cr:"CR de suscriptores",price:"Precio por suscriptor",themes:"Temáticas de suscriptores específicos",allThemes:"todas las temáticas",snippet:"Snippet",subscribed:"Suscriptores",profit:"Ganancia por suscripción",myAds:"Publicidad de mis proyectos",unknown:"Desconocido",installed:"Instalado",notSet:"No indicada",channel:"📣 Canal",bot:"🤖 Bot",buy:"Compra de tráfico",sell:"Venta de tráfico"},
+  it:{coop:"Tipo di collaborazione",resource:"Tipo di risorsa",topic:"Argomento del canale",admin:"Stato dell’amministratore",subs:"Iscritti",cr:"CR degli iscritti",price:"Prezzo per iscritto",themes:"Tematiche degli iscritti mirati",allThemes:"tutte le tematiche",snippet:"Snippet",subscribed:"Iscritti",profit:"Guadagno per iscrizione",myAds:"Pubblicità dei miei progetti",unknown:"Sconosciuto",installed:"Installato",notSet:"Non indicata",channel:"📣 Canale",bot:"🤖 Bot",buy:"Acquisto di traffico",sell:"Vendita di traffico"},
+  pt:{coop:"Tipo de colaboração",resource:"Tipo de recurso",topic:"Tema do canal",admin:"Status do administrador",subs:"Inscritos",cr:"CR dos inscritos",price:"Preço por inscrito",themes:"Temas dos inscritos segmentados",allThemes:"todos os temas",snippet:"Snippet",subscribed:"Inscritos",profit:"Lucro por inscrição",myAds:"Publicidade dos meus projetos",unknown:"Desconhecido",installed:"Instalado",notSet:"Não indicado",channel:"📣 Canal",bot:"🤖 Bot",buy:"Compra de tráfego",sell:"Venda de tráfego"},
+  "pt-BR":{coop:"Tipo de colaboração",resource:"Tipo de recurso",topic:"Tema do canal",admin:"Status do administrador",subs:"Inscritos",cr:"CR dos inscritos",price:"Preço por inscrito",themes:"Temas dos inscritos segmentados",allThemes:"todos os temas",snippet:"Snippet",subscribed:"Inscritos",profit:"Lucro por inscrição",myAds:"Publicidade dos meus projetos",unknown:"Desconhecido",installed:"Instalado",notSet:"Não informado",channel:"📣 Canal",bot:"🤖 Bot",buy:"Compra de tráfego",sell:"Venda de tráfego"},
+  tr:{coop:"İş birliği türü",resource:"Kaynak türü",topic:"Kanal konusu",admin:"Yönetici durumu",subs:"Aboneler",cr:"Abone CR",price:"Abone başına fiyat",themes:"Hedeflenen abonelerin konuları",allThemes:"tüm konular",snippet:"Snippet",subscribed:"Aboneler",profit:"Abonelik başına kâr",myAds:"Projelerimin reklamı",unknown:"Bilinmiyor",installed:"Yüklendi",notSet:"Belirtilmedi",channel:"📣 Kanal",bot:"🤖 Bot",buy:"Trafik satın alma",sell:"Trafik satışı"},
+  id:{coop:"Jenis kerja sama",resource:"Jenis sumber daya",topic:"Topik kanal",admin:"Status administrator",subs:"Pelanggan",cr:"CR pelanggan",price:"Harga per pelanggan",themes:"Topik pelanggan tertarget",allThemes:"semua topik",snippet:"Snippet",subscribed:"Pelanggan",profit:"Keuntungan per pelanggan",myAds:"Iklan proyek saya",unknown:"Tidak diketahui",installed:"Terpasang",notSet:"Tidak disebutkan",channel:"📣 Kanal",bot:"🤖 Bot",buy:"Pembelian trafik",sell:"Penjualan trafik"},
+  ar:{coop:"نوع التعاون",resource:"نوع المورد",topic:"موضوع القناة",admin:"حالة المسؤول",subs:"المشتركون",cr:"معدل تحويل المشتركين",price:"السعر لكل مشترك",themes:"مواضيع المشتركين المستهدفين",allThemes:"جميع المواضيع",snippet:"الـSnippet",subscribed:"المشتركون",profit:"الربح لكل اشتراك",myAds:"الإعلان عن مشاريعي",unknown:"غير معروف",installed:"مثبت",notSet:"غير محددة",channel:"📣 قناة",bot:"🤖 بوت",buy:"شراء الزيارات",sell:"بيع الزيارات"},
+  zh:{coop:"合作类型",resource:"资源类型",topic:"频道主题",admin:"管理员状态",subs:"订阅者",cr:"订阅者转化率",price:"每位订阅者价格",themes:"精准订阅者主题",allThemes:"所有主题",snippet:"代码片段",subscribed:"订阅者",profit:"每位订阅者收益",myAds:"我的项目广告",unknown:"未知",installed:"已安装",notSet:"未指定",channel:"📣 频道",bot:"🤖 机器人",buy:"购买流量",sell:"出售流量"},
+  ja:{coop:"協力タイプ",resource:"リソースタイプ",topic:"チャンネルのテーマ",admin:"管理者ステータス",subs:"購読者",cr:"購読者CR",price:"購読者単価",themes:"ターゲット購読者のテーマ",allThemes:"すべてのテーマ",snippet:"スニペット",subscribed:"購読者",profit:"購読1件あたりの利益",myAds:"自分のプロジェクトの広告",unknown:"不明",installed:"インストール済み",notSet:"未指定",channel:"📣 チャンネル",bot:"🤖 ボット",buy:"トラフィック購入",sell:"トラフィック販売"},
+  ko:{coop:"협력 유형",resource:"리소스 유형",topic:"채널 주제",admin:"관리자 상태",subs:"구독자",cr:"구독자 CR",price:"구독자당 가격",themes:"타겟 구독자 주제",allThemes:"모든 주제",snippet:"스니펫",subscribed:"구독자",profit:"구독 1건당 수익",myAds:"내 프로젝트 광고",unknown:"알 수 없음",installed:"설치됨",notSet:"지정되지 않음",channel:"📣 채널",bot:"🤖 봇",buy:"트래픽 구매",sell:"트래픽 판매"}
+};
+function projectDetailText(){return PROJECT_DETAIL_I18N[state.lang]||PROJECT_DETAIL_I18N.en}
+function escProject(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function projectNameUrl(p){
+  const u=String(p.resource_url||"").trim();
+  if(u)return u;
+  const uname=String(p.bot_username||"").replace(/^@/,"").trim();
+  return uname?"https://t.me/"+encodeURIComponent(uname):"";
 }
 async function openProject(pid){
   state.currentProjectId=pid;
   show("project");
   try{setLocationRoute("project",{projectId:pid})}catch(e){}
-  document.getElementById("pd-title").textContent="#"+pid;
+  document.getElementById("pd-title").textContent="";
   document.getElementById("pd-body").textContent="…";
   const act=document.getElementById("pd-actions");
   if(act)act.innerHTML="";
   try{
     const data=await apiGet("/api/miniapp/project/"+pid+"?user_id="+encodeURIComponent(USER_ID||0));
     const p=data.project||{};
-    const role=(p.role||"monetize");
-    document.getElementById("pd-title").textContent=(p.name||("#"+p.id)).replace(/[\s\-–—]+$/g,"");
-    let body="";
-    body+="<b>"+t("status")+":</b> "+(p.status||"—")+"<br/>";
-    body+="<b>"+t("role")+":</b> "+(role==="advertiser"?t("tx_purchase"):(role==="partner"?"Partner":t("tx_monetization")))+"<br/>";
+    const role=String(p.role||"monetize").toLowerCase();
+    const d=projectDetailText();
+    const name=String(p.name||("#"+p.id));
+    const url=projectNameUrl(p);
+    const nameHtml=url
+      ? '<a class="project-detail-link" href="'+escProject(url)+'" data-project-url="'+escProject(url)+'">'+escProject(name)+'</a>'
+      : '<span class="project-detail-link no-link">'+escProject(name)+'</span>' ;
+    let body='<div class="project-detail-name">'+nameHtml+'</div>';
+    const topic=p.topic?String(p.topic):d.notSet;
+    const rtype=String(p.resource_type||"channel").toLowerCase()==="bot"?d.bot:d.channel;
+    const coop=role==="advertiser"?d.buy:(role==="partner"?d.sell:d.sell);
+    body+='<div><b>'+d.coop+':</b> '+coop+'</div>';
+    body+='<div><b>'+d.resource+':</b> '+rtype+'</div>';
+    body+='<div><b>'+d.topic+':</b> '+escProject(topic)+'</div>';
+    body+='<br/>';
     if(role==="advertiser"){
-      body+="<b>"+t("tx_type")+":</b> "+(p.current_subs||0)+" / "+(p.target_subs||0)+"<br/>";
-      body+="<b>"+t("fee")+":</b> "+fmt(p.price_per_sub||0)+" ₽";
+      const adm=String(p.admin_status||"unknown").toLowerCase();
+      const admText=adm==="ok"?"✅ OK":adm==="no"?"❌ No":"🔄 "+d.unknown;
+      const current=Number(p.current_subs||0);
+      const target=Number(p.target_subs||1000);
+      const remaining=p.remaining_subs==null?current:Number(p.remaining_subs||0);
+      const cr=current<=0?100:(Math.max(0,Math.min(100,(remaining/current)*100)));
+      const price=Number(p.price_per_sub==null?3:p.price_per_sub);
+      let themes=d.allThemes;
+      try{const arr=JSON.parse(p.themes_json||"[]"); if(Array.isArray(arr)&&arr.length)themes=arr.join(", ");}catch(e){}
+      body+='<div><b>'+d.admin+':</b> '+admText+'</div>';
+      body+='<div><b>'+d.subs+':</b> '+current+'/'+target+'</div>';
+      body+='<div><b>'+d.cr+':</b> '+cr.toFixed(1)+'%</div>';
+      body+='<div><b>'+d.price+':</b> '+price.toFixed(2)+' ₽</div>';
+      body+='<br/><div><b>'+d.themes+':</b> '+escProject(themes)+'</div>';
     }else{
-      body+="<b>Snippet:</b> "+(p.snippet_status||"none")+"<br/>";
-      body+="<b>"+t("tx_monetization")+":</b> "+(p.current_subs||0);
+      const installed=(String(p.snippet_status||"").toLowerCase()==="installed"||Number(p.snippet_installed||0)===1);
+      const count=Number(p.current_subs||p.total_subs||0);
+      const profit=Number(p.profit_per_sub==null?1:p.profit_per_sub);
+      let ads=d.notSet;
+      try{
+        const raw=JSON.parse(p.own_channels_json||"[]");
+        if(Array.isArray(raw)){const names=raw.filter(x=>String(x.status||"active")==="active").map(x=>x.title||x.username||x.url).filter(Boolean); if(names.length)ads=names.join(", ");}
+      }catch(e){}
+      body+='<div><b>'+d.snippet+':</b> '+(installed?'✅ '+d.installed:'❌')+'</div>';
+      body+='<div><b>'+d.subscribed+':</b> '+count+' (0.00 ₽)</div>';
+      body+='<div><b>'+d.profit+':</b> '+profit.toFixed(2)+' ₽</div>';
+      body+='<br/><div><b>'+d.myAds+':</b> '+escProject(ads)+'</div>';
     }
     document.getElementById("pd-body").innerHTML=body;
-    // кнопки как в боте
+    const link=document.querySelector("#pd-body .project-detail-link[href]");
+    if(link){link.addEventListener("click",function(e){e.preventDefault();const u=this.getAttribute("data-project-url");try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink)Telegram.WebApp.openLink(u);else window.open(u,"_blank")}catch(err){window.open(u,"_blank")}});}
     let btns="";
     if(role==="monetize"){
       btns+='<div class="btn-row"><button class="btn" data-pa="settings">'+t("settings")+'</button><button class="btn" data-pa="snippet">Snippet</button></div>';
@@ -1941,38 +2195,55 @@ async function openProject(pid){
       btns+='<div class="btn-row"><button class="btn" data-pa="settings">'+t("settings")+'</button><button class="btn" data-pa="admin">Admin</button></div>';
     }
     const enabled=Number(p.enabled||0)===1 && (p.status||"")==="active";
-    btns+='<button class="btn primary wide" data-pa="'+(enabled?"stop":"start")+'">'+(enabled?t("btn_stop")||"Stop":t("btn_start")||"Start")+"</button>";
-    btns+='<button class="btn wide" data-pa="balance">'+t("balance")+"</button>";
-    btns+='<div class="btn-row"><button class="btn" data-pa="analytics">'+t("analytics")+'</button><button class="btn" data-pa="delete">'+t("close")+'</button></div>';
+    btns+='<button class="btn primary wide" data-pa="'+(enabled?"stop":"start")+'">'+(enabled?t("btn_stop")||"Stop":t("btn_start")||"Start")+'</button>';
+    btns+='<button class="btn wide" data-pa="balance">'+t("balance")+'</button>';
+    btns+='<button class="btn wide" data-pa="analytics">'+t("analytics")+'</button>';
     if(act){
       act.innerHTML=btns;
       act.querySelectorAll("[data-pa]").forEach(b=>{
         b.onclick=async()=>{
           const a=b.getAttribute("data-pa");
           if(a==="start"||a==="stop"){
-            try{
-              const r=await apiPost("/api/miniapp/project/"+pid+"/toggle",{user_id:USER_ID,enabled:a==="start"?1:0});
-              if(r.ok)openProject(pid);
-              else alert(r.message||r.error||"error");
-            }catch(err){alert(String(err.message||err))}
-            return;
+            try{const r=await apiPost("/api/miniapp/project/"+pid+"/toggle",{user_id:USER_ID,enabled:a==="start"?1:0});if(r.ok)openProject(pid);else alert(r.message||r.error||"error")}catch(err){alert(String(err.message||err))}return;
           }
-          if(a==="balance"){
-            show("balance");loadMe();loadRequests();
-            return;
-          }
-          if(a==="delete"){
-            // подтверждение удаления через API если есть — иначе назад к списку
-            show("projects");loadProjects();
-            return;
-          }
-          // settings / snippet / analytics — открываем детали обновлёнными
+          if(a==="balance"){show("balance");loadMe();loadRequests();return;}
+          if(a==="settings"){openProjectSettings(pid);return;}
+          if(a==="analytics"){openProjectAnalytics(pid);return;}
+          if(a==="admin"){openProjectAdmin(pid);return;}
+          if(a==="snippet"){openProjectSnippet(pid);return;}
           openProject(pid);
         };
       });
     }
   }catch(e){document.getElementById("pd-body").textContent=String(e.message||e)}
 }
+async function openProjectAdmin(pid){
+  try{
+    const data=await apiGet("/api/miniapp/project/"+pid+"?user_id="+encodeURIComponent(USER_ID||0));
+    const p=data.project||{};
+    const adm=String(p.admin_status||"unknown").toLowerCase();
+    const text=adm==="ok"?"✅ OK":adm==="no"?"❌ No":"🔄 "+(t("unknown")||"Unknown");
+    const box=document.getElementById("pd-body");
+    if(box){
+      const line='<div><b>'+((PROJECT_DETAIL_I18N[state.lang]||PROJECT_DETAIL_I18N.en).admin)+':</b> '+text+'</div>';
+      box.innerHTML=box.innerHTML+line;
+    }
+  }catch(e){alert(String(e.message||e))}
+}
+async function openProjectSnippet(pid){
+  try{
+    const data=await apiGet("/api/miniapp/project/"+pid+"?user_id="+encodeURIComponent(USER_ID||0));
+    const p=data.project||{};
+    const st=String(p.snippet_status||"none").toLowerCase();
+    const label=st==="installed"?"✅ "+(t("installed")||"Installed"):st==="pending"?"🔄 Pending":"❌ "+(t("not_installed")||"Not installed");
+    const box=document.getElementById("pd-body");
+    if(box){
+      const d=PROJECT_DETAIL_I18N[state.lang]||PROJECT_DETAIL_I18N.en;
+      box.innerHTML=box.innerHTML+'<div><b>'+d.snippet+':</b> '+label+'</div>';
+    }
+  }catch(e){alert(String(e.message||e))}
+}
+
 async function loadPanel(){
   if(!USER_ID)return;
   try{const p=await apiGet("/api/miniapp/panel?user_id="+encodeURIComponent(USER_ID));document.getElementById("panel-role").textContent=p.role_name||roleName(p.role)}
@@ -2056,6 +2327,8 @@ try{wireSupport()}catch(e){console.warn(e)}
 (function(){
   const b=document.getElementById("btn-web-logout");
   if(b)b.onclick=webLogout;
+  const pb=document.getElementById("profile-back-btn");
+  if(pb)pb.onclick=goBack;
 })();
 
 (async function bootstrapAuth(){
@@ -2454,6 +2727,146 @@ try{bindMainMenu()}catch(e){console.warn(e)}
 
 window.AdvincedAPI={API_BASE,USER_ID,setLang,setTheme,navigate,show,applyRouteFromLocation,getTrafficKind,isStandaloneApp,isTelegramMiniApp};
 </script>
+
+<div id="screen-project-settings" class="screen">
+  <div class="section-title" id="pps-title">Настройки</div>
+  <div class="panel" id="pps-content"></div>
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn" id="pps-back">Назад</button>
+    <button class="btn" id="pps-menu">В меню</button>
+  </div>
+</div>
+<div id="screen-project-analytics" class="screen">
+  <div class="section-title" id="ppa-title">📊 Аналитика</div>
+  <div class="panel" id="ppa-content"></div>
+  <button class="btn wide" id="ppa-back" style="margin-top:10px">Назад</button>
+</div>
+<style id="project-settings-analytics-ui">
+#screen-project-settings .panel,#screen-project-analytics .panel{font-size:14px;line-height:1.48}
+#screen-project-settings .setting-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#screen-project-settings .setting-grid .btn{min-height:58px;white-space:normal}
+#screen-project-settings .price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+#screen-project-settings .theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#screen-project-settings .channel-list{display:grid;gap:8px}
+#screen-project-settings .settings-block{display:grid;gap:10px}
+#screen-project-settings .settings-note{font-size:13px;color:var(--muted);margin-bottom:2px}
+#screen-project-settings .settings-input-row{display:flex;gap:8px}
+#screen-project-settings .settings-input-row .form-input{flex:1;min-width:0}
+</style>
+<script>
+(function(){
+  const PS_I18N={
+    ru:{settings:"Настройки",back:"Назад",menu:"В меню",subs:"Подписчики",price:"Цена",daily:"Лимит в день",hourly:"Скорость в час",unsubs:"Отписки",relink:"Изменить ссылку",themes:"Тематики",subcount:"Количество каналов",mychannels:"Мои каналы",addchannel:"Добавить канал",analytics:"Аналитика",save:"Сохранить",enter:"Введите значение",all:"Все тематики",required:"Обязательный",notrequired:"Необязательный",pending:"На проверке",active:"Активен",noaccess:"Нет доступа",saved:"Сохранено",starts:"Запуски",confirmed:"Подтвержденные подписки",total:"Всего подписалось",remain:"Осталось",cr:"CR пользователей",premium:"Пользователи с TG Premium",avatar:"Коэффициент аватаров",nodata:"Данных пока нет"},
+    en:{settings:"Settings",back:"Back",menu:"Main menu",subs:"Subscribers",price:"Price",daily:"Daily limit",hourly:"Hourly speed",unsubs:"Unsubs",relink:"Change link",themes:"Themes",subcount:"Channel count",mychannels:"My channels",addchannel:"Add channel",analytics:"Analytics",save:"Save",enter:"Enter value",all:"All themes",required:"Required",notrequired:"Optional",pending:"Pending",active:"Active",noaccess:"No access",saved:"Saved",starts:"Starts",confirmed:"Confirmed subscribers",total:"Subscribed all time",remain:"Remaining",cr:"User CR",premium:"Users with TG Premium",avatar:"Avatar coefficient",nodata:"No data yet"},
+    uk:{settings:"Налаштування",back:"Назад",menu:"Головне меню",subs:"Підписники",price:"Ціна",daily:"Ліміт на день",hourly:"Швидкість на годину",unsubs:"Відписки",relink:"Змінити посилання",themes:"Тематики",subcount:"Кількість каналів",mychannels:"Мої канали",addchannel:"Додати канал",analytics:"Аналітика",save:"Зберегти",enter:"Введіть значення",all:"Усі тематики",required:"Обов'язковий",notrequired:"Необов'язковий",pending:"На перевірці",active:"Активний",noaccess:"Немає доступу",saved:"Збережено",starts:"Запуски",confirmed:"Підтверджені підписники",total:"Всього підписалося",remain:"Залишилось",cr:"CR користувачів",premium:"Користувачі з TG Premium",avatar:"Коефіцієнт аватарів",nodata:"Даних поки немає"},
+    de:{settings:"Einstellungen",back:"Zurück",menu:"Hauptmenü",subs:"Abonnenten",price:"Preis",daily:"Tageslimit",hourly:"Geschwindigkeit pro Stunde",unsubs:"Abmeldungen",relink:"Link ändern",themes:"Themen",subcount:"Kanalanzahl",mychannels:"Meine Kanäle",addchannel:"Kanal hinzufügen",analytics:"Analyse",save:"Speichern",enter:"Wert eingeben",all:"Alle Themen",required:"Erforderlich",notrequired:"Optional",pending:"Ausstehend",active:"Aktiv",noaccess:"Kein Zugriff",saved:"Gespeichert",starts:"Starts",confirmed:"Bestätigte Abonnenten",total:"Insgesamt abonniert",remain:"Verbleibend",cr:"Nutzer-CR",premium:"Nutzer mit TG Premium",avatar:"Avatar-Koeffizient",nodata:"Noch keine Daten"},
+    fr:{settings:"Paramètres",back:"Retour",menu:"Menu principal",subs:"Abonnés",price:"Prix",daily:"Limite quotidienne",hourly:"Vitesse horaire",unsubs:"Désabonnements",relink:"Modifier le lien",themes:"Thématiques",subcount:"Nombre de canaux",mychannels:"Mes canaux",addchannel:"Ajouter un canal",analytics:"Analytique",save:"Enregistrer",enter:"Saisissez une valeur",all:"Toutes les thématiques",required:"Obligatoire",notrequired:"Optionnel",pending:"En attente",active:"Actif",noaccess:"Accès refusé",saved:"Enregistré",starts:"Démarrages",confirmed:"Abonnés confirmés",total:"Abonnements totaux",remain:"Restant",cr:"CR utilisateur",premium:"Utilisateurs avec TG Premium",avatar:"Coefficient avatar",nodata:"Aucune donnée"},
+    es:{settings:"Ajustes",back:"Atrás",menu:"Menú principal",subs:"Suscriptores",price:"Precio",daily:"Límite diario",hourly:"Velocidad por hora",unsubs:"Bajas",relink:"Cambiar enlace",themes:"Temáticas",subcount:"Cantidad de canales",mychannels:"Mis canales",addchannel:"Añadir canal",analytics:"Analítica",save:"Guardar",enter:"Introduce un valor",all:"Todas las temáticas",required:"Obligatorio",notrequired:"Opcional",pending:"Pendiente",active:"Activo",noaccess:"Sin acceso",saved:"Guardado",starts:"Inicios",confirmed:"Suscriptores confirmados",total:"Suscripciones totales",remain:"Restantes",cr:"CR de usuarios",premium:"Usuarios con TG Premium",avatar:"Coeficiente de avatar",nodata:"Sin datos todavía"},
+    it:{settings:"Impostazioni",back:"Indietro",menu:"Menu principale",subs:"Iscritti",price:"Prezzo",daily:"Limite giornaliero",hourly:"Velocità oraria",unsubs:"Disiscrizioni",relink:"Modifica link",themes:"Tematiche",subcount:"Numero canali",mychannels:"I miei canali",addchannel:"Aggiungi canale",analytics:"Analisi",save:"Salva",enter:"Inserisci valore",all:"Tutte le tematiche",required:"Obbligatorio",notrequired:"Opzionale",pending:"In attesa",active:"Attivo",noaccess:"Accesso negato",saved:"Salvato",starts:"Avvii",confirmed:"Iscritti confermati",total:"Iscritti totali",remain:"Rimanenti",cr:"CR utenti",premium:"Utenti con TG Premium",avatar:"Coefficiente avatar",nodata:"Nessun dato"},
+    pt:{settings:"Configurações",back:"Voltar",menu:"Menu principal",subs:"Inscritos",price:"Preço",daily:"Limite diário",hourly:"Velocidade por hora",unsubs:"Cancelamentos",relink:"Alterar link",themes:"Temas",subcount:"Número de canais",mychannels:"Meus canais",addchannel:"Adicionar canal",analytics:"Análise",save:"Salvar",enter:"Digite o valor",all:"Todos os temas",required:"Obrigatório",notrequired:"Opcional",pending:"Pendente",active:"Ativo",noaccess:"Sem acesso",saved:"Salvo",starts:"Inícios",confirmed:"Inscritos confirmados",total:"Inscritos no total",remain:"Restantes",cr:"CR do usuário",premium:"Usuários com TG Premium",avatar:"Coeficiente de avatar",nodata:"Sem dados"},
+    "pt-BR":{settings:"Configurações",back:"Voltar",menu:"Menu principal",subs:"Inscritos",price:"Preço",daily:"Limite diário",hourly:"Velocidade por hora",unsubs:"Cancelamentos",relink:"Alterar link",themes:"Temas",subcount:"Número de canais",mychannels:"Meus canais",addchannel:"Adicionar canal",analytics:"Análise",save:"Salvar",enter:"Digite o valor",all:"Todos os temas",required:"Obrigatório",notrequired:"Opcional",pending:"Pendente",active:"Ativo",noaccess:"Sem acesso",saved:"Salvo",starts:"Inícios",confirmed:"Inscritos confirmados",total:"Inscritos no total",remain:"Restantes",cr:"CR do usuário",premium:"Usuários com TG Premium",avatar:"Coeficiente de avatar",nodata:"Sem dados"},
+    tr:{settings:"Ayarlar",back:"Geri",menu:"Ana menü",subs:"Aboneler",price:"Fiyat",daily:"Günlük limit",hourly:"Saatlik hız",unsubs:"Çıkışlar",relink:"Bağlantıyı değiştir",themes:"Konular",subcount:"Kanal sayısı",mychannels:"Kanallarım",addchannel:"Kanal ekle",analytics:"Analitik",save:"Kaydet",enter:"Değer girin",all:"Tüm konular",required:"Zorunlu",notrequired:"İsteğe bağlı",pending:"Beklemede",active:"Aktif",noaccess:"Erişim yok",saved:"Kaydedildi",starts:"Başlangıçlar",confirmed:"Onaylı aboneler",total:"Tüm abonelikler",remain:"Kalan",cr:"Kullanıcı CR",premium:"TG Premium kullanıcıları",avatar:"Avatar katsayısı",nodata:"Henüz veri yok"},
+    id:{settings:"Pengaturan",back:"Kembali",menu:"Menu utama",subs:"Pelanggan",price:"Harga",daily:"Batas harian",hourly:"Kecepatan per jam",unsubs:"Berhenti berlangganan",relink:"Ubah tautan",themes:"Topik",subcount:"Jumlah kanal",mychannels:"Kanal saya",addchannel:"Tambah kanal",analytics:"Analitik",save:"Simpan",enter:"Masukkan nilai",all:"Semua topik",required:"Wajib",notrequired:"Opsional",pending:"Menunggu",active:"Aktif",noaccess:"Tidak ada akses",saved:"Tersimpan",starts:"Mulai",confirmed:"Pelanggan terkonfirmasi",total:"Total berlangganan",remain:"Tersisa",cr:"CR pengguna",premium:"Pengguna TG Premium",avatar:"Koefisien avatar",nodata:"Belum ada data"},
+    ar:{settings:"الإعدادات",back:"رجوع",menu:"القائمة الرئيسية",subs:"المشتركون",price:"السعر",daily:"الحد اليومي",hourly:"السرعة بالساعة",unsubs:"إلغاء الاشتراك",relink:"تغيير الرابط",themes:"المواضيع",subcount:"عدد القنوات",mychannels:"قنواتي",addchannel:"إضافة قناة",analytics:"التحليلات",save:"حفظ",enter:"أدخل القيمة",all:"جميع المواضيع",required:"مطلوب",notrequired:"اختياري",pending:"قيد الانتظار",active:"نشط",noaccess:"لا يوجد وصول",saved:"تم الحفظ",starts:"مرات البدء",confirmed:"المشتركون المؤكدون",total:"إجمالي الاشتراكات",remain:"المتبقي",cr:"معدل المستخدم",premium:"مستخدمو TG Premium",avatar:"معامل الصورة",nodata:"لا توجد بيانات بعد"},
+    zh:{settings:"设置",back:"返回",menu:"主菜单",subs:"订阅者",price:"价格",daily:"每日上限",hourly:"每小时速度",unsubs:"取消订阅",relink:"修改链接",themes:"主题",subcount:"频道数量",mychannels:"我的频道",addchannel:"添加频道",analytics:"分析",save:"保存",enter:"输入数值",all:"所有主题",required:"必选",notrequired:"可选",pending:"审核中",active:"已启用",noaccess:"无权限",saved:"已保存",starts:"启动次数",confirmed:"已确认订阅",total:"累计订阅",remain:"剩余",cr:"用户转化率",premium:"TG Premium 用户",avatar:"头像系数",nodata:"暂无数据"},
+    ja:{settings:"設定",back:"戻る",menu:"メインメニュー",subs:"購読者",price:"価格",daily:"1日の上限",hourly:"1時間あたりの速度",unsubs:"登録解除",relink:"リンクを変更",themes:"テーマ",subcount:"チャンネル数",mychannels:"自分のチャンネル",addchannel:"チャンネルを追加",analytics:"分析",save:"保存",enter:"値を入力",all:"すべてのテーマ",required:"必須",notrequired:"任意",pending:"確認待ち",active:"有効",noaccess:"アクセスなし",saved:"保存しました",starts:"開始数",confirmed:"確認済み購読",total:"累計購読",remain:"残り",cr:"ユーザーCR",premium:"TG Premiumユーザー",avatar:"アバター係数",nodata:"データはまだありません"},
+    ko:{settings:"설정",back:"뒤로",menu:"메인 메뉴",subs:"구독자",price:"가격",daily:"일일 한도",hourly:"시간당 속도",unsubs:"구독 취소",relink:"링크 변경",themes:"주제",subcount:"채널 수",mychannels:"내 채널",addchannel:"채널 추가",analytics:"분석",save:"저장",enter:"값 입력",all:"모든 주제",required:"필수",notrequired:"선택",pending:"대기 중",active:"활성",noaccess:"접근 권한 없음",saved:"저장됨",starts:"시작",confirmed:"확인된 구독자",total:"전체 구독",remain:"남음",cr:"사용자 CR",premium:"TG Premium 사용자",avatar:"아바타 계수",nodata:"아직 데이터 없음"}
+  };
+  function psT(k){return (PS_I18N[state.lang]||PS_I18N.en)[k]||PS_I18N.en[k]||k}
+  function psEsc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+  async function psApi(pid,action,payload={}){return await apiPost("/api/miniapp/project/"+pid+"/settings",Object.assign({user_id:USER_ID,action},payload))}
+  async function openProjectSettings(pid){
+    state.currentProjectId=pid; show("project-settings");
+    const box=document.getElementById("pps-content"); box.innerHTML="…";
+    document.getElementById("pps-title").textContent=psT("settings");
+    try{
+      const r=await apiGet("/api/miniapp/project/"+pid+"/settings?user_id="+encodeURIComponent(USER_ID));
+      if(!r.ok)throw new Error(r.message||r.error||psT("noaccess"));
+      renderProjectSettings(pid,r.settings||{});
+    }catch(e){box.innerHTML='<div class="muted">'+psEsc(e.message||e)+'</div>'}
+  }
+  function renderProjectSettings(pid,s){
+    const role=String(s.role||"monetize").toLowerCase();
+    const box=document.getElementById("pps-content"); let html='<div class="settings-block">';
+    if(role==="advertiser"){
+      html+='<div class="setting-grid"><button class="btn" data-set="subs">'+psT("subs")+': '+Number(s.target_subs||0)+'</button><button class="btn" data-set="price">'+psT("price")+': '+Number(s.price||0).toFixed(2)+' ₽</button>';
+      html+='<button class="btn" data-set="daily">'+psT("daily")+': '+Number(s.daily_limit||0)+'</button><button class="btn" data-set="hourly">'+psT("hourly")+': '+Number(s.hourly_speed||0)+'</button>';
+      html+='<button class="btn" data-set="unsubs">'+psT("unsubs")+': '+(Number(s.track_unsubs||0)?"✅":"❌")+'</button><button class="btn" data-set="relink">'+psT("relink")+'</button></div>';
+      html+='<button class="btn wide" data-set="themes">'+psT("themes")+'</button>';
+    }else{
+      html+='<div class="setting-grid"><button class="btn" data-set="subcount">'+psT("subcount")+': '+Number(s.sub_count||1)+'</button><button class="btn" data-set="price">'+psT("price")+': '+Number(s.price||1).toFixed(2)+' ₽</button></div>';
+      html+='<button class="btn wide" data-set="mychannels">'+psT("mychannels")+'</button><button class="btn wide" data-set="relink">'+psT("relink")+'</button>';
+    }
+    html+='</div>'; box.innerHTML=html;
+    box.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>psHandle(pid,s,b.getAttribute("data-set")));
+  }
+  async function psHandle(pid,s,a){
+    if(a==="price")return psPrice(pid,s);
+    if(a==="themes")return psThemes(pid,s);
+    if(a==="mychannels")return psChannels(pid);
+    if(a==="relink")return psInput(pid,"set_relink",psT("relink"),"https://t.me/username");
+    if(a==="unsubs"){
+      const r=await psApi(pid,"toggle_unsubs"); if(r.ok)openProjectSettings(pid); else alert(r.message||r.error); return;
+    }
+    const title=a==="subs"?psT("subs"):a==="daily"?psT("daily"):a==="hourly"?psT("hourly"):psT("subcount");
+    return psInput(pid,a==="subs"?"set_subs":a==="daily"?"set_daily":a==="hourly"?"set_hourly":"set_subcount",title,"");
+  }
+  async function psInput(pid,action,title,placeholder){
+    const box=document.getElementById("pps-content"); box.innerHTML='<div class="settings-block"><div><b>'+psEsc(title)+'</b></div><div class="settings-input-row"><input class="form-input" id="ps-input" type="text" inputmode="decimal" placeholder="'+psEsc(placeholder)+'"><button class="btn primary" id="ps-save">'+psT("save")+'</button></div></div>';
+    document.getElementById("ps-save").onclick=async()=>{const v=document.getElementById("ps-input").value.trim();if(!v)return;const r=await psApi(pid,action,{value:v});if(r.ok)openProjectSettings(pid);else alert(r.message||r.error)};
+  }
+  async function psPrice(pid,s){
+    const box=document.getElementById("pps-content"); const prices=Array.isArray(s.price_options)?s.price_options:[];
+    box.innerHTML='<div class="settings-note">'+psEsc(psT("price"))+'</div><div class="price-grid">'+prices.map(x=>'<button class="btn" data-price="'+x+'">'+Number(x).toFixed(2)+'</button>').join('')+'</div>';
+    box.querySelectorAll("[data-price]").forEach(b=>b.onclick=async()=>{const r=await psApi(pid,"set_price",{value:b.getAttribute("data-price")});if(r.ok)openProjectSettings(pid);else alert(r.message||r.error)});
+  }
+  async function psThemes(pid,s){
+    const selected=new Set((s.themes_mode==="all"||!Array.isArray(s.selected_themes)||!s.selected_themes.length)?(s.themes||[]):s.selected_themes);
+    const box=document.getElementById("pps-content");
+    box.innerHTML='<div class="theme-grid">'+(s.themes||[]).map(x=>'<button class="btn" data-theme="'+psEsc(x)+'">'+(selected.has(x)?'✅ ':'❌ ')+psEsc(x)+'</button>').join('')+'</div><button class="btn wide" id="ps-themes-save" style="margin-top:10px">'+psT("save")+'</button>';
+    box.querySelectorAll("[data-theme]").forEach(b=>b.onclick=()=>{const x=b.getAttribute("data-theme");if(selected.has(x))selected.delete(x);else selected.add(x);b.textContent=(selected.has(x)?'✅ ':'❌ ')+x});
+    document.getElementById("ps-themes-save").onclick=async()=>{const r=await psApi(pid,"set_themes",{themes:Array.from(selected)});if(r.ok)openProjectSettings(pid);else alert(r.message||r.error)};
+  }
+  async function psChannels(pid){
+    const r=await apiGet("/api/miniapp/project/"+pid+"/settings?user_id="+encodeURIComponent(USER_ID)); const s=r.settings||{}; const box=document.getElementById("pps-content");
+    let html='<div class="channel-list">';
+    (s.own_channels||[]).forEach((c,i)=>{const mark=c.required?'✅':'❌';const st=c.status==="active"?psT("active"):psT("pending");html+='<button class="btn" data-ch="'+i+'">'+mark+' '+psEsc(c.title||c.username||c.url||("#"+(i+1)))+' · '+st+'</button>'});
+    html+='<button class="btn wide" id="ps-add-channel">'+psT("addchannel")+'</button></div>'; box.innerHTML=html;
+    box.querySelectorAll("[data-ch]").forEach(b=>b.onclick=async()=>{const rr=await psApi(pid,"toggle_channel",{index:Number(b.getAttribute("data-ch"))});if(rr.ok)psChannels(pid);else alert(rr.message||rr.error)});
+    document.getElementById("ps-add-channel").onclick=()=>psInput(pid,"add_channel",psT("addchannel"),"@username or t.me/...");
+  }
+  async function openProjectAnalytics(pid){
+    state.currentProjectId=pid; show("project-analytics"); document.getElementById("ppa-title").textContent=psT("analytics"); const box=document.getElementById("ppa-content");box.innerHTML="…";
+    try{const r=await apiGet("/api/miniapp/project/"+pid+"/analytics?user_id="+encodeURIComponent(USER_ID));const a=r.analytics||{};let html='';if(a.themes&&Object.keys(a.themes).length){html+='<div><b>'+psT("themes")+'</b></div>';for(const [k,v] of Object.entries(a.themes))html+='<div>'+psEsc(k)+' — '+psEsc(v)+'</div>'}html+='<br/><div><b>'+psT("total")+':</b> '+Number(a.total||0)+'</div><div><b>'+psT("remain")+':</b> '+Number(a.remain||0)+'</div><div><b>'+psT("cr")+':</b> '+Number(a.cr||0)+'%</div><div><b>'+psT("premium")+':</b> '+Number(a.premium_pct||0)+'%</div><div><b>'+psT("avatar")+':</b> '+psEsc(a.avatar_coef==null?0:a.avatar_coef)+'</div>';box.innerHTML=html||'<div class="muted">'+psT("nodata")+'</div>'}catch(e){box.innerHTML='<div class="muted">'+psEsc(e.message||e)+'</div>'}
+  }
+  document.getElementById("pps-back").onclick=()=>openProject(state.currentProjectId);
+  document.getElementById("pps-menu").onclick=()=>show("home");
+  document.getElementById("ppa-back").onclick=()=>openProject(state.currentProjectId);
+})();
+</script>
+
+<style id="project-actions-final-fix">
+#screen-project .project-actions .btn,
+#pd-actions .btn{cursor:pointer}
+</style>
+<script id="project-actions-final-fix-script">
+(function(){
+  // Final safety layer: the project detail function must remain callable after all UI scripts load.
+  // The actual handlers are attached by openProject() after the project data is rendered.
+  document.addEventListener("click", function(e){
+    const b=e.target.closest("#pd-actions [data-pa]");
+    if(!b) return;
+    const pid=state.currentProjectId;
+    if(!pid) return;
+    const action=b.getAttribute("data-pa");
+    if(action==="settings" && typeof openProjectSettings==="function"){
+      e.preventDefault(); e.stopImmediatePropagation(); openProjectSettings(pid);
+    }else if(action==="analytics" && typeof openProjectAnalytics==="function"){
+      e.preventDefault(); e.stopImmediatePropagation(); openProjectAnalytics(pid);
+    }
+  }, true);
+})();
+</script>
 </body>
 
 
@@ -2546,7 +2959,7 @@ window.AdvincedAPI={API_BASE,USER_ID,setLang,setTheme,navigate,show,applyRouteFr
   color:var(--text);
 }
 
-/* Единая сетка как в настройках */
+/* Единая сетка как в настройках: Support + Panel = 2 квадратные плитки в ряд. */
 #screen-settings .tile-grid,
 #screen-support .tile-grid,
 #screen-panel .tile-grid,
@@ -2579,6 +2992,7 @@ window.AdvincedAPI={API_BASE,USER_ID,setLang,setTheme,navigate,show,applyRouteFr
   gap:6px;
   width:100%;
   min-width:0;
+  min-height:0;
   height:auto;
   box-sizing:border-box;
 }
@@ -2616,11 +3030,13 @@ window.AdvincedAPI={API_BASE,USER_ID,setLang,setTheme,navigate,show,applyRouteFr
   width:100%;
 }
 
-/* широкая кнопка аналитики в панели */
-#screen-panel .tile[style*="grid-column"]{
-  grid-column:1 / -1;
-  aspect-ratio:auto;
-  min-height:72px;
+/* Analytics is a normal square tile; preserve left-to-right, top-to-bottom order. */
+#screen-panel .tile[style*="grid-column"],
+#screen-panel .tile[data-panel="analytics"]{
+  grid-column:auto !important;
+  aspect-ratio:1 !important;
+  min-height:0 !important;
+  height:auto !important;
 }
 
 /* баланс / проекты — обычный поток, не на весь viewport */
@@ -2712,6 +3128,8 @@ window.AdvincedAPI={API_BASE,USER_ID,setLang,setTheme,navigate,show,applyRouteFr
   display:flex;justify-content:flex-end;align-items:center;
   margin:0 0 10px;min-height:28px;
 }
+.profile-back-btn{appearance:none;border:1px solid var(--line);cursor:pointer;height:28px;padding:0 12px;border-radius:8px;font-size:12px;font-weight:700;line-height:28px;background:var(--surface);color:var(--text);box-shadow:none;width:100%;min-width:0;white-space:nowrap}
+.profile-back-btn:active{opacity:.85;transform:scale(.98)}
 .btn-logout{
   appearance:none;border:none;cursor:pointer;
   height:28px;padding:0 12px;border-radius:8px;
@@ -2726,4 +3144,43 @@ window.AdvincedAPI={API_BASE,USER_ID,setLang,setTheme,navigate,show,applyRouteFr
 }
 </style>
 
+<style id="FINAL-PANEL-SUPPORT-TILE-GEOMETRY">
+/* FINAL AUTHORITY: Panel and Support must use the exact Settings tile geometry. */
+#screen-support .tile-grid,
+#screen-panel .tile-grid{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  grid-auto-flow:row !important;
+  gap:10px !important;
+  width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-sizing:border-box !important;
+}
+#screen-support .tile,
+#screen-panel .tile{
+  display:flex !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  height:auto !important;
+  aspect-ratio:1 / 1 !important;
+  box-sizing:border-box !important;
+  padding:16px 12px !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+#screen-panel .tile[data-panel="analytics"],
+#screen-panel .tile[style*="grid-column"]{
+  grid-column:auto !important;
+  grid-row:auto !important;
+  aspect-ratio:1 / 1 !important;
+  min-height:0 !important;
+  height:auto !important;
+}
+#screen-support #sup-other{
+  width:100% !important;
+  margin:12px 0 0 !important;
+}
+</style>
 </html>
