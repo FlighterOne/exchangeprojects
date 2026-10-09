@@ -2513,6 +2513,10 @@ body.dark .icon-apps-blue i{background:#111111}
  <div class="support-tile-icon">🪪</div>
  <div class="support-tile-title" data-i18n="mod_verify">Модерация верификации</div>
  </button>
+ <button class="support-tile" onclick="openAdminSection('complaints')">
+ <div class="support-tile-icon">⚠️</div>
+ <div class="support-tile-title" data-i18n="mod_complaints">Модерация жалоб</div>
+ </button>
 
  <button class="support-tile" id="admin-staff-tile" style="display:none;" onclick="openAdminSection('staff')">
  <div class="support-tile-icon">👥</div>
@@ -24321,7 +24325,7 @@ function openAdminSection(section) {
  else if (section === 'complaints') {
  if (role < 3) { tg.showAlert(tBlock('need_intern')); showPage('admin'); return; }
  window._staffAppsModTab = 'complaints';
- openStaffAppsTickets();
+ openPanelComplaintsModeration();
  }
  else if (section === 'tickets') {
  if (role < 3) { tg.showAlert(tBlock('need_intern')); showPage('admin'); return; }
@@ -25749,7 +25753,7 @@ function updateAdminModTiles() {
     // verification: admin+ (5+)
     if (vTile) vTile.style.display = (role >= 5) ? '' : 'none';
     // complaints: intern+ (3+) — tickets & jobs moved to staff → applications
-    if (cTile) cTile.style.display = 'none'; // moved to staff → apps
+    if (cTile) cTile.style.display = (role >= 3) ? '' : 'none';
     if (tTile) tTile.style.display = 'none';
     if (jTile) jTile.style.display = 'none';
   } catch (e) {}
@@ -26422,7 +26426,20 @@ async function openStaffAppsJobs() {
   await loadAdminJobs();
 }
 
-async function openStaffAppsTickets() {
+async 
+function openPanelComplaintsModeration() {
+  setAdminSectionBack(function(){ showPage('admin'); });
+  try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/complaints'); } catch(e){}
+  try {
+    var tEl = document.getElementById('admin-section-title');
+    if (tEl) tEl.textContent = (tBlock('mod_complaints') || 'Модерация жалоб');
+  } catch(e){}
+  window._staffAppsModTab = window._staffAppsModTab || 'complaints';
+  window._moderationFromPanel = true;
+  renderStaffAppsModeration();
+}
+
+function openStaffAppsTickets() {
   if (!userData || userData.role < 3) {
     try { tg.showAlert(tBlock('need_intern') || 'Недостаточно прав'); } catch(e){}
     return;
