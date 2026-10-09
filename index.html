@@ -1453,6 +1453,52 @@ button.btn.btn-compact,
 .verify-node-label{font-size:11px;text-align:center;margin-top:8px;color:var(--hint);line-height:1.25;max-width:86px;}
 
 </style>
+
+<style id="xcod-analytics-donut">
+.pa-donut-wrap{position:relative;margin:8px auto;display:flex;align-items:center;justify-content:center}
+.pa-donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+.pa-cr-label{font-size:11px;font-weight:600;color:var(--hint)}
+.pa-cr-val{font-size:18px;font-weight:700;color:var(--text)}
+.pa-legend{display:flex;flex-direction:column;gap:6px;margin:10px 0 4px}
+.pa-legend-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.pa-swatch{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.pa-legend-label{flex:1;color:var(--text)}
+.pa-legend-val{font-weight:700;color:var(--text)}
+.pa-meta{margin:10px 0;background:var(--secondary-bg);border-radius:12px;padding:12px 14px}
+.pa-meta-row{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:4px 0}
+.pa-meta-row span{color:var(--hint)}
+.pa-meta-row b{color:var(--text)}
+</style>
+
+<style id="xcod-period-bar">
+.an-period-bar{display:flex;align-items:center;gap:8px;margin:0 0 12px;position:relative}
+.an-period-bar .an-period-arrow{
+  width:40px;height:40px;border-radius:12px;border:1px solid rgba(128,128,128,0.3);
+  background:var(--secondary-bg);color:var(--text);font-size:18px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
+.an-period-bar .an-period-arrow:active{opacity:.75}
+.an-period-bar .an-period-label{
+  flex:1;min-width:0;height:40px;border-radius:12px;border:1px solid rgba(128,128,128,0.3);
+  background:var(--secondary-bg);color:var(--text);font-size:13px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;padding:0 10px;cursor:pointer;
+  text-align:center;line-height:1.25;
+}
+.an-period-dropdown{
+  position:absolute;left:48px;right:48px;top:46px;z-index:50;
+  background:var(--secondary-bg);border:1px solid rgba(128,128,128,0.3);
+  border-radius:12px;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+.an-period-dropdown button{
+  width:100%;text-align:left;padding:12px 14px;border:none;background:transparent;
+  color:var(--text);font-size:13px;font-weight:600;cursor:pointer;
+  border-bottom:1px solid rgba(128,128,128,0.12);
+}
+.an-period-dropdown button:last-child{border-bottom:none}
+.an-period-dropdown button.active{color:var(--button);background:rgba(46,166,255,0.1)}
+.an-period-dropdown button:active{opacity:.8}
+</style>
+
 </head>
 <body>
 
@@ -24251,6 +24297,7 @@ function loadAnalyticsMenu() {
  '<div class="support-grid">' +
  '<button class="support-tile" onclick="openAnalytics(\'expenses\')"><div class="support-tile-icon">📤</div><div class="support-tile-title">' + (tBlock('analytics_exp')) + '</div></button>' +
  '<button class="support-tile" onclick="openAnalytics(\'income\')"><div class="support-tile-icon">📥</div><div class="support-tile-title">' + (tBlock('analytics_inc')) + '</div></button>' +
+ '<button class="support-tile" onclick="openAnalytics(\'revenue\')"><div class="support-tile-icon">💹</div><div class="support-tile-title">' + (tBlock('analytics_rev') || 'Оборот и выручка') + '</div></button>' +
  '<button class="support-tile" onclick="openAdsAnalytics()"><div class="support-tile-icon">📣</div><div class="support-tile-title">' + (tBlock('analytics_ads')) + '</div></button>' +
  listingsTile +
  '<button class="support-tile" onclick="openVisitsAnalytics()"><div class="support-tile-icon">👁</div><div class="support-tile-title">' + (tBlock('analytics_visits') || 'Аналитика посещений') + '</div></button>' +
@@ -24296,30 +24343,155 @@ function defaultPeriod() {
  return { from: fmt(from), to: fmt(to) };
 }
 
+
+window._anPeriod = window._anPeriod || { mode: 'all', year: null, quarter: null, index: -1 };
+window._anQuarters = window._anQuarters || [];
+
+async function ensureAnQuarters() {
+  try {
+    var data = await apiGet('/api/admin/analytics/periods');
+    window._anQuarters = data.quarters || [];
+    return window._anQuarters;
+  } catch (e) {
+    window._anQuarters = window._anQuarters || [];
+    return window._anQuarters;
+  }
+}
+
+function anPeriodLabel() {
+  var p = window._anPeriod || { mode: 'all' };
+  if (p.mode === 'quarter' && p.year && p.quarter) {
+    var found = (window._anQuarters || []).find(function(q){ return q.year === p.year && q.quarter === p.quarter; });
+    if (found) return found.label || found.label_en;
+    return p.quarter + ' квартал ' + p.year + 'г';
+  }
+  return (typeof tBlock === 'function' ? tBlock('period_all') : null) || 'За весь период';
+}
+
+function anPeriodQuery() {
+  var p = window._anPeriod || { mode: 'all' };
+  if (p.mode === 'quarter' && p.year && p.quarter) {
+    return '&period=quarter&year=' + encodeURIComponent(p.year) + '&q=' + encodeURIComponent(p.quarter);
+  }
+  return '&period=all';
+}
+
+function renderAnPeriodBar(container) {
+  var wrap = document.createElement('div');
+  wrap.className = 'an-period-bar';
+  wrap.id = 'an-period-bar';
+  wrap.innerHTML =
+    '<button type="button" class="an-period-arrow" id="an-period-prev">‹</button>' +
+    '<div class="an-period-label" id="an-period-label">' + anPeriodLabel() + '</div>' +
+    '<button type="button" class="an-period-arrow" id="an-period-next">›</button>' +
+    '<div class="an-period-dropdown" id="an-period-dd" style="display:none"></div>';
+  container.appendChild(wrap);
+
+  function refreshLabel() {
+    var el = document.getElementById('an-period-label');
+    if (el) el.textContent = anPeriodLabel();
+  }
+  function closeDd() {
+    var dd = document.getElementById('an-period-dd');
+    if (dd) dd.style.display = 'none';
+  }
+  function openDd() {
+    var dd = document.getElementById('an-period-dd');
+    if (!dd) return;
+    var items = [{ mode: 'all', label: (typeof tBlock === 'function' ? tBlock('period_all') : null) || 'За весь период' }]
+      .concat((window._anQuarters || []).map(function(q){
+        return { mode: 'quarter', year: q.year, quarter: q.quarter, label: q.label };
+      }));
+    dd.innerHTML = items.map(function(it, idx){
+      var active = false;
+      var p = window._anPeriod || {};
+      if (it.mode === 'all' && p.mode === 'all') active = true;
+      if (it.mode === 'quarter' && p.mode === 'quarter' && p.year === it.year && p.quarter === it.quarter) active = true;
+      return '<button type="button" data-idx="' + idx + '" class="' + (active ? 'active' : '') + '">' + String(it.label).replace(/</g,'&lt;') + '</button>';
+    }).join('');
+    dd.style.display = 'block';
+    dd.querySelectorAll('button').forEach(function(btn){
+      btn.onclick = function() {
+        var idx = Number(btn.getAttribute('data-idx'));
+        var it = items[idx];
+        if (!it) return;
+        if (it.mode === 'all') {
+          window._anPeriod = { mode: 'all', year: null, quarter: null, index: -1 };
+        } else {
+          var qi = (window._anQuarters || []).findIndex(function(q){ return q.year === it.year && q.quarter === it.quarter; });
+          window._anPeriod = { mode: 'quarter', year: it.year, quarter: it.quarter, index: qi };
+        }
+        refreshLabel();
+        closeDd();
+        if (window._anCurrentKind) runAnalytics(window._anCurrentKind);
+      };
+    });
+  }
+
+  document.getElementById('an-period-label').onclick = function() {
+    var dd = document.getElementById('an-period-dd');
+    if (dd && dd.style.display === 'block') closeDd();
+    else openDd();
+  };
+  document.getElementById('an-period-prev').onclick = function() {
+    var list = window._anQuarters || [];
+    if (!list.length) return;
+    var p = window._anPeriod || { mode: 'all' };
+    if (p.mode === 'all') {
+      var q = list[0];
+      window._anPeriod = { mode: 'quarter', year: q.year, quarter: q.quarter, index: 0 };
+    } else {
+      var idx = typeof p.index === 'number' && p.index >= 0 ? p.index : list.findIndex(function(q){ return q.year===p.year && q.quarter===p.quarter; });
+      if (idx < 0) idx = 0;
+      if (idx >= list.length - 1) {
+        window._anPeriod = { mode: 'all', year: null, quarter: null, index: -1 };
+      } else {
+        var nq = list[idx + 1];
+        window._anPeriod = { mode: 'quarter', year: nq.year, quarter: nq.quarter, index: idx + 1 };
+      }
+    }
+    refreshLabel(); closeDd();
+    if (window._anCurrentKind) runAnalytics(window._anCurrentKind);
+  };
+  document.getElementById('an-period-next').onclick = function() {
+    var list = window._anQuarters || [];
+    if (!list.length) return;
+    var p = window._anPeriod || { mode: 'all' };
+    if (p.mode === 'all') {
+      var q = list[list.length - 1];
+      window._anPeriod = { mode: 'quarter', year: q.year, quarter: q.quarter, index: list.length - 1 };
+    } else {
+      var idx = typeof p.index === 'number' && p.index >= 0 ? p.index : list.findIndex(function(q){ return q.year===p.year && q.quarter===p.quarter; });
+      if (idx < 0) idx = 0;
+      if (idx <= 0) {
+        window._anPeriod = { mode: 'all', year: null, quarter: null, index: -1 };
+      } else {
+        var nq = list[idx - 1];
+        window._anPeriod = { mode: 'quarter', year: nq.year, quarter: nq.quarter, index: idx - 1 };
+      }
+    }
+    refreshLabel(); closeDd();
+    if (window._anCurrentKind) runAnalytics(window._anCurrentKind);
+  };
+}
+
+
 async function openAnalytics(kind) {
  if (kind === 'listings' && (!userData || userData.role < 5)) {
  tg.showAlert(tBlock('analytics_admin_only'));
  return;
  }
 
- var titles = { expenses: tBlock('analytics_exp'), income: tBlock('analytics_inc'), listings: tBlock('analytics_list') };
+ var titles = { expenses: tBlock('analytics_exp'), income: tBlock('analytics_inc'), revenue: (tBlock('analytics_rev')||'Оборот и выручка'), listings: tBlock('analytics_list') };
  document.getElementById('admin-section-title').textContent = titles[kind] || 'Аналитика';
- var p = defaultPeriod();
+ window._anCurrentKind = kind;
  var box = document.getElementById('admin-content');
  box.innerHTML = '';
 
- var period = document.createElement('div');
- period.className = 'period-row';
- period.innerHTML = '<div class="form-group" style="margin:0;"><label class="form-label" data-i18n="date_from">С</label><input class="form-input" type="date" id="an-from" value="' + p.from + '"></div>' +
- '<div class="form-group" style="margin:0;"><label class="form-label" data-i18n="date_to">По</label><input class="form-input" type="date" id="an-to" value="' + p.to + '"></div>';
- box.appendChild(period);
+ // period bar (calendar quarters) — for expenses/income/revenue; listings keep simple bar too
+ await ensureAnQuarters();
+ renderAnPeriodBar(box);
 
- var btnShow = document.createElement('button');
- btnShow.className = 'btn btn-secondary';
- btnShow.style.marginBottom = '12px';
- btnShow.textContent = tBlock('show');
- btnShow.onclick = function() { runAnalytics(kind); };
- box.appendChild(btnShow);
 
  var result = document.createElement('div');
  result.id = 'analytics-result';
@@ -24329,30 +24501,99 @@ async function openAnalytics(kind) {
  var btnPdf = document.createElement('button');
  btnPdf.className = 'btn';
  btnPdf.style.marginTop = '14px';
- btnPdf.textContent = tBlock('download_report_pdf');
- btnPdf.onclick = function() { downloadAnalyticsPdf(kind); };
+ if (kind === 'expenses' || kind === 'income' || kind === 'revenue') {
+  btnPdf.textContent = tBlock('download_excel') || 'Скачать Excel';
+  btnPdf.onclick = function() { downloadAnalyticsExcel(kind); };
+ } else {
+  btnPdf.textContent = tBlock('download_report_pdf');
+  btnPdf.onclick = function() { downloadAnalyticsPdf(kind); };
+ }
  box.appendChild(btnPdf);
 
  runAnalytics(kind);
 }
 
+function xcodDonut(segments, centerHtml, size){
+ size = size || 180;
+ var r = 56, cx = 80, cy = 80, stroke = 22;
+ var circ = 2 * Math.PI * r;
+ var total = 0;
+ segments.forEach(function(s){ total += Math.max(0, Number(s.value)||0); });
+ if(total <= 0){
+  return '<div class="pa-donut-wrap" style="width:'+size+'px;height:'+size+'px">'
+   +'<svg viewBox="0 0 160 160" width="'+size+'" height="'+size+'">'
+   +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(128,128,128,0.25)" stroke-width="'+stroke+'"/>'
+   +'</svg><div class="pa-donut-center">'+centerHtml+'</div></div>';
+ }
+ var offset = 0, arcs = '';
+ segments.forEach(function(s){
+  var v = Math.max(0, Number(s.value)||0);
+  if(v <= 0) return;
+  var len = (v / total) * circ;
+  arcs += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+s.color+'" stroke-width="'+stroke+'" '
+   +'stroke-dasharray="'+len.toFixed(2)+' '+(circ-len).toFixed(2)+'" '
+   +'stroke-dashoffset="'+(-offset).toFixed(2)+'" stroke-linecap="butt" '
+   +'transform="rotate(-90 '+cx+' '+cy+')"/>';
+  offset += len;
+ });
+ return '<div class="pa-donut-wrap" style="width:'+size+'px;height:'+size+'px">'
+  +'<svg viewBox="0 0 160 160" width="'+size+'" height="'+size+'">'+arcs+'</svg>'
+  +'<div class="pa-donut-center">'+centerHtml+'</div></div>';
+}
+function xcodLegend(items){
+ return '<div class="pa-legend">'+items.map(function(it){
+  return '<div class="pa-legend-item"><span class="pa-swatch" style="background:'+it.color+'"></span>'
+   +'<span class="pa-legend-label">'+String(it.label||'').replace(/</g,'&lt;')+'</span>'
+   +(it.value!=null?'<span class="pa-legend-val">'+String(it.value)+'</span>':'')
+   +'</div>';
+ }).join('')+'</div>';
+}
+var XCOD_AN_COLORS = ['#2ea6ff','#34c759','#ff9500','#ff3b30','#af52de','#5ac8fa','#ffcc00','#8e8e93'];
+
 async function runAnalytics(kind) {
- var from = document.getElementById('an-from').value;
- var to = document.getElementById('an-to').value;
+ window._anCurrentKind = kind;
  var box = document.getElementById('analytics-result');
  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
  try {
- var data = await apiGet('/api/admin/analytics/summary?kind=' + encodeURIComponent(kind) + '&from=' + from + '&to=' + to);
+ var data = await apiGet('/api/admin/analytics/summary?kind=' + encodeURIComponent(kind) + anPeriodQuery());
  if (kind === 'listings') {
  box.innerHTML = renderListingsChart(data.categories || []) +
  '<div class="info-block" style="margin-top:10px;">' + tBlock('total_listings') + ': <b>' + (data.total || 0) + '</b></div>';
+ } else if (kind === 'revenue') {
+  var inc = Number(data.income_total||0), exp = Number(data.expense_total||0);
+  var cr = Number(data.cr||0);
+  var main = [
+   {value:inc,color:'#34c759',label:(tBlock('analytics_inc')||'Доходы')},
+   {value:exp,color:'#ff3b30',label:(tBlock('analytics_exp')||'Расходы')}
+  ];
+  var html = xcodDonut(main, '<div class="pa-cr-label">CR</div><div class="pa-cr-val">~ '+cr.toFixed(1)+'%</div>', 190);
+  html += xcodLegend([
+   {color:'#34c759',label:(tBlock('analytics_inc')||'Доходы'),value:inc.toFixed(2)+' $'},
+   {color:'#ff3b30',label:(tBlock('analytics_exp')||'Расходы'),value:exp.toFixed(2)+' $'}
+  ]);
+  html += '<div class="pa-meta">';
+  html += '<div class="pa-meta-row"><span>'+(tBlock('an_gross')||'Валовая прибыль')+'</span><b>'+Number(data.gross_profit||0).toFixed(2)+' $</b></div>';
+  html += '<div class="pa-meta-row"><span>'+(tBlock('an_operating')||'Операционная прибыль (−20%)')+'</span><b>'+Number(data.operating_profit||0).toFixed(2)+' $</b></div>';
+  html += '<div class="pa-meta-row"><span>'+(tBlock('an_net_usn')||'Чистая прибыль (−15% УСН)')+'</span><b>'+Number(data.net_profit||0).toFixed(2)+' $</b></div>';
+  html += '</div>';
+  box.innerHTML = html;
  } else {
- var label = kind === 'expenses' ? tBlock('payout_sum') : tBlock('topup_sum');
- box.innerHTML =
- '<div class="wallet-balance" style="padding:20px 0;"><div class="wallet-amount">' +
- Number(data.total || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) +
- ' <small>$</small></div></div>' +
- '<div class="info-block">' + label + ' · ' + (data.count || 0) + ' ' + tBlock('operations') + '</div>';
+  var segs = (data.segments||[]).map(function(s,i){
+   return {value:Number(s.value||0), color:XCOD_AN_COLORS[i%XCOD_AN_COLORS.length], label:s.label||('#'+(i+1))};
+  });
+  var total = Number(data.total||0);
+  var label = kind === 'expenses' ? tBlock('payout_sum') : tBlock('topup_sum');
+  var html2 = '';
+  if(segs.length){
+   html2 += xcodDonut(segs, '<div class="pa-cr-label">Σ</div><div class="pa-cr-val">'+total.toFixed(0)+'</div>', 190);
+   html2 += xcodLegend(segs.map(function(s){ return {color:s.color,label:s.label,value:Number(s.value).toFixed(2)+' $'}; }));
+  } else {
+   html2 += '<div class="wallet-balance" style="padding:20px 0;"><div class="wallet-amount">' +
+    total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) +
+    ' <small>$</small></div></div>';
+  }
+  html2 += '<div class="info-block">' + label + ' · ' + (data.count || 0) + ' ' + tBlock('operations') + '</div>';
+  box.innerHTML = html2;
  }
  } catch (e) {
  box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
@@ -24384,15 +24625,20 @@ function renderListingsChart(cats) {
 }
 
 async function downloadAnalyticsPdf(kind) {
- var from = document.getElementById('an-from').value;
- var to = document.getElementById('an-to').value;
  try {
  tg.showAlert && tg.showAlert(tBlock('report_building'));
- await apiPost('/api/admin/analytics/report.send', {
- kind: kind,
- from: from,
- to: to
- });
+ var p = window._anPeriod || { mode: 'all' };
+ var payload = { kind: kind };
+ if (p.mode === 'quarter' && p.year && p.quarter) {
+  payload.period = 'quarter';
+  payload.year = p.year;
+  payload.q = p.quarter;
+ } else {
+  payload.period = 'all';
+  payload.from = '2000-01-01';
+  payload.to = '2099-12-31';
+ }
+ await apiPost('/api/admin/analytics/report.send', payload);
  if (tg.showAlert) tg.showAlert(tBlock('report_ready_bot'));
  else alert('Файл готов — проверьте сообщения бота');
  } catch (e) {
@@ -24400,6 +24646,38 @@ async function downloadAnalyticsPdf(kind) {
  else alert(e.message);
  }
 }
+
+async function downloadAnalyticsExcel(kind) {
+ try {
+  if (tg.showAlert) tg.showAlert(tBlock('report_building') || 'Building…');
+  var base = (typeof API_BASE !== 'undefined' ? API_BASE : '').replace(/\/$/,'');
+  var url = base + '/api/admin/analytics/excel?kind=' + encodeURIComponent(kind) + anPeriodQuery();
+  var headers = {};
+  try {
+   if (typeof getAuthHeaders === 'function') headers = getAuthHeaders() || {};
+   else if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+    headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+   }
+  } catch(e){}
+  var r = await fetch(url, {headers: headers, credentials:'omit'});
+  if(!r.ok){
+   var err = 'HTTP '+r.status;
+   try { var j = await r.json(); err = j.error || err; } catch(e){}
+   throw new Error(err);
+  }
+  var blob = await r.blob();
+  var a = document.createElement('a');
+  var href = URL.createObjectURL(blob);
+  a.href = href;
+  a.download = kind + '_' + from + '_' + to + '.xlsx';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(href); }, 2000);
+ } catch (e) {
+  if (tg.showAlert) tg.showAlert(e.message);
+  else alert(e.message);
+ }
+}
+
 
 
 
@@ -26367,6 +26645,42 @@ Object.keys(X).forEach(function(l){if(!I18N[l])I18N[l]={};Object.assign(I18N[l],
 })();
 </script>
 
+
+<script>
+(function(){try{
+var X={
+ru:{analytics_rev:"Оборот и выручка",download_excel:"Скачать Excel",an_gross:"Валовая прибыль",an_operating:"Операционная прибыль (−20%)",an_net_usn:"Чистая прибыль (−15% УСН)"},
+en:{analytics_rev:"Turnover & revenue",download_excel:"Download Excel",an_gross:"Gross profit",an_operating:"Operating profit (−20%)",an_net_usn:"Net profit (−15% STS)"},
+uk:{analytics_rev:"Оборот і виручка",download_excel:"Завантажити Excel",an_gross:"Валовий прибуток",an_operating:"Операційний прибуток (−20%)",an_net_usn:"Чистий прибуток (−15% УСН)"},
+de:{analytics_rev:"Umsatz & Ertrag",download_excel:"Excel herunterladen",an_gross:"Bruttogewinn",an_operating:"Betriebsgewinn (−20%)",an_net_usn:"Nettogewinn (−15% STS)"},
+fr:{analytics_rev:"Chiffre d'affaires",download_excel:"Télécharger Excel",an_gross:"Bénéfice brut",an_operating:"Résultat opérationnel (−20%)",an_net_usn:"Bénéfice net (−15% STS)"},
+es:{analytics_rev:"Volumen e ingresos",download_excel:"Descargar Excel",an_gross:"Beneficio bruto",an_operating:"Beneficio operativo (−20%)",an_net_usn:"Beneficio neto (−15% STS)"},
+it:{analytics_rev:"Fatturato e ricavi",download_excel:"Scarica Excel",an_gross:"Utile lordo",an_operating:"Utile operativo (−20%)",an_net_usn:"Utile netto (−15% STS)"},
+pt:{analytics_rev:"Volume e receita",download_excel:"Baixar Excel",an_gross:"Lucro bruto",an_operating:"Lucro operacional (−20%)",an_net_usn:"Lucro líquido (−15% STS)"},
+"pt-BR":{analytics_rev:"Volume e receita",download_excel:"Baixar Excel",an_gross:"Lucro bruto",an_operating:"Lucro operacional (−20%)",an_net_usn:"Lucro líquido (−15% STS)"},
+tr:{analytics_rev:"Ciro ve gelir",download_excel:"Excel indir",an_gross:"Brüt kâr",an_operating:"Faaliyet kârı (−20%)",an_net_usn:"Net kâr (−15% STS)"},
+id:{analytics_rev:"Omzet & pendapatan",download_excel:"Unduh Excel",an_gross:"Laba kotor",an_operating:"Laba operasi (−20%)",an_net_usn:"Laba bersih (−15% STS)"},
+ar:{analytics_rev:"الدوران والإيرادات",download_excel:"تحميل Excel",an_gross:"الربح الإجمالي",an_operating:"الربح التشغيلي (−20%)",an_net_usn:"صافي الربح (−15%)"},
+zh:{analytics_rev:"营业额与收入",download_excel:"下载 Excel",an_gross:"毛利润",an_operating:"营业利润（−20%）",an_net_usn:"净利润（−15% STS）"},
+ja:{analytics_rev:"売上と収益",download_excel:"Excelをダウンロード",an_gross:"粗利益",an_operating:"営業利益（−20%）",an_net_usn:"純利益（−15% STS）"},
+ko:{analytics_rev:"매출 및 수익",download_excel:"Excel 다운로드",an_gross:"매출총이익",an_operating:"영업이익 (−20%)",an_net_usn:"순이익 (−15% STS)"}
+};
+if(typeof I18N==="object"){
+ Object.keys(X).forEach(function(l){
+  if(!I18N[l]) I18N[l]={};
+  Object.assign(I18N[l], X[l]);
+ });
+}
+}catch(e){}})();
+</script>
+
+
+<script>
+(function(){try{
+var P={ru:"За весь период",en:"All time",uk:"За весь період",de:"Gesamter Zeitraum",fr:"Toute la période",es:"Todo el período",it:"Tutto il periodo",pt:"Todo o período","pt-BR":"Todo o período",tr:"Tüm dönem",id:"Semua periode",ar:"كل الفترة",zh:"全部时间",ja:"全期間",ko:"전체 기간"};
+if(typeof I18N==="object"){Object.keys(P).forEach(function(l){if(!I18N[l])I18N[l]={};I18N[l].period_all=P[l];});}
+}catch(e){}})();
+</script>
 </body>
 <script>
 (function(){try{var M={"ru":"Минимум 0.1$","en":"Minimum 0.1$","de":"Mindestens 0,1$","fr":"Minimum 0,1$","es":"Mínimo 0,1$","zh":"最低 0.1$","uk":"Мінімум 0,1$","it":"Minimo 0,1$","pt":"Mínimo 0,1$","pt-BR":"Mínimo 0,1$","tr":"Minimum 0,1$","id":"Minimum 0,1$","ar":"الحد الأدنى 0.1$","ja":"最小 0.1$","ko":"최소 0.1$"};if(typeof I18N==='object'){Object.keys(M).forEach(function(k){if(!I18N[k])I18N[k]={};I18N[k].min_01=M[k];});}if(typeof applyI18n==='function'){try{applyI18n();}catch(e1){}}}catch(e){}})();
