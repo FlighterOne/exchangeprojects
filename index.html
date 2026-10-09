@@ -723,6 +723,75 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .chat-list-item:active{opacity:.85}
 </style>
 
+
+<style id="topbar-flag-logout-fix">
+/* Language flag always visible in topbar */
+.topbar-right{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+}
+.lang-btn#btn-flag,
+#btn-flag.lang-btn{
+  display:inline-flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-width:36px !important;
+  height:32px !important;
+  padding:0 8px !important;
+  font-size:18px !important;
+  line-height:1 !important;
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif !important;
+  overflow:visible !important;
+  color:inherit !important;
+  background:var(--surface) !important;
+  border:1px solid var(--line) !important;
+  border-radius:8px !important;
+  cursor:pointer !important;
+  box-shadow:var(--shadow);
+}
+
+/* Back + Logout on the SAME horizontal line */
+.menu-back-bar{
+  display:none;
+  flex-direction:row !important;
+  justify-content:space-between !important;
+  align-items:center !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+  margin:0 0 12px !important;
+  min-height:34px !important;
+  pointer-events:none;
+}
+.menu-back-bar.show{
+  display:flex !important;
+}
+.menu-back-bar .menu-back-btn,
+.menu-back-bar .btn-logout{
+  pointer-events:auto !important;
+  align-self:center !important;
+  height:32px !important;
+  line-height:32px !important;
+  margin:0 !important;
+}
+.menu-back-bar .btn-logout{
+  display:none; /* shown only on profile when web session */
+  height:32px !important;
+  line-height:32px !important;
+  padding:0 12px !important;
+  border-radius:10px !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  background:#DC2626 !important;
+  color:#fff !important;
+  border:none !important;
+  white-space:nowrap;
+}
+.profile-logout-row{display:none !important;}
+</style>
+
 </head>
 <body>
 
@@ -753,6 +822,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
   <div class="content">
     <div class="menu-back-bar" id="menu-back-bar" style="display:none">
       <button type="button" class="menu-back-btn" id="btn-menu-back" data-i18n="back">Назад</button>
+      <button type="button" class="btn-logout" id="btn-web-logout" style="display:none" data-i18n="logout">Log out</button>
     </div>
     <div id="screen-main" class="screen active">
       <div class="carousel" id="carousel">
@@ -853,9 +923,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
     </div>
 
     <div id="screen-profile" class="screen">
-      <div class="profile-logout-row">
-        <button type="button" class="btn-logout" id="btn-web-logout" style="display:none" data-i18n="logout">Log out</button>
-      </div>
       <div class="profile-wrap">
           <div class="avatar-lg" id="p-av"><span id="p-av-fb">A</span><img id="p-av-img" style="display:none" alt=""/></div>
           <div class="profile-name" id="p-name">—</div>
@@ -1874,7 +1941,20 @@ function applyTheme(theme,saveLocal){
   document.querySelectorAll(".theme-item").forEach(b=>b.classList.toggle("active",b.getAttribute("data-theme-set")===state.theme));
 }
 function updateThemeTile(){const el=document.getElementById("tile-theme-sub");if(!el)return;el.textContent=state.theme==="auto"?t("theme_auto"):(state.theme==="dark"?t("theme_dark"):t("theme_light"))}
-function updateLangTile(){const meta=LANGS.find(l=>l.code===state.lang)||LANGS[0];document.getElementById("btn-flag").textContent=meta.flag;const sub=document.getElementById("tile-lang-sub");if(sub)sub.textContent=meta.flag+" "+meta.native}
+function updateLangTile(){
+  const meta=LANGS.find(l=>l.code===state.lang)||LANGS[0];
+  const flag=meta&&meta.flag?meta.flag:"🇷🇺";
+  const bf=document.getElementById("btn-flag");
+  if(bf){
+    bf.textContent=flag;
+    bf.style.display="inline-flex";
+    bf.style.visibility="visible";
+    bf.style.opacity="1";
+    bf.setAttribute("aria-label", (meta&&meta.native)||state.lang||"lang");
+  }
+  const sub=document.getElementById("tile-lang-sub");
+  if(sub) sub.textContent=flag+" "+((meta&&meta.native)||"");
+}
 function renderLangList(){
   const box=document.getElementById("lang-list");if(!box)return;
   box.innerHTML=LANGS.map(l=>{
@@ -2275,6 +2355,23 @@ function show(id,push){
       if(content)content.classList.add("has-back");
     }
   }
+  // Logout sits on the same row as Back; only on profile (web session)
+  try{
+    const lb=document.getElementById("btn-web-logout");
+    if(lb){
+      const webOn=!!(typeof loadWebSession==="function" && loadWebSession());
+      if(id==="profile" && webOn){
+        lb.style.display="inline-flex";
+        lb.style.alignItems="center";
+      }else if(id==="profile"){
+        // miniapp without web session — hide logout
+        lb.style.display="none";
+      }else{
+        lb.style.display="none";
+      }
+    }
+  }catch(e){}
+  try{ if(typeof updateLangTile==="function") updateLangTile(); }catch(e){}
   try{applyI18n()}catch(e){}
   if(tg){try{if(id==="main")tg.BackButton.hide();else{tg.BackButton.show();tg.BackButton.onClick(goBack)}}catch(e){}}
 }
