@@ -626,7 +626,76 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 }
 .snip-instr-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px}
 .snip-instr-body{font-size:13px;line-height:1.45;color:var(--text2);white-space:pre-wrap}
-</style></head>
+</style>
+<style id="panel-tickets-ads-visibility-fix">
+/* Panel must scroll; 6 tiles must stay visible */
+#screen-panel.screen.active,
+#screen-panel-analytics.screen.active,
+#screen-panel-mod-tickets.screen.active,
+#screen-panel-support-chat.screen.active{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch;
+}
+.content{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch;
+}
+/* Compact panel tiles so all 6 fit without depending on huge squares */
+#screen-panel .tile-grid,
+#screen-panel #panel-tile-grid{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:10px !important;
+  width:100% !important;
+  margin:0 !important;
+  padding:0 0 16px 0 !important;
+  box-sizing:border-box !important;
+}
+#screen-panel .tile,
+#screen-panel #panel-tile-grid .tile{
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  width:100% !important;
+  min-width:0 !important;
+  aspect-ratio:auto !important;
+  min-height:56px !important;
+  height:auto !important;
+  padding:14px 12px !important;
+  box-sizing:border-box !important;
+}
+#screen-panel .tile[data-panel="mod_tickets"],
+#screen-panel .tile[data-panel="analytics"]{
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+/* Analytics action buttons always visible + scroll */
+#screen-panel-analytics .panel-an-actions{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  width:100% !important;
+  padding-bottom:20px !important;
+}
+#screen-panel-analytics .panel-an-actions .btn,
+#screen-panel-analytics .panel-an-actions .btn.wide{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  width:100% !important;
+  min-height:48px !important;
+}
+#screen-panel-analytics .panel-an-actions .btn[data-pan-an="ads"]{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+</style>
+
+</head>
 <body>
 
 <div id="login-overlay" class="login-overlay" aria-hidden="true">
@@ -1040,13 +1109,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
           <span class="role-badge" id="panel-role">—</span>
         </div>
       </div>
-      <div class="tile-grid">
+      <div class="tile-grid" id="panel-tile-grid">
         <button type="button" class="tile" data-panel="staff"><div class="t-title" data-i18n="staff">Сотрудники</div></button>
         <button type="button" class="tile" data-panel="mod_sell"><div class="t-title" data-i18n="mod_sell">Продажа</div></button>
         <button type="button" class="tile" data-panel="mod_buy"><div class="t-title" data-i18n="mod_buy">Покупка</div></button>
         <button type="button" class="tile" data-panel="mod_tx"><div class="t-title" data-i18n="mod_tx">Транзакции</div></button>
         <button type="button" class="tile" data-panel="mod_tickets"><div class="t-title" data-i18n="mod_tickets">Обращения</div></button>
-        <button type="button" class="tile" style="grid-column:1/-1;aspect-ratio:auto;min-height:72px" data-panel="analytics"><div class="t-title" data-i18n="analytics">Аналитика</div></button>
+        <button type="button" class="tile" data-panel="analytics"><div class="t-title" data-i18n="analytics">Аналитика</div></button>
       </div>
     </div>
 
@@ -1188,7 +1257,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
       </div>
     </div>
 
-    <div 
     <div id="screen-panel-period" class="screen">
       <div class="section-title" data-i18n="an_period">Период</div>
       <div class="list" id="panel-period-list"></div>
