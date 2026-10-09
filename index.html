@@ -1508,9 +1508,16 @@ button.btn.btn-compact,
 
 <style id="xcod-staff-icons">
 .icon-plus-blue{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-right:8px;flex-shrink:0}
-.icon-plus-blue::before{content:"";width:12px;height:12px;background:var(--button,#2ea6ff);clip-path:polygon(40% 0,60% 0,60% 40%,100% 40%,100% 60%,60% 60%,60% 100%,40% 100%,40% 60%,0 60%,0 40%,40% 40%)}
+/* светлая тема — светлый плюс; тёмная — тёмный (не сливается с кнопкой) */
+.icon-plus-blue::before{content:"";width:12px;height:12px;background:#ffffff;clip-path:polygon(40% 0,60% 0,60% 40%,100% 40%,100% 60%,60% 60%,60% 100%,40% 100%,40% 60%,0 60%,0 40%,40% 40%)}
+[data-theme="dark"] .icon-plus-blue::before,
+html.dark .icon-plus-blue::before,
+body.dark .icon-plus-blue::before{background:#111111}
 .icon-apps-blue{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px;width:16px;height:16px;margin-right:8px;flex-shrink:0}
-.icon-apps-blue i{display:block;width:6px;height:6px;border-radius:1px;background:var(--button,#2ea6ff)}
+.icon-apps-blue i{display:block;width:6px;height:6px;border-radius:1px;background:#ffffff}
+[data-theme="dark"] .icon-apps-blue i,
+html.dark .icon-apps-blue i,
+body.dark .icon-apps-blue i{background:#111111}
 .icon-list{display:inline-flex;flex-direction:column;justify-content:center;gap:3px;width:16px;height:14px;margin-right:8px;flex-shrink:0}
 .icon-list i{display:block;height:2px;border-radius:1px;background:var(--button,#2ea6ff)}
 .icon-list i:nth-child(1){width:100%}
@@ -26394,8 +26401,8 @@ function openStaffApps() {
       '<div class="support-tile-title">' + (tBlock('mod_jobs') || 'Заявки на работу') + '</div></button>';
   }
   html += '<button class="support-tile" onclick="openStaffAppsTickets()">' +
-    '<div class="support-tile-icon">💬</div>' +
-    '<div class="support-tile-title">' + (tBlock('mod_tickets') || 'Модерация обращений') + '</div></button>';
+    '<div class="support-tile-icon">⚠️</div>' +
+    '<div class="support-tile-title">' + (tBlock('mod_complaints') || 'Модерация жалоб') + '</div></button>';
   html += '</div>';
   box.innerHTML = html;
   showPage('admin-section');
@@ -26424,14 +26431,14 @@ async function openStaffAppsTickets() {
   try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/apps/moderation'); } catch(e){}
   try {
     var tEl = document.getElementById('admin-section-title');
-    if (tEl) tEl.textContent = (tBlock('mod_tickets') || 'Модерация обращений');
+    if (tEl) tEl.textContent = (tBlock('mod_complaints') || 'Модерация жалоб');
   } catch(e){}
-  window._staffAppsModTab = window._staffAppsModTab || 'tickets';
+  window._staffAppsModTab = window._staffAppsModTab || 'complaints';
   renderStaffAppsModeration();
 }
 
 function renderStaffAppsModeration() {
-  var tab = window._staffAppsModTab || 'tickets';
+  var tab = window._staffAppsModTab || 'complaints';
   var box = document.getElementById('admin-content');
   if (!box) return;
   var html = '';
