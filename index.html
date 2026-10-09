@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
-<title>Advinced Management</title>
+<title>Advinced Management · 20261009-1811</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root,[data-theme="light"]{
@@ -2401,7 +2401,8 @@ async function apiFetch(path,opts,timeoutMs){
   const timer=ctrl?setTimeout(()=>ctrl.abort(),ms):null;
   try{
     opts=opts||{};
-    const headers=Object.assign({},opts.headers||{});
+    opts.cache="no-store";
+    const headers=Object.assign({},opts.headers||{},{"Cache-Control":"no-cache","Pragma":"no-cache"});
 
     // Telegram Mini App: передаём подписанные initData серверу.
     try{
