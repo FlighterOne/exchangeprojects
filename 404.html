@@ -2506,10 +2506,6 @@ button.btn.btn-compact,
  <div class="support-tile-icon">🪪</div>
  <div class="support-tile-title" data-i18n="mod_verify">Модерация верификации</div>
  </button>
- <button class="support-tile" onclick="openAdminSection('complaints')">
- <div class="support-tile-icon">⚠️</div>
- <div class="support-tile-title" data-i18n="mod_complaints">Модерация жалоб</div>
- </button>
 
  <button class="support-tile" id="admin-staff-tile" style="display:none;" onclick="openAdminSection('staff')">
  <div class="support-tile-icon">👥</div>
@@ -20958,7 +20954,8 @@ async function sendSupportMessage() {
 }
 
 async function loadAdminSupportThreads() {
- var box = document.getElementById('admin-content');
+ var box = document.getElementById('staff-apps-mod-body') || document.getElementById('admin-content');
+ if (!box) return;
  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
  try {
  var data = await apiGet('/api/admin/support/threads');
@@ -24316,11 +24313,13 @@ function openAdminSection(section) {
  }
  else if (section === 'complaints') {
  if (role < 3) { tg.showAlert(tBlock('need_intern')); showPage('admin'); return; }
- loadAdminUserComplaints();
+ window._staffAppsModTab = 'complaints';
+ openStaffAppsTickets();
  }
  else if (section === 'tickets') {
  if (role < 3) { tg.showAlert(tBlock('need_intern')); showPage('admin'); return; }
- loadAdminSupportThreads();
+ window._staffAppsModTab = 'tickets';
+ openStaffAppsTickets();
  }
  else if (section === 'staff') {
  if (role < 4) { tg.showAlert(tBlock('need_mod') || tBlock('need_admin')); showPage('admin'); return; }
@@ -25743,7 +25742,7 @@ function updateAdminModTiles() {
     // verification: admin+ (5+)
     if (vTile) vTile.style.display = (role >= 5) ? '' : 'none';
     // complaints: intern+ (3+) — tickets & jobs moved to staff → applications
-    if (cTile) cTile.style.display = (role >= 3) ? '' : 'none';
+    if (cTile) cTile.style.display = 'none'; // moved to staff → apps
     if (tTile) tTile.style.display = 'none';
     if (jTile) jTile.style.display = 'none';
   } catch (e) {}
@@ -25970,7 +25969,7 @@ async function adminDecideVerify(uid, decision) {
   }
 }
 async function loadAdminUserComplaints() {
-  var box = document.getElementById('admin-content') || document.getElementById('admin-section-list');
+  var box = document.getElementById('staff-apps-mod-body') || document.getElementById('admin-content') || document.getElementById('admin-section-list');
   if (!box) return;
   box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   try {
@@ -26422,12 +26421,44 @@ async function openStaffAppsTickets() {
     return;
   }
   setAdminSectionBack(function(){ openStaffApps(); });
-  try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/apps/tickets'); } catch(e){}
+  try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/apps/moderation'); } catch(e){}
   try {
     var tEl = document.getElementById('admin-section-title');
     if (tEl) tEl.textContent = (tBlock('mod_tickets') || 'Модерация обращений');
   } catch(e){}
-  await loadAdminSupportThreads();
+  window._staffAppsModTab = window._staffAppsModTab || 'tickets';
+  renderStaffAppsModeration();
+}
+
+function renderStaffAppsModeration() {
+  var tab = window._staffAppsModTab || 'tickets';
+  var box = document.getElementById('admin-content');
+  if (!box) return;
+  var html = '';
+  html += '<div class="seg-toggle" id="staff-apps-mod-seg" style="grid-template-columns:1fr 1fr;gap:6px;width:100%;box-sizing:border-box;margin-bottom:12px;">';
+  html += '<button type="button" class="' + (tab === 'complaints' ? 'active' : '') + '" onclick="setStaffAppsModTab(\'complaints\')">' +
+    (tBlock('mod_complaints_tab') || tBlock('mod_complaints') || 'Жалобы') + '</button>';
+  html += '<button type="button" class="' + (tab === 'tickets' ? 'active' : '') + '" onclick="setStaffAppsModTab(\'tickets\')">' +
+    (tBlock('mod_tickets_tab') || tBlock('mod_tickets') || 'Обращения') + '</button>';
+  html += '</div>';
+  html += '<div id="staff-apps-mod-body"><div class="loading"><div class="spinner"></div></div></div>';
+  box.innerHTML = html;
+  showPage('admin-section');
+  if (tab === 'complaints') {
+    loadAdminUserComplaints();
+  } else {
+    loadAdminSupportThreads();
+  }
+}
+
+function setStaffAppsModTab(tab) {
+  window._staffAppsModTab = tab || 'tickets';
+  try {
+    if (typeof setRoutePathReplace === 'function') {
+      setRoutePathReplace('admin/staff/apps/moderation/' + (tab === 'complaints' ? 'complaints' : 'tickets'));
+    }
+  } catch(e){}
+  renderStaffAppsModeration();
 }
 
 
@@ -27092,6 +27123,24 @@ var packs={
  apply:{ru:"Применить",en:"Apply",uk:"Застосувати",de:"Anwenden",fr:"Appliquer",es:"Aplicar",it:"Applica",pt:"Aplicar","pt-BR":"Aplicar",tr:"Uygula",id:"Terapkan",ar:"تطبيق",zh:"应用",ja:"適用",ko:"적용"},
  now:{ru:"сейчас",en:"now",uk:"зараз",de:"jetzt",fr:"maintenant",es:"ahora",it:"ora",pt:"agora","pt-BR":"agora",tr:"şimdi",id:"sekarang",ar:"الآن",zh:"现在",ja:"現在",ko:"지금"},
  search:{ru:"Поиск",en:"Search",uk:"Пошук",de:"Suche",fr:"Recherche",es:"Buscar",it:"Cerca",pt:"Pesquisar","pt-BR":"Pesquisar",tr:"Ara",id:"Cari",ar:"بحث",zh:"搜索",ja:"検索",ko:"검색"}
+};
+if(typeof I18N==="object"){
+ Object.keys(packs).forEach(function(k){
+  var pack=packs[k];
+  Object.keys(pack).forEach(function(l){
+   if(!I18N[l]) I18N[l]={};
+   I18N[l][k]=pack[l];
+  });
+ });
+}
+}catch(e){}})();
+</script>
+
+<script>
+(function(){try{
+var packs={
+ mod_complaints_tab:{ru:"Жалобы",en:"Complaints",uk:"Скарги",de:"Beschwerden",fr:"Plaintes",es:"Quejas",it:"Reclami",pt:"Reclamações","pt-BR":"Reclamações",tr:"Şikayetler",id:"Keluhan",ar:"الشكاوى",zh:"投诉",ja:"苦情",ko:"불만"},
+ mod_tickets_tab:{ru:"Обращения",en:"Appeals",uk:"Звернення",de:"Anfragen",fr:"Demandes",es:"Consultas",it:"Richieste",pt:"Pedidos","pt-BR":"Pedidos",tr:"Başvurular",id:"Permohonan",ar:"الطلبات",zh:"申诉",ja:"問い合わせ",ko:"문의"}
 };
 if(typeof I18N==="object"){
  Object.keys(packs).forEach(function(k){
