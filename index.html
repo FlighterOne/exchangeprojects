@@ -2835,6 +2835,7 @@ async function loadPanel(){
     const el=document.getElementById("panel-role");
     if(el) el.textContent="—";
   }
+  try{ if(typeof wirePanelMenus==="function") wirePanelMenus(); }catch(e){}
 }
 
 // ---- Panel submenus ----
@@ -3758,8 +3759,8 @@ async function openPanelAdsAnalytics(){
   body.innerHTML='…';
   state.adsTab=state.adsTab||"stats";
   let h='<div class="seg-toggle" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">';
-  h+='<button type="button" class="btn '+(state.adsTab==="stats"?"":"secondary")+'" id="ads-tab-stats">'+(t("ads_tab_stats")||"Статистика")+'</button>';
-  h+='<button type="button" class="btn '+(state.adsTab==="partners"?"":"secondary")+'" id="ads-tab-partners">'+(t("ads_tab_partners")||"Партнёры")+'</button>';
+  h+='<button type="button" class="btn" style="'+(state.adsTab==="stats"?"":"opacity:.7;background:var(--surface);color:var(--text);border:1px solid var(--line);")+'" id="ads-tab-stats">'+(t("ads_tab_stats")||"Статистика")+'</button>';
+  h+='<button type="button" class="btn" style="'+(state.adsTab==="partners"?"":"opacity:.7;background:var(--surface);color:var(--text);border:1px solid var(--line);")+'" id="ads-tab-partners">'+(t("ads_tab_partners")||"Партнёры")+'</button>';
   h+='</div><div id="ads-body">…</div>';
   body.innerHTML=h;
   const render=async()=>{
