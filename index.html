@@ -1499,6 +1499,12 @@ button.btn.btn-compact,
 .an-period-dropdown button:active{opacity:.8}
 </style>
 
+
+<style id="xcod-an-extra">
+.pa-section-label{font-size:13px;font-weight:700;margin:4px 0 8px;color:var(--text);opacity:.9}
+.pa-total-line{text-align:center;font-size:14px;font-weight:700;margin:6px 0 4px;color:var(--text)}
+.pa-block{margin-bottom:6px}
+</style>
 </head>
 <body>
 
@@ -5228,6 +5234,28 @@ function setRouteHash(hash) {
     if (page === '__create_freelance__') { setRoutePath('create-freelance-listing'); return; }
     var pathKey = PAGE_PATH_MAP[page] || PAGE_PATH_MAP[key] || key;
     if (pathKey) setRoutePath(pathKey);
+  } catch (e) {}
+}
+
+
+function setRoutePathReplace(path) {
+  try {
+    if (!usesPathRouting()) return;
+    if (__pathNavLock || __hashNavLock) return;
+    var p = String(path || '').replace(/^\/+/, '').replace(/\/+$/, '');
+    if (!p) p = 'home';
+    var target = '/' + p;
+    var cur = (location.pathname || '/').replace(/\/+$/, '') || '/';
+    if (cur === target || (cur === '/' && target === '/home')) return;
+    __pathNavLock = true;
+    try {
+      if (history && history.replaceState) {
+        history.replaceState({ spa: true, path: p }, '', target);
+      } else if (history && history.pushState) {
+        history.pushState({ spa: true, path: p }, '', target);
+      }
+    } catch (e1) {}
+    setTimeout(function(){ __pathNavLock = false; }, 30);
   } catch (e) {}
 }
 
@@ -19841,7 +19869,7 @@ function adsStatsHtml(s) {
 
 async function openAdsAnalytics() {
   document.getElementById('admin-section-title').textContent = tBlock('analytics_ads');
-  setAdminSectionBack(function(){ openAdminSection('analytics'); });
+  setAdminSectionBack(function(){ loadAnalyticsMenu(); });
   window._adsAnalyticsTab = 'stats';
   renderAdsAnalytics();
 }
@@ -24237,6 +24265,9 @@ function openAdminSection(section) {
 
  _adminSection = section;
  setAdminSectionBack(function(){ showPage('admin'); });
+ try {
+  if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/' + encodeURIComponent(section));
+ } catch(e){}
  var titles = {
  verification: (typeof tBlock==='function'&&tBlock('mod_verify'))||'Модерация верификации',
  workcenter: tBlock('workcenter'),
@@ -24289,6 +24320,12 @@ function openAdminSection(section) {
 }
 
 function loadAnalyticsMenu() {
+ setAdminSectionBack(function(){ showPage('admin'); });
+ try {
+  var tEl = document.getElementById('admin-section-title');
+  if (tEl) tEl.textContent = (typeof tBlock==='function' && tBlock('analytics')) || 'Аналитика';
+ } catch(e){}
+ try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/analytics'); } catch(e){}
  var box = document.getElementById('admin-content');
  var listingsTile = (userData && userData.role >= 5)
  ? '<button class="support-tile" onclick="openAnalytics(\'listings\')"><div class="support-tile-icon">🥧</div><div class="support-tile-title">' + (tBlock('analytics_list')) + '</div></button>'
@@ -24305,7 +24342,7 @@ function loadAnalyticsMenu() {
 }
 async function openVisitsAnalytics() {
  document.getElementById('admin-section-title').textContent = tBlock('analytics_visits') || 'Аналитика посещений';
- setAdminSectionBack(function(){ openAdminSection('analytics'); });
+ setAdminSectionBack(function(){ loadAnalyticsMenu(); });
  var box = document.getElementById('admin-content');
  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
  try {
@@ -24482,6 +24519,13 @@ async function openAnalytics(kind) {
  return;
  }
 
+ // назад → меню выбора аналитики (не в панель)
+ setAdminSectionBack(function(){ loadAnalyticsMenu(); });
+ // URL без накопления истории степов
+ try {
+  if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/analytics/' + encodeURIComponent(kind));
+ } catch(e){}
+
  var titles = { expenses: tBlock('analytics_exp'), income: tBlock('analytics_inc'), revenue: (tBlock('analytics_rev')||'Оборот и выручка'), listings: tBlock('analytics_list') };
  document.getElementById('admin-section-title').textContent = titles[kind] || 'Аналитика';
  window._anCurrentKind = kind;
@@ -24562,15 +24606,31 @@ async function runAnalytics(kind) {
  } else if (kind === 'revenue') {
   var inc = Number(data.income_total||0), exp = Number(data.expense_total||0);
   var cr = Number(data.cr||0);
+  var netAmt = Number(data.revenue_net != null ? data.revenue_net : (inc - exp));
   var main = [
    {value:inc,color:'#34c759',label:(tBlock('analytics_inc')||'Доходы')},
    {value:exp,color:'#ff3b30',label:(tBlock('analytics_exp')||'Расходы')}
   ];
-  var html = xcodDonut(main, '<div class="pa-cr-label">CR</div><div class="pa-cr-val">~ '+cr.toFixed(1)+'%</div>', 190);
+  var rev = [
+   {value:inc,color:'#34c759',label:(tBlock('an_topups')||'Пополнения')},
+   {value:exp,color:'#ff9500',label:(tBlock('an_withdrawals')||'Выводы')}
+  ];
+  var html = '<div class="pa-block">';
+  html += xcodDonut(main, '<div class="pa-cr-label">CR</div><div class="pa-cr-val">~ '+cr.toFixed(1).replace('.',',')+'%</div>', 190);
   html += xcodLegend([
    {color:'#34c759',label:(tBlock('analytics_inc')||'Доходы'),value:inc.toFixed(2)+' $'},
    {color:'#ff3b30',label:(tBlock('analytics_exp')||'Расходы'),value:exp.toFixed(2)+' $'}
   ]);
+  html += '</div>';
+  html += '<div class="pa-block" style="margin-top:8px">';
+  html += '<div class="pa-section-label">'+(tBlock('an_rev_detail')||'Пополнения и выводы')+'</div>';
+  html += xcodDonut(rev, '<div class="pa-cr-label">'+(tBlock('an_net')||'Итого')+'</div><div class="pa-cr-val" style="font-size:16px">'+netAmt.toFixed(0)+'</div>', 150);
+  html += '<div class="pa-total-line">'+netAmt.toFixed(2)+' $</div>';
+  html += xcodLegend([
+   {color:'#34c759',label:(tBlock('an_topups')||'Пополнения'),value:inc.toFixed(2)+' $'},
+   {color:'#ff9500',label:(tBlock('an_withdrawals')||'Выводы'),value:exp.toFixed(2)+' $'}
+  ]);
+  html += '</div>';
   html += '<div class="pa-meta">';
   html += '<div class="pa-meta-row"><span>'+(tBlock('an_gross')||'Валовая прибыль')+'</span><b>'+Number(data.gross_profit||0).toFixed(2)+' $</b></div>';
   html += '<div class="pa-meta-row"><span>'+(tBlock('an_operating')||'Операционная прибыль (−20%)')+'</span><b>'+Number(data.operating_profit||0).toFixed(2)+' $</b></div>';
@@ -24585,8 +24645,11 @@ async function runAnalytics(kind) {
   var label = kind === 'expenses' ? tBlock('payout_sum') : tBlock('topup_sum');
   var html2 = '';
   if(segs.length){
+   html2 += '<div class="pa-block">';
    html2 += xcodDonut(segs, '<div class="pa-cr-label">Σ</div><div class="pa-cr-val">'+total.toFixed(0)+'</div>', 190);
+   html2 += '<div class="pa-total-line">'+total.toFixed(2)+' $</div>';
    html2 += xcodLegend(segs.map(function(s){ return {color:s.color,label:s.label,value:Number(s.value).toFixed(2)+' $'}; }));
+   html2 += '</div>';
   } else {
    html2 += '<div class="wallet-balance" style="padding:20px 0;"><div class="wallet-amount">' +
     total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) +
@@ -26679,6 +26742,26 @@ if(typeof I18N==="object"){
 (function(){try{
 var P={ru:"За весь период",en:"All time",uk:"За весь період",de:"Gesamter Zeitraum",fr:"Toute la période",es:"Todo el período",it:"Tutto il periodo",pt:"Todo o período","pt-BR":"Todo o período",tr:"Tüm dönem",id:"Semua periode",ar:"كل الفترة",zh:"全部时间",ja:"全期間",ko:"전체 기간"};
 if(typeof I18N==="object"){Object.keys(P).forEach(function(l){if(!I18N[l])I18N[l]={};I18N[l].period_all=P[l];});}
+}catch(e){}})();
+</script>
+
+<script>
+(function(){try{
+var keys={
+ an_rev_detail:{ru:"Пополнения и выводы",en:"Topups & withdrawals",uk:"Поповнення та виводи",de:"Aufladungen & Auszahlungen",fr:"Recharges et retraits",es:"Recargas y retiros",it:"Ricariche e prelievi",pt:"Recargas e saques","pt-BR":"Recargas e saques",tr:"Yüklemeler ve çekimler",id:"Top-up & penarikan",ar:"الإيداعات والسحوبات",zh:"充值与提现",ja:"入金と出金",ko:"충전 및 출금"},
+ an_topups:{ru:"Пополнения",en:"Topups",uk:"Поповнення",de:"Aufladungen",fr:"Recharges",es:"Recargas",it:"Ricariche",pt:"Recargas","pt-BR":"Recargas",tr:"Yüklemeler",id:"Top-up",ar:"الإيداعات",zh:"充值",ja:"入金",ko:"충전"},
+ an_withdrawals:{ru:"Выводы",en:"Withdrawals",uk:"Виводи",de:"Auszahlungen",fr:"Retraits",es:"Retiros",it:"Prelievi",pt:"Saques","pt-BR":"Saques",tr:"Çekimler",id:"Penarikan",ar:"السحوبات",zh:"提现",ja:"出金",ko:"출금"},
+ an_net:{ru:"Итого",en:"Net",uk:"Разом",de:"Netto",fr:"Net",es:"Neto",it:"Netto",pt:"Líquido","pt-BR":"Líquido",tr:"Net",id:"Bersih",ar:"الصافي",zh:"合计",ja:"合計",ko:"합계"}
+};
+if(typeof I18N==="object"){
+ Object.keys(keys).forEach(function(k){
+  var pack=keys[k];
+  Object.keys(pack).forEach(function(l){
+   if(!I18N[l]) I18N[l]={};
+   I18N[l][k]=pack[l];
+  });
+ });
+}
 }catch(e){}})();
 </script>
 </body>
