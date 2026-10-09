@@ -3327,6 +3327,9 @@ async function continueAfterAuth() {
 function apiFetch(path, options) {
  options = options || {};
  var ms = options.timeout || 10000;
+ if (typeof API_URL === 'undefined' || !API_URL) {
+   return Promise.reject(new Error('API_URL is not configured'));
+ }
  var initData = '';
  try {
    initData = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData)
@@ -24759,7 +24762,7 @@ async function downloadAnalyticsPdf(kind) {
 async function downloadAnalyticsExcel(kind) {
  try {
   if (tg.showAlert) tg.showAlert(tBlock('report_building') || 'Building…');
-  var base = (typeof API_BASE !== 'undefined' ? API_BASE : '').replace(/\/$/,'');
+  var base = (typeof API_URL !== 'undefined' ? API_URL : (typeof API_BASE !== 'undefined' ? API_BASE : '')).replace(/\/$/,'');
   var url = base + '/api/admin/analytics/excel?kind=' + encodeURIComponent(kind) + anPeriodQuery();
   var headers = {};
   try {
