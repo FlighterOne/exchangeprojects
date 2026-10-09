@@ -1505,6 +1505,28 @@ button.btn.btn-compact,
 .pa-total-line{text-align:center;font-size:14px;font-weight:700;margin:6px 0 4px;color:var(--text)}
 .pa-block{margin-bottom:6px}
 </style>
+
+<style id="xcod-staff-icons">
+.icon-plus-blue{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-right:8px;flex-shrink:0}
+.icon-plus-blue::before{content:"";width:12px;height:12px;background:var(--button,#2ea6ff);clip-path:polygon(40% 0,60% 0,60% 40%,100% 40%,100% 60%,60% 60%,60% 100%,40% 100%,40% 60%,0 60%,0 40%,40% 40%)}
+.icon-apps-blue{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px;width:16px;height:16px;margin-right:8px;flex-shrink:0}
+.icon-apps-blue i{display:block;width:6px;height:6px;border-radius:1px;background:var(--button,#2ea6ff)}
+.icon-list{display:inline-flex;flex-direction:column;justify-content:center;gap:3px;width:16px;height:14px;margin-right:8px;flex-shrink:0}
+.icon-list i{display:block;height:2px;border-radius:1px;background:var(--button,#2ea6ff)}
+.icon-list i:nth-child(1){width:100%}
+.icon-list i:nth-child(2){width:80%}
+.icon-list i:nth-child(3){width:60%}
+.staff-bottom-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.staff-bottom-actions .btn{display:inline-flex;align-items:center;justify-content:center}
+.staff-more-btn{
+  width:100%;margin-top:10px;padding:12px 14px;border-radius:12px;
+  border:1px solid rgba(128,128,128,0.25);background:var(--secondary-bg);
+  color:var(--text);font-size:14px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+.staff-more-btn:active{opacity:.8}
+#staff-search-input{width:100%;box-sizing:border-box}
+</style>
 </head>
 <body>
 
@@ -2487,14 +2509,6 @@ button.btn.btn-compact,
  <button class="support-tile" onclick="openAdminSection('complaints')">
  <div class="support-tile-icon">⚠️</div>
  <div class="support-tile-title" data-i18n="mod_complaints">Модерация жалоб</div>
- </button>
- <button class="support-tile" onclick="openAdminSection('tickets')">
- <div class="support-tile-icon">💬</div>
- <div class="support-tile-title" data-i18n="mod_tickets">Модерация обращений</div>
- </button>
- <button class="support-tile" id="admin-jobs-tile" style="display:none;" onclick="openAdminSection('jobs')">
- <div class="support-tile-icon">💼</div>
- <div class="support-tile-title" data-i18n="mod_jobs">Job applications</div>
  </button>
 
  <button class="support-tile" id="admin-staff-tile" style="display:none;" onclick="openAdminSection('staff')">
@@ -4917,11 +4931,10 @@ function renderMain() {
  if (compTile) compTile.style.display = (userData.role >= 3) ? '' : 'none';
  var anTile = document.querySelector("button[onclick*=\"openAdminSection('analytics')\"]");
  if (anTile) anTile.style.display = (userData.role >= 3) ? '' : 'none';
- if (userData.role >= 5) {
+ // staff management + applications: moderator+
+ if (userData.role >= 4) {
  var st = document.getElementById('admin-staff-tile');
  if (st) st.style.display = 'flex';
- var jt = document.getElementById('admin-jobs-tile');
- if (jt) jt.style.display = 'flex';
  }
 }
 
@@ -24310,7 +24323,7 @@ function openAdminSection(section) {
  loadAdminSupportThreads();
  }
  else if (section === 'staff') {
- if (role < 5) { tg.showAlert(tBlock('need_admin')); showPage('admin'); return; }
+ if (role < 4) { tg.showAlert(tBlock('need_mod') || tBlock('need_admin')); showPage('admin'); return; }
  loadAdminStaff();
  }
  else if (section === 'analytics') {
@@ -25726,11 +25739,13 @@ function updateAdminModTiles() {
     var vTile = document.querySelector("button[onclick*=\"openAdminSection('verification')\"]");
     var cTile = document.querySelector("button[onclick*=\"openAdminSection('complaints')\"]");
     var tTile = document.querySelector("button[onclick*=\"openAdminSection('tickets')\"]");
+    var jTile = document.getElementById('admin-jobs-tile');
     // verification: admin+ (5+)
     if (vTile) vTile.style.display = (role >= 5) ? '' : 'none';
-    // complaints & tickets: intern+ (3+)
+    // complaints: intern+ (3+) — tickets & jobs moved to staff → applications
     if (cTile) cTile.style.display = (role >= 3) ? '' : 'none';
-    if (tTile) tTile.style.display = (role >= 3) ? '' : 'none';
+    if (tTile) tTile.style.display = 'none';
+    if (jTile) jTile.style.display = 'none';
   } catch (e) {}
 }
 
@@ -26258,20 +26273,22 @@ function renderStaffMainList() {
   } else {
     html = top.map(staffItemHtml).join('');
     if (staff.length >= 5) {
-      html += '<button type="button" class="btn btn-secondary" style="width:100%;margin-top:10px;" onclick="openStaffAllList()">' +
-        (tBlock('staff_show_all') || 'Все сотрудники') + ' (' + staff.length + ')</button>';
+      html += '<button type="button" class="staff-more-btn" onclick="openStaffAllList()">' +
+        '<span class="icon-list" aria-hidden="true"><i></i><i></i><i></i></span>' +
+        '<span>' + (tBlock('staff_show_all') || 'Все сотрудники') + ' (' + staff.length + ')</span></button>';
     }
   }
-  // bottom actions
-  html += '<div style="display:flex;gap:8px;margin-top:14px;">';
+  // bottom actions — same drawn icons as Advinced traffic project
   if (userData && userData.role >= 4) {
-    html += '<button type="button" class="btn" style="flex:1;" onclick="openStaffAdd()">' +
-      '<span style="color:var(--button);font-weight:700;margin-right:4px;">+</span>' +
-      (tBlock('staff_add') || tBlock('add_staff') || 'Добавить') + '</button>';
-    html += '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="openStaffApps()">' +
-      (tBlock('staff_apps') || 'Заявки') + '</button>';
+    html += '<div class="staff-bottom-actions">';
+    html += '<button type="button" class="btn" onclick="openStaffAdd()">' +
+      '<span class="icon-plus-blue" aria-hidden="true"></span>' +
+      '<span>' + (tBlock('staff_add') || tBlock('add_staff') || 'Добавить') + '</span></button>';
+    html += '<button type="button" class="btn btn-secondary" onclick="openStaffApps()">' +
+      '<span class="icon-apps-blue" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' +
+      '<span>' + (tBlock('staff_apps') || 'Заявки') + '</span></button>';
+    html += '</div>';
   }
-  html += '</div>';
   box.innerHTML = html;
   bindProfileLinks(box);
 }
@@ -26280,10 +26297,14 @@ function openStaffAllList() {
   window._staffListMode = 'all';
   setAdminSectionBack(function(){ loadAdminStaff(); });
   try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/all'); } catch(e){}
+  try {
+    var tEl = document.getElementById('admin-section-title');
+    if (tEl) tEl.textContent = (tBlock('staff_show_all') || 'Все сотрудники');
+  } catch(e){}
   var box = document.getElementById('admin-content');
-  var html = '<div class="form-group" style="margin-bottom:10px;">' +
+  var html = '<div class="form-group" style="margin:0 0 10px;">' +
     '<input class="form-input" type="text" id="staff-search-input" placeholder="' + (tBlock('search') || 'Поиск') + '" ' +
-    'oninput="renderStaffAllList()">' +
+    'oninput="renderStaffAllList()" autocomplete="off">' +
     '</div><div id="staff-all-list"></div>';
   box.innerHTML = html;
   renderStaffAllList();
@@ -26359,8 +26380,54 @@ function openStaffApps() {
     try { tg.showAlert(tBlock('need_mod') || 'У вас недостаточно прав для этой функции'); } catch(e){}
     return;
   }
-  // reuse jobs moderation
-  openAdminSection('jobs');
+  setAdminSectionBack(function(){ loadAdminStaff(); });
+  try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/apps'); } catch(e){}
+  try {
+    var tEl = document.getElementById('admin-section-title');
+    if (tEl) tEl.textContent = (tBlock('staff_apps') || 'Заявки');
+  } catch(e){}
+  var box = document.getElementById('admin-content');
+  var html = '<div class="support-grid">';
+  // job applications — admin+ (role 5) historically, keep 5 for jobs, 4+ for tickets
+  if (userData.role >= 5) {
+    html += '<button class="support-tile" onclick="openStaffAppsJobs()">' +
+      '<div class="support-tile-icon">💼</div>' +
+      '<div class="support-tile-title">' + (tBlock('mod_jobs') || 'Заявки на работу') + '</div></button>';
+  }
+  html += '<button class="support-tile" onclick="openStaffAppsTickets()">' +
+    '<div class="support-tile-icon">💬</div>' +
+    '<div class="support-tile-title">' + (tBlock('mod_tickets') || 'Модерация обращений') + '</div></button>';
+  html += '</div>';
+  box.innerHTML = html;
+  showPage('admin-section');
+}
+
+async function openStaffAppsJobs() {
+  if (!userData || userData.role < 5) {
+    try { tg.showAlert(tBlock('need_admin') || 'Нужны права администратора'); } catch(e){}
+    return;
+  }
+  setAdminSectionBack(function(){ openStaffApps(); });
+  try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/apps/jobs'); } catch(e){}
+  try {
+    var tEl = document.getElementById('admin-section-title');
+    if (tEl) tEl.textContent = (tBlock('mod_jobs') || 'Заявки на работу');
+  } catch(e){}
+  await loadAdminJobs();
+}
+
+async function openStaffAppsTickets() {
+  if (!userData || userData.role < 3) {
+    try { tg.showAlert(tBlock('need_intern') || 'Недостаточно прав'); } catch(e){}
+    return;
+  }
+  setAdminSectionBack(function(){ openStaffApps(); });
+  try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/apps/tickets'); } catch(e){}
+  try {
+    var tEl = document.getElementById('admin-section-title');
+    if (tEl) tEl.textContent = (tBlock('mod_tickets') || 'Модерация обращений');
+  } catch(e){}
+  await loadAdminSupportThreads();
 }
 
 
