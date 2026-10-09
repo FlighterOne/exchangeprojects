@@ -24635,6 +24635,7 @@ async function runAnalytics(kind) {
   html += '<div class="pa-meta-row"><span>'+(tBlock('an_gross')||'Валовая прибыль')+'</span><b>'+Number(data.gross_profit||0).toFixed(2)+' $</b></div>';
   html += '<div class="pa-meta-row"><span>'+(tBlock('an_operating')||'Операционная прибыль (−20%)')+'</span><b>'+Number(data.operating_profit||0).toFixed(2)+' $</b></div>';
   html += '<div class="pa-meta-row"><span>'+(tBlock('an_net_usn')||'Чистая прибыль (−15% УСН)')+'</span><b>'+Number(data.net_profit||0).toFixed(2)+' $</b></div>';
+  html += '<div class="pa-meta-row" style="margin-top:8px;border-top:1px solid rgba(128,128,128,0.2);padding-top:8px;"><span style="font-weight:700;">'+(tBlock('an_reserve20')||'Баланс 20% отчислений')+'</span><b>'+Number(data.reserve_20||0).toFixed(2)+' $</b></div>';
   html += '</div>';
   box.innerHTML = html;
  } else {
@@ -24650,6 +24651,28 @@ async function runAnalytics(kind) {
    html2 += '<div class="pa-total-line">'+total.toFixed(2)+' $</div>';
    html2 += xcodLegend(segs.map(function(s){ return {color:s.color,label:s.label,value:Number(s.value).toFixed(2)+' $'}; }));
    html2 += '</div>';
+   // method summary
+   if (data.summary) {
+     html2 += '<div class="pa-meta" style="margin-top:8px;">';
+     if (kind === 'income') {
+       html2 += '<div class="pa-meta-row"><span>СБП</span><b>'+Number(data.summary.sbp||0).toFixed(2)+' $</b></div>';
+       html2 += '<div class="pa-meta-row"><span>Криптовалюта</span><b>'+Number(data.summary.crypto||0).toFixed(2)+' $</b></div>';
+       html2 += '<div class="pa-meta-row"><span>Telegram Stars</span><b>'+Number(data.summary.stars||0).toFixed(2)+' $</b></div>';
+     } else {
+       html2 += '<div class="pa-meta-row"><span>СБП</span><b>'+Number(data.summary.sbp||0).toFixed(2)+' $</b></div>';
+       html2 += '<div class="pa-meta-row"><span>Карта</span><b>'+Number(data.summary.card||0).toFixed(2)+' $</b></div>';
+       html2 += '<div class="pa-meta-row"><span>Криптовалюта</span><b>'+Number(data.summary.crypto||0).toFixed(2)+' $</b></div>';
+     }
+     html2 += '</div>';
+   }
+   // all-time quarters list
+   if (data.quarters_summary && data.quarters_summary.length) {
+     html2 += '<div class="pa-section-label" style="margin-top:12px;">'+(tBlock('an_by_quarters')||'По кварталам')+'</div>';
+     data.quarters_summary.forEach(function(q){
+       var val = kind==='expenses' ? q.expenses : q.income;
+       html2 += '<div class="pa-meta-row"><span>'+String(q.label||'').replace(/</g,'&lt;')+'</span><b>'+Number(val||0).toFixed(2)+' $</b></div>';
+     });
+   }
   } else {
    html2 += '<div class="wallet-balance" style="padding:20px 0;"><div class="wallet-amount">' +
     total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) +
@@ -26192,36 +26215,154 @@ async function setJobStatus(id, status) {
  } catch (e) { tg.showAlert(e.message); }
 }
 
+
 async function loadAdminStaff() {
- var box = document.getElementById('admin-content');
- box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
- try {
- var data = await apiGet('/api/admin/staff');
- var staff = data.staff || [];
- _adminCache.staff = staff;
- var html = '';
- if (userData.role >= 5) {
- html += '<button class="btn" style="margin-bottom:12px;" onclick="showPage(\'admin-add-staff\')">' + tBlock('add_staff') + '</button>';
- }
- if (!staff.length) {
- html += '<div class="empty">' + tBlock('no_staff') + '</div>';
- box.innerHTML = html;
- return;
- }
- html += staff.map(function(s) {
- var nick = s.username ? ('@' + s.username) : ((s.first_name || '') + ' ' + (s.last_name || '')).trim() || ('ID ' + s.user_id);
- nick = String(nick).replace(/</g, '&lt;');
- return '<div class="list-item" style="cursor:pointer;" onclick="openStaffDetail(' + s.user_id + ')">' +
- '<div class="top"><div class="title"><span class="seller-link" data-uid="' + s.user_id + '" onclick="return goProfile(' + s.user_id + ', event)">' + nick + '</span></div>' +
- '<span class="badge badge-processing">' + (roleName(s.role) || "").replace(/</g,'&lt;') + '</span></div>' +
- '<div class="subtitle">ID: ' + s.user_id + ' · ' + tBlock('balance_title') + ': ' + s.balance + '$</div></div>';
- }).join('');
- box.innerHTML = html;
- bindProfileLinks(box);
- } catch (e) {
- box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + e.message + '</div>';
- }
+  setAdminSectionBack(function(){ showPage('admin'); });
+  try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff'); } catch(e){}
+  var box = document.getElementById('admin-content');
+  box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var data = await apiGet('/api/admin/staff');
+    var staff = (data.staff || []).filter(function(s){ return Number(s.role || 0) > 0; });
+    staff.sort(function(a,b){ return Number(b.role||0) - Number(a.role||0) || Number(a.user_id||0) - Number(b.user_id||0); });
+    _adminCache.staff = staff;
+    window._staffListMode = 'main';
+    renderStaffMainList();
+  } catch (e) {
+    box.innerHTML = '<div class="empty"><div class="icon">❌</div>' + (e.message || e) + '</div>';
+  }
 }
+
+function staffItemHtml(s) {
+  var nick = s.username ? ('@' + s.username) : ((s.first_name || '') + ' ' + (s.last_name || '')).trim() || ('ID ' + s.user_id);
+  nick = String(nick).replace(/</g, '&lt;');
+  var star = (window.MANDATORY_USERS && window.MANDATORY_USERS.indexOf(Number(s.user_id)) >= 0)
+    ? '<span style="color:var(--button);margin-right:4px;">★</span>' : '';
+  var uname = s.username
+    ? ('<span class="seller-link" data-uid="' + s.user_id + '" onclick="return goProfile(' + s.user_id + ', event)">@' + String(s.username).replace(/</g,'&lt;') + '</span>')
+    : ('ID ' + s.user_id);
+  return '<div class="list-item" style="cursor:pointer;" onclick="openStaffDetail(' + s.user_id + ')">' +
+    '<div class="top"><div class="title">' + star + uname + '</div>' +
+    '<span class="badge badge-processing">' + (roleName(s.role) || '').replace(/</g,'&lt;') + '</span></div>' +
+    '<div class="subtitle">ID: ' + s.user_id + ' · ' + tBlock('balance_title') + ': ' + (s.balance != null ? s.balance : '0') + '$</div></div>';
+}
+
+function renderStaffMainList() {
+  var box = document.getElementById('admin-content');
+  if (!box) return;
+  var staff = _adminCache.staff || [];
+  var top = staff.slice(0, 5);
+  var html = '';
+  if (!staff.length) {
+    html = '<div class="empty">' + (tBlock('no_staff') || 'Нет сотрудников') + '</div>';
+  } else {
+    html = top.map(staffItemHtml).join('');
+    if (staff.length >= 5) {
+      html += '<button type="button" class="btn btn-secondary" style="width:100%;margin-top:10px;" onclick="openStaffAllList()">' +
+        (tBlock('staff_show_all') || 'Все сотрудники') + ' (' + staff.length + ')</button>';
+    }
+  }
+  // bottom actions
+  html += '<div style="display:flex;gap:8px;margin-top:14px;">';
+  if (userData && userData.role >= 4) {
+    html += '<button type="button" class="btn" style="flex:1;" onclick="openStaffAdd()">' +
+      '<span style="color:var(--button);font-weight:700;margin-right:4px;">+</span>' +
+      (tBlock('staff_add') || tBlock('add_staff') || 'Добавить') + '</button>';
+    html += '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="openStaffApps()">' +
+      (tBlock('staff_apps') || 'Заявки') + '</button>';
+  }
+  html += '</div>';
+  box.innerHTML = html;
+  bindProfileLinks(box);
+}
+
+function openStaffAllList() {
+  window._staffListMode = 'all';
+  setAdminSectionBack(function(){ loadAdminStaff(); });
+  try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/all'); } catch(e){}
+  var box = document.getElementById('admin-content');
+  var html = '<div class="form-group" style="margin-bottom:10px;">' +
+    '<input class="form-input" type="text" id="staff-search-input" placeholder="' + (tBlock('search') || 'Поиск') + '" ' +
+    'oninput="renderStaffAllList()">' +
+    '</div><div id="staff-all-list"></div>';
+  box.innerHTML = html;
+  renderStaffAllList();
+}
+
+function renderStaffAllList() {
+  var box = document.getElementById('staff-all-list');
+  if (!box) return;
+  var q = ((document.getElementById('staff-search-input') || {}).value || '').trim().toLowerCase();
+  var staff = (_adminCache.staff || []).slice();
+  if (q) {
+    staff = staff.filter(function(s) {
+      var id = String(s.user_id || '');
+      var un = String(s.username || '').toLowerCase();
+      var fn = String(s.first_name || '').toLowerCase();
+      return id.indexOf(q) >= 0 || un.indexOf(q) >= 0 || fn.indexOf(q) >= 0 || ('@' + un).indexOf(q) >= 0;
+    });
+  }
+  if (!staff.length) {
+    box.innerHTML = '<div class="empty">' + (q ? (tBlock('staff_not_found') || 'Пользователь не найден') : (tBlock('no_staff') || 'Нет сотрудников')) + '</div>';
+    return;
+  }
+  box.innerHTML = staff.map(staffItemHtml).join('');
+  bindProfileLinks(box);
+}
+
+function openStaffAdd() {
+  if (!userData || userData.role < 4) {
+    try { tg.showAlert(tBlock('need_mod') || 'У вас недостаточно прав для этой функции'); } catch(e){}
+    return;
+  }
+  setAdminSectionBack(function(){ loadAdminStaff(); });
+  try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/add'); } catch(e){}
+  var box = document.getElementById('admin-content');
+  box.innerHTML =
+    '<div class="form-group"><label class="form-label">ID</label>' +
+    '<input class="form-input" type="number" id="staff-add-id" placeholder="ID" inputmode="numeric">' +
+    '<div id="staff-add-err" style="color:#ff3b30;font-size:12px;margin-top:4px;display:none;"></div></div>' +
+    '<button type="button" class="btn" onclick="staffSearchUser()">' + (tBlock('search') || 'Найти') + '</button>' +
+    '<div id="staff-add-result" style="margin-top:12px;"></div>';
+}
+
+async function staffSearchUser() {
+  var el = document.getElementById('staff-add-id');
+  var err = document.getElementById('staff-add-err');
+  var res = document.getElementById('staff-add-result');
+  var id = parseInt((el && el.value) || '', 10);
+  if (err) { err.style.display = 'none'; err.textContent = ''; }
+  if (!id || id < 1) {
+    if (err) { err.textContent = (tBlock('staff_enter_id') || 'Введите числовой ID'); err.style.display = 'block'; }
+    return;
+  }
+  res.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var data = await apiGet('/api/admin/users/' + id);
+    var u = data.user || data;
+    if (!u || !u.user_id && !u.id) {
+      res.innerHTML = '<div class="empty">' + (tBlock('staff_not_found') || 'Пользователь не найден') + '</div>';
+      return;
+    }
+    u.user_id = u.user_id || u.id;
+    res.innerHTML = staffItemHtml(u);
+    // override click to assign mode
+    res.querySelector('.list-item').onclick = function() { openStaffDetail(u.user_id, { assign: true, user: u }); };
+    bindProfileLinks(res);
+  } catch (e) {
+    res.innerHTML = '<div class="empty">' + (tBlock('staff_not_found') || 'Пользователь не найден') + '</div>';
+  }
+}
+
+function openStaffApps() {
+  if (!userData || userData.role < 4) {
+    try { tg.showAlert(tBlock('need_mod') || 'У вас недостаточно прав для этой функции'); } catch(e){}
+    return;
+  }
+  // reuse jobs moderation
+  openAdminSection('jobs');
+}
+
 
 
 async function adminStaffLeave(uid, kind) {
@@ -26241,55 +26382,154 @@ async function adminStaffLeave(uid, kind) {
  }
 }
 
-function openStaffDetail(uid) {
- if (userData.role < 5) {
- tg.showAlert(tBlock('need_admin'));
- return;
+
+function openStaffDetail(uid, opts) {
+ opts = opts || {};
+ if (userData.role < 4) {
+  try { tg.showAlert(tBlock('need_mod') || 'У вас недостаточно прав для этой функции'); } catch(e){}
+  return;
  }
- var s = (_adminCache.staff || []).find(function(x){ return x.user_id === uid; });
- if (!s) { tg.showAlert(tBlock('staff_nf')); return; }
+ var s = opts.user || (_adminCache.staff || []).find(function(x){ return Number(x.user_id) === Number(uid); });
+ if (!s) {
+  // try fetch
+  apiGet('/api/admin/users/' + uid).then(function(data){
+    var u = data.user || data;
+    if (!u || !(u.user_id || u.id)) { try { tg.showAlert(tBlock('staff_not_found')||'Пользователь не найден'); } catch(e){} return; }
+    u.user_id = u.user_id || u.id;
+    openStaffDetail(u.user_id, { user: u, assign: opts.assign });
+  }).catch(function(){ try { tg.showAlert(tBlock('staff_not_found')||'Пользователь не найден'); } catch(e){} });
+  return;
+ }
+ s.user_id = s.user_id || s.id;
  window._currentStaff = s;
+ setAdminSectionBack(function(){
+  if (window._staffListMode === 'all') openStaffAllList();
+  else loadAdminStaff();
+ });
+ try { if (typeof setRoutePathReplace === 'function') setRoutePathReplace('admin/staff/' + s.user_id); } catch(e){}
+
  var name = s.username ? ('@' + s.username) : (s.first_name || ('ID ' + s.user_id));
- var titleEl = document.getElementById('staff-detail-title');
+ var titleEl = document.getElementById('admin-section-title');
  if (titleEl) titleEl.textContent = name;
- var roles = [
- { id: 0, name: tBlock('role_user') },
- { id: 1, name: tBlock('role_partner') },
- { id: 2, name: tBlock('role_corp') },
- { id: 3, name: tBlock('role_intern') },
- { id: 4, name: tBlock('role_mod') },
- { id: 5, name: tBlock('role_admin') },
- { id: 6, name: tBlock('role_owner') }
- ];
- var roleBtns = roles.filter(function(r){
- return r.id !== s.role && r.id <= userData.role && (r.id < 6 || userData.role >= 6);
- }).map(function(r) {
- return '<button class="btn btn-secondary" style="margin-bottom:6px;" onclick="adminSetStaffRole(' + s.user_id + ', ' + r.id + ')">' + r.name + '</button>';
- }).join('');
+
+ var myRole = Number(userData.role || 0);
+ var targetRole = Number(s.role || 0);
+ var isMandatory = (window.MANDATORY_USERS || []).indexOf(Number(s.user_id)) >= 0;
 
  var nickHtml = s.username
- ? ('<span class="seller-link" data-uid="' + s.user_id + '" onclick="return goProfile(' + s.user_id + ', event)">@' + String(s.username).replace(/</g,'&lt;') + '</span>')
- : '—';
+  ? ('<span class="seller-link" data-uid="' + s.user_id + '" onclick="return goProfile(' + s.user_id + ', event)">@' + String(s.username).replace(/</g,'&lt;') + '</span>')
+  : ('ID ' + s.user_id);
+
+ var box = document.getElementById('admin-content');
  var html = '<div class="info-block">' +
- '<b>' + tBlock('name') + ':</b> ' + (s.first_name || '—') + '<br>' +
- '<b>' + tBlock('username') + ':</b> ' + nickHtml + '<br>' +
- '<b>ID:</b> ' + s.user_id + '<br>' +
- '<b>' + tBlock('privilege') + ':</b> ' + roleName(s.role) + '<br>' +
- '<b>' + tBlock('balance_title') + ':</b> ' + s.balance + '$' +
- '</div>' +
- '<div class="section-title" style="font-size:16px;">' + tBlock('change_role') + '</div>' +
- (roleBtns || '<div class="info-block">' + tBlock('no_roles_available') + '</div>') +
- '<div class="section-title" style="font-size:16px;margin-top:16px;">' + tBlock('change_balance') + '</div>' +
- '<div class="form-group"><label class="form-label">' + tBlock('new_balance') + ' ($)</label>' +
- '<input class="form-input" type="number" id="staff-balance-input" value="' + s.balance + '"></div>' +
- '<button class="btn" data-i18n="save_balance" onclick="adminSetStaffBalance(' + s.user_id + ')">Сохранить баланс</button>' +
- '<div style="display:flex;gap:8px;margin-top:10px;">' +
- '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'dayoff\')">' + tBlock('dayoff') + '</button>' +
- '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'vacation\')">' + tBlock('vacation_short') + '</button>' +
- '</div>';
- document.getElementById('staff-detail-content').innerHTML = html;
- showPage('admin-staff-detail');
+  '<b>ID:</b> ' + s.user_id +
+  (s.username ? (' · ' + nickHtml) : '') + '<br>' +
+  '<b>' + (tBlock('privilege')||'Роль') + ':</b> ' + (roleName(targetRole) || '—') + '<br>' +
+  '<b>' + (tBlock('balance_title')||'Баланс') + ':</b> ' + (s.balance != null ? s.balance : '0') + ' $' +
+  (isMandatory ? ('<br><span style="color:var(--button);">★ ' + (tBlock('staff_mandatory')||'Обязательный сотрудник') + '</span>') : '') +
+  '</div>';
+
+ // actions: change role | change balance | block
+ html += '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">';
+ html += '<div style="display:flex;gap:8px;">';
+ html += '<button type="button" class="btn" style="flex:1;" onclick="staffShowRolePicker(' + s.user_id + ')">' + (tBlock('change_role')||'Изменить роль') + '</button>';
+ html += '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="staffShowBalanceEditor(' + s.user_id + ',' + Number(s.balance||0) + ')">' + (tBlock('change_balance')||'Изменить баланс') + '</button>';
+ html += '</div>';
+ html += '<button type="button" class="btn btn-secondary" style="width:100%;" onclick="staffShowBan(' + s.user_id + ')">' + (tBlock('staff_block')||'Заблокировать') + '</button>';
+ html += '</div>';
+ html += '<div id="staff-action-panel" style="margin-top:12px;"></div>';
+
+ // leave buttons for admin+
+ if (myRole >= 5) {
+  html += '<div style="display:flex;gap:8px;margin-top:10px;">' +
+   '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'dayoff\')">' + (tBlock('dayoff')||'Отгул') + '</button>' +
+   '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="adminStaffLeave(' + s.user_id + ',\'vacation\')">' + (tBlock('vacation')||'Отпуск') + '</button>' +
+   '</div>';
+ }
+
+ box.innerHTML = html;
+ showPage('admin-section');
+ bindProfileLinks(box);
 }
+
+function staffShowRolePicker(uid) {
+  var s = window._currentStaff || {};
+  var myRole = Number(userData.role || 0);
+  var targetRole = Number(s.role || 0);
+  var isMandatory = (window.MANDATORY_USERS || []).indexOf(Number(uid)) >= 0;
+  var panel = document.getElementById('staff-action-panel');
+  if (!panel) return;
+  if (isMandatory) {
+    panel.innerHTML = '<div class="empty" style="color:#ff3b30;">' + (tBlock('staff_mandatory_lock')||'Роль обязательного сотрудника нельзя изменить') + '</div>';
+    return;
+  }
+  // hierarchy: mod(4) up to intern(3), admin(5) up to mod(4), owner(6) any
+  var maxAssign = myRole >= 6 ? 6 : (myRole >= 5 ? 4 : (myRole >= 4 ? 3 : -1));
+  if (maxAssign < 0 || targetRole >= myRole && myRole < 6) {
+    panel.innerHTML = '<div class="empty" style="color:#ff3b30;">' + (tBlock('need_mod')||'У вас недостаточно прав для этой функции') + '</div>';
+    return;
+  }
+  var roles = [
+    {id:1,name:tBlock('role_partner')||'Партнёр'},
+    {id:2,name:tBlock('role_corp')||'Корпоративный'},
+    {id:3,name:tBlock('role_intern')||'Стажёр'},
+    {id:4,name:tBlock('role_mod')||'Модератор'},
+    {id:5,name:tBlock('role_admin')||'Админ'},
+    {id:6,name:tBlock('role_owner')||'Владелец'}
+  ].filter(function(r){ return r.id <= maxAssign && r.id !== targetRole; });
+  var html = '<div class="section-title" style="font-size:15px;">' + (tBlock('change_role')||'Изменить роль') + '</div>';
+  roles.forEach(function(r){
+    html += '<button class="btn btn-secondary" style="width:100%;margin-bottom:6px;" onclick="adminSetStaffRole(' + uid + ',' + r.id + ')">' + r.name + '</button>';
+  });
+  // remove from position
+  if (targetRole > 0 && targetRole < myRole) {
+    html += '<button class="btn" style="width:100%;margin-top:6px;background:#ff3b30;" onclick="adminSetStaffRole(' + uid + ',0)">' + (tBlock('staff_remove_role')||'Снять с должности') + '</button>';
+  }
+  panel.innerHTML = html;
+}
+
+function staffShowBalanceEditor(uid, current) {
+  var panel = document.getElementById('staff-action-panel');
+  if (!panel) return;
+  panel.innerHTML =
+    '<div class="section-title" style="font-size:15px;">' + (tBlock('change_balance')||'Изменить баланс') + '</div>' +
+    '<div class="form-group"><input class="form-input" type="number" id="staff-balance-input" value="' + current + '" step="0.01"></div>' +
+    '<div style="font-size:12px;opacity:.7;margin-bottom:8px;">' + (tBlock('balance_title')||'Баланс') + ' ' + (tBlock('now')||'сейчас') + ': <b>' + current + ' $</b></div>' +
+    '<button class="btn" onclick="adminSetStaffBalance(' + uid + ')">' + (tBlock('apply')||'Применить') + '</button>';
+}
+
+function staffShowBan(uid) {
+  var myRole = Number(userData.role || 0);
+  var s = window._currentStaff || {};
+  var targetRole = Number(s.role || 0);
+  var panel = document.getElementById('staff-action-panel');
+  if (!panel) return;
+  if (myRole < 4 || (targetRole >= myRole && myRole < 6)) {
+    panel.innerHTML = '<div class="empty" style="color:#ff3b30;">' + (tBlock('need_mod')||'У вас недостаточно прав для этой функции') + '</div>';
+    return;
+  }
+  panel.innerHTML =
+    '<div class="section-title" style="font-size:15px;">' + (tBlock('staff_block')||'Заблокировать') + '</div>' +
+    '<div class="form-group"><label class="form-label">' + (tBlock('ban_reason')||'Причина') + '</label>' +
+    '<input class="form-input" type="text" id="staff-ban-reason" placeholder="' + (tBlock('ban_reason')||'Причина') + '"></div>' +
+    '<div class="form-group"><label class="form-label">' + (tBlock('ban_days')||'Срок (дней, 0 = навсегда)') + '</label>' +
+    '<input class="form-input" type="number" id="staff-ban-days" value="0" min="0"></div>' +
+    '<button class="btn" style="background:#ff3b30;" onclick="staffDoBan(' + uid + ')">' + (tBlock('staff_block')||'Заблокировать') + '</button>';
+}
+
+async function staffDoBan(uid) {
+  var reason = ((document.getElementById('staff-ban-reason')||{}).value || '').trim();
+  var days = parseInt(((document.getElementById('staff-ban-days')||{}).value || '0'), 10) || 0;
+  if (!reason) { try { tg.showAlert(tBlock('ban_reason')||'Укажите причину'); } catch(e){} return; }
+  try {
+    await apiPost('/api/admin/user/ban', { user_id: uid, reason: reason, days: days });
+    try { tg.showAlert(tBlock('ok')||'Готово'); } catch(e){}
+    loadAdminStaff();
+  } catch (e) {
+    try { tg.showAlert(e.message || tBlock('error') || 'Ошибка'); } catch(e2){}
+  }
+}
+
 
 async function adminSetStaffRole(uid, role) {
  try {
@@ -26756,6 +26996,39 @@ var keys={
 if(typeof I18N==="object"){
  Object.keys(keys).forEach(function(k){
   var pack=keys[k];
+  Object.keys(pack).forEach(function(l){
+   if(!I18N[l]) I18N[l]={};
+   I18N[l][k]=pack[l];
+  });
+ });
+}
+}catch(e){}})();
+</script>
+
+<script>
+(function(){try{
+var packs={
+ an_reserve20:{ru:"Баланс 20% отчислений",en:"20% reserve balance",uk:"Баланс 20% відрахувань",de:"20%-Rücklagen",fr:"Solde réserve 20%",es:"Saldo reserva 20%",it:"Saldo riserva 20%",pt:"Saldo reserva 20%","pt-BR":"Saldo reserva 20%",tr:"%20 rezerv bakiyesi",id:"Saldo cadangan 20%",ar:"رصيد احتياطي 20%",zh:"20%储备余额",ja:"20%積立残高",ko:"20% 적립 잔액"},
+ an_by_quarters:{ru:"По кварталам",en:"By quarters",uk:"По кварталах",de:"Nach Quartalen",fr:"Par trimestres",es:"Por trimestres",it:"Per trimestri",pt:"Por trimestres","pt-BR":"Por trimestres",tr:"Çeyreklere göre",id:"Per kuartal",ar:"حسب الأرباع",zh:"按季度",ja:"四半期別",ko:"분기별"},
+ staff_show_all:{ru:"Все сотрудники",en:"All staff",uk:"Усі співробітники",de:"Alle Mitarbeiter",fr:"Tout le personnel",es:"Todo el personal",it:"Tutto lo staff",pt:"Todos os funcionários","pt-BR":"Todos os funcionários",tr:"Tüm personel",id:"Semua staf",ar:"كل الموظفين",zh:"全部员工",ja:"全スタッフ",ko:"전체 직원"},
+ staff_add:{ru:"Добавить",en:"Add",uk:"Додати",de:"Hinzufügen",fr:"Ajouter",es:"Añadir",it:"Aggiungi",pt:"Adicionar","pt-BR":"Adicionar",tr:"Ekle",id:"Tambah",ar:"إضافة",zh:"添加",ja:"追加",ko:"추가"},
+ staff_apps:{ru:"Заявки",en:"Applications",uk:"Заявки",de:"Anträge",fr:"Candidatures",es:"Solicitudes",it:"Candidature",pt:"Candidaturas","pt-BR":"Candidaturas",tr:"Başvurular",id:"Lamaran",ar:"الطلبات",zh:"申请",ja:"申請",ko:"신청"},
+ staff_not_found:{ru:"Пользователь не найден",en:"User not found",uk:"Користувача не знайдено",de:"Benutzer nicht gefunden",fr:"Utilisateur introuvable",es:"Usuario no encontrado",it:"Utente non trovato",pt:"Utilizador não encontrado","pt-BR":"Usuário não encontrado",tr:"Kullanıcı bulunamadı",id:"Pengguna tidak ditemukan",ar:"المستخدم غير موجود",zh:"未找到用户",ja:"ユーザーが見つかりません",ko:"사용자를 찾을 수 없음"},
+ staff_enter_id:{ru:"Введите числовой ID",en:"Enter numeric ID",uk:"Введіть числовий ID",de:"Numerische ID eingeben",fr:"Entrez un ID numérique",es:"Introduce un ID numérico",it:"Inserisci ID numerico",pt:"Introduza ID numérico","pt-BR":"Digite o ID numérico",tr:"Sayısal ID girin",id:"Masukkan ID angka",ar:"أدخل معرفًا رقميًا",zh:"输入数字ID",ja:"数字のIDを入力",ko:"숫자 ID 입력"},
+ staff_block:{ru:"Заблокировать",en:"Block",uk:"Заблокувати",de:"Sperren",fr:"Bloquer",es:"Bloquear",it:"Blocca",pt:"Bloquear","pt-BR":"Bloquear",tr:"Engelle",id:"Blokir",ar:"حظر",zh:"封禁",ja:"ブロック",ko:"차단"},
+ staff_remove_role:{ru:"Снять с должности",en:"Remove role",uk:"Зняти з посади",de:"Von Position entfernen",fr:"Retirer du poste",es:"Quitar del cargo",it:"Rimuovi dal ruolo",pt:"Remover do cargo","pt-BR":"Remover do cargo",tr:"Görevden al",id:"Lepas jabatan",ar:"إزالة من المنصب",zh:"解除职务",ja:"役職を解除",ko:"직위 해제"},
+ staff_mandatory:{ru:"Обязательный сотрудник",en:"Mandatory staff",uk:"Обов'язковий співробітник",de:"Pflicht-Mitarbeiter",fr:"Employé obligatoire",es:"Empleado obligatorio",it:"Staff obbligatorio",pt:"Funcionário obrigatório","pt-BR":"Funcionário obrigatório",tr:"Zorunlu personel",id:"Staf wajib",ar:"موظف إلزامي",zh:"固定员工",ja:"必須スタッフ",ko:"필수 직원"},
+ staff_mandatory_lock:{ru:"Роль обязательного сотрудника нельзя изменить",en:"Cannot change mandatory staff role",uk:"Роль обов'язкового співробітника не можна змінити",de:"Pflicht-Rolle kann nicht geändert werden",fr:"Impossible de modifier le rôle obligatoire",es:"No se puede cambiar el rol obligatorio",it:"Impossibile modificare il ruolo obbligatorio",pt:"Não é possível alterar a função obrigatória","pt-BR":"Não é possível alterar a função obrigatória",tr:"Zorunlu personel rolü değiştirilemez",id:"Peran staf wajib tidak dapat diubah",ar:"لا يمكن تغيير دور الموظف الإلزامي",zh:"无法更改固定员工角色",ja:"必須スタッフの役割は変更できません",ko:"필수 직원 역할은 변경할 수 없음"},
+ ban_reason:{ru:"Причина",en:"Reason",uk:"Причина",de:"Grund",fr:"Raison",es:"Motivo",it:"Motivo",pt:"Motivo","pt-BR":"Motivo",tr:"Sebep",id:"Alasan",ar:"السبب",zh:"原因",ja:"理由",ko:"사유"},
+ ban_days:{ru:"Срок (дней, 0 = навсегда)",en:"Duration (days, 0 = forever)",uk:"Термін (днів, 0 = назавжди)",de:"Dauer (Tage, 0 = für immer)",fr:"Durée (jours, 0 = pour toujours)",es:"Duración (días, 0 = para siempre)",it:"Durata (giorni, 0 = per sempre)",pt:"Duração (dias, 0 = para sempre)","pt-BR":"Duração (dias, 0 = para sempre)",tr:"Süre (gün, 0 = sonsuz)",id:"Durasi (hari, 0 = selamanya)",ar:"المدة (أيام، 0 = إلى الأبد)",zh:"期限（天，0=永久）",ja:"期間（日、0=無期限）",ko:"기간(일, 0=영구)"},
+ need_mod:{ru:"У вас недостаточно прав для этой функции",en:"Insufficient permissions for this action",uk:"Недостатньо прав для цієї функції",de:"Unzureichende Rechte für diese Funktion",fr:"Droits insuffisants pour cette fonction",es:"Permisos insuficientes para esta función",it:"Permessi insufficienti per questa funzione",pt:"Permissões insuficientes para esta função","pt-BR":"Permissões insuficientes para esta função",tr:"Bu işlem için yetkiniz yok",id:"Izin tidak cukup untuk fungsi ini",ar:"صلاحيات غير كافية لهذه الوظيفة",zh:"权限不足，无法执行此操作",ja:"この機能の権限が不足しています",ko:"이 기능에 대한 권한이 부족합니다"},
+ apply:{ru:"Применить",en:"Apply",uk:"Застосувати",de:"Anwenden",fr:"Appliquer",es:"Aplicar",it:"Applica",pt:"Aplicar","pt-BR":"Aplicar",tr:"Uygula",id:"Terapkan",ar:"تطبيق",zh:"应用",ja:"適用",ko:"적용"},
+ now:{ru:"сейчас",en:"now",uk:"зараз",de:"jetzt",fr:"maintenant",es:"ahora",it:"ora",pt:"agora","pt-BR":"agora",tr:"şimdi",id:"sekarang",ar:"الآن",zh:"现在",ja:"現在",ko:"지금"},
+ search:{ru:"Поиск",en:"Search",uk:"Пошук",de:"Suche",fr:"Recherche",es:"Buscar",it:"Cerca",pt:"Pesquisar","pt-BR":"Pesquisar",tr:"Ara",id:"Cari",ar:"بحث",zh:"搜索",ja:"検索",ko:"검색"}
+};
+if(typeof I18N==="object"){
+ Object.keys(packs).forEach(function(k){
+  var pack=packs[k];
   Object.keys(pack).forEach(function(l){
    if(!I18N[l]) I18N[l]={};
    I18N[l][k]=pack[l];
