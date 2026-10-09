@@ -695,6 +695,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 }
 </style>
 
+
+<style id="ads-seg-and-chat-styles">
+.seg-toggle.ads-seg,.ads-seg{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  width:100%;
+  box-sizing:border-box;
+  margin-bottom:12px;
+}
+.seg-toggle.ads-seg button,.ads-seg button{
+  min-height:42px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  color:var(--text);
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+}
+.seg-toggle.ads-seg button.active,.ads-seg button.active{
+  background:var(--brand);
+  border-color:var(--brand);
+  color:#fff;
+}
+.chat-list-item:active{opacity:.85}
+</style>
+
 </head>
 <body>
 
@@ -1252,8 +1280,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
         <button type="button" class="btn wide" data-pan-an="revenue" data-i18n="an_revenue">Оборот и выручка</button>
         <button type="button" class="btn wide" data-pan-an="expenses" data-i18n="an_expenses">Расходы</button>
         <button type="button" class="btn wide" data-pan-an="income" data-i18n="an_income">Доходы</button>
-        <button type="button" class="btn wide" data-pan-an="other" data-i18n="an_other">Другое</button>
         <button type="button" class="btn wide" data-pan-an="ads" data-i18n="analytics_ads">Реклама</button>
+        <button type="button" class="btn wide" data-pan-an="other" data-i18n="an_other">Другое</button>
       </div>
     </div>
 
@@ -3687,6 +3715,166 @@ async function openPanelAnalyticsView(kind){
 }
 
 
+
+function adsStatsHtml(s){
+  s=s||{};
+  const line=(l,v)=>'<div class="pa-meta-row"><span>'+panelEsc(l)+'</span><b>'+panelEsc(v)+'</b></div>';
+  let h='<div class="pa-meta" style="border-top:none;padding-top:0">';
+  h+=line(t("ads_invited_total")||"Приглашено партнёрами всего", s.invited_total!=null?s.invited_total:(s.invited_by_partners||0));
+  h+=line(t("ads_pay1_total")||"1-степенные платежи", s.pay1_total||0);
+  h+=line(t("ads_pay1_10d")||"1-степенные за 10 дн.", s.pay1_10d||0);
+  h+=line(t("ads_pay2_total")||"2-степенные платежи", s.pay2_total||0);
+  h+=line(t("ads_pay2_10d")||"2-степенные за 10 дн.", s.pay2_10d||0);
+  h+=line(t("ads_spend_total")||"Потрачено на рекламу всего", Number(s.spend_total||0).toFixed(2)+" ₽");
+  h+=line(t("ads_spend_1")||"Траты на 1-степенные", Number(s.spend_1||0).toFixed(2)+" ₽");
+  h+=line(t("ads_spend_2")||"Траты на 2-степенные", Number(s.spend_2||0).toFixed(2)+" ₽");
+  h+='</div>';
+  return h;
+}
+
+async function openPanelAdsAnalytics(){
+  state.panelBack="panel-analytics";
+  show("panel-analytics-view");
+  const title=document.getElementById("panel-an-view-title");
+  if(title) title.textContent=t("analytics_ads")||"Реклама";
+  await renderPanelAdsAnalytics();
+}
+
+async function renderPanelAdsAnalytics(){
+  const body=document.getElementById("panel-an-view-body");
+  if(!body)return;
+  state.adsTab=state.adsTab||"stats";
+  const tab=state.adsTab;
+  let h='<div class="seg-toggle ads-seg">';
+  h+='<button type="button" class="'+(tab==="stats"?"active":"")+'" id="ads-tab-stats">'+(t("ads_tab_stats")||"Статистика")+'</button>';
+  h+='<button type="button" class="'+(tab==="partners"?"active":"")+'" id="ads-tab-partners">'+(t("ads_tab_partners")||"Партнёры")+'</button>';
+  h+='</div><div id="ads-body"><div class="muted">…</div></div>';
+  body.innerHTML=h;
+  const sBtn=document.getElementById("ads-tab-stats");
+  const pBtn=document.getElementById("ads-tab-partners");
+  if(sBtn) sBtn.onclick=()=>{state.adsTab="stats";renderPanelAdsAnalytics();};
+  if(pBtn) pBtn.onclick=()=>{state.adsTab="partners";renderPanelAdsAnalytics();};
+  const box=document.getElementById("ads-body");
+  try{
+    if(tab==="stats"){
+      const d=await apiGet("/api/miniapp/panel/referral/stats?user_id="+encodeURIComponent(USER_ID));
+      box.innerHTML=adsStatsHtml(d);
+    }else{
+      let def={level:1};
+      try{def=await apiGet("/api/miniapp/panel/referral/default-level?user_id="+encodeURIComponent(USER_ID));}catch(e){}
+      state.defaultPartnerLevel=Number(def.level!=null?def.level:1);
+      const d=await apiGet("/api/miniapp/panel/referral/partners?user_id="+encodeURIComponent(USER_ID));
+      const items=(d&&d.partners)||[];
+      let hh='<div class="panel" style="margin-bottom:12px">';
+      hh+='<div class="hint" style="margin-bottom:8px">'+(t("ads_default_level_label")||"Все партнёры сначала получают уровень")+'</div>';
+      hh+='<div style="display:flex;gap:6px">';
+      for(let lv=0;lv<=3;lv++){
+        const sel=state.defaultPartnerLevel===lv;
+        hh+='<button type="button" class="btn" data-def-lv="'+lv+'" style="flex:1;min-height:42px;font-size:13px;'+(sel?"background:var(--brand);border-color:var(--brand);color:#fff;":"background:var(--surface);color:var(--text);border:1px solid var(--line);")+'">'+lv+'</button>';
+      }
+      hh+='</div>';
+      hh+='<div class="hint" style="margin-top:6px;font-size:11px">'+(t("ads_level0_hint")||"0 — без дохода партнёра, бонус 5% приглашённому")+'</div>';
+      hh+='</div>';
+      if(!items.length){
+        hh+='<div class="empty">'+(t("no_partners")||"Партнёров пока нет")+'</div>';
+      }else{
+        hh+=items.map(p=>{
+          const un=(p.username||"").replace(/^@/,"");
+          const name=panelEsc(p.name||p.user_id);
+          const nameHtml=un
+            ?('<a class="uname-link" href="https://t.me/'+encodeURIComponent(un)+'" data-tg="'+panelEsc(un)+'" onclick="event.stopPropagation()">'+name+'</a>')
+            :name;
+          return '<div class="item" style="cursor:pointer" data-partner-id="'+p.user_id+'">'
+            +'<div style="display:flex;align-items:center;gap:10px">'
+            +'<div style="flex:1;min-width:0;font-weight:700">'+nameHtml+'</div>'
+            +'<div style="font-family:monospace;font-size:13px;color:var(--hint)">'+panelEsc(p.ref_code||"")+'</div>'
+            +'<div style="font-weight:800;color:var(--brand)">'+(t("ads_level")||"Ур.")+' '+panelEsc(p.ref_level)+'</div>'
+            +'</div>'
+            +'<div class="hint" style="margin-top:4px">'+(t("ads_refs_total")||"Рефералов")+': '+panelEsc(p.refs_total)+' · 10д: '+panelEsc(p.refs_10d)+'</div>'
+            +'</div>';
+        }).join("");
+      }
+      box.innerHTML=hh;
+      box.querySelectorAll("[data-def-lv]").forEach(b=>{
+        b.onclick=async()=>{
+          const lv=Number(b.getAttribute("data-def-lv"));
+          try{
+            await apiPost("/api/miniapp/panel/referral/default-level",{user_id:USER_ID,level:lv});
+            state.defaultPartnerLevel=lv;
+            renderPanelAdsAnalytics();
+          }catch(e){alert(e.message||e);}
+        };
+      });
+      box.querySelectorAll("[data-partner-id]").forEach(el=>{
+        el.onclick=function(e){
+          if(e.target&&e.target.closest&&e.target.closest("a.uname-link"))return;
+          openPanelPartnerAdsDetail(Number(el.getAttribute("data-partner-id")));
+        };
+      });
+      box.querySelectorAll("a.uname-link[data-tg]").forEach(a=>{
+        a.onclick=function(e){
+          e.preventDefault();e.stopPropagation();
+          const u=a.getAttribute("data-tg");
+          if(u){try{openTgLink("https://t.me/"+u)}catch(err){window.open("https://t.me/"+u,"_blank")}}
+        };
+      });
+    }
+  }catch(e){
+    box.innerHTML='<div class="empty">'+panelEsc(e.message||e)+'</div>';
+  }
+}
+
+async function openPanelPartnerAdsDetail(pid){
+  state.panelBack="panel-analytics-view";
+  state.adsTab="partners";
+  show("panel-analytics-view");
+  const title=document.getElementById("panel-an-view-title");
+  if(title) title.textContent=t("ads_partner_detail")||"Статистика партнёра";
+  const body=document.getElementById("panel-an-view-body");
+  if(!body)return;
+  body.innerHTML='<div class="muted">…</div>';
+  // back from detail goes to partners list
+  const back=document.getElementById("panel-an-view-back");
+  if(back){
+    back.onclick=()=>{state.adsTab="partners";openPanelAdsAnalytics();};
+  }
+  try{
+    const d=await apiGet("/api/miniapp/panel/referral/partner/"+encodeURIComponent(pid)+"?user_id="+encodeURIComponent(USER_ID));
+    const un=(d.username||"").replace(/^@/,"");
+    const name=panelEsc(d.name||d.user_id);
+    const nameHtml=un
+      ?('<a class="uname-link" href="https://t.me/'+encodeURIComponent(un)+'" data-tg="'+panelEsc(un)+'">'+name+'</a>')
+      :name;
+    let h='<div class="panel" style="text-align:center;margin-bottom:12px">';
+    h+='<div style="font-weight:700;font-size:15px;margin-bottom:6px">'+nameHtml+'</div>';
+    h+='<div style="font-family:monospace;font-size:18px;font-weight:800">'+panelEsc(d.ref_code||"")+'</div>';
+    h+='</div>';
+    h+=adsStatsHtml(d.stats||{});
+    h+='<div class="hint" style="margin:12px 0 8px">'+(t("ads_partner_level")||"Уровень партнёра")+'</div>';
+    h+='<div style="display:flex;gap:6px">';
+    for(let lv=0;lv<=3;lv++){
+      const sel=Number(d.ref_level)===lv;
+      h+='<button type="button" class="btn" data-set-lv="'+lv+'" style="flex:1;min-height:42px;'+(sel?"background:var(--brand);border-color:var(--brand);color:#fff;":"background:var(--surface);color:var(--text);border:1px solid var(--line);")+'">'+lv+'</button>';
+    }
+    h+='</div>';
+    body.innerHTML=h;
+    body.querySelectorAll("a.uname-link[data-tg]").forEach(a=>{
+      a.onclick=function(e){e.preventDefault();const u=a.getAttribute("data-tg");if(u){try{openTgLink("https://t.me/"+u)}catch(err){window.open("https://t.me/"+u,"_blank")}}};
+    });
+    body.querySelectorAll("[data-set-lv]").forEach(b=>{
+      b.onclick=async()=>{
+        const lv=Number(b.getAttribute("data-set-lv"));
+        try{
+          await apiPost("/api/miniapp/panel/referral/set-level",{user_id:USER_ID,target_id:pid,level:lv});
+          openPanelPartnerAdsDetail(pid);
+        }catch(e){alert(e.message||e);}
+      };
+    });
+  }catch(e){
+    body.innerHTML='<div class="empty">'+panelEsc(e.message||e)+'</div>';
+  }
+}
+
 async function loadPanelSupportThreads(){
   const box=document.getElementById("panel-mod-tickets-list");
   if(!box)return;
@@ -3703,16 +3891,16 @@ async function loadPanelSupportThreads(){
       const name=panelEsc(th.display_name||th.user_id);
       const nameHtml=un
         ?('<a class="uname-link" href="https://t.me/'+encodeURIComponent(un)+'" data-tg="'+panelEsc(un)+'">'+name+'</a>')
-        :('<span>'+name+'</span>');
+        :('<span style="font-weight:700">'+name+'</span>');
       const unread=Number(th.unread||th.staff_unread||0);
-      const prev=panelEsc((th.last_message_preview||"").slice(0,80));
+      const prev=panelEsc((th.last_message_preview||"").slice(0,100));
       const when=panelEsc(String(th.last_message_at||"").slice(0,16).replace("T"," "));
-      return '<div class="item" style="cursor:pointer" data-chat-uid="'+th.user_id+'">'
+      return '<div class="item chat-list-item" style="cursor:pointer" data-chat-uid="'+th.user_id+'">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
-        +'<div style="font-weight:700">'+nameHtml+'</div>'
+        +'<div style="font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis">'+nameHtml+'</div>'
         +(unread>0?('<span class="chat-unread">'+unread+'</span>'):'')
         +'</div>'
-        +'<div class="hint" style="margin-top:4px">'+prev+'</div>'
+        +'<div class="hint" style="margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+prev+'</div>'
         +'<div class="hint" style="margin-top:2px">'+when+' · ID '+panelEsc(th.user_id)+'</div>'
         +'</div>';
     }).join("");
@@ -3736,6 +3924,7 @@ async function loadPanelSupportThreads(){
 
 async function openPanelSupportChat(targetId){
   state.supportChatUserId=targetId;
+  state.panelBack="panel-mod-tickets";
   show("panel-support-chat");
   const title=document.getElementById("panel-support-chat-title");
   if(title) title.textContent=t("mod_tickets")||"Обращения";
@@ -3768,7 +3957,7 @@ async function openPanelSupportChat(targetId){
             +" · "+panelEsc(String(m.created_at||"").slice(0,16).replace("T"," "))
             +'</div></div>';
         }).join("");
-        box.scrollTop=box.scrollHeight;
+        try{box.scrollTop=box.scrollHeight;}catch(e){}
       }
     }
   }catch(e){
@@ -3776,8 +3965,7 @@ async function openPanelSupportChat(targetId){
   }
   const sendBtn=document.getElementById("panel-support-chat-send");
   const input=document.getElementById("panel-support-chat-input");
-  if(sendBtn&&!sendBtn._wired){
-    sendBtn._wired=true;
+  if(sendBtn){
     sendBtn.onclick=async function(){
       const text=(input&&input.value||"").trim();
       if(!text||!state.supportChatUserId)return;
@@ -3801,80 +3989,6 @@ async function openPanelSupportChat(targetId){
   }
 }
 
-function adsStatsHtml(s){
-  s=s||{};
-  const line=(l,v)=>'<div class="pa-meta-row"><span>'+panelEsc(l)+'</span><b>'+panelEsc(v)+'</b></div>';
-  let h='<div class="pa-meta">';
-  h+=line(t("ads_invited_total")||"Приглашено партнёрами всего", s.invited_total!=null?s.invited_total:(s.invited_by_partners||0));
-  h+=line(t("ads_pay1_total")||"1-степенные платежи", s.pay1_total||0);
-  h+=line(t("ads_pay1_10d")||"1-степенные за 10 дн.", s.pay1_10d||0);
-  h+=line(t("ads_pay2_total")||"2-степенные платежи", s.pay2_total||0);
-  h+=line(t("ads_pay2_10d")||"2-степенные за 10 дн.", s.pay2_10d||0);
-  h+=line(t("ads_spend_total")||"Потрачено на рекламу всего", Number(s.spend_total||0).toFixed(2)+" ₽");
-  h+=line(t("ads_spend_1")||"Траты на 1-степенные", Number(s.spend_1||0).toFixed(2)+" ₽");
-  h+=line(t("ads_spend_2")||"Траты на 2-степенные", Number(s.spend_2||0).toFixed(2)+" ₽");
-  h+='</div>';
-  return h;
-}
-
-async function openPanelAdsAnalytics(){
-  state.panelBack="panel-analytics";
-  show("panel-analytics-view");
-  const title=document.getElementById("panel-an-view-title");
-  if(title) title.textContent=t("analytics_ads")||"Реклама";
-  const body=document.getElementById("panel-an-view-body");
-  if(!body)return;
-  body.innerHTML='…';
-  state.adsTab=state.adsTab||"stats";
-  let h='<div class="seg-toggle" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">';
-  h+='<button type="button" class="btn" style="'+(state.adsTab==="stats"?"":"opacity:.7;background:var(--surface);color:var(--text);border:1px solid var(--line);")+'" id="ads-tab-stats">'+(t("ads_tab_stats")||"Статистика")+'</button>';
-  h+='<button type="button" class="btn" style="'+(state.adsTab==="partners"?"":"opacity:.7;background:var(--surface);color:var(--text);border:1px solid var(--line);")+'" id="ads-tab-partners">'+(t("ads_tab_partners")||"Партнёры")+'</button>';
-  h+='</div><div id="ads-body">…</div>';
-  body.innerHTML=h;
-  const render=async()=>{
-    const box=document.getElementById("ads-body");
-    if(!box)return;
-    box.innerHTML="…";
-    try{
-      if(state.adsTab==="stats"){
-        const d=await apiGet("/api/miniapp/panel/referral/stats?user_id="+encodeURIComponent(USER_ID));
-        box.innerHTML=adsStatsHtml(d);
-      }else{
-        let def={level:1};
-        try{def=await apiGet("/api/miniapp/panel/referral/default-level?user_id="+encodeURIComponent(USER_ID));}catch(e){}
-        const d=await apiGet("/api/miniapp/panel/referral/partners?user_id="+encodeURIComponent(USER_ID));
-        const items=(d&&d.partners)||[];
-        let hh='<div class="muted" style="margin-bottom:8px">'+(t("ads_default_level_label")||"Уровень партнёров по умолчанию")+': <b>'+Number(def.level!=null?def.level:1)+'</b></div>';
-        if(!items.length){
-          hh+='<div class="empty">'+(t("no_partners")||"Нет партнёров с промокодом")+'</div>';
-        }else{
-          hh+=items.map(p=>{
-            const un=(p.username||"").replace(/^@/,"");
-            const name=panelEsc(p.name||p.user_id);
-            const nameHtml=un?('<a class="uname-link" href="https://t.me/'+encodeURIComponent(un)+'" data-tg="'+panelEsc(un)+'">'+name+'</a>'):name;
-            return '<div class="item">'
-              +'<div style="font-weight:700">'+nameHtml+'</div>'
-              +'<div class="hint">'+panelEsc(p.ref_code||"")+' · '+(t("ads_level")||"Уровень")+' '+panelEsc(p.ref_level)
-              +' · '+(t("ads_refs_total")||"Рефералов")+': '+panelEsc(p.refs_total)
-              +' · 10д: '+panelEsc(p.refs_10d)+'</div>'
-              +'</div>';
-          }).join("");
-        }
-        box.innerHTML=hh;
-        box.querySelectorAll("a.uname-link[data-tg]").forEach(a=>{
-          a.onclick=function(e){e.preventDefault();const u=a.getAttribute("data-tg");if(u){try{openTgLink("https://t.me/"+u)}catch(err){window.open("https://t.me/"+u,"_blank")}}};
-        });
-      }
-    }catch(e){
-      box.innerHTML='<div class="empty">'+panelEsc(e.message||e)+'</div>';
-    }
-  };
-  const sBtn=document.getElementById("ads-tab-stats");
-  const pBtn=document.getElementById("ads-tab-partners");
-  if(sBtn) sBtn.onclick=()=>{state.adsTab="stats";openPanelAdsAnalytics();};
-  if(pBtn) pBtn.onclick=()=>{state.adsTab="partners";openPanelAdsAnalytics();};
-  await render();
-}
 
 function wirePanelMenus(){
   document.querySelectorAll("[data-panel]").forEach(b=>{
